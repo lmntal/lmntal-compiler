@@ -1,7 +1,5 @@
 package runtime;
 
-import java.io.Serializable;
-
 import util.Util;
 
 import compile.parser.SrcName;
@@ -12,13 +10,16 @@ import compile.parser.SrcName;
  * サブクラスはこれらの情報を取得する getName, getArity を実装する．
  * オブジェクトの生成は各サブクラスを new する他に build メソッドを使うことが出来る．
  */
-public abstract class Functor implements Serializable {
-	// **注意**：特殊なFunctorを追加した場合、readObjectメソッドを変更する事。
-	
-	/** 膜の内側の自由リンク管理アトムを表すファンクタ $in/2 */
+public abstract class Functor
+{
+	/**
+	 * 膜の内側の自由リンク管理アトムを表すファンクタ $in/2
+	 */
 	public static final Functor INSIDE_PROXY = new SpecialFunctor(SpecialFunctor.INSIDE_PROXY_NAME, 2);
 
-	/** 膜の外側の自由リンク管理アトムを表すファンクタ $out/2 */
+	/**
+	 * 膜の外側の自由リンク管理アトムを表すファンクタ $out/2
+	 */
 	public static final Functor OUTSIDE_PROXY = new SpecialFunctor(SpecialFunctor.OUTSIDE_PROXY_NAME, 2);
 
 	/**
@@ -26,7 +27,7 @@ public abstract class Functor implements Serializable {
 	 * （通称:star）
 	 */
 	public static final Functor STAR = new SpecialFunctor("$star", 2);
-	
+
 	/**
 	 * cons アトムを表すファンクタ ./3
 	 */
@@ -42,8 +43,6 @@ public abstract class Functor implements Serializable {
 	 */
 	public static final Functor UNIFY = new SymbolFunctor("=", 2);
 
-	// //////////////////////////////////////////////////////////////
-
 	/**
 	 * 引数をもつアトムの名前として表示名を印字するための文字列を返す。 通常の名前以外（数値や記号）の場合、クォートして返す。
 	 */
@@ -56,12 +55,11 @@ public abstract class Functor implements Serializable {
 	 * @return 改行文字を取り除いたファンクタ名
 	 */
 	public String getQuotedFullyFunctorName() {
-		// \rや\nがparseの際に邪魔になるため
 		return quoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
 	}
 
 	private String quoteFunctorName(String text) {
-		if (Env.verbose > Env.VERBOSE_SIMPLELINK || ( Env.dump2 && (!Dumper2.isInfixNotation()||!Dumper2.isAbbrAtom() )) ) {
+		if (Env.verbose > Env.VERBOSE_SIMPLELINK) {
 			if (!text.matches("^([a-z0-9][A-Za-z0-9_]*)$")) {
 				text = quoteName(text);
 			}
@@ -86,7 +84,6 @@ public abstract class Functor implements Serializable {
 	 * @return クオートされた省略しないアトム名
 	 */
 	public String getQuotedFullyAtomName() {
-		// \rや\nがparseの際に邪魔になるため
 		return quoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
 	}
 
@@ -101,15 +98,13 @@ public abstract class Functor implements Serializable {
 			text = getPath() + "." + text;
 		return text;
 	}
-	
+
 	/**
 	 * 指定された文字列を表すシンボルリテラルのテキスト表現を取得する。 例えば a'b を渡すと 'a\'b' が返る。
 	 */
 	static final String quoteName(String text) {
 		return Util.quoteString(text, '\'');
 	}
-
-	// //////////////////////////////////////////////////////////////
 
 	/** 適切に省略された表示名を取得 */
 	protected String getAbbrName() {
@@ -118,7 +113,7 @@ public abstract class Functor implements Serializable {
 				Env.printLength - 2)
 				+ ".." : full;
 	}
-	
+
 	/**
 	 * ファンクタが所属するモジュール名を返す
 	 * （SymbolFunctor 以外は 常に null を返す）
@@ -132,35 +127,6 @@ public abstract class Functor implements Serializable {
 		if (Env.compileonly)
 			return Util.quoteString(getName(), '\'') + "_" + getArity();
 		return getQuotedFunctorName() + "_" + getArity();
-	}
-	
-	// //////////////////////////////////////////////////////////////
-	//
-	// serialize/deserialize/build
-	//
-
-	// todo pathやStringFunctorを考慮に入れる
-
-	public String serialize() {
-		return getName() + "_" + getArity(); // TODO 将来は、直列化を使う
-	}
-
-	public static Functor deserialize(String text) {
-		int loc = text.lastIndexOf('_');
-		String name = "err";
-		int arity = 0;
-		try {
-			name = text.substring(0, loc);
-			arity = Integer.parseInt(text.substring(loc + 1));
-		} catch (Exception e) {
-		}
-		if (arity == 2) {
-			if (name.equals(SpecialFunctor.INSIDE_PROXY_NAME))
-				return Functor.INSIDE_PROXY;
-			if (name.equals(SpecialFunctor.OUTSIDE_PROXY_NAME))
-				return Functor.OUTSIDE_PROXY;
-		}
-		return build(name, arity, SrcName.PLAIN);
 	}
 
 	/**
@@ -209,9 +175,6 @@ public abstract class Functor implements Serializable {
 		}
 		return new SymbolFunctor(name, arity, path);
 	}
-	
-	////////////////////////////////////////////////
-	// 抽象メソッド
 
 	public abstract int hashCode();
 
@@ -270,8 +233,4 @@ public abstract class Functor implements Serializable {
 
 	/** アリティを取得する。 */
 	public abstract int getArity();
-
-
-
-
 }

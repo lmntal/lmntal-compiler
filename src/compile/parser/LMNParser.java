@@ -5,18 +5,22 @@
 
 package compile.parser;
 
-import java_cup.runtime.Scanner;
-import java.io.Reader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Properties;
+
+import java_cup.runtime.Scanner;
+import runtime.Env;
+import runtime.Functor;
+import runtime.SpecialFunctor;
 
 import compile.structure.Atom;
 import compile.structure.Atomic;
@@ -28,12 +32,6 @@ import compile.structure.ProcessContext;
 import compile.structure.ProcessContextEquation;
 import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
-
-import runtime.Dumper2;
-import runtime.Functor;
-import runtime.SpecialFunctor;
-import runtime.Env;
-import util.Util;
 
 
 public class LMNParser {
@@ -92,29 +90,6 @@ public class LMNParser {
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
 		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
-		if(Env.dump2 && Dumper2.getIsUseSource()){ 
-			HashSet nameSet = expander.getTopAtomNameSet();
-		    try {
-		        Properties prop = new Properties();
-		        prop.load(new FileInputStream(Dumper2.getPropertiesPath()));
-		        Iterator<String> it = nameSet.iterator();
-		        StringBuffer AtomNames = new StringBuffer();
-		        boolean commaflg = false;			        
-		        while(it.hasNext()){
-			        if(commaflg){
-				        AtomNames.append(",");
-			        }else{
-			        	commaflg = true;
-		            }
-		        String Atomname = it.next();
-		        AtomNames.append(Atomname);		        
-		        }
-		        prop.setProperty("toplevelNameFromSource", AtomNames.toString() );			        
-		        prop.store(new FileOutputStream(Dumper2.getPropertiesPath()), null); // プロパティのリストをファイルに保存
-		      } catch (IOException e) {
-		    	  e.printStackTrace();
-		      }
-		}		
 		return mem;
 	}
 	
@@ -1389,22 +1364,6 @@ class SyntaxExpander {
 		while (it.hasNext()) {
 			Object obj = it.next();
 			if (obj instanceof SrcAtom) {
-				if(Env.dump2 && Dumper2.getIsUseSource()){
-			        Properties prop = new Properties();
-			        try{
-			        	prop.load(new FileInputStream((Dumper2.getPropertiesPath())));
-				    }catch(Exception e){
-				    	e.printStackTrace();
-				    }
-					String aName = ((SrcAtom)obj).getName();
-					if( aName.equals("=")){					
-						Object linkedobj = ((SrcAtom) obj).process.get(0);
-						if( linkedobj instanceof SrcAtom){
-							aName = ((SrcAtom)linkedobj).getName();
-						}
-			        }
-					addToTopAtomNameSet(aName);
-				}
 				expandAtom((SrcAtom)obj, process);
 			}
 			else if (obj instanceof SrcMembrane) {

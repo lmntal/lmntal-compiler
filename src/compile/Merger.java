@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import runtime.Env;
 import runtime.Functor;
@@ -47,8 +47,10 @@ public class Merger {
 	 * @param rules ルールセット内のルール群
 	 * @return ファンクタ⇒命令列のマップ
 	 */
-	public MergedBranchMap Merging(ArrayList<Rule> rules, boolean system){
-		for(Rule rule : rules){
+	public MergedBranchMap Merging(List<Rule> rules, boolean system)
+	{
+		for (Rule rule : rules)
+		{
 			List<Instruction> atomMatch = rule.atomMatch;
 			List<Instruction> guard = rule.guard;
 			//if(Env.fTrace || Env.debugOption)(rule.body).add(1, new Instruction(Instruction.GETCURRENTRULE, rule));

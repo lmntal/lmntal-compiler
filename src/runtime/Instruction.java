@@ -1,11 +1,5 @@
-/*
- * 作成日: 2003/10/21
- *
- */
 package runtime;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -46,7 +40,8 @@ import util.Util;
  *
  * @author hara, nakajima, n-kato
  */
-public class Instruction implements Cloneable, Serializable {
+public class Instruction implements Cloneable
+{
 	/** 命令毎の引数情報を入れるテーブル */
 	private static HashMap<Integer, ArgType> argTypeTable = new HashMap<Integer, ArgType>();
 	/**アトム*/
@@ -2478,118 +2473,6 @@ public class Instruction implements Cloneable, Serializable {
 		return buffer.toString();
     }
 
-	public String toStringLMNtalSyntax() {
-		int depth = 0;
-		depth++;
-		//nakajima版2004-01-21
-		StringBuffer buffer = new StringBuffer("               ");
-		String tmp = "[" + getInstructionString(kind) + ",";
-		ArgType argtype = (ArgType)argTypeTable.get(new Integer(kind));
-		int indent = 14;
-		if (argtype.output) {
-			indent -= data.get(0).toString().length() + 2;
-			buffer.delete(indent,14);
-		}
-		if( tmp.length() > indent && !Env.compileonly) {
-			buffer.replace(0, indent, tmp.substring(0, indent - 2) + "..");
-		} else {
-			buffer.replace(0, tmp.length(), tmp);
-		}
-		if (data.size() == 1 && data.get(0) instanceof ArrayList) {
-			ArrayList arg1 = (ArrayList)data.get(0);
-			if (arg1.size() == 1 && arg1.get(0) instanceof ArrayList) {
-				ArrayList insts = (ArrayList)arg1.get(0);
-				if(insts.size() == 0) {
-					buffer.append("[[]]");
-				} else {
-					buffer.append("[[\n");
-					int i;
-					for(i = 0; i < insts.size()-1; i++){
-						buffer.append("                  ");
-						buffer.append(insts.get(i));
-						buffer.append(", \n");
-					}
-					buffer.append("                  ");
-					buffer.append(insts.get(i));
-					buffer.append(" ]]");
-					return buffer.toString();
-				}
-			}
-		}
-		
-		if (kind != Instruction.JUMP && data.size() >= 1 && data.get(0) instanceof InstructionList) {
-			List insts = ((InstructionList)data.get(0)).insts;
-			if(insts.size() == 0) {
-				buffer.append("[]");
-			} else {
-				if(Env.compileonly) buffer.append("[[\n");
-				else buffer.append("[\n");
-				int i;
-				for(i = 0; i < insts.size()-1; i++){
-					//アトム主導テストの命令列を見やすく(?)する sakurai
-//					if(((Instruction)insts.get(i)).getKind() == Instruction.GROUP
-//						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
-//						buffer.append("\n");
-//					}
-					buffer.append("                ");
-					for(int j = 0;j < depth ; j++)
-						buffer.append("  ");
-					buffer.append(((Instruction)insts.get(i)).toStringLMNtalSyntax());
-					//TODO 出力引数だったらインデントを下げる.
-					if(Env.compileonly) buffer.append("\n");
-					else buffer.append(", \n");
-				}
-				buffer.append("                ");
-				for(int j = 0;j < depth ; j++)
-					buffer.append("  ");
-				buffer.append(((Instruction)insts.get(i)).toStringLMNtalSyntax());
-				for(int j = 1; j < data.size(); j++){
-					buffer.append("                  ");
-					buffer.append("     ");
-					buffer.append(", " + data.get(j));
-				}
-				buffer.append(" ]] ],");
-				depth--;
-				return buffer.toString();
-			}
-		}
-
-		buffer.append("[");
-		//パーズできるようにエスケープ by mizuno
-		for (int i = 0; i < data.size(); i++) {
-			if (i != 0) buffer.append(", ");
-			Object o = data.get(i);
-			String str = (o==null?"null":o.toString());
-			if (o instanceof String || (Env.compileonly && o instanceof Rule)) {
-				str = Util.quoteString(str, '"');
-			}
-			buffer.append(str);
-		}
-		buffer.append("]]");
-		
-		if (kind != Instruction.PROCEED) {
-			buffer.append(",");
-		}
-		depth--;
-		
-		String str = buffer.toString();
-		
-		str = str.replaceFirst("'\\[\\]'_(\\d+)", "functor('listnilfunctor_escape', $1)"); // []アトムを特別扱い
-		str = str.replaceFirst("'(\\w+)'\\.'(\\w+)'_(\\d+)", "moduleFunctor($1, $2, $3)"); // module (io.use など) を特別扱い
-		str = str.replaceFirst("('[\\w\\$\\+\\-<>]+')_(\\d+)", "functor($1, $2)"); // ファンクタを lmn syntax に
-		str = str.replaceFirst("(\\$\\w+)_(\\d+)", "proxyFunctor(\"$1\", $2)"); // プロキシを lmn syntax に
-		str = str.replaceFirst("(-\\d+)_(\\d+)", "intFunctor($1, $2)"); // 負の int アトムを特別扱い
-		str = str.replaceFirst("(\\d+)_(\\d+)", "intFunctor($1, $2)"); // 非負の int アトムを特別扱い
-		str = str.replaceFirst("\"(([\\w\\s\\+\\-\\\\\\[\\]\\(\\)\\$\\,\\./@_:;']|\\\\\")+)\"_(\\d+)", "stringFunctor(\"$1\", $3)"); // string アトムを特別扱い
-		str = str.replaceFirst("'\\.'_(\\d+)", "functor('.', $1)"); // . アトムを特別扱い
-		str = str.replaceFirst("'\\,'_(\\d+)", "functor(',', $1)"); // , アトムを特別扱い
-		str = str.replaceFirst("@(\\d+)", "rulesetNum($1)"); // ルールセット番号を lmntal syntax に
-		
-		str = str.replaceFirst("listnilfunctor_escape", "[]"); // エスケープした [] を戻す
-
-		return str;
-	}
-    
     /** spec命令の引数値を新しい値に更新する（暫定的措置）*/
     public void updateSpec(int formals, int locals) {
     	if (getKind() == SPEC) {
@@ -2597,34 +2480,4 @@ public class Instruction implements Cloneable, Serializable {
 			data.set(1,new Integer(locals));
     	}
     }
-    
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException{
-		out.writeInt(kind);
-		out.writeInt(data.size());
-		Iterator it = data.iterator();
-		while (it.hasNext()) {
-			Object o = it.next();
-			if (o instanceof Ruleset) {
-				out.writeObject("Ruleset");
-				((Ruleset)o).serialize(out);
-			} else {
-				out.writeObject("Other");
-				out.writeObject(o);
-			}
-		}
-	}
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-		kind = in.readInt();
-		data = new ArrayList();
-		int size = in.readInt();
-		for (int i = 0; i < size; i++) {
-			String argtype = (String)in.readObject();
-			if (argtype.equals("Ruleset")) {
-				data.add(Ruleset.deserialize(in));
-			} else {
-				data.add(in.readObject());
-			}
-		}
-	}
-
 }

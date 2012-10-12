@@ -6,10 +6,16 @@ package compile.structure;
  * <p>
  * 例: [$p=(a(X),$pp),$q=(b(X),$qq)]
  */
-public final class ProcessContextEquation {
-	/** 等式左辺のプロセス文脈の定義 */
+public final class ProcessContextEquation
+{
+	/**
+	 * 等式左辺のプロセス文脈の定義
+	 */
 	public ContextDef def;
-	/** 等式右辺のプロセス */
+
+	/**
+	 * 等式右辺のプロセス
+	 */
 	public Membrane mem = new Membrane(null);
 
 	/**
@@ -17,11 +23,14 @@ public final class ProcessContextEquation {
 	 * @param def 等式左辺のプロセス文脈の定義
 	 * @param mem 等式右辺のプロセスを格納する仮想的な膜
 	 */
-	public ProcessContextEquation(ContextDef def, Membrane mem) {
+	public ProcessContextEquation(ContextDef def, Membrane mem)
+	{
 		this.def = def;
 		this.mem = mem;
 	}
-	public String toString() {
+
+	public String toString()
+	{
 		return def.toString() + "=(" + mem.toStringWithoutBrace() + ")";
-	}	
+	}
 }

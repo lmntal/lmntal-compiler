@@ -5,15 +5,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import runtime.Membrane;
 import runtime.Atom;
 import runtime.Env;
 import runtime.Functor;
 import runtime.IntegerFunctor;
 import runtime.Link;
+import runtime.Membrane;
 import runtime.StringFunctor;
 import runtime.SymbolFunctor;
-import unyo.Mediator;
 
 /**
  * @author mizuno
@@ -30,18 +29,10 @@ abstract public class Util {
 	}
 	
 	public static void errPrint(String msg){
-		if(Env.fUNYO){
-			Mediator.errPrint(msg);
-			return;
-		}
 		System.err.print(msg);
 	}
 	
 	public static void errPrintln(String msg){
-		if(Env.fUNYO){
-			Mediator.errPrintln(msg);
-			return;
-		}
 		System.err.println(msg);
 	}
 	
@@ -50,10 +41,6 @@ abstract public class Util {
 	}
 	
 	public static void println(String msg){
-		if(Env.fUNYO){
-			Mediator.println(msg, 0);
-			return;
-		}
 		System.out.println(msg);
 	}
 	
@@ -62,10 +49,6 @@ abstract public class Util {
 	}
 	
 	public static void print(String msg){
-		if(Env.fUNYO){
-			Mediator.print(msg, 0);
-			return;
-		}
 		System.out.print(msg);
 	}
 	
@@ -73,35 +56,6 @@ abstract public class Util {
 		print(msg.toString());
 	}
 	
-	/**
-	 * 与えられたリストから LMNtal リストを生成して与えられたリンク先につなげる
-	 * 
-	 * @param link LMNtal リストを接続するリンク
-	 * @param l Java リスト
-	 */
-	public static void makeList(Link link, List l) {
-		Membrane mem = link.getAtom().getMem();
-		Atom parent=null;
-		boolean first=true;
-		for (Object o : l) {
-			Atom c = mem.newAtom(new SymbolFunctor(".", 3));  // .(Value Next Parent)
-			Atom v = mem.newAtom(new StringFunctor(o.toString())); // value(Value)
-			mem.newLink(c, 0, v, 0);
-			if(first) {
-				mem.inheritLink(c, 2, link);
-			} else {
-				mem.newLink(c, 2, parent, 1);
-			}
-			parent = c;
-			first=false;
-		}
-		Atom nil = mem.newAtom(new SymbolFunctor("[]", 1));
-		if(first) {
-			mem.inheritLink(nil, 0, link);
-		} else {
-			mem.newLink(nil, 0, parent, 1);
-		}
-	}
 	/**
 	 * LMNtal リストをうけとり、Object配列にして返す。リストは消さない。
 	 * @param link

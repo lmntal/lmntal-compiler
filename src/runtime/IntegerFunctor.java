@@ -3,12 +3,14 @@ package runtime;
 /** 整数アトム用の1引数ファンクタを表すクラス
  * @author n-kato */
 
-public class IntegerFunctor extends DataFunctor {
-	int value;
+public class IntegerFunctor extends DataFunctor
+{
+	private int value;
+
 	public IntegerFunctor(int value) {
 		this.value = value;
 	}
-	
+
 	public int hashCode() { return value; }
 	public int intValue() { return value; }
 	public Object getValue() { return new Integer(value); }
@@ -29,8 +31,6 @@ public class IntegerFunctor extends DataFunctor {
 	}
 		
 	public String getQuotedAtomName() {
-		if (Env.colorMode) return "\033[0;34m"+getName()+"\033[0m";
 		return getName();
 	}
-
 }

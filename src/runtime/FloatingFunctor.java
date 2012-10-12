@@ -25,7 +25,6 @@ public class FloatingFunctor extends DataFunctor {
 	}
 	
 	public String getQuotedAtomName() {
-		if (Env.colorMode) return "\033[0;34m"+getName()+"\033[0m";
 		return getName();
 	}
 

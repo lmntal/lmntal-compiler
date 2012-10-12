@@ -6,10 +6,16 @@ package compile.structure;
  * @author Takahiko Nagata, n-kato
  * @date 2003/10/28
  */
-abstract public class Atomic {
-	/** 所属膜 */
+abstract public class Atomic
+{
+	/**
+	 * 所属膜
+	 */
 	public Membrane mem = null;
-	/** アトムのリンク列（またはアトム集団のリンク束列） */
+
+	/**
+	 * アトムのリンク列（またはアトム集団のリンク束列）
+	 */
 	public LinkOccurrence[] args;
 
 	/**
@@ -18,7 +24,7 @@ abstract public class Atomic {
 	 * @author Tomohito Makino
 	 */
 	public int line = -1;
-	
+
 	/**
 	 * デバッグ情報:ソースコード中での出現位置(桁)
 	 * 情報が無いときは-1を代入
@@ -31,22 +37,33 @@ abstract public class Atomic {
 	 * @param mem このアトムの所属膜
 	 * @param arity リンク列の長さ
 	 */
-	public Atomic(Membrane mem, int arity) {
+	public Atomic(Membrane mem, int arity)
+	{
 		this.mem = mem;
 		args = new LinkOccurrence[arity];
 	}
-	
-	public void setSourceLocation(int line, int column) {
+
+	public void setSourceLocation(int line, int column)
+	{
 		this.line = line;
 		this.column = column;
 	}
+
 	abstract public String toString();
-	/** 明示的な自由リンク引数の個数を取得する。*/
-	public int getArity() {
+
+	/**
+	 * 明示的な自由リンク引数の個数を取得する。
+	 */
+	public int getArity()
+	{
 		return args.length;
 	}
-	/** ファンクタの名前を取得する。ファンクタが無い場合は空文字列を返す。*/
-	public String getName() {
+
+	/**
+	 * ファンクタの名前を取得する。ファンクタが無い場合は空文字列を返す。
+	 */
+	public String getName()
+	{
 		return "";
 	}
 }

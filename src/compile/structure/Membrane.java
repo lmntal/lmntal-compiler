@@ -18,13 +18,17 @@ import runtime.Env;
  * memo:全て1つの配列に入れる方法もある。<br>
  * 各要素はListとして保持される。
  */
-public final class Membrane {
+public final class Membrane
+{
 	/** 親膜 */
 	public Membrane parent = null;
+
 	/** 終了フラグがセットされているかどうかを表す */
 	public boolean stable = false;
+
 	/** 膜のタイプ */
 	public int kind = 0;
+
 	/** ＠指定またはnull
 	 * <p><b>仮仕様</b>
 	 * ホスト指定を表す文字列が入る型付きプロセス文脈名を持った
@@ -80,22 +84,27 @@ public final class Membrane {
 	 * コンストラクタ
 	 * @param mem 親膜
 	 */
-	public Membrane(Membrane mem) {
+	public Membrane(Membrane mem)
+	{
 		this.parent = mem;
 	}
 
-	public int getNormalAtomCount() {
-		int c=0;
-		for(Atom a : atoms){
-			if(!a.functor.isInsideProxy() && !a.functor.isOutsideProxy()) c++;
+	public int getNormalAtomCount()
+	{
+		int c = 0;
+		for (Atom a : atoms)
+		{
+			if (!a.functor.isInsideProxy() && !a.functor.isOutsideProxy()) c++;
 		}
 		return c;
 	}
 	/** この膜にあるinside_proxyアトムの個数を取得する */
-	public int getFreeLinkAtomCount() {
-		int c=0;
-		for(Atom a : atoms){
-			if(a.functor.equals(Functor.INSIDE_PROXY)) c++;
+	public int getFreeLinkAtomCount()
+	{
+		int c = 0;
+		for (Atom a : atoms)
+		{
+			if (a.functor.equals(Functor.INSIDE_PROXY)) c++;
 		}
 		return c;
 	}
@@ -108,50 +117,60 @@ public final class Membrane {
 	 *  
 	 * @return String 
 	 */
-	public String toStringWithoutBrace() {
-		LinkedList list = new LinkedList();
+	public String toStringWithoutBrace()
+	{
+		List<Object> list = new LinkedList<Object>();
 		list.addAll(atoms);
 		list.addAll(mems);
 		list.addAll(rules);
 		list.addAll(processContexts);
 		list.addAll(ruleContexts);
 		list.addAll(typedProcessContexts);
-
 		//return list.toString().replaceAll("^.|.$","");
 		return Env.parray(list, ", ").toString();
 	}
 
-	public String toString() {
+	public String toString()
+	{
 		String ret = "{ " + toStringWithoutBrace() + " }" + (kind==1 ? "_" : "") + (stable ? "/" : "");
-		if (pragmaAtHost != null) {
+		if (pragmaAtHost != null)
+		{
 			ret += "@" + ((ProcessContext)pragmaAtHost).getQualifiedName();
 		}
 		return ret;
 	}
-	public String toStringAsGuardTypeConstraints() {
+
+	public String toStringAsGuardTypeConstraints()
+	{
 		if (atoms.isEmpty()) return "";
 		String text = "";
-		for(Atom atom : atoms){
+		for (Atom atom : atoms)
+		{
 			text += " "+ atom.toStringAsTypeConstraint();
 		}
 		return text.substring(1);
 	}
+
 	/**
 	 * この膜に含まれる全てのルールセットを表示する。
 	 */
-	public void showAllRulesets() {
-		Iterator it = rulesets.iterator();
-		while (it.hasNext()) {
-			Env.d( ((InterpretedRuleset)it.next()) );
+	public void showAllRulesets()
+	{
+		for (Ruleset r : rulesets)
+		{
+			Env.d(r);
 		}
 
 		// 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
-		for(RuleStructure rs : rules){
+		for (RuleStructure rs : rules)
+		{
 			rs.leftMem.showAllRulesets();
 			rs.rightMem.showAllRulesets();
 		}
+
 		// 子膜それぞれ
-		for(Membrane mem : mems){
+		for (Membrane mem : mems)
+		{
 			mem.showAllRulesets();
 		}
 	}
@@ -166,65 +185,30 @@ public final class Membrane {
 	 * 　[3] [1]の右辺膜の中にあるルール
 	 * </pre>
 	 */
-	public void showAllRules() {
+	public void showAllRules()
+	{
 		Env.c("Membrane.showAllRules " + this);
-		Iterator it = rulesets.iterator();
-		while (it.hasNext()) {
-			((InterpretedRuleset)it.next()).showDetail();
+		for (Ruleset r : rulesets)
+		{
+			((InterpretedRuleset)r).showDetail();
 		}
 
 		// 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
-		it = rules.iterator();
-		while (it.hasNext()) {
-			RuleStructure rs = (RuleStructure)it.next();
-			//Env.p("");
+		for (RuleStructure rs : rules)
+		{
 			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
 			rs.leftMem.showAllRules();
 			//Env.p("About rule structure (RIGHT): "+rs.rightMem+" of "+rs);
 			rs.rightMem.showAllRules();
 		}
+
 		// 子膜それぞれ
-		it = mems.iterator();
-		while(it.hasNext()) ((Membrane)it.next()).showAllRules();
+		for (Membrane submem : mems)
+		{
+			submem.showAllRules();
+		}
 	}
 
-	/**
-	 * この膜の中にあるルールを LMNtal syntax で全て表示する。
-	 * 
-	 * <pre>
-	 * 「この膜の中にあるルール」とは、以下の３種類。
-	 * 　[1]この膜のルールセットに含まれる全てのルール
-	 * 　[2] [1]の左辺膜の中にあるルール
-	 * 　[3] [1]の右辺膜の中にあるルール
-	 * </pre>
-	 */
-	public int showAllRulesLMNtalSyntax(int rulesetIndex) {
-		Env.c("Membrane.showAllRules " + this);
-		Iterator it = rulesets.iterator();
-		while (it.hasNext()) {
-			Env.p("ruleset{");
-			((InterpretedRuleset)it.next()).showDetailLMNtalSyntax(rulesetIndex);
-			rulesetIndex++;
-			Env.p("}.");
-		}
-
-		// 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
-		it = rules.iterator();
-		while (it.hasNext()) {
-			RuleStructure rs = (RuleStructure)it.next();
-			//Env.p("");
-			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
-			rulesetIndex = rs.leftMem.showAllRulesLMNtalSyntax(rulesetIndex);
-			//Env.p("About rule structure (RIGHT): "+rs.rightMem+" of "+rs);
-			rulesetIndex = rs.rightMem.showAllRulesLMNtalSyntax(rulesetIndex);
-		}
-		// 子膜それぞれ
-		it = mems.iterator();
-		while(it.hasNext()){
-			rulesetIndex = ((Membrane)it.next()).showAllRulesLMNtalSyntax(rulesetIndex);
-		}
-		return rulesetIndex;
-	}
 	/*
 	 * okabe
 	 * この膜に含まれるアトムのうち一番最初のアトムのアトム名を返す

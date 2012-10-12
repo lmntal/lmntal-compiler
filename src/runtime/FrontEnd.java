@@ -1,103 +1,43 @@
-/*
- * 作成日: 2003/10/22
- */
 package runtime;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.StringReader;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import type.TypeException;
 import type.TypeInferer;
-import unyo.Mediator;
-import util.StreamDumper;
 import util.Util;
-import chorus.Output;
 
 import compile.Module;
 import compile.Optimizer;
 import compile.RulesetCompiler;
-import compile.Translator;
 import compile.parser.LMNParser;
 import compile.parser.ParseException;
-import compile.parser.intermediate.RulesetParser;
 
-import debug.Debug;
-
-/**
- * LMNtal のメイン
- * 
- * 
- * 作成日: 2003/10/22
- */
-public class FrontEnd {
-	/**
-	 * 全ての始まり。
-	 * 
-	 * @param args
-	 * 
-	 */
-	public static void main(String[] args) {
-
+public class FrontEnd
+{
+	public static void main(String[] args)
+	{
 		checkVersion();
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+			public void run()
+			{
 				Inline.terminate();
 			}
 		});
 
-		// //TODO REPL で LMNtal プログラムを実行中の場合は、実行を中止してプロンプトに戻るようにする。
-		// //注意 : ハンドラを追加しても、標準入力には EOF が送られてくるので、EOF を読んでも終了しないように変更する必要がある。
-		// //Ctrl-C のハンドラ
-		// Signal.handle(new Signal("INT"), new SignalHandler () {
-		// public void handle(Signal sig) {
-		// }
-		// });
-
 		processOptions(args);
-		if (Env.debugOption)
-			Debug.openSocket(); // 2006.4.27 by inui
-
-		// 実行
-
-		if (Env.oneLiner != null) {
-			// 一行実行の場合はそれを優先
-			REPL.processLine(Env.oneLiner);
-		} else {
-			// ソースありならソースを解釈実行、なしなら REPL。
-			if (Env.srcs.isEmpty()) {
-				if (Env.stdinLMN)
-					run(new InputStreamReader(System.in)); // 2006.07.11 inui
-				else if (Env.stdinTAL) { // 2006.07.11 inui
-					try {
-						run(RulesetParser
-								.parse(new InputStreamReader(System.in)));
-					} catch (ParseException e) {
-					}
-				} else
-					REPL.run();
-			} else {
-				run(Env.srcs);
-				if (Env.fREMAIN)
-					REPL.run();
-			}
-		}
-
-		if (Env.fREPL) {
-			REPL.run();
-		}
+		run(Env.srcs);
 	}
 
 	/**
@@ -106,7 +46,8 @@ public class FrontEnd {
 	 * java1.4以上を使っていないとエラー出力する
 	 * </p>
 	 */
-	public static void checkVersion() {
+	public static void checkVersion()
+	{
 		// バージョンチェック by 水野
 		try {
 			String ver = System.getProperty("java.version");
@@ -143,19 +84,9 @@ public class FrontEnd {
 			if (isSrcs && (args[i].length() > 0) && (args[i].charAt(0) == '-')) {
 				if (args[i].length() < 2) { // '-'のみの時
 					Util.errPrintln("不明なオプション:" + args[i]);
-					if (Env.fUNYO) {
-						Mediator.exit("Invalid option: " + args[i]);
-					} else
-						System.exit(-1);
+					System.exit(-1);
 				} else { // オプション解釈部
 					switch (args[i].charAt(1)) {
-					case 'c':
-						// -c
-						// CGI mode. Output the header 'Content-type:text/html'
-						if (args[i].equals("-cgi")) {
-							Env.fCGI = true;
-						}
-						break;
 					case 'd':
 						//@ -d[<0-9>]
 						//@ Debug output level.
@@ -165,24 +96,6 @@ public class FrontEnd {
 							Env.debug = Env.DEBUG_DEFAULT;
 						}
 						// System.out.println("debug level " + Env.debug);
-						break;
-					case 'e':
-						//@ -e <LMNtal program>
-						//@ One liner code execution like Perl.
-						//@ Example: -e 'a,(a:-b)'
-						if (++i < args.length)
-							Env.oneLiner = args[i];
-						break;
-					case 'g':
-						//@ -g
-						//@ GUI mode. Atoms, membranes and links are drawn graphically.
-						//@ Click button to proceed reaction. Close the window to quit.
-						Env.fGUI = true;
-						break;
-					case 'o':
-						//@ -o <file>
-						//@ Specify the output JAR file name.
-						Translator.outputName = args[++i];
 						break;
 					case 'I':
 						//@ -I <path>
@@ -218,30 +131,8 @@ public class FrontEnd {
 							break;
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
-							if (Env.fUNYO) {
-								Mediator.exit("Invalid option: " + args[i]);
-							} else
-								System.exit(-1);
+							System.exit(-1);
 						}
-						break;
-					case 's':
-						//@ -s[<0-9>]  (-s=-s3)
-						//@ Shuffle level. Select a strategy of rule application.
-						//@   0: default. use an atom stack for each membrane (LIFO)
-						//@   1: atoms are selected in some arbitrary manner
-						//@   2: select atoms and membranes randomly from a membrane
-						//@   3: select atoms, mems and rules randomly from a membrane
-						if (args[i].matches("-s[0-9]")) {
-							Env.shuffle = args[i].charAt(2) - '0';
-						} else {
-							Env.shuffle = Env.SHUFFLE_DEFAULT;
-						}
-						Util.errPrintln("shuffle level " + Env.shuffle);
-						break;
-					case 't':
-						//@ -t
-						//@ Trace mode.
-						Env.fTrace = true;
 						break;
 					case 'v':
 						//@ -v[<0-9>]
@@ -269,97 +160,23 @@ public class FrontEnd {
 							String value = i + 2 < args.length ? args[i + 2] : "";
 							Env.extendedOption.put(name, value);
 						}
-						
-						// 2011-10-05: revised (shinobu)
-						// if (Env.getExtendedOption("dump2") != "")
-						if (!Env.getExtendedOption("dump2").isEmpty())
-						{
-							Env.dump2 = true;
-							Properties prop = new Properties();
-							try {
-								prop.load(new FileInputStream(Env
-										.getExtendedOption("dump2")));
-								Dumper2.setPropertiesPath(Env
-										.getExtendedOption("dump2"));
-								Dumper2.getProperties();
-							} catch (FileNotFoundException e) {
-								Env.e("Property file is not found.");
-								Env.dump2 = false;
-							} catch (IOException e) {
-								e.printStackTrace();
-								Env.dump2 = false;
-							}
-						}
 						i += 2;
 						break;
-					case 'p':
-						//@ -p[<0-3>] (-p=-p0)
-						//@ Profiling program.
-						//@ Profile level. Select a detail levels of profiling.
-						//@ 0: execution times of atom driven tests and membrane driven
-						//@    tests for each thread
-						//@ 1: test counts and applying counts and execution times
-						//@    for each rule
-						//@ 2: 1 + backtrack counts and lockfailure counts
-						//@    for each rule
-						//@ 3: profiles each rule for each test and for each thread
-						//@    output by CSV
-						if (args[i].matches("-p[0-3]")) {
-							Env.profile = args[i].charAt(2) - '0';
-						} else {
-							Env.profile = Env.PROFILE_DEFAULT;
-						}
-						if (Env.profile != Env.PROFILE_ALL)
-							Util.errPrintln("profile level " + Env.profile);
-						if (Env.profile == Env.PROFILE_ALL)
-							Env.p(Dumper.PROFILE_TABS);
-						break;
 					case '-': // 文字列オプション
-						if (args[i].equals("--gui")) {
-							Env.fGUI = true;
-						} else if (args[i].equals("--color")) {// 2006.11.13
-							// inui
-							//@ --color
-							//@ color dump
-							Env.colorMode = true;
-						} else if (args[i].equals("--compileonly")) {
+						if (args[i].equals("--compileonly")) {
 							// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
-							Env.fInterpret = true;
 						} else if (args[i].equals("--slimcode")) {
 							// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.slimcode = true;
-						} else if (args[i].equals("--slimcodelmnsyntax")) {
-							// コンパイル後の中間命令列を LMNtal syntax で出力するモード
-							Env.compileonly = true;
-							Env.slimcode = true;
-							Env.slimcodelmnsyntax = true;
 						} else if (args[i].equals("--use-findatom2")) {
 							// Env.compileonly = true;
 							Env.slimcode = true;
 							Env.findatom2 = true;
-							Env.fInterpret = true;
 							Optimizer.fGuardMove = true; // これをtrueにしないと動かない
 						} else if (args[i].equals("--memtest-only")) {
 							Env.memtestonly = true;
-						} else if (args[i].equals("--debug-daemon")) {
-							// --debug-daemon
-							// dump debug message of LMNtalDaemon
-							Env.debugDaemon = Env.DEBUG_DEFAULT;
-						} else if (args[i].matches("--event-port")) {// 2006.4.27
-							// by
-							// inui
-							Debug.setEventPort(Integer.parseInt(args[i + 1]));
-							i++;
-						} else if (args[i].equals("--graphic")) {
-							//@ --graphic
-							//@ Graphic LMNtal mode.
-							Env.fGraphic = true;
-						} else if (args[i].equals("--wt")) {
-							//@ --wt
-							//@ tool mode. Use tools.
-							Env.fTool = true;
 						} else if (args[i].equals("--help")) {
 							//@ --help
 							//@ Show usage (this).
@@ -370,51 +187,7 @@ public class FrontEnd {
 							// commandline: perl src/help_gen.pl <
 							// src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
-							if (Env.fUNYO) {
-								Mediator.exit("");
-							} else
-								System.exit(-1);
-						} else if (args[i].equals("--immediate")) {
-							//@ --immediate
-							//@ Use a single newline (rather than two newlines)
-							//@ to start execution in the REPL mode
-							Env.replTerm = "immediate";
-						} else if (args[i].equals("--interpret")) {
-							//@ --interpret
-							//@ Interpret intermediate instruction sequences
-							//@ without translating into Java.
-							//@ In REPL mode and one-liner, alwas interpret.
-							Env.fInterpret = true;
-							// } else if
-							// (args[i].equals("--keep-temporary-files")) {
-							// --keep-temporary-files
-							// Do not delete the translated Java source.
-							// Translator.fKeepSource = true;
-						} else if (args[i].equals("--library")) {
-							//@ --library
-							//@ Generate library.
-							Env.fLibrary = true;
-						} else if (args[i].startsWith("--max-string-length=")) { // 2006.07.02
-							// inui
-							//@ --max-string-length=<integer>
-							//@ Set <integer> as translator's maxStringLength
-							//@ (0 <= integer <= 65534)
-							Translator.maxStringLength = Integer
-							.parseInt(args[i].substring(20));
-						} else if (args[i].equals("--nd")) {
-							//@ --nd
-							//@ Nondeterministic mode. Execute the all
-							//@ reduction paths.
-							Env.ndMode = Env.ND_MODE_ND_ALL;
-						} else if (args[i].equals("--nd2")) {
-							Env.ndMode = Env.ND_MODE_ND_ANSCESTOR;
-						} else if (args[i].equals("--nd3")) {
-							Env.ndMode = Env.ND_MODE_ND_NOTHING;
-						} else if (args[i].equals("--interactive")) {
-							//@ --interactive
-							//@ Interactive mode. This option is available only
-							//@ in the nondeterministic mode.
-							Env.fInteractive = true;
+							System.exit(-1);
 						} else if (args[i].equals("--optimize-grouping")) {
 							//@ --optimize-grouping
 							//@ Group the head instructions. (EXPERIMENTAL)
@@ -449,107 +222,14 @@ public class FrontEnd {
 							Optimizer.fReuseMem = true;
 						} else if (args[i].equals("--optimize-slimoptimizer")) {
 
-						} else if (args[i].matches("--port")) {
-							//@ --port portnumber
-							//@ Specifies the port number that LMNtalDaemon listens on.
-							//@ The default is 60000.
-							//@ Only dynamic and private ports
-							//@ defined by IANA is usable: port 49152 through 65535.
-
-							if (args[i + 1].matches("\\d*")) {
-								try {
-									/*
-									 * http://www.iana.org/assignments/port-numbers
-									 * 
-									 * DYNAMIC AND/OR PRIVATE PORTS The Dynamic
-									 * and/or Private Ports are those from 49152
-									 * through 65535
-									 */
-									int portnum = Integer.parseInt(args[i + 1]);
-									if (portnum < 49152 || portnum > 65535) {
-										Util.errPrintln("Invalid option: "
-												+ args[i] + " " + args[i + 1]);
-										Util
-										.errPrintln("only port 49152 through 65535 is available");
-										if (Env.fUNYO) {
-											Mediator
-											.exit("Invalid option: "
-													+ args[i]
-													       + " "
-													       + args[i + 1]
-													              + "only port 49152 through 65535 is available");
-										} else
-											System.exit(-1);
-									}
-									Env.daemonListenPort = portnum;
-								} catch (NumberFormatException e) {
-									// e.printStackTrace();
-									Util.errPrintln("Invalid option: "
-											+ args[i] + " " + args[i + 1]);
-									Util.errPrintln("Cannot parse as integer: "
-											+ args[i + 1]);
-									if (Env.fUNYO) {
-										Mediator.exit("Invalid option: "
-												+ args[i] + " " + args[i + 1]
-												                       + ". "
-												                       + "Cannot parse as integer: "
-												                       + args[i + 1]);
-									} else
-										System.exit(-1);
-								}
-							} else {
-								Util.errPrintln("Invalid option: " + args[i]
-								                                          + " " + args[i + 1]);
-								if (Env.fUNYO) {
-									Mediator.exit("Invalid option: " + args[i]
-									                                        + " " + args[i + 1]);
-								} else
-									System.exit(-1);
-							}
-
-							i++;
 						} else if (args[i].equals("--pp0")) {
 							// 暫定オプション
 							Env.preProcess0 = true;
-						} else if (args[i].startsWith("--public-dir=")) {
-							// 開発者用オプション
-							// --public-dir=<dir>
-							// use <dir> as public directory
-							Translator.publicDirName = args[i].substring(13);
-						} else if (args[i].equals("--remain")) {
-							//@ --remain
-							//@ Processes remain in REPL mode
-							Env.fREMAIN = true;
-							// } else if(args[i].equals("--REPL")){
-							//@ --REPL
-							//@ REPL(Read-Eval-Print-Loop) mode
-							// Env.fREPL = true;
-							// Env.fREMAIN = true;
-						} else if (args[i].matches("--request-port")) {// 2006.4.27
-							// by
-							// inui
-							Debug.setRequestPort(Integer.parseInt(args[i + 1]));
-							i++;
 						} else if (args[i].equals("--stdin-lmn")) { // 2006.07.11
 							// inui
 							//@ --stdin-lmn
 							//@ read LMNtal program from standard input
 							Env.stdinLMN = true;
-						} else if (args[i].equals("--stdin-tal")) { // 2006.07.11
-							// inui
-							//@ --stdin-tal
-							//@ read LMNtal intermediate instruction list from standard
-							//@ input
-							Env.stdinTAL = true;
-						} else if (args[i].startsWith("--stdlib-name=")) {
-							// 開発者用オプション
-							// --stdlib-name=<name>
-							// use <name> as standard library name
-							Translator.stdlibName = args[i].substring(14);
-						} else if (args[i].equals("--start-daemon")) {
-							//@ --start-daemon
-							//@ Start LMNtalDaemon
-							Env.startDaemon = true;
 						} else if (args[i].equals("--showproxy")) {
 							//@ --showproxy
 							//@ Show proxy atoms
@@ -574,11 +254,6 @@ public class FrontEnd {
 							//@ in leftside rules.
 							Env.threadMax = Integer.parseInt(args[i]
 							                                      .substring(13));
-						} else if (args[i].startsWith("--temporary-dir=")) {
-							//@ --temporary-dir=<path>
-							//@ use <path> as temporary directory
-							Translator.baseDirName = args[i].substring(16);
-							Translator.fKeepSource = true;
 						} else if (args[i].equals("--use-source-library")) {
 							//@ --use-source-library
 							//@ Use source libraries in lib/src and lib/public.
@@ -587,7 +262,6 @@ public class FrontEnd {
 							//@ --debug
 							//@ run command-line debugger.
 							Env.debugOption = true;
-							Env.fInterpret = true;
 						} else if (args[i].equals("--nothread")) {
 							// 暫定オプション
 							// スレッドルールの変換を行わない
@@ -634,10 +308,6 @@ public class FrontEnd {
 							//@ --args
 							//@ give command-line options after this to LMNtal program.
 							isSrcs = false;
-						} else if (args[i].equals("--safe")) {
-							// 060804 safe mode
-							Env.safe = true;
-							Env.maxStep = Integer.parseInt(args[++i]);
 						} else if (args[i].equals("--compile-rule")) {
 							// -- --compile-rule
 							// compile one rule (for SLIM model checking mode)
@@ -663,27 +333,13 @@ public class FrontEnd {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util
 							.errPrintln("Use option --help to see a long list of options.");
-							if (Env.fUNYO) {
-								Mediator
-								.exit("Invalid option: "
-										+ args[i]
-										       + ". "
-										       + "Use option --help to see a long list of options.");
-							} else
-								System.exit(-1);
+							System.exit(-1);
 						}
 						break;
 					default:
 						Util.errPrintln("Invalid option: " + args[i]);
 						Util.errPrintln("Use option --help to see a long list of options.");
-					if (Env.fUNYO) {
-						Mediator
-						.exit("Invalid option: "
-								+ args[i]
-								       + ". "
-								       + "Use option --help to see a long list of options.");
-					} else
-						System.exit(-1);
+					System.exit(-1);
 					}
 				}
 			} else { // '-'以外で始まるものは (実行ファイル名, argv[0], argv[1], ...) とみなす
@@ -692,77 +348,6 @@ public class FrontEnd {
 				} else {
 					Env.argv.add(args[i]);
 				}
-			}
-		}
-		// オプションの正規化
-		if (Env.ndMode != Env.ND_MODE_D) {
-			if (Env.fInterpret) {
-				Util
-				.errPrintln("Non Deterministic execution is not supported in interpreted mode");
-				if (Env.fUNYO) {
-					Mediator
-					.exit("Non Deterministic execution is not supported in interpreted mode");
-				} else
-					System.exit(-1);
-			}
-			if (Env.shuffle < Env.SHUFFLE_DONTUSEATOMSTACKS)
-				Env.shuffle = Env.SHUFFLE_DONTUSEATOMSTACKS;
-			Env.fMemory = false;
-		}
-		// REPL と one-liner では常に解釈実行
-		if (Env.oneLiner != null || Env.srcs.isEmpty()) {
-			Env.fInterpret = true;
-		}
-
-		if (Env.fCGI) {
-			System.setErr(System.out);
-			Util.println("Content-type: text/html\n");
-		}
-
-		// start LMNtalDaemon
-		if (Env.startDaemon) {
-			String classpath = System.getProperty("java.class.path");
-			String newCmdLine = new String("java -classpath" + " " + classpath
-					+ " " + "daemon.LMNtalDaemon" + " " + Env.debugDaemon + " "
-					+ Env.daemonListenPort);
-
-			// System.out.println(newCmdLine);
-			try {
-				Process daemon = Runtime.getRuntime().exec(newCmdLine);
-
-				// daemonが起動するまで待つ
-				// TODO 既にLMNtalDaemonが起動していたら起動しない
-				InputStreamReader daemonStdout = new InputStreamReader(daemon
-						.getInputStream());
-				for (int i = 0; i < 10; i++) { // ネットワークインタフェースがあがってない時は永久にready()はfalseなので
-					if (daemonStdout.ready())
-						break;
-					try {
-						Thread.sleep(100);
-						// System.out.println("LMNtalDaemon not yet started...");
-						// System.out.println(daemonStdout.ready());
-					} catch (InterruptedException e2) {
-						// e2.printStackTrace();
-					}
-				}
-				// daemonStdout.close();
-
-				if (Env.debugDaemon > 0) {
-					Thread dumpErr = new Thread(new StreamDumper(
-							"LMNtalDaemon.stderr", daemon.getErrorStream()),
-					"StreamDumper");
-					Thread dumpOut = new Thread(new StreamDumper(
-							"LMNtalDaemon.stdout", daemon.getInputStream()),
-					"StreamDumper");
-					dumpErr.start();
-					dumpOut.start();
-				}
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				if (Env.fUNYO) {
-					Mediator.exit("");
-				} else
-					System.exit(-1);
 			}
 		}
 
@@ -774,96 +359,84 @@ public class FrontEnd {
 
 	/**
 	 * 与えられた名前のファイルたちをくっつけたソースについて、一連の実行を行う。
-	 * 
-	 * @param files
-	 *            ソースファイル
+	 * @param files ソースファイル名のリスト
 	 */
-	public static void run(List<String> files) {
+	public static void run(List<String> files)
+	{
 		InputStream is = null;
-		try {
-			for (String filename : files) {
-				FileInputStream fis = new FileInputStream(filename);
+		try
+		{
+			for (String filename : files)
+			{
+				InputStream fis = new FileInputStream(filename);
 				if (is == null)
+				{
 					is = fis;
+				}
 				else
+				{
 					is = new SequenceInputStream(is, fis);
+				}
 			}
-		} catch (FileNotFoundException e) {
-			// e.printStackTrace();
+		}
+		catch (FileNotFoundException e)
+		{
 			Util.println(e.getMessage());
-			if (Env.fUNYO) {
-				Mediator.exit(e.getMessage());
-			} else
-				System.exit(-1);
-		} catch (SecurityException e) {
+			System.exit(-1);
+		}
+		catch (SecurityException e)
+		{
 			e.printStackTrace();
-			if (Env.fUNYO) {
-				Mediator.exit(e.getMessage());
-			} else
-				System.exit(-1);
+			System.exit(-1);
 		}
+		
 		// 複数のファイルのときはファイル名が１つに決められない。
-		String unitName = files.size() == 1 ? (String) files.get(0)
-				: InlineUnit.DEFAULT_UNITNAME;
-		if (((String) files.get(0)).endsWith(".tal")) {
-			// 中間命令列
-			try {
-				Ruleset rs = RulesetParser.parse(new BufferedReader(
-						new InputStreamReader(is)));
-				((InterpretedRuleset) rs).showDetail();
-				run(rs);
-			} catch (ParseException e) {/* メッセージは出力済み */
-			}
-		} else {
-			run(new BufferedReader(new InputStreamReader(is)), unitName);
-		}
-	}
-	
-	/**
-	 * 与えられたソースについて、一連の実行を行う。
-	 * 
-	 * @param src
-	 *            Reader 型で表されたソース
-	 */
-	public static void run(Reader src) {
-		run(src, InlineUnit.DEFAULT_UNITNAME);
+		String unitName = files.size() == 1 ? files.get(0) : InlineUnit.DEFAULT_UNITNAME;
+		run(new BufferedReader(new InputStreamReader(is)), unitName);
 	}
 
 	/**
 	 * 与えられたソースについて、一連の実行を行う。
 	 * 
-	 * @param src
-	 *            Reader 型で表されたソース
-	 * @param unitName
-	 *            String ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
+	 * @param src Reader型で表されたソース
+	 * @param unitName ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
 	 */
-	public static void run(Reader src, String unitName) {
+	public static void run(Reader src, String unitName)
+	{
 		if (Env.preProcess0)
+		{
 			src = preProcess0(src);
-		try {
-			compile.structure.Membrane m;
+		}
+
+		try
+		{
 			Env.clearErrors();
-			try {
+
+			// 構文解析
+			// 抽象構文木からコンパイル時データ構造を生成する
+			compile.structure.Membrane m;
+			try
+			{
 				LMNParser lp = new LMNParser(src);
 				m = lp.parse();
-			} catch (ParseException e) {
+			}
+			catch (ParseException e)
+			{
 				Env.p("Compilation Failed");
 				Env.e(e.getMessage());
-				if (Env.fUNYO) {
-					Mediator.exit("Compilation Failed. "
-							+ System.getProperty("line.separator")
-							+ e.getMessage());
-				}
 				return;
 			}
 
-			/* 2006/06/09 by kudo */
-			if (Env.fType) {
+			if (Env.fType)
+			{
 				TypeInferer tci = new TypeInferer(m);
-				try {
+				try
+				{
 					tci.infer();
 					// tci.printAllConstraints();
-				} catch (TypeException e) {
+				}
+				catch (TypeException e)
+				{
 					Env.p("Type Inference Failed");
 					Env.e("TYPE ERROR: " + e.getMessage());
 					// tci.printAllConstraints();
@@ -871,66 +444,45 @@ public class FrontEnd {
 				}
 			}
 
-			Ruleset rs;
-			if (Env.fInterpret) {
-				rs = RulesetCompiler.compileMembrane(m, unitName);
-				Inline.makeCode();
-				if (Env.nErrors > 0) {
-					Env.e("Compilation Failed");
-					return;
-				}
-			} else {
-				try {
-					if (!Translator.init(unitName)) {
-						// エラーメッセージは出力済み
-						return;
-					}
-					// 実際の Translate は、compileMembrane の中で、ルールセットを生成した後に行っている。
-					// わかりにくいのでなおした方が良いかもしれない。
-					rs = RulesetCompiler.compileMembrane(m, unitName);
-					if (Env.nErrors > 0) {
-						Env.e("Compilation Failed");
-						return;
-					}
-					if (Translator.genInlineCode()) {
-						Translator.genModules(m);
-						if (!Env.fLibrary) {
-							Translator.genMain((InterpretedRuleset) rs, m);
-						}
-						Translator.genJAR();
-					}
-				} catch (IOException e) {
-					Env.e("Failed to write Translated File. "
-							+ e.getLocalizedMessage());
-					return;
-				} finally {
-					Translator.deleteTemporaryFiles();
-				}
+			// コンパイル、コード生成
+			// コンパイル時データ構造からルールセットの中間命令列を生成する
+			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
+			if (Env.getErrorCount() > 0)
+			{
+				Env.e("Compilation Failed");
+				return;
 			}
 
-			if (Env.compileRule) {
-				try {
+			if (Env.compileRule)
+			{
+				try
+				{
 					List<Ruleset> rulesets = m.rulesets;
-					runtime.InterpretedRuleset r = (runtime.InterpretedRuleset) rulesets
-					.get(0);
+					InterpretedRuleset r = (InterpretedRuleset)rulesets.get(0);
 					r.rules.get(0).showDetail();
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 					Env.e("Compilation Failed: no rule");
 				}
 				return;
-			} else {
+			}
+			else
+			{
+				// 通常はこっち？
 				showIL((InterpretedRuleset)rs, m);
-
 			}
 
-			if (Env.compileonly) {
+			if (Env.compileonly)
+			{
 				// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
-				for (String libName : Module.loaded) {
+				for (String libName : Module.loaded)
+				{
 					compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
 					.get(libName);
-					Iterator<Ruleset> it2 = mem.rulesets.iterator();
-					while (it2.hasNext()) {
-						((InterpretedRuleset) it2.next()).showDetail();
+					for (Ruleset r : mem.rulesets)
+					{
+						((InterpretedRuleset)r).showDetail();
 					}
 				}
 				// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
@@ -940,187 +492,22 @@ public class FrontEnd {
 				Inline.showInlineList();
 				return;
 			}
-
-			if (Env.fInterpret) {
-				Debug.setUnitName(unitName);
-				run(rs);
-			}
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
-			// Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()),
-			// "\n"));
 		}
 	}
 
 	/**
 	 * 中間命令列を出力する
-	 * @param rs　初期化ルールのみを含むルールセット
+	 * @param rs 初期化ルールのみを含むルールセット
 	 * @param m グローバル膜
 	 */
-	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m) {
-		if (!Env.slimcodelmnsyntax) {
-			rs.showDetail();
-			m.showAllRules();
-		} else {
-			int rulesetIndex = 0;
-			Env.p("rulesets{");
-			Env.p("initRuleset{");
-			rs.showDetailLMNtalSyntax(rulesetIndex);
-			rulesetIndex++;
-			Env.p("}.");
-			
-			rulesetIndex = m.showAllRulesLMNtalSyntax(rulesetIndex);
-			StringBuffer sb = new StringBuffer();
-			sb.append("rulesetList = [");
-			String pre = "";
-			for (int i = 0; i < rulesetIndex; i++) {
-				sb.append(pre);
-				sb.append("RulesetIndex" + i);
-				pre = ",";
-			}
-			sb.append("].");
-			Env.p(sb.toString());
-			Env.p("}.");
-			
-			System.out.print("//");
-		}
-	}
-
-	/**
-	 * 与えられた初期データ生成ルールセットを元に、一連の実行を行う。
-	 * 
-	 * @param rs
-	 *            (:-m) というルール１つだけからなるルールセット
-	 */
-	public static void run(Ruleset rs) {
-		// 060804 safe mode
-		Env.counter = 0;
-		try {
-			// 実行
-			LMNtalRuntime rt = new LMNtalRuntime();
-			// LMNtalRuntimeManager.init();
-
-			Membrane root = rt.getGlobalRoot();
-
-			if (Env.fREMAIN) {
-				if (Env.remainedRuntime != null) {
-					root.moveCellsFrom(Env.remainedRuntime.getGlobalRoot());
-					root.rulesets
-					.addAll(Env.remainedRuntime.getGlobalRoot().rulesets);
-				}
-			}
-
-			Env.initGUI();
-			Env.initGraphic();
-			Env.initTool();
-
-			if (Env.fGUI)
-				Env.gui.setRootMem(root);
-
-			// if(Env.f3D)
-			// Env.threed.lmnPanel.getGraph3DLayout().setRootMem(root);
-			// root.asyncLock();
-			boolean t = Env.fTrace;
-			Env.fTrace = false;
-			rs.react(root);
-			Env.fTrace = t;
-			// root.asyncUnlock();
-			// rt.asyncFlag = false;
-
-			// by inui
-			if (Env.debugOption) {
-				Task.initTrace();
-				Debug.init();
-				Debug.inputCommand();// 2006.4.27 by inui
-			}
-
-			boolean ready = true;
-
-			if (Env.fUNYO) {
-				// unyo.Mediator.sync(root);
-				if (!unyo.Mediator.sync(root)) {
-					Mediator.end();
-					return;
-				}
-			}
-
-			if (Env.gui != null) {
-				Env.gui.onTrace();
-			}
-
-			// if(Env.fUNYO){
-			// unyo.Mediator.sync(root);
-			// }
-
-			/* TODO:3d calc */
-			/*
-			 * nakano* if (Env.threed != null) {
-			 * Env.threed.lmnPanel.getGraph3DLayout().init(); if
-			 * (!Env.threed.onTrace()) ready = false; }
-			 */
-			if (ready) {
-				((Task) root.getTask()).execAsMasterTask(); // rt.exec();
-
-				if (Env.profile == Env.PROFILE_ALL) {
-					Env.d("Execution Result:");
-					if (Env.dump2) {
-						Env.p(Dumper2.dump(rt.getGlobalRoot()));
-					} else {
-						Env.p(Dumper.dump(rt.getGlobalRoot()));
-					}
-				} // else if (!Env.fTrace && Env.verbose > 0 && Env.ndMode ==
-				// Env.ND_MODE_D) {
-				else if (Env.verbose > 0 && Env.ndMode == Env.ND_MODE_D) {
-					Env.d("Execution Result:");
-					if (Env.dump2) {
-						Env.p(Dumper2.dump(rt.getGlobalRoot()));
-					} else {
-						Env.p(Dumper.dump(rt.getGlobalRoot()));
-					}
-				}
-				if (Env.getExtendedOption("chorus") != "") {
-					Output.out(Env.getExtendedOption("chorus"), rt
-							.getGlobalRoot());
-				}
-
-				if (Env.fUNYO) {
-					// unyo.Mediator.sync(root);
-					if (!unyo.Mediator.sync(root)) {
-						Mediator.end();
-						return;
-					}
-				}
-
-				if (Env.gui != null) {
-					Env.gui.onTrace();
-				}
-			}
-			if (Env.fREMAIN) {
-				Env.remainedRuntime = rt;
-			}
-			if (Env.LMNgraphic != null)
-				Env.LMNgraphic = null;
-
-			// LMNtalRuntimeManager.terminateAll();
-			// LMNtalRuntimeManager.terminateAllThreaded();
-			// if(true)
-			// System.out.println("FrontEnd: terminateAll() finished!");
-			// LMNtalRuntimeManager.disconnectFromDaemon();
-
-			if (Env.debugOption) // 2006.4.26 by inui
-				Debug.terminate();
-
-			// 060831 okabe
-			Env.theRuntime.terminate();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			// Env.e("!! catch !! "+e+"\n"+Env.parray(Arrays.asList(e.getStackTrace()),
-			// "\n"));
-		}
-		if (Env.fUNYO) {
-			Mediator.end();
-		}
+	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)
+	{
+		rs.showDetail();
+		m.showAllRules();
 	}
 
 	/**
@@ -1176,4 +563,3 @@ public class FrontEnd {
 		return null;
 	}
 }
-// TODO 初期配置で子タスクを作る

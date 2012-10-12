@@ -1,10 +1,5 @@
-/**
- * 作成日: 2004/4/8
- * @author n-kato
- */
 package runtime;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +10,8 @@ import java.util.List;
  * 
  * @author n-kato
  */
-public class InstructionList implements Cloneable, Serializable {
+public class InstructionList implements Cloneable
+{
 	/** ラベル生成用整数値 */
 	private static int nextId = 100;
 	/** ラベル */

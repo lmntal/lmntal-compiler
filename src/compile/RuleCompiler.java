@@ -18,6 +18,7 @@ import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Rule;
+import runtime.Ruleset;
 import runtime.SymbolFunctor;
 import util.Util;
 
@@ -42,7 +43,8 @@ import compile.structure.RuleStructure;
  *
  * @author n-kato, hara
  */
-public class RuleCompiler {
+public class RuleCompiler
+{
 	/** コンパイルされるルール構造 */
 	RuleStructure rs;
 
@@ -52,8 +54,11 @@ public class RuleCompiler {
 	private List<Instruction> atomMatch;
 	private List<Instruction> memMatch;
 	private List<Instruction> tempMatch;// Slimcode時にのみ使用される(中身はmemMatch)
+
 	List<Instruction> guard;
+
 	private List<Instruction> body;
+
 	private int varcount;			// 次の変数番号
 
 	boolean hasISGROUND = true;
@@ -76,35 +81,39 @@ public class RuleCompiler {
 
 	private boolean debug2 = false;
 
-	private final int lhsmemToPath(Membrane mem) { return lhsmempath.get(mem); }
-	private final int rhsmemToPath(Membrane mem) { return rhsmempath.get(mem); }
-	private final int lhsatomToPath(Atomic atom) { return lhsatompath.get(atom); }
-	private final int rhsatomToPath(Atomic atom) { return rhsatompath.get(atom); }
-	private final int lhslinkToPath(Atomic atom, int pos) {	return lhslinkToPath(atom.args[pos]); }
-	private final int lhslinkToPath(LinkOccurrence link) { return lhslinkpath.get(link); }
+	private int lhsmemToPath(Membrane mem) { return lhsmempath.get(mem); }
+	private int rhsmemToPath(Membrane mem) { return rhsmempath.get(mem); }
+	private int lhsatomToPath(Atomic atom) { return lhsatompath.get(atom); }
+	private int rhsatomToPath(Atomic atom) { return rhsatompath.get(atom); }
+	private int lhslinkToPath(Atomic atom, int pos) { return lhslinkToPath(atom.args[pos]); }
+	private int lhslinkToPath(LinkOccurrence link) { return lhslinkpath.get(link); }
 
 	private String unitName;
+
 	/** ヘッドのマッチング終了後の継続命令列のラベル */
 	private InstructionList contLabel;
 
 	/**
 	 * 指定された RuleStructure 用のルールをつくる
 	 */
-	RuleCompiler(RuleStructure rs) {
+	public RuleCompiler(RuleStructure rs)
+	{
 		this(rs, InlineUnit.DEFAULT_UNITNAME);
 	}
-	RuleCompiler(RuleStructure rs, String unitName) {
-		//Env.n("RuleCompiler");
-		//Env.d(rs);
+
+	public RuleCompiler(RuleStructure rs, String unitName)
+	{
 		this.unitName = unitName;
 		this.rs = rs;
 	}
+
 	/**
 	 * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルする
 	 */
-	Rule compile() throws CompileException {
-		Env.c("compile");
-		if(debug2){
+	public Rule compile() throws CompileException
+	{
+		if(debug2)
+		{
 			Util.println("\n*************************************************");
 			Util.println("compile called : this.rs = " + rs);
 			Util.println(rs.leftMem + "\n :- " + rs.guardMem + "\n | " + rs.rightMem + "\n");
@@ -131,11 +140,14 @@ public class RuleCompiler {
 		body = theRule.bodyLabel.insts;
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
 
+		// 左辺膜のコンパイル
 		compile_l();
+
+		// ガードのコンパイル
 		compile_g();
 
-
-		if(debug2){
+		if (debug2)
+		{
 			Util.println("first compile_l() and compile_g() exit");
 			Rule tmpRule = new Rule();
 			tmpRule.memMatch = memMatch;
@@ -194,11 +206,13 @@ public class RuleCompiler {
 			theRule.body.add(1, Instruction.commit(ruleName.toString(), theRule.lineno));
 		}
 
-		if(debug2){
+		if (debug2)
+		{
 			Util.println("compile return theRule is\n");
 			theRule.showDetail();
 			Util.println("***************************************************\n");
 		}
+
 		optimize();
 		return theRule;
 	}
@@ -237,10 +251,13 @@ public class RuleCompiler {
 		return false;
 	}
 
-	/** 左辺膜をコンパイルする */
-	private void compile_l() {
-		Env.c("compile_l");
-		if(debug2){
+	/**
+	 * 左辺膜をコンパイルする
+	 */
+	private void compile_l()
+	{
+		if(debug2)
+		{
 			Util.println("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++");
 			Util.println("\ncompile_l called\n");
 		}
@@ -249,11 +266,13 @@ public class RuleCompiler {
 		atomMatch = theRule.atomMatchLabel.insts;
 
 		int maxvarcount = 2;	// アトム主導用（仮）
-		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++) {
+		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++)
+		{
 			hc.prepare(); // 変数番号を初期化
 			hc2.prepare();
-			if (firstid < hc.atoms.size()) {
-				if (Env.shuffle >= Env.SHUFFLE_DONTUSEATOMSTACKS || Env.slimcode || Env.memtestonly) continue;
+			if (firstid < hc.atoms.size())
+			{
+				if (Env.slimcode || Env.memtestonly) continue;
 				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
 
 				Atom atom = (Atom)hc.atoms.get(firstid);
@@ -269,15 +288,18 @@ public class RuleCompiler {
 				hc.varCount = 2;
 				hc.match.add(new Instruction(Instruction.FUNC, 1, atom.functor));
 				Membrane mem = atom.mem;
-				if (mem == rs.leftMem) {
+				if (mem == rs.leftMem)
+				{
 					hc.match.add(new Instruction(Instruction.TESTMEM, 0, 1));
 				}
-				else {
+				else
+				{
 					hc.match.add(new Instruction(Instruction.GETMEM, hc.varCount, 1, mem.kind, mem.name));
 					hc.match.add(new Instruction(Instruction.LOCK,   hc.varCount));
 					hc.memPaths.put(mem, new Integer(hc.varCount++));
 					mem = mem.parent;
-					while (mem != rs.leftMem) {
+					while (mem != rs.leftMem)
+					{
 						hc.match.add(new Instruction(Instruction.GETPARENT,hc.varCount,hc.varCount-1));
 						hc.match.add(new Instruction(Instruction.LOCK,     hc.varCount));
 						hc.memPaths.put(mem, new Integer(hc.varCount++));
@@ -290,25 +312,34 @@ public class RuleCompiler {
 				Atom firstatom = (Atom)hc.atoms.get(firstid);
 				hc.compileLinkedGroup(firstatom, hc.matchLabel);
 				hc.compileMembrane(firstatom.mem, hc.matchLabel);
-			} else {
+			}
+			else
+			{
 				// 膜主導
 				theRule.memMatchLabel = hc.matchLabel;
-				if(Env.findatom2){
+				if (Env.findatom2)
+				{
 					tempMatch = hc.tempMatch;
 					memMatch = hc.match;
-				} else {
+				}
+				else
+				{
 					memMatch = hc.match;
 				}
 				hc.memPaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 				hc2.memPaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
 			}
-			if(Env.findatom2){
+			if (Env.findatom2)
+			{
 				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
 				hc2.compileMembrane(rs.leftMem, hc.tempLabel);
-			} else {
+			}
+			else
+			{
 				hc.compileMembrane(rs.leftMem, hc.matchLabel);
 			}
-			if(debug2){
+			if (debug2)
+			{
 				Util.println("first compile_l() and compile_g() exit");
 				Rule tmpRule = new Rule();
 				tmpRule.memMatch = memMatch;
@@ -320,36 +351,47 @@ public class RuleCompiler {
 			}
 
 			if(debug2) Util.println("\n-----------------------------------------------------");
+
 			// 自由出現したデータアトムがないか検査する
-			if (!hc.fFindDataAtoms) {
-				if (Env.debug >= 1) {
-					Iterator it = hc.atoms.iterator();
-					while (it.hasNext()) {
-						Atom atom = (Atom)it.next();
-						if (!hc.isAtomLoaded(atom)) {
+			if (!hc.fFindDataAtoms)
+			{
+				if (Env.debug >= 1)
+				{
+					for (Atomic a : hc.atoms)
+					{
+						Atom atom = (Atom)a;
+						if (!hc.isAtomLoaded(atom))
+						{
 							Env.warning("TYPE WARNING: Rule head contains free data atom: " + atom);
 						}
 					}
 				}
 				hc.switchToUntypedCompilation();
 				hc.setContLabel(contLabel);
-				if(Env.findatom2){
+				if (Env.findatom2)
+				{
 					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
 					hc2.compileMembrane(rs.leftMem, hc.tempLabel);
-				} else {
+				}
+				else
+				{
 					hc.compileMembrane(rs.leftMem, hc.matchLabel);
 				}
 			}
 			hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
-			
-			if (Env.hyperLinkOpt) 
-			  hc.compileSameProcessContext(rs.leftMem, hc.matchLabel);//seiji
-			
-			if (hc.match == memMatch) {
+
+			if (Env.hyperLinkOpt)
+			{
+				hc.compileSameProcessContext(rs.leftMem, hc.matchLabel);//seiji
+			}
+
+			if (hc.match == memMatch)
+			{
 				hc.match.add(0, Instruction.spec(1, hc.maxVarCount));
 				hc.tempMatch.add(0, Instruction.spec(1, hc.maxVarCount));
 			}
-			else {
+			else
+			{
 				hc.match.add(0, Instruction.spec(2, hc.maxVarCount));
 				hc.tempMatch.add(0, Instruction.spec(1, hc.maxVarCount));
 			}
@@ -373,7 +415,8 @@ public class RuleCompiler {
 			if (maxvarcount < hc.varCount) maxvarcount = hc.maxVarCount;
 		}
 		atomMatch.add(0, Instruction.spec(2,maxvarcount));
-		if(debug2){
+		if(debug2)
+		{
 			Util.println("\n compile_l return ");
 			if(debug2){
 				Util.println("first compile_l() and compile_g() exit");
@@ -387,66 +430,50 @@ public class RuleCompiler {
 			}
 			Util.println("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++");
 		}
-
 	}
 
-	// todo spec命令を外側に持ち上げる最適化器を実装する
-
 	/**
-	 * 左辺のアトムのリンクに対してgetlinkを行い、変数番号を登録する。(RISC化)
-	 * 将来的にはリンクオブジェクトをボディ命令列の引数に渡すようにするかもしれない。
+	 * 右辺のリンクを取得または生成する
 	 */
-//	private void getLHSLinks() {
-//	lhslinkpath = new HashMap();
-//	for (int i = 0; i < lhsatoms.size(); i++) {
-//	Atom atom = (Atom)lhsatoms.get(i);
-//	int atompath = lhsatomToPath(atom);
-//	int arity = atom.functor.getArity();
-//	for (int j = 0; j < arity; j++) {
-//	int linkpath;
-//	// リンク先がgroundの場合、既にGETLINKは発行されている(getGroundLinkPaths)
-//	if(!(atom.args[j].buddy.atom instanceof Context &&
-//	groundsrcs.containsKey(((Context)atom.args[j].buddy.atom).def))){
-//	linkpath = varcount++;
-//	body.add(new Instruction(Instruction.GETLINK, linkpath, atompath, j));
-//	}
-//	else{
-//	linkpath = ((Integer)groundsrcs.get(((Context)atom.args[j].buddy.atom).def)).intValue();
-//	}
-//	lhslinkpath.put(atom.args[j],new Integer(linkpath));
-//	}
-//	}
-//	}
-
-	/** 右辺のリンクを取得または生成する */
-	private List<LinkOccurrence> computeRHSLinks() {
+	private List<LinkOccurrence> computeRHSLinks()
+	{
 		List<LinkOccurrence> rhslinks = new ArrayList<LinkOccurrence>();
 		rhslinkpath = new HashMap<LinkOccurrence, Integer>();
 		int rhslinkindex = 0;
 		// アトムの引数のリンク出現
-		for (Atom atom : rhsatoms){
-			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
+		for (Atom atom : rhsatoms)
+		{
+			for (int pos = 0; pos < atom.functor.getArity(); pos++)
+			{
 				body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhsatomToPath(atom),pos));
 				rhslinkpath.put(atom.args[pos],new Integer(varcount));
-				if(!rhslinks.contains(atom.args[pos].buddy) &&
+				if (!rhslinks.contains(atom.args[pos].buddy) &&
 						!(atom.functor.equals(Functor.INSIDE_PROXY) && pos == 0))
+				{
 					rhslinks.add(rhslinkindex++,atom.args[pos]);
+				}
 				varcount++;
 			}
 		}
 
 		// unary型付プロセス文脈のリンク出現
-		for(ProcessContext atom : rhstypedcxtpaths.keySet()){
+		for (ProcessContext atom : rhstypedcxtpaths.keySet())
+		{
 			body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhstypedcxtToPath(atom),0));
 			rhslinkpath.put(atom.args[0],new Integer(varcount));
-			if(!rhslinks.contains(atom.args[0].buddy))rhslinks.add(rhslinkindex++,atom.args[0]);
+			if (!rhslinks.contains(atom.args[0].buddy))
+			{
+				rhslinks.add(rhslinkindex++,atom.args[0]);
+			}
 			varcount++;
 		}
 
 		// ground型付プロセス文脈のリンク出現
-		for(ProcessContext ground : rhsgroundpaths.keySet()){
+		for (ProcessContext ground : rhsgroundpaths.keySet())
+		{
 			int linklistpath = rhsgroundToPath(ground);
-			for(int i=0;i<ground.def.lhsOcc.args.length;i++){
+			for (int i = 0; i < ground.def.lhsOcc.args.length; i++)
+			{
 				int linkpath = varcount++;
 				body.add(new Instruction(Instruction.GETFROMLIST,linkpath, linklistpath, i));
 //				int linkpath = rhsgroundToPath(atom);
@@ -457,43 +484,55 @@ public class RuleCompiler {
 
 		// 型なし
 
-		for(ContextDef def : rs.processContexts.values()){
+		for (ContextDef def : rs.processContexts.values())
+		{
 			Iterator it2 = def.rhsOccs.iterator();
-			while (it2.hasNext()) {
+			while (it2.hasNext())
+			{
 				ProcessContext atom = (ProcessContext)it2.next();
-				for (int pos = 0; pos < atom.getArity(); pos++) {
-//					LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy;
-//					int srclinkid;
-//					if(!lhslinkpath.containsKey(srclink)){
-//					srclinkid = varcount++;
-//					body.add( new Instruction(Instruction.GETLINK,srclinkid,
-//					lhsatomToPath(srclink.atom), srclink.pos));
-//					lhslinkpath.put(srclink,new Integer(srclinkid));
-//					}
-//					srclinkid = lhslinkToPath(srclink);
-//					if (!(fUseMoveCells && atom.def.rhsOccs.size() == 1)) {
-//					int copiedlink = varcount++;
-//					body.add( new Instruction(Instruction.LOOKUPLINK,
-//					copiedlink, rhspcToMapPath(atom), srclinkid));
-//					srclinkid = copiedlink;
-//					}
-//					rhslinkpath.put(atom.args[pos],new Integer(srclinkid));
-					if(!rhslinks.contains(atom.args[pos].buddy))rhslinks.add(rhslinkindex++,atom.args[pos]);
+				for (int pos = 0; pos < atom.getArity(); pos++)
+				{
+					//LinkOccurrence srclink = atom.def.lhsOcc.args[pos].buddy;
+					//int srclinkid;
+					//if (!lhslinkpath.containsKey(srclink))
+					//{
+					//	srclinkid = varcount++;
+					//	body.add(new Instruction(Instruction.GETLINK,srclinkid,
+					//	lhsatomToPath(srclink.atom), srclink.pos));
+					//	lhslinkpath.put(srclink,new Integer(srclinkid));
+					//}
+					//srclinkid = lhslinkToPath(srclink);
+					//if (!(fUseMoveCells && atom.def.rhsOccs.size() == 1))
+					//{
+					//	int copiedlink = varcount++;
+					//	body.add( new Instruction(Instruction.LOOKUPLINK,
+					//	copiedlink, rhspcToMapPath(atom), srclinkid));
+					//	srclinkid = copiedlink;
+					//}
+					//rhslinkpath.put(atom.args[pos],new Integer(srclinkid));
+					if (!rhslinks.contains(atom.args[pos].buddy))
+					{
+						rhslinks.add(rhslinkindex++,atom.args[pos]);
+					}
 				}
 			}
 		}
 		return rhslinks;
 	}
 
-	private int getLinkPath(LinkOccurrence link){
-		if(rhslinkpath.containsKey(link)){
+	private int getLinkPath(LinkOccurrence link)
+	{
+		if (rhslinkpath.containsKey(link))
+		{
 			return rhslinkpath.get(link);
 		}
-		else if (link.atom instanceof ProcessContext && !((ProcessContext)link.atom).def.typed){
+		else if (link.atom instanceof ProcessContext && !((ProcessContext)link.atom).def.typed)
+		{
 			LinkOccurrence srclink = ((ProcessContext)link.atom).def.lhsOcc.args[link.pos].buddy;
 			int linkpath = varcount++;
 			body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(srclink.atom),srclink.pos));
-			if(!(fUseMoveCells && ((ProcessContext)link.atom).def.rhsOccs.size() == 1)) {
+			if (!(fUseMoveCells && ((ProcessContext)link.atom).def.rhsOccs.size() == 1))
+			{
 				int copiedlink = varcount++;
 				body.add( new Instruction(Instruction.LOOKUPLINK,
 						copiedlink, rhspcToMapPath(((ProcessContext)link.atom)), linkpath));
@@ -501,11 +540,13 @@ public class RuleCompiler {
 			}
 			return linkpath;
 		}
-		else{
-			if(!lhslinkpath.containsKey(link)){
+		else
+		{
+			if (!lhslinkpath.containsKey(link))
+			{
 				int linkpath = varcount++;
 				body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(link.atom),link.pos));
-				lhslinkpath.put(link,new Integer(linkpath));
+				lhslinkpath.put(link, linkpath);
 			}
 			return lhslinkToPath(link);
 		}
@@ -518,8 +559,8 @@ public class RuleCompiler {
 	 * 左辺の膜のロックはマッチングの時点で行う
 	 *
 	 * */
-	private void compile_r() throws CompileException {
-		Env.c("compile_r");
+	private void compile_r() throws CompileException
+	{
 		int formals = varcount;
 		//body.add( Instruction.commit(theRule) );
 		inc_guard();
@@ -550,11 +591,13 @@ public class RuleCompiler {
 		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
-		if (removeLHSMem(rs.leftMem) >= 2) {
-		    //2011/01/23 slimでは必要なくなったので挿入しないように修正 by meguro
-		    if(!Env.slimcode){
-			body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
-		    }
+		if (removeLHSMem(rs.leftMem) >= 2)
+		{
+			//2011/01/23 slimでは必要なくなったので挿入しないように修正 by meguro
+			if (!Env.slimcode)
+			{
+				body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
+			}
 		}
 
 		recursiveLockLHSNonlinearProcessContextMems();
@@ -563,13 +606,13 @@ public class RuleCompiler {
 		// insertconnectorsの後でなければうまくいかないので再発行 ( 2006/09/15 kudo)
 		getGroundLinkPaths();
 
-
 		// 右辺の構造と$pの内容，を再帰的に生成する
 		// $pの明示的でないリンクをはる
 
 		buildRHSMem(rs.rightMem);
 		/* 右辺の$pが配置された直後。このタイミングでなければならない筈 */
-		if (!rs.rightMem.processContexts.isEmpty()) {
+		if (!rs.rightMem.processContexts.isEmpty())
+		{
 			body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
 		}
 		copyRules(rs.rightMem);
@@ -589,8 +632,12 @@ public class RuleCompiler {
 
 		//次の2つは右辺の構造の生成以降ならいつでもよい
 		addInline();
-		if (Env.slimcode) {
-			if (Env.hyperLink) addHyperlink();//seiji
+		if (Env.slimcode)
+		{
+			if (Env.hyperLink)
+			{
+				addHyperlink();//seiji
+			}
 			addCallback();
 		}
 		addRegAndLoadModules();
@@ -600,7 +647,7 @@ public class RuleCompiler {
 		freeLHSMem(rs.leftMem);
 		freeLHSAtoms();
 		freeLHSTypedProcesses();
-//		freeLHSSingletonProcessContexts(); // freememに先行させるため3行上に移動した n-kato 2005.1.13
+		//freeLHSSingletonProcessContexts(); // freememに先行させるため3行上に移動した n-kato 2005.1.13
 
 		// 膜をunlockする
 
@@ -609,10 +656,10 @@ public class RuleCompiler {
 		//
 		body.add(0, Instruction.spec(formals, varcount));
 
-//		if (rs.rightMem.mems.isEmpty() && rs.rightMem.ruleContexts.isEmpty()
-//		&& rs.rightMem.processContexts.isEmpty() && rs.rightMem.rulesets.isEmpty()) {
-//		body.add(new Instruction(Instruction.CONTINUE));
-//		} else
+		//if (rs.rightMem.mems.isEmpty() && rs.rightMem.ruleContexts.isEmpty()
+		//&& rs.rightMem.processContexts.isEmpty() && rs.rightMem.rulesets.isEmpty()) {
+		//body.add(new Instruction(Instruction.CONTINUE));
+		//} else
 		body.add(new Instruction(Instruction.PROCEED));
 	}
 
@@ -621,7 +668,6 @@ public class RuleCompiler {
 	 */
 	private void compile_r_swaplink() throws CompileException
 	{
-		Env.c("compile_r_swaplink");
 		int formals = varcount;
 		inc_guard();
 
@@ -796,19 +842,26 @@ public class RuleCompiler {
 	//
 
 	/** ヘッドの膜とアトムに対して、仮引数番号を登録する */
-	private void genLHSPaths() {
+	private void genLHSPaths()
+	{
 		lhsatompath = new HashMap<Atomic, Integer>();
 		lhsmempath  = new HashMap<Membrane, Integer>();
 		varcount = 0;
-		for (int i = 0; i < lhsmems.size(); i++) {
-			lhsmempath.put(lhsmems.get(i), new Integer(varcount++));
+		for (int i = 0; i < lhsmems.size(); i++)
+		{
+			lhsmempath.put(lhsmems.get(i), varcount++);
 		}
 		for (Atomic atomic : lhsatoms)
-			lhsatompath.put(atomic, new Integer(varcount++));
+		{
+			lhsatompath.put(atomic, varcount++);
+		}
 	}
 
-	/** ガードの取り込み */
-	private void inc_guard() {
+	/**
+	 * ガードの取り込み
+	 */
+	private void inc_guard()
+	{
 		varcount = lhsatoms.size() + lhsmems.size();
 		genTypedProcessContextPaths();
 		// typedcxtdefs = gc.typedcxtdefs;
@@ -826,7 +879,8 @@ public class RuleCompiler {
 //	}
 
 	/** ガードをコンパイルする */
-	private void compile_g() throws CompileException {
+	private void compile_g() throws CompileException
+	{
 		lhsmems  = hc.mems;
 		lhsatoms = hc.atoms;
 		genLHSPaths();
@@ -847,6 +901,7 @@ public class RuleCompiler {
 		varcount = gc.getMemActuals().size() + gc.getAtomActuals().size()
 		+ gc.getVarActuals().size();
 	}
+
 	/**
 	 * uniq 命令を一つにまとめてガード命令列の最後に移動する。
 	 * uniq 命令は、全ての失敗しうるガード命令のうち最後尾にないといけない。
@@ -861,13 +916,15 @@ public class RuleCompiler {
 	 *     [newhlinkなどのシンボルアトム生成命令列]
 	 *        ....
 	 */
-	void fixUniqOrder() {
-		boolean found = false;
+	void fixUniqOrder()
+	{
+		boolean found = guard.contains(Instruction.UNIQ);
 		List vars = new ArrayList();
-		Iterator<Instruction> it = guard.iterator();
-		while(it.hasNext()) {
+		for (Iterator<Instruction> it = guard.iterator(); it.hasNext(); )
+		{
 			Instruction inst = it.next();
-			if(inst.getKind() == Instruction.UNIQ) {
+			if (inst.getKind() == Instruction.UNIQ)
+			{
 				found = true;
 				vars.addAll((ArrayList)inst.getArg(0));
 				it.remove();
@@ -875,29 +932,37 @@ public class RuleCompiler {
 		}
 		
 //		if(found) guard.add(new Instruction(Instruction.UNIQ, vars));
-		if (found) {
+		if (found)
+		{
 			boolean guardallocs = false;
-			Iterator<Instruction> it2 = guard.iterator();
 			int i = 0;
-			while (it2.hasNext()) {
-				Instruction inst2 = it2.next();
-				/* シンボルアトムを生成する命令に出会うまでループ */
-				if (inst2.getKind() == Instruction.NEWHLINK
-						|| inst2.getKind() == Instruction.MAKEHLINK) {
+			for (Instruction inst : guard)
+			{
+				// シンボルアトムを生成する命令に出会うまでループ
+				if (inst.getKind() == Instruction.NEWHLINK || inst.getKind() == Instruction.MAKEHLINK)
+				{
 					guardallocs = true;
 					break;
 				}
 				i++;
 			}
-			if (guardallocs) guard.add(i, new Instruction(Instruction.UNIQ, vars));
-			else guard.add(new Instruction(Instruction.UNIQ, vars));
+			if (guardallocs)
+			{
+				guard.add(i, new Instruction(Instruction.UNIQ, vars));
+			}
+			else
+			{
+				guard.add(new Instruction(Instruction.UNIQ, vars));
+			}
 		}
 	}
 
 	/** 否定条件をコンパイルする */
-	void compileNegatives() throws CompileException{
+	void compileNegatives() throws CompileException
+	{
 		Iterator<List<ProcessContextEquation>> it = rs.guardNegatives.iterator();
-		while (it.hasNext()) {
+		while (it.hasNext())
+		{
 			List<ProcessContextEquation> eqs = it.next();
 			HeadCompiler negcmp = hc.getNormalizedHeadCompiler();
 			negcmp.varCount = varcount;
@@ -938,51 +1003,68 @@ public class RuleCompiler {
 	}
 
 	/** unary型プロセス文脈について、変数番号をガードコンパイラから取得する */
-	private void genTypedProcessContextPaths() {
-		for(ContextDef def : gc.typedCxtDefs){
-			if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
-				typedcxtsrcs.put( def, new Integer(varcount++) );
+	private void genTypedProcessContextPaths()
+	{
+		for (ContextDef def : gc.typedCxtDefs)
+		{
+			if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE)
+			{
+				typedcxtsrcs.put( def, varcount++);
 			}
 		}
 	}
 
 	/** ground型付きプロセス文脈定義について、根となるリンクのリストを取得する */
-	private void getGroundLinkPaths() {
+	private void getGroundLinkPaths()
+	{
 		groundsrcs = new HashMap<ContextDef, Integer>();
-		for(ContextDef def : gc.groundSrcs.keySet()){
-			if(gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
-//				ProcessContext lhsOcc = def.lhsOcc
+		for (ContextDef def : gc.groundSrcs.keySet())
+		{
+			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
+			{
+				//ProcessContext lhsOcc = def.lhsOcc
 				int linklistpath = varcount++;
 				body.add(new Instruction(Instruction.NEWLIST,linklistpath));
 				// 全ての引数に対して発行する
-				for(int i=0;i<def.lhsOcc.args.length;i++){
+				for (int i = 0; i < def.lhsOcc.args.length; i++)
+				{
 					int linkpath = varcount++;
 					body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
 					body.add(new Instruction(Instruction.ADDTOLIST,linklistpath,linkpath));
-					groundsrcs.put(def,new Integer(linklistpath));
+					groundsrcs.put(def, linklistpath);
 				}
 			}
 		}
 	}
-//	public void enumTypedContextDefs() {
-//	Iterator it = rs.typedProcessContexts.values().iterator();
-//	while (it.hasNext()) {
-//	ContextDef def = (ContextDef)it.next();
-//	typedcxtdefs.add(def);
-//	}
-//	}
+
+	/*
+	public void enumTypedContextDefs()
+	{
+		Iterator it = rs.typedProcessContexts.values().iterator();
+		while (it.hasNext())
+		{
+			ContextDef def = (ContextDef)it.next();
+			typedcxtdefs.add(def);
+		}
+	}
+	*/
+
 	/** 左辺の型付きプロセス文脈を除去する */
-	private void removeLHSTypedProcesses() {
-		for(ContextDef def : rs.typedProcessContexts.values()){
+	private void removeLHSTypedProcesses()
+	{
+		for (ContextDef def : rs.typedProcessContexts.values())
+		{
 			Context pc = def.lhsOcc;
 			if (pc != null) { // ヘッドのときのみ除去する
-				if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
+				if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE)
+				{
 					//dequeueされていなかったので追加(2005/08/27) by mizuno
 					body.add(new Instruction( Instruction.DEQUEUEATOM, typedcxtToSrcPath(def) ));
 					body.add(new Instruction( Instruction.REMOVEATOM,
 							typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
-				else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+				else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
+				{
 					body.add(new Instruction( Instruction.REMOVEGROUND,
 							groundToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
@@ -990,21 +1072,27 @@ public class RuleCompiler {
 		}
 	}
 	/** 左辺の型付きプロセス文脈を解放する */
-	private void freeLHSTypedProcesses() {
-		for(ContextDef def : rs.typedProcessContexts.values()){
-			if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
+	private void freeLHSTypedProcesses()
+	{
+		for (ContextDef def : rs.typedProcessContexts.values())
+		{
+			if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE)
+			{
 				body.add(new Instruction( Instruction.FREEATOM,
 						typedcxtToSrcPath(def) ));
 			}
-			else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+			else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
+			{
 				body.add(new Instruction( Instruction.FREEGROUND,groundToSrcPath(def)));
 			}
 		}
 	}
 
 	/** 非線形プロセス文脈の左辺出現を解放する */
-	private void freeLHSNonlinearProcessContexts(){
-		for(ContextDef def : rs.processContexts.values()){
+	private void freeLHSNonlinearProcessContexts()
+	{
+		for (ContextDef def : rs.processContexts.values())
+		{
 			if (def.rhsOccs.size() != 1) { // 非線型のとき1つだけ再利用するようにしたら size == 0 に直せる -> 再利用は最適化に任せることにしたので不要
 				body.add(new Instruction( Instruction.DROPMEM,
 						lhsmemToPath(def.lhsOcc.mem) ));
@@ -1013,9 +1101,12 @@ public class RuleCompiler {
 	}
 
 	/** 非線形プロセス文脈の左辺出現膜を再帰的にロックする */
-	private void recursiveLockLHSNonlinearProcessContextMems(){
-		for(ContextDef def : rs.processContexts.values()){
-			if (def.rhsOccs.size() != 1) {
+	private void recursiveLockLHSNonlinearProcessContextMems()
+	{
+		for (ContextDef def : rs.processContexts.values())
+		{
+			if (def.rhsOccs.size() != 1)
+			{
 				body.add(new Instruction( Instruction.RECURSIVELOCK,
 						lhsmemToPath(def.lhsOcc.mem) ));
 			}
@@ -1023,9 +1114,12 @@ public class RuleCompiler {
 	}
 
 	/** 非線形プロセス文脈の左辺出現膜を再帰的にロック解放する */
-	private void recursiveUnlockLHSNonlinearProcessContextMems(){
-		for(ContextDef def : rs.processContexts.values()){
-			if (def.rhsOccs.size() != 1) {
+	private void recursiveUnlockLHSNonlinearProcessContextMems()
+	{
+		for (ContextDef def : rs.processContexts.values())
+		{
+			if (def.rhsOccs.size() != 1)
+			{
 				if (false) { // 再利用したときのみ recursiveunlock する
 					body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
 							lhsmemToPath(def.lhsOcc.mem) ));
@@ -1035,22 +1129,27 @@ public class RuleCompiler {
 	}
 
 	/** 右辺の型付きプロセス文脈を構築する */
-	private void buildRHSTypedProcesses() {
-		for(ContextDef def : rs.typedProcessContexts.values()){
+	private void buildRHSTypedProcesses()
+	{
+		for (ContextDef def : rs.typedProcessContexts.values())
+		{
 			Iterator it2 = def.rhsOccs.iterator();
-			while (it2.hasNext()) {
+			while (it2.hasNext())
+			{
 				ProcessContext pc = (ProcessContext)it2.next();
-				if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
+				if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE)
+				{
 					int atompath = varcount++;
 					body.add(new Instruction( Instruction.COPYATOM, atompath,
 							rhsmemToPath(pc.mem),
 							typedcxtToSrcPath(pc.def) ));
-					rhstypedcxtpaths.put(pc, new Integer(atompath));
+					rhstypedcxtpaths.put(pc, atompath);
 				}
-				else if(gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
+				else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
+				{
 					int retlistpath = varcount++;
-//					System.out.println("cp");
-//					int mappath = varcount++;
+					//System.out.println("cp");
+					//int mappath = varcount++;
 					body.add(new Instruction( Instruction.COPYGROUND, retlistpath,
 							groundToSrcPath(pc.def), // groundの場合はリンクの変数番号のリストを指す変数番号
 							rhsmemToPath(pc.mem) ));
@@ -1058,8 +1157,8 @@ public class RuleCompiler {
 					body.add(new Instruction( Instruction.GETFROMLIST,groundpath,retlistpath,0));
 					int mappath = varcount++;
 					body.add(new Instruction(Instruction.GETFROMLIST,mappath,retlistpath,1));
-					rhsgroundpaths.put(pc, new Integer(groundpath));
-					rhsmappaths.put(pc,new Integer(mappath));
+					rhsgroundpaths.put(pc, groundpath);
+					rhsmappaths.put(pc, mappath);
 				}
 			}
 		}
@@ -1067,48 +1166,52 @@ public class RuleCompiler {
 
 	////////////////////////////////////////////////////////////////
 
-	/** 膜階層下にあるアクティブアトムを各膜内で先頭方向にスライド移動する。
-	 *  slimのためにアクティブアトム、データアトム(数値アトム以外)、
-	 *  数値アトムの順に変更。数値アトムとは IntegerFunctorとFloatingFunctor
-	 *  がファンクタであるようなアトムのこと。*/
-	private static void liftupActiveAtoms(Membrane mem) {
-		for(Iterator<Membrane> it = mem.mems.iterator(); it.hasNext();){
-			liftupActiveAtoms(it.next());
+	/**
+	 * 膜階層下にあるアクティブアトムを各膜内で先頭方向にスライド移動する。
+	 * slimのためにアクティブアトム、データアトム(数値アトム以外)、
+	 * 数値アトムの順に変更。数値アトムとは IntegerFunctorとFloatingFunctorがファンクタであるようなアトムのこと。
+	 */
+	private static void liftupActiveAtoms(Membrane mem)
+	{
+		for (Membrane submem : mem.mems)
+		{
+			liftupActiveAtoms(submem);
 		}
 		List<Atom> atomlist = new LinkedList<Atom>();
-		for(Iterator<Atom> it = mem.atoms.iterator(); it.hasNext();){
-			atomlist.add(it.next());
+		for (Atom atom : mem.atoms)
+		{
+			atomlist.add(atom);
 		}
 		mem.atoms.clear();
-		for(Iterator<Atom> it = atomlist.iterator(); it.hasNext();){
+
+		for (Iterator<Atom> it = atomlist.iterator(); it.hasNext();)
+		{
 			Atom a = it.next();
-			if (a.functor.isActive()) {
-				mem.atoms.add(a);
-				it.remove();
-			}
-		}
-		for(Iterator<Atom> it = atomlist.iterator(); it.hasNext();){
-			Atom a = it.next();
-			if (!a.functor.isNumber()) {
+			if (a.functor.isActive() || !a.functor.isNumber())
+			{
 				mem.atoms.add(a);
 				it.remove();
 			}
 		}
 		mem.atoms.addAll(atomlist);
 	}
+
 	/** ルールの左辺と右辺に対してstaticUnifyを呼ぶ */
-	private void simplify() throws CompileException {
+	private void simplify() throws CompileException
+	{
 		staticUnify(rs.leftMem);
 		checkExplicitFreeLinks(rs.leftMem);
 		staticUnify(rs.rightMem);
-		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning) {
+		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning)
+		{
 			Env.warning("WARNING: rule with empty head: " + rs);
 		}
 		// その他 unary =/== ground の順番に並べ替える
 		List<Atom> typeConstraints = rs.guardMem.atoms;
 		LinkedList lists[] = {new LinkedList(),new LinkedList(),new LinkedList()};
 		Iterator<Atom> it = typeConstraints.iterator();
-		while (it.hasNext()) {
+		while (it.hasNext())
+		{
 			Atom cstr = it.next();
 			Functor func = cstr.functor;
 			if (func.equals(new SymbolFunctor("unary",1)))  { lists[0].add(cstr); it.remove(); }
@@ -1120,29 +1223,34 @@ public class RuleCompiler {
 		typeConstraints.addAll(lists[0]);
 		typeConstraints.addAll(lists[1]);
 		typeConstraints.addAll(lists[2]);
-
 	}
 
 	/** 指定された膜とその子孫に存在する冗長な =（todo および自由リンク管理アトム）を除去する */
-	private void staticUnify(Membrane mem) throws CompileException {
-		Env.c("RuleCompiler::staticUnify");
-		for(Iterator<Membrane> it = mem.mems.iterator(); it.hasNext();){
-			staticUnify(it.next());
+	private void staticUnify(Membrane mem) throws CompileException
+	{
+		for (Membrane submem : mem.mems)
+		{
+			staticUnify(submem);
 		}
 		List<Atom> removedAtoms = new ArrayList<Atom>();
-		for(Atom atom : mem.atoms){
-			if (atom.functor.equals(Functor.UNIFY)) {
+		for (Atom atom : mem.atoms)
+		{
+			if (atom.functor.equals(Functor.UNIFY))
+			{
 				LinkOccurrence link1 = atom.args[0].buddy;
 				LinkOccurrence link2 = atom.args[1].buddy;
-				if (link1.atom.mem != mem && link2.atom.mem != mem) {
+				if (link1.atom.mem != mem && link2.atom.mem != mem)
+				{
 					// 単一化アトムのリンク先が両方とも他の膜につながっている場合
-					if (mem == rs.leftMem) {
+					if (mem == rs.leftMem)
+					{
 						// // <strike> ( X=Y :- p(X,Y) ) は意味解析エラー
 						// //（=は通常のヘッドアトムと見なして放置される）</strike>
 						// error("COMPILE ERROR: head contains body unification");
 						// ( X=Y :- p(X,Y) ) は ( :- p(X,X) ) になる
 					}
-					else {
+					else
+					{
 						// ( p(X,Y) :- X=Y ) はUNIFYボディ命令を出力するのでここでは何もしない
 						continue;
 					}
@@ -1153,7 +1261,8 @@ public class RuleCompiler {
 				removedAtoms.add(atom);
 			}
 		}
-		for(Atom atom : removedAtoms){
+		for (Atom atom : removedAtoms)
+		{
 			atom.mem.atoms.remove(atom);
 		}
 	}
@@ -1163,20 +1272,25 @@ public class RuleCompiler {
 	 * @param mem
 	 * @throws CompileException
 	 */
-	private void checkExplicitFreeLinks(Membrane mem)throws CompileException {
-		Env.c("RuleCompiler::checkExplicitFreeLinks");
-		for(Iterator<Membrane> it = mem.mems.iterator(); it.hasNext();){
-			checkExplicitFreeLinks(it.next());
+	private void checkExplicitFreeLinks(Membrane mem) throws CompileException
+	{
+		for (Membrane submem : mem.mems)
+		{
+			checkExplicitFreeLinks(submem);
 		}
-		for(ProcessContext pc : mem.processContexts){
-			if(pc.def.isTyped())continue;
+		for (ProcessContext pc : mem.processContexts)
+		{
+			if (pc.def.isTyped()) continue;
 			HashSet<String> explicitfreelinks = new HashSet<String>();
-			for (int i = 0; i < pc.args.length; i++) {
+			for (int i = 0; i < pc.args.length; i++)
+			{
 				LinkOccurrence lnk = pc.args[i];
-				if (explicitfreelinks.contains(lnk.name)) {
+				if (explicitfreelinks.contains(lnk.name))
+				{
 					systemError("SYNTAX ERROR: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
 				}
-				else {
+				else
+				{
 					explicitfreelinks.add(lnk.name);
 				}
 			}
@@ -1184,7 +1298,8 @@ public class RuleCompiler {
 	}
 
 	/** 命令列を最適化する */
-	private void optimize() {
+	private void optimize()
+	{
 		Env.c("optimize");
 //		Optimizer.optimize(memMatch, body);
 		if (!rs.fSuppressEmptyHeadWarning) {
@@ -1199,9 +1314,10 @@ public class RuleCompiler {
 	//
 
 	/** 左辺のアトムを所属膜から除去する。*/
-	private void removeLHSAtoms() {
-		//Env.c("RuleCompiler::removeLHSAtoms");
-		for (int i = 0; i < lhsatoms.size(); i++) {
+	private void removeLHSAtoms()
+	{
+		for (int i = 0; i < lhsatoms.size(); i++)
+		{
 			Atom atom = (Atom)lhsatoms.get(i);
 			body.add( Instruction.removeatom(
 					lhsatomToPath(atom), // ← lhsmems.size() + i に一致する
@@ -1221,11 +1337,14 @@ public class RuleCompiler {
 	}
 
 	/** 左辺のアトムを実行アトムスタックから除去する。*/
-	private void dequeueLHSAtoms() {
-		for (int i = 0; i < lhsatoms.size(); i++) {
+	private void dequeueLHSAtoms()
+	{
+		for (int i = 0; i < lhsatoms.size(); i++)
+		{
 			Atom atom = (Atom)lhsatoms.get(i);
-			if (atom.functor.isSymbol() ) {
-				body.add( Instruction.dequeueatom(
+			if (atom.functor.isSymbol())
+			{
+				body.add(Instruction.dequeueatom(
 						lhsatomToPath(atom) // ← lhsmems.size() + i に一致する
 				));
 			}
@@ -1233,13 +1352,15 @@ public class RuleCompiler {
 	}
 	/** 左辺の膜を子膜側から再帰的に除去する。
 	 * @return 膜memの内部に出現したプロセス文脈の個数 */
-	private int removeLHSMem(Membrane mem) {
-		//Env.c("RuleCompiler::removeLHSMem");
+	private int removeLHSMem(Membrane mem)
+	{
 		int procvarcount = mem.processContexts.size();
-		for(Membrane submem : mem.mems){
+		for (Membrane submem : mem.mems)
+		{
 			int subcount = removeLHSMem(submem);
 			body.add(new Instruction(Instruction.REMOVEMEM, lhsmemToPath(submem), lhsmemToPath(mem))); //第2引数追加 by mizuno
-			if (subcount > 0) {
+			if (subcount > 0)
+			{
 				body.add(new Instruction(Instruction.REMOVEPROXIES, lhsmemToPath(submem)));
 			}
 			procvarcount += subcount;
@@ -1251,7 +1372,8 @@ public class RuleCompiler {
 
 	HashMap<ProcessContext, Integer> rhsmappaths = new HashMap<ProcessContext, Integer>();	// 右辺の非線型$p出現(ProcessContext) -> mapの変数番号(Integer)
 	static final int NOTCOPIED = -1;		// rhsmappaths未登録時の値
-	private int rhspcToMapPath(ProcessContext pc) {
+	private int rhspcToMapPath(ProcessContext pc)
+	{
 		if (!rhsmappaths.containsKey(pc)) return NOTCOPIED;
 		return rhsmappaths.get(pc).intValue();
 	}
@@ -1262,34 +1384,41 @@ public class RuleCompiler {
 
 	/** 膜の階層構造およびプロセス文脈の内容を親膜側から再帰的に生成する。
 	 * @return 膜memの内部に出現したプロセス文脈の個数 */
-	private int buildRHSMem(Membrane mem) throws CompileException {
-		Env.c("RuleCompiler::buildRHSMem" + mem);
+	private int buildRHSMem(Membrane mem) throws CompileException
+	{
 		int procvarcount = mem.processContexts.size();
-		for(ProcessContext pc : mem.processContexts){
-			if (pc.def.lhsOcc.mem == null) {
+		for (ProcessContext pc : mem.processContexts)
+		{
+			if (pc.def.lhsOcc.mem == null)
+			{
 				systemError("SYSTEM ERROR: ProcessContext.def.lhsOcc.mem is not set");
 			}
-			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.lhsOcc.mem)) {
-				if (fUseMoveCells && /*pc.def.rhsOccs.get(0) == pc*/ pc.def.rhsOccs.size() == 1) {
+			if (rhsmemToPath(mem) != lhsmemToPath(pc.def.lhsOcc.mem))
+			{
+				if (fUseMoveCells && /*pc.def.rhsOccs.get(0) == pc*/ pc.def.rhsOccs.size() == 1)
+				{
 					body.add(new Instruction(Instruction.MOVECELLS,
 							rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
 				}
-				else {
+				else
+				{
 					int rethashmap = varcount++;
 					body.add(new Instruction(Instruction.COPYCELLS,
 							rethashmap, rhsmemToPath(mem), lhsmemToPath(pc.def.lhsOcc.mem) ));
-					rhsmappaths.put(pc,new Integer(rethashmap));
+					rhsmappaths.put(pc, rethashmap);
 					//else {
 					//	systemError("FEATURE NOT IMPLEMENTED: untyped process context must be linear: " + pc);
 					//}
 				}
 			}
 		}
-		for(Membrane submem : mem.mems){
+		for (Membrane submem : mem.mems)
+		{
 			int submempath = varcount++;
-			rhsmempath.put(submem, new Integer(submempath));
+			rhsmempath.put(submem, submempath);
 			if (submem.pragmaAtHost != null) { // 右辺で＠指定されている場合
-				if (submem.pragmaAtHost.def == null) {
+				if (submem.pragmaAtHost.def == null)
+				{
 					systemError("SYSTEM ERROR: pragmaAtHost.def is not set: " + submem.pragmaAtHost.getQualifiedName());
 				}
 				int nodedescatomid = typedcxtToSrcPath(submem.pragmaAtHost.def);
@@ -1373,49 +1502,60 @@ public class RuleCompiler {
 	*/
 
 	/** 右辺の膜内のルール文脈の内容を生成する */
-	private void copyRules(Membrane mem) {
-		Env.c("RuleCompiler::copyRules");
-		for(Iterator<Membrane> it = mem.mems.iterator(); it.hasNext();){
-			copyRules(it.next());
+	private void copyRules(Membrane mem)
+	{
+		for (Membrane submem : mem.mems)
+		{
+			copyRules(submem);
 		}
-		for(RuleContext rc : mem.ruleContexts){
+		for (RuleContext rc : mem.ruleContexts)
+		{
 			if (rhsmemToPath(mem) == lhsmemToPath(rc.def.lhsOcc.mem)) continue;
 			body.add(new Instruction( Instruction.COPYRULES, rhsmemToPath(mem), lhsmemToPath(rc.def.lhsOcc.mem) ));
 		}
 	}
+
 	/** 右辺の膜内のルールの内容を生成する */
-	private void loadRulesets(Membrane mem) {
-		Env.c("RuleCompiler::loadRulesets");
-		for(Iterator<Membrane> it = mem.mems.iterator(); it.hasNext();){
-			loadRulesets(it.next());
+	private void loadRulesets(Membrane mem)
+	{
+		for (Membrane submem : mem.mems)
+		{
+			loadRulesets(submem);
 		}
-		for(Iterator<runtime.Ruleset> it = mem.rulesets.iterator(); it.hasNext();){
-//			if (!mem.rules.isEmpty()) {
-			body.add(Instruction.loadruleset(rhsmemToPath(mem), it.next()));
-//			}
+		for (Ruleset ruleset : mem.rulesets)
+		{
+			//if (!mem.rules.isEmpty())
+			//{
+			body.add(Instruction.loadruleset(rhsmemToPath(mem), ruleset));
+			//}
 		}
 	}
 
 	/** 右辺の膜内のアトムを生成する。
 	 * 単一化アトムならばUNIFY命令を生成し、
 	 * それ以外ならば右辺のアトムのリストrhsatomsに追加する。 */
-	private void buildRHSAtoms(Membrane mem) {
-		Env.c("RuleCompiler::buildRHSAtoms");
-		for(Iterator<Membrane> it = mem.mems.iterator(); it.hasNext();){
-			buildRHSAtoms(it.next());
+	private void buildRHSAtoms(Membrane mem)
+	{
+		for (Membrane submem : mem.mems)
+		{
+			buildRHSAtoms(submem);
 		}
-		for(Atom atom : mem.atoms){
-			if (atom.functor.equals(Functor.UNIFY)) {
+		for (Atom atom : mem.atoms)
+		{
+			if (atom.functor.equals(Functor.UNIFY))
+			{
 				LinkOccurrence link1 = atom.args[0].buddy;
 				LinkOccurrence link2 = atom.args[1].buddy;
 				body.add(new Instruction( Instruction.UNIFY,
 						lhsatomToPath(link1.atom), link1.pos,
 						lhsatomToPath(link2.atom), link2.pos, rhsmemToPath(mem) ));
-			} else {
+			}
+			else
+			{
 				int atomid = varcount++;
-				rhsatompath.put(atom, new Integer(atomid));
+				rhsatompath.put(atom, atomid);
 				rhsatoms.add(atom);
-				body.add( Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
+				body.add(Instruction.newatom(atomid, rhsmemToPath(mem), atom.functor));
 			}
 		}
 	}
@@ -1495,44 +1635,50 @@ public class RuleCompiler {
 	 *
 	 * プロセス文脈の自由リンクが実は局所リンクである場合に必要であるらしい
 	 */
-	private void insertconnectors(){
-		for(ContextDef def : rs.processContexts.values()){
+	private void insertconnectors()
+	{
+		for (ContextDef def : rs.processContexts.values())
+		{
 			if (def.rhsOccs.size() < 2) continue;
 			List<Integer> linklist = new ArrayList<Integer>();
-			int setpath=varcount++;
-			for(int i=0;i<def.lhsOcc.args.length;i++){
-				if(!lhslinkpath.containsKey(def.lhsOcc.args[i])){
+			int setpath = varcount++;
+			for (int i = 0; i < def.lhsOcc.args.length; i++)
+			{
+				if (!lhslinkpath.containsKey(def.lhsOcc.args[i]))
+				{
 					int linkpath = varcount++;
 					body.add(new Instruction(Instruction.GETLINK,linkpath,
 							lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
-					lhslinkpath.put(def.lhsOcc.args[i],new Integer(linkpath));
+					lhslinkpath.put(def.lhsOcc.args[i], linkpath);
 				}
 				int srclink = lhslinkToPath(def.lhsOcc.args[i]);
-				linklist.add(new Integer(srclink));
+				linklist.add(srclink);
 			}
 			body.add(new Instruction( Instruction.INSERTCONNECTORS,
 					setpath,linklist,lhsmemToPath(def.lhsOcc.mem) ));
-			cxtlinksetpaths.put(def,new Integer(setpath));
+			cxtlinksetpaths.put(def, setpath);
 
 		}
-		for(ContextDef def : rs.typedProcessContexts.values()){
-			if(gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE) continue;
+		for (ContextDef def : rs.typedProcessContexts.values())
+		{
+			if (gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE) continue;
 			List<Integer> linklist = new ArrayList<Integer>();
 			int setpath = varcount++;
-			for(int i=0;i<def.lhsOcc.args.length;i++){
-				if(!lhslinkpath.containsKey(def.lhsOcc.args[i])){
+			for (int i = 0; i < def.lhsOcc.args.length; i++)
+			{
+				if (!lhslinkpath.containsKey(def.lhsOcc.args[i]))
+				{
 					int linkpath = varcount++;
 					body.add(new Instruction(Instruction.GETLINK,linkpath,
 							lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
-					lhslinkpath.put(def.lhsOcc.args[i],new Integer(linkpath));
+					lhslinkpath.put(def.lhsOcc.args[i], linkpath);
 				}
 				int srclink = lhslinkToPath(def.lhsOcc.args[i]);
-				linklist.add(new Integer(srclink));
+				linklist.add(srclink);
 			}
 			body.add(new Instruction(Instruction.INSERTCONNECTORSINNULL,
 					setpath,linklist));//,lhsmemToPath(def.lhsOcc.mem)));
-			cxtlinksetpaths.put(def,new Integer(setpath));
-
+			cxtlinksetpaths.put(def, setpath);
 		}
 	}
 
@@ -1540,16 +1686,19 @@ public class RuleCompiler {
 	 * 引数にして、deleteconnectors命令を発行する。
 	 *
 	 */
-	private void deleteconnectors(){
+	private void deleteconnectors()
+	{
 		/*
 		Iterator it = rs.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
 		 */
-		for(ContextDef def : rs.processContexts.values()){
+		for (ContextDef def : rs.processContexts.values())
+		{
 			Iterator it2 = def.rhsOccs.iterator();
-			if(def.rhsOccs.size() <2)continue;
-			while (it2.hasNext()) {
+			if (def.rhsOccs.size() < 2)continue;
+			while (it2.hasNext())
+			{
 				ProcessContext pc = (ProcessContext)it2.next();
 				body.add(new Instruction(Instruction.DELETECONNECTORS,
 						cxtlinksetpaths.get(def).intValue(),
@@ -1562,10 +1711,13 @@ public class RuleCompiler {
 		while(it.hasNext()){
 			ContextDef def = (ContextDef)it.next();
 		 */
-		for(ContextDef def : rs.typedProcessContexts.values()){
-			if(gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE){
+		for (ContextDef def : rs.typedProcessContexts.values())
+		{
+			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
+			{
 				Iterator it2 = def.rhsOccs.iterator();
-				while(it2.hasNext()){
+				while (it2.hasNext())
+				{
 					ProcessContext pc = (ProcessContext)it2.next();
 					body.add(new Instruction(Instruction.DELETECONNECTORS,
 							cxtlinksetpaths.get(def).intValue(),
@@ -1576,11 +1728,15 @@ public class RuleCompiler {
 		}
 	}
 
-	/** リンクの張り替えと生成を行う */
-	private void updateLinks() throws CompileException {
-		Env.c("RuleCompiler::updateLinks");
-		if(true) {
-			for(LinkOccurrence link : computeRHSLinks()){
+	/**
+	 * リンクの張り替えと生成を行う
+	 */
+	private void updateLinks() throws CompileException
+	{
+		if (true)
+		{
+			for (LinkOccurrence link : computeRHSLinks())
+			{
 				int linkpath = getLinkPath(link);
 				int buddypath = getLinkPath(link.buddy);
 				Membrane mem = link.atom.mem;
@@ -2023,8 +2179,11 @@ public class RuleCompiler {
 		return new Instruction(Instruction.NEWLINK, a1, pos1, a2, pos2, memi);
 	}
 
-	/** 右辺のアトムを実行アトムスタックに積む */
-	private void enqueueRHSAtoms() {
+	/**
+	 * 右辺のアトムを実行アトムスタックに積む
+	 */
+	private void enqueueRHSAtoms()
+	{
 		int index = body.size(); // 末尾再帰最適化の効果を最大化するため、逆順に積む（コードがセコい）
 		for(Atom atom : rhsatoms){
 			if (atom.functor.isSymbol() && atom.functor.isActive() ) {
@@ -2060,87 +2219,138 @@ public class RuleCompiler {
 			}
 		}
 	}
-	
-    /** hyperlink関連の命令列を生成する */
-	private void addHyperlink() { //seiji
-		for(Atom atom : rhsatoms){
+
+	/**
+	 * hyperlink関連の命令列を生成する
+	 */
+	private void addHyperlink()
+	{ //seiji
+		for (Atom atom : rhsatoms)
+		{
 			int atomID = rhsatomToPath(atom);
-			if (atom.functor.equals(new SymbolFunctor("-", 2))) {
+			if (atom.functor.equals(new SymbolFunctor("-", 2)))
+			{
 				; //body.add( new Instruction(Instruction.REVERSEHLINK, rhsmemToPath(atom.mem), atomID));
-			} else if (atom.functor.equals(new SymbolFunctor("><", 2)))
+			}
+			else if (atom.functor.equals(new SymbolFunctor("><", 2)))
+			{
 				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+			}
 			else if (atom.functor.equals(new SymbolFunctor(">*<", 2)))
+			{
 				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+			}
 			else if (atom.functor.equals(new SymbolFunctor(">+<", 2)))
+			{
 				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+			}
 			else if (atom.functor.equals(new SymbolFunctor(">>", 2)))
+			{
 				; //body.add( new Instruction(Instruction.UNIFYNAMECONAME, rhsmemToPath(atom.mem), atomID));
+			}
 			else if (atom.functor.equals(new SymbolFunctor("<<", 2)))
+			{
 				;
-			
+			}
 		}
 	}
-	/** Cコールバックを実行する命令を生成する */
-	private void addCallback() {
-		for(Atom atom : rhsatoms){
-      if (atom.getName() == "$callback") {
-        int atomID = rhsatomToPath(atom);
-        body.add( new Instruction(Instruction.CALLBACK, rhsmemToPath(atom.mem), atomID));
-      }
-    }
+
+	/**
+	 * Cコールバックを実行する命令を生成する
+	 */
+	private void addCallback()
+	{
+		for (Atom atom : rhsatoms)
+		{
+			if (atom.getName() == "$callback")
+			{
+				int atomID = rhsatomToPath(atom);
+				body.add( new Instruction(Instruction.CALLBACK, rhsmemToPath(atom.mem), atomID));
+			}
+		}
 	}
-	/** インラインコードを実行する命令を生成する */
-	private void addInline() {
-		for(Atom atom : rhsatoms){
+
+	/**
+	 * インラインコードを実行する命令を生成する
+	 */
+	private void addInline()
+	{
+		for (Atom atom : rhsatoms)
+		{
 			int atomID = rhsatomToPath(atom);
 			Inline.register(unitName, atom.functor.getName());
 			int codeID = Inline.getCodeID(unitName, atom.functor.getName());
-			if(codeID == -1) continue;
+			if (codeID == -1) continue;
 			body.add( new Instruction(Instruction.INLINE, atomID, unitName, codeID));
 		}
 	}
+
 	static final Functor FUNC_USE = new SymbolFunctor("use",1);
-	/** モジュールを読み込む */
-	private void addRegAndLoadModules() {
-		for(Atom atom : rhsatoms){
+
+	/**
+	 * モジュールを読み込む
+	 */
+	private void addRegAndLoadModules()
+	{
+		for (Atom atom : rhsatoms)
+		{
 			//REG
-			if(atom.functor.getArity()==1 && atom.functor.getName().equals("module")) {
+			if (atom.functor.getArity()==1 && atom.functor.getName().equals("module"))
+			{
 				Module.regMemName(atom.args[0].buddy.atom.getName(), atom.mem);
 			}
 
 			//LOAD
-			if (atom.functor.equals(FUNC_USE)) {
+			if (atom.functor.equals(FUNC_USE))
+			{
 				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
 						atom.args[0].buddy.atom.getName()) );
 			}
 			String path = atom.getPath(); // .functor.path;
-			if(path!=null && !path.equals(atom.mem.name)) {
+			if (path!=null && !path.equals(atom.mem.name))
+			{
 				// この時点では解決できないモジュールがあるので名前にしておく
 				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem), path));
 			}
 		}
 	}
-	/**（再利用された膜または）新しいルート膜に対して、子孫膜から順番にUNLOCKMEMを発行する。
-	 * ただし現在の実装では、この時点ではまだ膜は再利用されていない。*/
-	private void unlockReusedOrNewRootMem(Membrane mem) {
-		Iterator<Membrane> it = mem.mems.iterator();
-		while (it.hasNext()) unlockReusedOrNewRootMem(it.next());
-		if (mem.pragmaAtHost != null) { // 右辺で＠指定されている場合
+
+	/**
+	 * （再利用された膜または）新しいルート膜に対して、子孫膜から順番にUNLOCKMEMを発行する。
+	 * ただし現在の実装では、この時点ではまだ膜は再利用されていない。
+	 */
+	private void unlockReusedOrNewRootMem(Membrane mem)
+	{
+		for (Membrane submem : mem.mems)
+		{
+			unlockReusedOrNewRootMem(submem);
+		}
+		if (mem.pragmaAtHost != null)
+		{ // 右辺で＠指定されている場合
 			body.add(new Instruction(Instruction.UNLOCKMEM, rhsmemToPath(mem)));
 		}
 	}
-	/** 左辺の膜を廃棄する */
-	private void freeLHSMem(Membrane mem) {
-		Env.c("RuleCompiler::freeLHSMem");
-		for(Membrane submem : mem.mems){
+
+	/**
+	 * 左辺の膜を廃棄する
+	 */
+	private void freeLHSMem(Membrane mem)
+	{
+		for (Membrane submem : mem.mems)
+		{
 			freeLHSMem(submem);
 			// 再利用された場合freeしてはいけない
 			body.add(new Instruction(Instruction.FREEMEM, lhsmemToPath(submem)));
 		}
 	}
-	/** 左辺のアトムを廃棄する */
-	private void freeLHSAtoms() {
-		for (int i = 0; i < lhsatoms.size(); i++) {
+
+	/**
+	 * 左辺のアトムを廃棄する
+	 */
+	private void freeLHSAtoms()
+	{
+		for (int i = 0; i < lhsatoms.size(); i++)
+		{
 			body.add( new Instruction(Instruction.FREEATOM, lhsmems.size() + i ));
 		}
 	}
@@ -2158,19 +2368,25 @@ public class RuleCompiler {
 	}
 
 	/** デバッグ用表示 */
-	private void showInstructions() {
-		Iterator<Instruction> it;
-		it = atomMatch.listIterator();
+	private void showInstructions()
+	{
 		Env.d("--atomMatches:");
-		while(it.hasNext()) Env.d(it.next());
+		for (Instruction inst : atomMatch)
+		{
+			Env.d(inst);
+		}
 
-		it = memMatch.listIterator();
 		Env.d("--memMatch:");
-		while(it.hasNext()) Env.d(it.next());
+		for (Instruction inst : memMatch)
+		{
+			Env.d(inst);
+		}
 
-		it = body.listIterator();
 		Env.d("--body:");
-		while(it.hasNext()) Env.d(it.next());
+		for (Instruction inst : body)
+		{
+			Env.d(inst);
+		}
 	}
 
 	////////////////////////////////////////////////////////////////

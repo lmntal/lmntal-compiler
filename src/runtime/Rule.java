@@ -1,13 +1,11 @@
 package runtime;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public final class Rule implements Serializable {
-	// Instruction のリスト
-
+public final class Rule
+{
 	/** アトム主導ルール適用の命令列（atomMatchLabel.insts）
 	 * 先頭の命令はspec[2,*]でなければならない。*/
 	public List<Instruction> atomMatch;
@@ -45,9 +43,6 @@ public final class Rule implements Serializable {
 
 	/** 行番号 by inui */
 	public int lineno;
-
-	/** 履歴 */
-	public Uniq uniq;
 
 	/** uniq制約を持つかどうか */
 	public boolean hasUniq = false;
@@ -100,73 +95,64 @@ public final class Rule implements Serializable {
 
 	/**
 	 * 命令列の詳細を出力する
-	 *
 	 */
-	public void showDetail() {
+	public void showDetail()
+	{
 		if (Env.debug == 0 && !Env.compileonly) return;
 
-		Iterator<Instruction> l;
-		if (hasUniq && Env.slimcode) Env.p("Compiled Uniq Rule " + this);
-		else Env.p("Compiled Rule " + this);
-
-		l = atomMatch.listIterator();
-		Env.p("--atommatch:", 1);
-		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
-
-		l = memMatch.listIterator();
-		Env.p("--memmatch:", 1);
-		while(l.hasNext()) Env.p((Instruction)l.next(), 2);
-
-		if (guard != null) {
-			l = guard.listIterator();
-			Env.p("--guard:" + guardLabel + ":", 1);
-			while(l.hasNext()) Env.p((Instruction)l.next(), 2);
+		if (hasUniq && Env.slimcode)
+		{
+			Env.p("Compiled Uniq Rule " + this);
+		}
+		else
+		{
+			Env.p("Compiled Rule " + this);
 		}
 
-		if (body != null) {
-			l = body.listIterator();
+		Env.p("--atommatch:", 1);
+		for (Instruction inst : atomMatch)
+		{
+			Env.p(inst, 2);
+		}
+
+		Env.p("--memmatch:", 1);
+		for (Instruction inst : memMatch)
+		{
+			Env.p(inst, 2);
+		}
+
+		if (guard != null)
+		{
+			Env.p("--guard:" + guardLabel + ":", 1);
+			for (Instruction inst : guard)
+			{
+				Env.p(inst, 2);
+			}
+		}
+
+		if (body != null)
+		{
 			Env.p("--body:" + bodyLabel + ":", 1);
-			while(l.hasNext()) Env.p((Instruction)l.next(), 2);
+			for (Instruction inst : body)
+			{
+				Env.p(inst, 2);
+			}
 		}
 
 		Env.p("");
 	}
-	/**
-	 * 命令列の詳細を　LMNtal syntax で出力する
-	 *
-	 */
-	public void showDetailLMNtalSyntax(int rulesetIndex, int ruleIndex) {
-		if (Env.debug == 0 && !Env.compileonly) return;
 
-		if (hasUniq && Env.slimcode) Env.p("rule{ hasUniq(true), +RuleIndex" + rulesetIndex + "_" + ruleIndex + ", " + this);
-		else Env.p("rule{ hasUniq(false), +RuleIndex" + rulesetIndex + "_" + ruleIndex + ", " + this);
-
-		
-		Env.p("compiledRule = [\n");
-		if (body != null) {
-			Iterator<Instruction> l = body.listIterator();
-			while(l.hasNext()) Env.p(((Instruction)l.next()).toStringLMNtalSyntax(), 2);
-		} else {
-			Iterator<Instruction> l = memMatch.listIterator();
-			while(l.hasNext()) Env.p(((Instruction)l.next()).toStringLMNtalSyntax(), 2);
-		}
-		Env.p("].", 2);
-
-		Env.p("\n}.");
-	}
-
-	public String toString() {
-		//		return text;
+	public String toString()
+	{
 		if (Env.compileonly) return "";
-		//		if (Env.compileonly) return (name!=null) ? name : "";
-		return name!=null && !name.equals("") ? name : text;
-		//		return name;
+		return name != null && !name.equals("") ? name : text;
 	}
 
 	/**
 	 * @return fullText ルールのコンパイル可能な文字列表現
 	 */
-	public String getFullText() {
+	public String getFullText()
+	{
 		return fullText;
 	}
 

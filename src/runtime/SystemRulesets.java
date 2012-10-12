@@ -3,8 +3,6 @@ package runtime;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import runtime.systemRuleset.GlobalSystemRuleset;
-
 /**
  * システムルールセットを管理する static クラス
  * @author Mizuno
@@ -19,7 +17,7 @@ public final class SystemRulesets {
 	public static void clear() {
 		all.clear();
 		userDefined.clear();
-		all.add(GlobalSystemRuleset.getInstance());
+		//all.add(GlobalSystemRuleset.getInstance());
 	}
 	/**
 	 * ユーザー定義システムルールセットを登録する。
@@ -43,24 +41,5 @@ public final class SystemRulesets {
 	 */
 	public static Iterator<Ruleset> iterator() {
 		return all.iterator();
-	}
-
-	/**
-	 * 膜主導テストによるシステムルールの適用を試みる。
-	 * @return 適用した場合はtrue
-	 */
-	public static boolean react(Membrane mem, boolean nondeterministic) {
-		boolean flag = false;
-		int debugvalue = Env.debug; // todo spy機能を実装する
-		if (Env.debug < Env.DEBUG_SYSTEMRULESET) Env.debug = 0;
-		Iterator<Ruleset> itsys = SystemRulesets.iterator();
-		while (itsys.hasNext()) {
-			if (itsys.next().react(mem, nondeterministic)) {
-				flag = true;
-				break;
-			}
-		}
-		Env.debug = debugvalue;
-		return flag;
 	}
 }

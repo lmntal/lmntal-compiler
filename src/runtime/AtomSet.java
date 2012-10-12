@@ -94,8 +94,7 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 			if (l == null) {
 				return Util.NULL_ITERATOR;
 			} else {
-				if (Env.shuffle >= Env.SHUFFLE_ATOMS) return new RandomIterator<Atom>(l);
-				else return l.iterator();
+				return l.iterator();
 			}
 		} else {
 			return new DataAtomIterator(f);
@@ -238,15 +237,6 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		size = 0;
 	}
 	
-	/** sizeの整合性を検査する。デバッグ用。*/
-	public boolean verify() {
-		int n = 0;
-		Iterator<List<Atom>> it = getAtoms().values().iterator();
-		while (it.hasNext()) {
-			n += ((RandomSet)it.next()).size();
-		}
-		return size == n;
-	}
 	/**デバッグ用出力*/
 	public void print() {
 		Util.println("AtomSet: ");
@@ -254,7 +244,6 @@ public final class AtomSet implements Serializable, Iterable<Atom> {
 		while (it.hasNext()) {
 			Util.println(it.next());
 		}
-		Util.println("result of verify() is " + verify());
 	}
 	
 	/** dataAtoms 中の特定のファンクタだけを返す反復子 */

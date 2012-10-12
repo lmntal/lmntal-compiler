@@ -1,7 +1,5 @@
 package runtime;
 
-import java.io.IOException;
-
 import util.Util;
 
 /**
@@ -9,7 +7,8 @@ import util.Util;
  * @author inui
  * @since 2006-08-30
  */
-public class SymbolFunctor extends Functor {
+public class SymbolFunctor extends Functor
+{
 	/**
 	 * シンボル名。このクラスのオブジェクトの場合は、名前の表示名が格納される。 常に intern した値を格納する。
 	 */
@@ -133,15 +132,6 @@ public class SymbolFunctor extends Functor {
 	 */
 	public String getPath() {
 		return path;
-	}
-	
-	/**
-	 * 直列化復元時に呼ばれる。
-	 * @author mizuno
-	 */
-	protected void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-		name = name.intern();
 	}
 	
 	public String getName() {

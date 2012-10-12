@@ -1,7 +1,5 @@
 package runtime;
 
-import java.io.IOException;
-
 /**
  * 特殊なファンクタ (inside_proxy, outside_proxy, star) を表すクラス
  */
@@ -66,15 +64,6 @@ public class SpecialFunctor extends Functor {
 	 */
 	public int getKind() {
 		return kind;
-	}
-
-	/**
-	 * 直列化復元時に呼ばれる。
-	 * author mizuno
-	 */
-	protected void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-		name = name.intern();
 	}
 
 	/** 引数をもつアトムの名前として表示名を印字するための文字列を返す */

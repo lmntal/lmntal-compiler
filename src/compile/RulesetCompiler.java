@@ -4,20 +4,21 @@
  */
 package compile;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import runtime.Env;
 import runtime.InlineUnit;
 import runtime.InterpretedRuleset;
+import runtime.MergedBranchMap;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;
-import runtime.MergedBranchMap;
 
-import compile.parser.*;
+import compile.parser.LMNParser;
+import compile.parser.ParseException;
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.RuleStructure;
@@ -27,10 +28,10 @@ import compile.structure.RuleStructure;
  * @author hara
  * 
  */
-public class RulesetCompiler {
-	
+public class RulesetCompiler
+{
 	private static boolean recursived = false;
-	
+
 	/**
 	 * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。
 	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
@@ -39,14 +40,16 @@ public class RulesetCompiler {
 	 * @param m 膜構造
 	 * @return (:-m)というルール1つだけからなるルールセット
 	 */
-	public static Ruleset compileMembrane(Membrane m, String unitName) {
+	public static Ruleset compileMembrane(Membrane m, String unitName)
+	{
 		return compileMembraneToGeneratingMembrane(m, unitName).rulesets.get(0);
 	}
-	
-	public static Ruleset compileMembrane(Membrane m) {
+
+	public static Ruleset compileMembrane(Membrane m)
+	{
 		return compileMembrane(m, InlineUnit.DEFAULT_UNITNAME);
 	}
-	
+
 	/**
 	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
 	 * より正確に言うと、与えられた膜構造の内容に対応するプロセスを1回だけ生成するreactメソッドを
@@ -56,139 +59,124 @@ public class RulesetCompiler {
 	 * @param unitName
 	 * @return 生成したルールセットを持つ膜構造
 	 */
-	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName) {
+	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName)
+	{
 		Env.c("RulesetGenerator.runStartWithNull");
-		// 世界を生成する
+
+		// グローバルルート膜
 		Membrane root = new Membrane(null);
+
+		// 初期構造を生成するルール
 		RuleStructure rs = new RuleStructure(root, "(initial rule)");
 		rs.fSuppressEmptyHeadWarning = true;
 		rs.leftMem  = new Membrane(null);
 		rs.rightMem = m;
 		root.rules.add(rs);
+
 		processMembrane(root, unitName);
-		if (Env.fUseSourceLibrary) {
+
+		if (Env.fUseSourceLibrary)
+		{
 			Module.resolveModules(root);
 		}
 		return root;
 	}
-	
+
 	/**
 	 * 与えられた膜の階層下にある全ての RuleStructure について、
 	 * 対応する Rule を生成してその膜のルールセットに追加する。
 	 * <p>ルールをちょうど1つ持つ膜にはちょうど1つのルールセットが追加される。
 	 * @param mem 対象となる膜
 	 */
-	public static void processMembrane(Membrane mem) {
+	public static void processMembrane(Membrane mem)
+	{
 		processMembrane(mem, InlineUnit.DEFAULT_UNITNAME);
 	}
-	public static void processMembrane(Membrane mem, String unitName) {
-		Env.c("RulesetCompiler.processMembrane");
+
+	/**
+	 * 与えられた膜の階層下にある全ての {@code RuleStructure} について、対応する {@code Rule} を生成してその膜のルールセットに追加する。
+	 * <p>ルールをちょうど1つ持つ膜にはちょうど1つのルールセットが追加される。</p>
+	 * @param mem 対象となる膜
+	 */
+	public static void processMembrane(Membrane mem, String unitName)
+	{
 		// 子膜にあるルールをルールセットにコンパイルする
-		for(Membrane submem : mem.mems){
+		for (Membrane submem : mem.mems)
+		{
 			processMembrane(submem, unitName);
 		}
+
+		List<Rule> rules = new ArrayList<Rule>();
+
 		// この膜にあるルール構造をルールオブジェクトにコンパイルする
-		ArrayList<Rule> rules = new ArrayList<Rule>();
-		/*it = mem.rules.listIterator();
-		while (it.hasNext()) {
-			RuleStructure rs = (RuleStructure)it.next();
-		*/
-		for(RuleStructure rs : mem.rules){
+		for (RuleStructure rs : mem.rules)
+		{
 			// ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
 			processMembrane(rs.leftMem, unitName); // 一応左辺も
 			processMembrane(rs.rightMem, unitName);
-			//
+
 			RuleCompiler rc = null;
-			try {
+			try
+			{
 				rc = new RuleCompiler(rs, unitName);
 				rc.compile();
 				//2006.1.22 Ruleに行番号を渡す by inui
 				rc.theRule.lineno = rs.lineno;
-//				rc.theRule.showDetail();
 			}
-			catch (CompileException e) {
+			catch (CompileException e)
+			{
 				Env.p("    in " + rs.toString() + "\n");
 			}
-			if(Env.fThread && rc.theRule.getFullText().matches(".*thread.*") && !recursived){
-				RuleConverter conv = new RuleConverter();
-				Iterator<String> ite = conv.convert(rc.theRule.getFullText());
-				while(ite.hasNext()){
-					String s = ite.next();
-					try {
-						LMNParser lp = new LMNParser(new StringReader(s));
-						Membrane m = lp.parse();
-						recursived = true;
-						compileMembrane(m);
-						recursived = false;
-						rules.add(((InterpretedRuleset)m.rulesets.get(0)).rules.get(0));
-					} catch(ParseException e) {
-						e.printStackTrace();
-					}
-				}
-			} else {
-				rules.add(rc.theRule);
-			}
+			rules.add(rc.theRule);
 		}
-		
+
 		// 編み上げを行う
 		Merger merger = new Merger();
 		MergedBranchMap mbm = null;
 		MergedBranchMap systemmbm = null;
-		if (Optimizer.fMerging) {
+		if (Optimizer.fMerging)
+		{
 			mbm = merger.Merging(rules, false);
 			merger.clear();
 			systemmbm = merger.createSystemRulesetsMap();
 		}
-		
+
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
-		if (!rules.isEmpty()) {
-			if (Env.shuffle >= Env.SHUFFLE_RULES) {
-				for (Rule r : rules) {
-					InterpretedRuleset ruleset = new InterpretedRuleset();
-					ruleset.branchmap = mbm;
-					ruleset.systemrulemap = systemmbm;
-					ruleset.rules.add(r);
-					Ruleset compiledRuleset = compileRuleset(ruleset);
-					mem.rulesets.add(ruleset);
-				}
-			} else {
-				InterpretedRuleset ruleset = new InterpretedRuleset();
-				for (Rule r : rules){
-					ruleset.rules.add(r);
-				}
-				ruleset.branchmap = mbm;
-				ruleset.systemrulemap = systemmbm;
-				Ruleset compiledRuleset = compileRuleset(ruleset);
-				mem.rulesets.add(ruleset);
+		if (!rules.isEmpty())
+		{
+			InterpretedRuleset ruleset = new InterpretedRuleset();
+			for (Rule r : rules)
+			{
+				ruleset.rules.add(r);
 			}
+			ruleset.branchmap = mbm;
+			ruleset.systemrulemap = systemmbm;
+			Ruleset compiledRuleset = compileRuleset(ruleset);
+			mem.rulesets.add(ruleset);
 		}
 		// 必要ならシステムルールセットに登録
-		boolean is_system_ruleset = false;
-		for(Atom atom : mem.atoms){
-			if(atom.functor.getName().equals("system_ruleset")){
-				is_system_ruleset = true;
+		boolean isSystemRuleset = false;
+		for (Atom atom : mem.atoms)
+		{
+			if (atom.functor.getName().equals("system_ruleset"))
+			{
+				isSystemRuleset = true;
 				break;
 			}
 		}
-		if (is_system_ruleset) {
-			//Env.p("Use system_ruleset "+mem);
-			Iterator ri = mem.rulesets.iterator();
-			while(ri.hasNext()) {
-				InterpretedRuleset ir = (InterpretedRuleset)ri.next();
+		if (isSystemRuleset)
+		{
+			for (Ruleset r : mem.rulesets)
+			{
+				InterpretedRuleset ir = (InterpretedRuleset)r;
 				SystemRulesets.addUserDefinedSystemRuleset(ir);
 				ir.isSystemRuleset = true;
 			}
 		}
 	}
-	public static Ruleset compileRuleset(InterpretedRuleset rs) {
-		// todo ここでグローバルルールセットIDを生成するとよいはず
-		if (!Env.fInterpret) {
-			try {
-				new Translator(rs).translate();
-			} catch (IOException e) {
-				Env.e("Failed to write Translated File. " + e.getLocalizedMessage());
-			}
-		}
+
+	public static Ruleset compileRuleset(InterpretedRuleset rs)
+	{
 		return rs; //返すルールセットはそのまま。どうするのが良いのだろうか？
 	}
 }

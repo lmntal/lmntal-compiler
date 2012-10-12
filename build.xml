@@ -117,7 +117,7 @@
 			<zipfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
 		</zip>
 	</target>
-	<target name="dist" depends="help,jar,lib,archive" description="generate the distribution"/>
+	<target name="dist" depends="help,jar,archive" description="generate the distribution"/>
 
 	
 	<target name="clean" depends="mkdir,lib_clean" description="clean up">

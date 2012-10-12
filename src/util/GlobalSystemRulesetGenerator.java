@@ -13,8 +13,6 @@ import runtime.InterpretedRuleset;
 import runtime.Rule;
 import runtime.SymbolFunctor;
 
-import compile.Translator;
-
 /** システムルールセット
  * <p>todo インスタンスを誰が生成するのか決める</p>
  * 
@@ -108,11 +106,6 @@ public final class GlobalSystemRulesetGenerator {
 			String text = "";
 			text += generateUnaryFloatingFunctionRuleText("sin");
 			compileAndLoadRules(ruleset,text);
-		}
-		try {
-			new Translator(ruleset, true).translate();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	static String generateUnaryFloatingFunctionRuleText(String func) {

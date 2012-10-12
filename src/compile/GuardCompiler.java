@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Util;
-
 import runtime.Env;
 import runtime.Functor;
 import runtime.Instruction;
@@ -23,7 +21,8 @@ import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
 
-class GuardCompiler extends HeadCompiler {
+class GuardCompiler extends HeadCompiler
+{
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
 //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
