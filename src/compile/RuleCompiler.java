@@ -20,7 +20,6 @@ import runtime.InstructionList;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SymbolFunctor;
-import util.Util;
 
 import compile.structure.Atom;
 import compile.structure.Atomic;
@@ -79,8 +78,6 @@ public class RuleCompiler
 
 	HeadCompiler hc, hc2;
 
-	private boolean debug2 = false;
-
 	private int lhsmemToPath(Membrane mem) { return lhsmempath.get(mem); }
 	private int rhsmemToPath(Membrane mem) { return rhsmempath.get(mem); }
 	private int lhsatomToPath(Atomic atom) { return lhsatompath.get(atom); }
@@ -112,16 +109,9 @@ public class RuleCompiler
 	 */
 	public Rule compile() throws CompileException
 	{
-		if(debug2)
-		{
-			Util.println("\n*************************************************");
-			Util.println("compile called : this.rs = " + rs);
-			Util.println(rs.leftMem + "\n :- " + rs.guardMem + "\n | " + rs.rightMem + "\n");
-
-		}
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
-//		theRule = new Rule(rs.toString());
+		//theRule = new Rule(rs.toString());
 		theRule = new Rule(rs.leftMem.getFirstAtomName(),rs.toString());
 		theRule.name = rs.name;
 
@@ -130,12 +120,16 @@ public class RuleCompiler
 		hc2 = new HeadCompiler();
 		hc2.enumFormals(rs.leftMem);
 		//とりあえず常にガードコンパイラを呼ぶ事にしてしまう by mizuno
-//		if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty()) {
-		if (true) {
+		//if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty())
+		if (true)
+		{
 			theRule.guardLabel = new InstructionList();
 			guard = theRule.guardLabel.insts;
 		}
-		else guard = null;
+		else
+		{
+			guard = null;
+		}
 		theRule.bodyLabel = new InstructionList();
 		body = theRule.bodyLabel.insts;
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
@@ -146,24 +140,15 @@ public class RuleCompiler
 		// ガードのコンパイル
 		compile_g();
 
-		if (debug2)
-		{
-			Util.println("first compile_l() and compile_g() exit");
-			Rule tmpRule = new Rule();
-			tmpRule.memMatch = memMatch;
-			tmpRule.tempMatch = tempMatch;
-			tmpRule.atomMatch = atomMatch;
-			tmpRule.guard = guard;
-			tmpRule.body = body;
-			tmpRule.showDetail();
-		}
 		hc = new HeadCompiler();//rs.leftMem;
 		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
 		hc.firsttime = false;
 		theRule.guardLabel = new InstructionList();
 		guard = theRule.guardLabel.insts;
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
+
 		compile_l();
+
 		compile_g();
 
 		if (isSwapLinkUsable() && (Env.useSwapLink || Env.useCycleLinks))
@@ -193,7 +178,7 @@ public class RuleCompiler
 			//ルール名を生成
 			StringBuilder ruleName = new StringBuilder("_");
 			String orgName = rs.toString();
-			for (int i = 0; i < orgName.length(); ++i)
+			for (int i = 0; i < orgName.length(); i++)
 			{
 				char c = orgName.charAt(i);
 				if (isAlphabetOrDigit(c) || c == '_')
@@ -204,13 +189,6 @@ public class RuleCompiler
 				if (!Env.showlongrulename && ruleName.length() >= 5) break;
 			}
 			theRule.body.add(1, Instruction.commit(ruleName.toString(), theRule.lineno));
-		}
-
-		if (debug2)
-		{
-			Util.println("compile return theRule is\n");
-			theRule.showDetail();
-			Util.println("***************************************************\n");
 		}
 
 		optimize();
@@ -256,12 +234,6 @@ public class RuleCompiler
 	 */
 	private void compile_l()
 	{
-		if(debug2)
-		{
-			Util.println("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-			Util.println("\ncompile_l called\n");
-		}
-
 		theRule.atomMatchLabel = new InstructionList();
 		atomMatch = theRule.atomMatchLabel.insts;
 
@@ -283,8 +255,8 @@ public class RuleCompiler
 				tmplabel.insts = hc.match;
 				atomMatch.add(new Instruction(Instruction.BRANCH, tmplabel));
 
-				hc.memPaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
-				hc.atomPaths.put(atom, new Integer(1));		// 主導するアトムの変数番号は 1
+				hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
+				hc.atomPaths.put(atom, 1);		// 主導するアトムの変数番号は 1
 				hc.varCount = 2;
 				hc.match.add(new Instruction(Instruction.FUNC, 1, atom.functor));
 				Membrane mem = atom.mem;
@@ -296,13 +268,13 @@ public class RuleCompiler
 				{
 					hc.match.add(new Instruction(Instruction.GETMEM, hc.varCount, 1, mem.kind, mem.name));
 					hc.match.add(new Instruction(Instruction.LOCK,   hc.varCount));
-					hc.memPaths.put(mem, new Integer(hc.varCount++));
+					hc.memPaths.put(mem, hc.varCount++);
 					mem = mem.parent;
 					while (mem != rs.leftMem)
 					{
 						hc.match.add(new Instruction(Instruction.GETPARENT,hc.varCount,hc.varCount-1));
 						hc.match.add(new Instruction(Instruction.LOCK,     hc.varCount));
-						hc.memPaths.put(mem, new Integer(hc.varCount++));
+						hc.memPaths.put(mem, hc.varCount++);
 						mem = mem.parent;
 					}
 					hc.match.add(new Instruction(Instruction.GETPARENT,hc.varCount,hc.varCount-1));
@@ -326,8 +298,8 @@ public class RuleCompiler
 				{
 					memMatch = hc.match;
 				}
-				hc.memPaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
-				hc2.memPaths.put(rs.leftMem, new Integer(0));	// 本膜の変数番号は 0
+				hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
+				hc2.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
 			}
 			if (Env.findatom2)
 			{
@@ -338,19 +310,6 @@ public class RuleCompiler
 			{
 				hc.compileMembrane(rs.leftMem, hc.matchLabel);
 			}
-			if (debug2)
-			{
-				Util.println("first compile_l() and compile_g() exit");
-				Rule tmpRule = new Rule();
-				tmpRule.memMatch = memMatch;
-				tmpRule.tempMatch = tempMatch;
-				tmpRule.atomMatch = atomMatch;
-				tmpRule.guard = guard;
-				tmpRule.body = body;
-				tmpRule.showDetail();
-			}
-
-			if(debug2) Util.println("\n-----------------------------------------------------");
 
 			// 自由出現したデータアトムがないか検査する
 			if (!hc.fFindDataAtoms)
@@ -403,33 +362,18 @@ public class RuleCompiler
 			hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
 			hc.tempMatch.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
 			// - コード#2
-//			hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
-//			int formals = memActuals.size() + atomActuals.size() + varActuals.size();
-//			hc.match.add( Instruction.spec(formals, formals) );
-//			hc.match.add( hc.getResetVarsInstruction() );
-//			List brancharg = new ArrayList();
-//			brancharg.add(body);
-//			hc.match.add( new Instruction(Instruction.BRANCH, brancharg) );
+			//hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
+			//int formals = memActuals.size() + atomActuals.size() + varActuals.size();
+			//hc.match.add( Instruction.spec(formals, formals) );
+			//hc.match.add( hc.getResetVarsInstruction() );
+			//List brancharg = new ArrayList();
+			//brancharg.add(body);
+			//hc.match.add( new Instruction(Instruction.BRANCH, brancharg) );
 
 			// jump命令群の生成終わり
 			if (maxvarcount < hc.varCount) maxvarcount = hc.maxVarCount;
 		}
 		atomMatch.add(0, Instruction.spec(2,maxvarcount));
-		if(debug2)
-		{
-			Util.println("\n compile_l return ");
-			if(debug2){
-				Util.println("first compile_l() and compile_g() exit");
-				Rule tmpRule = new Rule();
-				tmpRule.memMatch = memMatch;
-				tmpRule.tempMatch = tempMatch;
-				tmpRule.atomMatch = atomMatch;
-				tmpRule.guard = guard;
-				tmpRule.body = body;
-				tmpRule.showDetail();
-			}
-			Util.println("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-		}
 	}
 
 	/**
@@ -446,7 +390,7 @@ public class RuleCompiler
 			for (int pos = 0; pos < atom.functor.getArity(); pos++)
 			{
 				body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhsatomToPath(atom),pos));
-				rhslinkpath.put(atom.args[pos],new Integer(varcount));
+				rhslinkpath.put(atom.args[pos], varcount);
 				if (!rhslinks.contains(atom.args[pos].buddy) &&
 						!(atom.functor.equals(Functor.INSIDE_PROXY) && pos == 0))
 				{
@@ -460,7 +404,7 @@ public class RuleCompiler
 		for (ProcessContext atom : rhstypedcxtpaths.keySet())
 		{
 			body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhstypedcxtToPath(atom),0));
-			rhslinkpath.put(atom.args[0],new Integer(varcount));
+			rhslinkpath.put(atom.args[0], varcount);
 			if (!rhslinks.contains(atom.args[0].buddy))
 			{
 				rhslinks.add(rhslinkindex++,atom.args[0]);
@@ -477,8 +421,11 @@ public class RuleCompiler
 				int linkpath = varcount++;
 				body.add(new Instruction(Instruction.GETFROMLIST,linkpath, linklistpath, i));
 //				int linkpath = rhsgroundToPath(atom);
-				rhslinkpath.put(ground.args[i],new Integer(linkpath));
-				if(!rhslinks.contains(ground.args[i].buddy))rhslinks.add(rhslinkindex++,ground.args[i]);
+				rhslinkpath.put(ground.args[i], linkpath);
+				if (!rhslinks.contains(ground.args[i].buddy))
+				{
+					rhslinks.add(rhslinkindex++,ground.args[i]);
+				}
 			}
 		}
 
@@ -499,7 +446,7 @@ public class RuleCompiler
 					//	srclinkid = varcount++;
 					//	body.add(new Instruction(Instruction.GETLINK,srclinkid,
 					//	lhsatomToPath(srclink.atom), srclink.pos));
-					//	lhslinkpath.put(srclink,new Integer(srclinkid));
+					//	lhslinkpath.put(srclink, srclinkid);
 					//}
 					//srclinkid = lhslinkToPath(srclink);
 					//if (!(fUseMoveCells && atom.def.rhsOccs.size() == 1))
@@ -509,7 +456,7 @@ public class RuleCompiler
 					//	copiedlink, rhspcToMapPath(atom), srclinkid));
 					//	srclinkid = copiedlink;
 					//}
-					//rhslinkpath.put(atom.args[pos],new Integer(srclinkid));
+					//rhslinkpath.put(atom.args[pos], srclinkid);
 					if (!rhslinks.contains(atom.args[pos].buddy))
 					{
 						rhslinks.add(rhslinkindex++,atom.args[pos]);
@@ -569,7 +516,7 @@ public class RuleCompiler
 		rhsatompath = new HashMap<Atom, Integer>();
 		rhsmempath  = new HashMap<Membrane, Integer>();
 		int toplevelmemid = lhsmemToPath(rs.leftMem);
-		rhsmempath.put(rs.rightMem, new Integer(toplevelmemid));
+		rhsmempath.put(rs.rightMem, toplevelmemid);
 
 		//Env.d("rs.leftMem -> "+rs.leftMem);
 		//Env.d("lhsmempaths.get(rs.leftMem) -> "+lhsmempaths.get(rs.leftMem));
@@ -1187,7 +1134,16 @@ public class RuleCompiler
 		for (Iterator<Atom> it = atomlist.iterator(); it.hasNext();)
 		{
 			Atom a = it.next();
-			if (a.functor.isActive() || !a.functor.isNumber())
+			if (a.functor.isActive())
+			{
+				mem.atoms.add(a);
+				it.remove();
+			}
+		}
+		for (Iterator<Atom> it = atomlist.iterator(); it.hasNext();)
+		{
+			Atom a = it.next();
+			if (!a.functor.isNumber())
 			{
 				mem.atoms.add(a);
 				it.remove();
@@ -1470,7 +1426,7 @@ public class RuleCompiler
 		for (Membrane submem : mem.mems)
 		{
 			int submempath = varcount++;
-			rhsmempath.put(submem, new Integer(submempath));
+			rhsmempath.put(submem, submempath);
 			if (submem.pragmaAtHost != null) // 右辺で＠指定されている場合
 			{
 				if (submem.pragmaAtHost.def == null) {
@@ -2310,7 +2266,7 @@ public class RuleCompiler
 			if (path!=null && !path.equals(atom.mem.name))
 			{
 				// この時点では解決できないモジュールがあるので名前にしておく
-				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem), path));
+				body.add(new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem), path));
 			}
 		}
 	}
@@ -2325,8 +2281,8 @@ public class RuleCompiler
 		{
 			unlockReusedOrNewRootMem(submem);
 		}
-		if (mem.pragmaAtHost != null)
-		{ // 右辺で＠指定されている場合
+		if (mem.pragmaAtHost != null) // 右辺で＠指定されている場合
+		{
 			body.add(new Instruction(Instruction.UNLOCKMEM, rhsmemToPath(mem)));
 		}
 	}
@@ -2391,7 +2347,8 @@ public class RuleCompiler
 
 	////////////////////////////////////////////////////////////////
 
-	private void systemError(String text) throws CompileException {
+	private void systemError(String text) throws CompileException
+	{
 		Env.error(text);
 		throw new CompileException("SYSTEM ERROR");
 	}
