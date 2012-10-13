@@ -39,7 +39,8 @@ public final class Env
 	/** メモリ使用量を最小化する */
 	public static boolean fMemory = true;
 
-	public static boolean fThread = true;
+	public static boolean oneLine = false;
+	public static String oneLineCode = "";
 
 	/**
 	 * <p>リンク操作に{@code swaplink}命令を使用する。</p>
@@ -73,17 +74,7 @@ public final class Env
 	/** verbose level. */
 	public static int verbose = VERBOSE_INIT;
 
-	public static int indent = 0;
-
-	public static boolean showrule = true;
-
-	public static boolean showruleset = true;
-
 	public static boolean showlongrulename = false;
-
-	// PROXY を表示させない 2005/02/03 T.Nagata オプション --hideproxy
-	// デフォルトで有効 2005/10/14 mizuno
-	public static boolean hideProxy = true;
 
 	/**
 	 * プログラムに与える引数
@@ -123,6 +114,9 @@ public final class Env
 
 	/** アトム名の表示する長さ */
 	public static int printLength = 14;
+
+	// 以下に出力系の一文字メソッドが並んでいるが、これはデバッグ用と考えるべきではないか？
+	// コンパイラのコード生成出力等で度々これらのメソッドが使われているが、それは本来好ましくない。
 
 	/**
 	 * General error report
@@ -202,16 +196,29 @@ public final class Env
 	}
 
 	/**
-	 * Better list dumper : No comma output
+	 * 走査可能なコレクションの各要素の文字列表現を区切り文字 {@code delim} で連結した文字列を返します。
 	 */
-	public static<E> String parray(Collection<E> l, String delim) {
-		StringBuffer s = new StringBuffer();
-		for(Iterator<E> i=l.iterator();i.hasNext();) {
-			s.append( i.next().toString()+(i.hasNext() ? delim:"") );
+	public static <E> String parray(Iterable<E> l, String delim)
+	{
+		StringBuilder s = new StringBuilder();
+		boolean first = true;
+		for (E e : l)
+		{
+			s.append(e);
+			if (first)
+			{
+				s.append(delim);
+				first = false;
+			}
 		}
 		return s.toString();
 	}
-	public static<E> String parray(Collection<E> l) {
+
+	/**
+	 * 走査可能なコレクションの各要素の文字列表現を半角空白で連結した文字列を返します。
+	 */
+	public static <E> String parray(Iterable<E> l)
+	{
 		return parray(l, " ");
 	}
 

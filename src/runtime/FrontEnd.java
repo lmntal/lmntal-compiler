@@ -28,6 +28,7 @@ public class FrontEnd
 	public static void main(String[] args)
 	{
 		checkVersion();
+
 		Runtime.getRuntime().addShutdownHook(new Thread()
 		{
 			public void run()
@@ -37,7 +38,15 @@ public class FrontEnd
 		});
 
 		processOptions(args);
-		run(Env.srcs);
+
+		if (Env.oneLine)
+		{
+			run(new StringReader(Env.oneLineCode), InlineUnit.DEFAULT_UNITNAME);
+		}
+		else
+		{
+			run(Env.srcs);
+		}
 	}
 
 	/**
@@ -87,6 +96,16 @@ public class FrontEnd
 					System.exit(-1);
 				} else { // オプション解釈部
 					switch (args[i].charAt(1)) {
+					case 'e':
+						//@ -e <LMNtal program>
+						//@ One liner code execution like Perl.
+						//@ Example: -e 'a,(a:-b)'
+						if (++i < args.length)
+						{
+							Env.oneLine = true;
+							Env.oneLineCode = args[i];
+						}
+						break;
 					case 'd':
 						//@ -d[<0-9>]
 						//@ Debug output level.
@@ -230,18 +249,6 @@ public class FrontEnd
 							//@ --stdin-lmn
 							//@ read LMNtal program from standard input
 							Env.stdinLMN = true;
-						} else if (args[i].equals("--showproxy")) {
-							//@ --showproxy
-							//@ Show proxy atoms
-							Env.hideProxy = false;
-						} else if (args[i].equals("--hideruleset")) {
-							//@ --hideruleset
-							//@ Hide ruleset
-							Env.showruleset = false;
-						} else if (args[i].equals("--hiderule")) {
-							//@ --hiderule
-							//@ Hide rule names
-							Env.showrule = false;
 						} else if (args[i].equals("--showlongrulename")) {
 							Env.showlongrulename = true;
 						} else if (args[i].equals("--dump-converted-rules")) {
@@ -262,10 +269,6 @@ public class FrontEnd
 							//@ --debug
 							//@ run command-line debugger.
 							Env.debugOption = true;
-						} else if (args[i].equals("--nothread")) {
-							// 暫定オプション
-							// スレッドルールの変換を行わない
-							Env.fThread = false;
 						} else if (args[i].equals("--type")) {
 							// --type
 							// enable type check
