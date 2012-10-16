@@ -1,8 +1,8 @@
 package runtime;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public final class Rule
 {
@@ -33,10 +33,10 @@ public final class Rule
 	/** このルールの表示用文字列 */
 	public String text = "";
 	/** このルールの表示用文字列（省略なし） */
-	public String fullText ="";
+	public String fullText = "";
 
 	/** スレッドごとのベンチマーク結果 **/
-	public HashMap<Thread, Benchmark> bench;
+	public Map<Thread, Benchmark> bench;
 
 	/** ルール名 */
 	public String name;
@@ -51,36 +51,42 @@ public final class Rule
 
 	/**
 	 * ふつうのコンストラクタ。
-	 *
 	 */
-	public Rule() {
-		//		atomMatch = new ArrayList();
-		//		memMatch  = new ArrayList();
+	public Rule()
+	{
+		this("");
+	}
+
+	/**
+	 * ルール文字列つきコンストラクタ
+	 * @param text ルールの文字列表現
+	 */
+	public Rule(String text)
+	{
+		this(text, "");
+	}
+
+	/**
+	 * ルール文字列（省略なし）つきコンストラクタ
+	 * @param text ルールの文字列表現
+	 * @param fullText ルールの文字列表現（省略なし）
+	 */
+	public Rule(String text, String fullText)
+	{
+		this.text = text;
+		this.fullText = fullText;
 		atomMatchLabel = new InstructionList();
 		memMatchLabel = new InstructionList();
 		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
 		bench = new HashMap<Thread, Benchmark>();
 	}
+
 	/**
-	 * ルール文字列つきコンストラクタ
-	 * @param text ルールの文字列表現
+	 * パーザーで利用するコンストラクタ
 	 */
-	public Rule(String text) {
-		this();
-		this.text = text;
-	}
-	/**
-	 * ルール文字列（省略なし）つきコンストラクタ
-	 * @param text ルールの文字列表現
-	 * @param fullText ルールの文字列表現（省略なし）
-	 */
-	public Rule(String text, String fullText) {
-		this(text);
-		this.fullText = fullText;
-	}
-	/** パーザーで利用するコンストラクタ */
-	public Rule(InstructionList atomMatchLabel, InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel) {
+	public Rule(InstructionList atomMatchLabel, InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel)
+	{
 		this.atomMatchLabel = atomMatchLabel;
 		this.memMatchLabel = memMatchLabel;
 		this.guardLabel = guardLabel;
@@ -110,36 +116,32 @@ public final class Rule
 		}
 
 		Env.p("--atommatch:", 1);
-		for (Instruction inst : atomMatch)
-		{
-			Env.p(inst, 2);
-		}
+		printInstructions(atomMatch);
 
 		Env.p("--memmatch:", 1);
-		for (Instruction inst : memMatch)
-		{
-			Env.p(inst, 2);
-		}
+		printInstructions(memMatch);
 
 		if (guard != null)
 		{
 			Env.p("--guard:" + guardLabel + ":", 1);
-			for (Instruction inst : guard)
-			{
-				Env.p(inst, 2);
-			}
+			printInstructions(guard);
 		}
 
 		if (body != null)
 		{
 			Env.p("--body:" + bodyLabel + ":", 1);
-			for (Instruction inst : body)
-			{
-				Env.p(inst, 2);
-			}
+			printInstructions(body);
 		}
 
 		Env.p("");
+	}
+
+	private static void printInstructions(Iterable<Instruction> insts)
+	{
+		for (Instruction inst : insts)
+		{
+			Env.p(inst, 2);
+		}
 	}
 
 	public String toString()
@@ -175,163 +177,209 @@ public final class Rule
 	/* ルール適用時の膜ロック失敗の回数 */
 	public long lockfailure = 0;
 
-	public void incAtomApply(Thread thread){
-		if(bench.containsKey(thread))
-			bench.get(thread).atomapply ++;
-		else {
+	public void incAtomApply(Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
+			bench.get(thread).atomapply++;
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
-			benchmark.atomapply ++;
+			benchmark.atomapply++;
 			bench.put(thread, benchmark);
 		}
 	}
-	public void incAtomSucceed(Thread thread){
-		if(bench.containsKey(thread))
-			bench.get(thread).atomsucceed ++;
-		else {
+
+	public void incAtomSucceed(Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
+			bench.get(thread).atomsucceed++;
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
-			benchmark.atomsucceed ++;
+			benchmark.atomsucceed++;
 			bench.put(thread, benchmark);
 		}
 	}
-	public void setAtomTime(long value, Thread thread){
-		if(bench.containsKey(thread))
+
+	public void setAtomTime(long value, Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
 			bench.get(thread).atomtime += value;
-		else {
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.atomtime += value;
 			bench.put(thread, benchmark);
 		}
 	}
-	public void incMemApply(Thread thread){
-		if(bench.containsKey(thread))
-			bench.get(thread).memapply ++;
-		else {
+
+	public void incMemApply(Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
+			bench.get(thread).memapply++;
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
-			benchmark.memapply ++;
+			benchmark.memapply++;
 			bench.put(thread, benchmark);
 		}
 	}
-	public void incMemSucceed(Thread thread){
-		if(bench.containsKey(thread))
-			bench.get(thread).memsucceed ++;
-		else {
+
+	public void incMemSucceed(Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
+			bench.get(thread).memsucceed++;
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
-			benchmark.memsucceed ++;
+			benchmark.memsucceed++;
 			bench.put(thread, benchmark);
 		}
 	}
-	public void setMemTime(long value, Thread thread){
-		if(bench.containsKey(thread))
+
+	public void setMemTime(long value, Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
 			bench.get(thread).memtime += value;
-		else {
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.memtime += value;
 			bench.put(thread, benchmark);
 		}
 	}
-	public void setBackTracks(long value, Thread thread){
-		if(bench.containsKey(thread))
+
+	public void setBackTracks(long value, Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
 			bench.get(thread).backtracks += value;
-		else {
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.backtracks += value;
 			bench.put(thread, benchmark);
 		}
 	}
-	public void setLockFailure(long value, Thread thread){
-		if(bench.containsKey(thread))
+
+	public void setLockFailure(long value, Thread thread)
+	{
+		if (bench.containsKey(thread))
+		{
 			bench.get(thread).lockfailure += value;
-		else {
+		}
+		else
+		{
 			Benchmark benchmark = new Benchmark(thread);
 			benchmark.lockfailure += value;
 			bench.put(thread, benchmark);
 		}
 	}
 
-	public long allAtomApplys() {
-		Iterator<Benchmark> its = bench.values().iterator();
+	public long allAtomApplys()
+	{
 		long apply = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			apply += bench.atomapply;
-		}
-		return apply;
-	}
-	public long allMemApplys() {
-		Iterator<Benchmark> its = bench.values().iterator();
-		long apply = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			apply += bench.memapply;
+		for (Benchmark b : bench.values())
+		{
+			apply += b.atomapply;
 		}
 		return apply;
 	}
 
-	public long allAtomSucceeds() {
-		Iterator<Benchmark> its = bench.values().iterator();
+	public long allMemApplys()
+	{
+		long apply = 0;
+		for (Benchmark b : bench.values())
+		{
+			apply += b.memapply;
+		}
+		return apply;
+	}
+
+	public long allAtomSucceeds()
+	{
 		long succeed = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			succeed += bench.atomsucceed;
+		for (Benchmark b : bench.values())
+		{
+			succeed += b.atomsucceed;
 		}
 		return succeed;
 	}
 
-	public long allMemSucceeds() {
-		Iterator<Benchmark> its = bench.values().iterator();
+	public long allMemSucceeds()
+	{
 		long succeed = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			succeed += bench.memsucceed;
+		for (Benchmark b : bench.values())
+		{
+			succeed += b.memsucceed;
 		}
 		return succeed;
 	}
 
-	public long allAtomTimes() {
-		Iterator<Benchmark> its = bench.values().iterator();
+	public long allAtomTimes()
+	{
 		long time = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			time += bench.atomtime;
+		for (Benchmark b : bench.values())
+		{
+			time += b.atomtime;
 		}
 		return time;
 	}
 
-	public long allMemTimes() {
-		Iterator<Benchmark> its = bench.values().iterator();
+	public long allMemTimes()
+	{
 		long time = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			time += bench.memtime;
+		for (Benchmark b : bench.values())
+		{
+			time += b.memtime;
 		}
 		return time;
 	}
 
-	public long allApplys() {
+	public long allApplys()
+	{
 		return allAtomApplys() + allMemApplys();
 	}
-	public long allSucceeds() {
+
+	public long allSucceeds()
+	{
 		return allAtomSucceeds() + allMemSucceeds();
 	}
-	public long allTimes() {
+
+	public long allTimes()
+	{
 		return allAtomTimes() + allMemTimes();
 	}
 
-	public long allBackTracks() {
-		Iterator<Benchmark> its = bench.values().iterator();
+	public long allBackTracks()
+	{
 		long backtracks = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			backtracks += bench.backtracks;
+		for (Benchmark b : bench.values())
+		{
+			backtracks += b.backtracks;
 		}
 		return backtracks;
 	}
-	public long allLockFailures() {
-		Iterator<Benchmark> its = bench.values().iterator();
+
+	public long allLockFailures()
+	{
 		long lockfailure = 0;
-		while(its.hasNext()) {
-			Benchmark bench = its.next();
-			lockfailure += bench.lockfailure;
+		for (Benchmark b : bench.values())
+		{
+			lockfailure += b.lockfailure;
 		}
 		return lockfailure;
 	}
