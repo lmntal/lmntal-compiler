@@ -1,6 +1,6 @@
 package type.occurrence;
 
-import runtime.Functor;
+import runtime.functor.Functor;
 
 public class AtomOccurrence {
 	private String memname;

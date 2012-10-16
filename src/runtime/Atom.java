@@ -1,5 +1,6 @@
 package runtime;
 
+import runtime.functor.Functor;
 import util.QueuedEntity;
 
 /**

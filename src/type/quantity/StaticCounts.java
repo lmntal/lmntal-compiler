@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import runtime.Env;
-import runtime.Functor;
+import runtime.functor.Functor;
 import type.TypeEnv;
 
 import compile.structure.Atom;

@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import runtime.FloatingFunctor;
-import runtime.Functor;
-import runtime.IntegerFunctor;
-import runtime.StringFunctor;
+import runtime.functor.FloatingFunctor;
+import runtime.functor.Functor;
+import runtime.functor.IntegerFunctor;
+import runtime.functor.StringFunctor;
 
 class FunctorKindAndArgumentMap {
 	Multimap<FunctorAndArgument, FunctorAndArgument> map;

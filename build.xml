@@ -5,7 +5,7 @@
 	<property name="bin"  location="bin"/>
 	<property name="lib"  location="tools"/>
 	<property name="docs" location="doc"/>
-	<property name="classpath"  value="C:/eclipse/eclipse3.7.2/plugins/org.junit_4.8.2.v4_8_2_v20110321-1705/junit.jar" />
+	<property name="classpath"  value="" />
 	<property name="lmntal_lib" location="lib"/>
 	<property name="java_ver" value="1.6"/>
 

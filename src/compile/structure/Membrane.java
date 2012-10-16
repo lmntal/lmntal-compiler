@@ -7,11 +7,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import runtime.Functor;
 import runtime.InterpretedRuleset;
 import runtime.Ruleset;
 
 import runtime.Env;
+import runtime.functor.Functor;
 
 /** 
  * ソースコード中の膜の構造を表すクラス<br>

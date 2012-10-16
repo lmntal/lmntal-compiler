@@ -3,6 +3,7 @@ package runtime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import runtime.functor.Functor;
 
 /**
  * 編み上げ後の命令列を扱うクラス

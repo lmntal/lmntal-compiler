@@ -1,6 +1,5 @@
 package runtime;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,10 +11,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import runtime.functor.Functor;
+import runtime.functor.SpecialFunctor;
+
 import util.MultiMapIterator;
 import util.NestedIterator;
 import util.Util;
-import util.RandomIterator;
 
 /**
  * アトムの集合を管理するためのクラス。
@@ -24,7 +25,8 @@ import util.RandomIterator;
  * Functor毎にアトムを管理している。
  * @author Mizuno
  */
-public final class AtomSet implements Serializable, Iterable<Atom> {
+public final class AtomSet implements Iterable<Atom>
+{
 	/** atoms内のアトムの数。整合性要注意 */
 	private int size = 0;
 	/** 実際にアトムの集合を管理している変数 */

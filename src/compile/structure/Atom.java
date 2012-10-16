@@ -1,7 +1,7 @@
 package compile.structure;
 
-import runtime.Functor;
-import runtime.SymbolFunctor;
+import runtime.functor.Functor;
+import runtime.functor.SymbolFunctor;
 
 /**
  * ソースコード中のアトム（またはアトム集団または型制約）の構造を表すクラス。

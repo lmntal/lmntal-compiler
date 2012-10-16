@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import runtime.Functor;
+import runtime.functor.Functor;
 import type.TypeEnv;
 import type.TypeException;
 import util.Util;

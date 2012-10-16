@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import runtime.functor.Functor;
+
 import util.QueuedEntity;
 import util.Stack;
 

@@ -12,10 +12,11 @@ import java.util.ListIterator;
 import java.util.TreeMap;
 
 import runtime.Env;
-import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Rule;
+import runtime.functor.Functor;
+import runtime.functor.SpecialFunctor;
 
 /**
  * 最適化を行うクラスメソッドを持つクラス。
@@ -1184,7 +1185,7 @@ public class Optimizer {
 			for(Iterator<Functor> functorIterator = removedAtoms.functorIterator(mem); functorIterator.hasNext();){
 				Functor functor = functorIterator.next();
 				//removeproxies・insertproxiesがあるので、再利用できない
-				if (functor instanceof runtime.SpecialFunctor) {
+				if (functor instanceof SpecialFunctor) {
 					continue;
 				}
 				Iterator<Integer> removedAtomIterator = removedAtoms.iterator(mem, functor);
@@ -1408,7 +1409,7 @@ public class Optimizer {
 			{
 				Functor functor = functorIterator.next();
 				//removeproxies・insertproxiesがあるので、再利用できない
-				if (functor instanceof runtime.SpecialFunctor)
+				if (functor instanceof SpecialFunctor)
 				{
 					continue;
 				}

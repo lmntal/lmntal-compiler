@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import runtime.FloatingFunctor;
-import runtime.Functor;
-import runtime.IntegerFunctor;
-import runtime.ObjectFunctor;
-import runtime.StringFunctor;
-import runtime.SymbolFunctor;
+import runtime.functor.FloatingFunctor;
+import runtime.functor.Functor;
+import runtime.functor.IntegerFunctor;
+import runtime.functor.ObjectFunctor;
+import runtime.functor.StringFunctor;
+import runtime.functor.SymbolFunctor;
 
 import compile.structure.Atom;
 import compile.structure.ContextDef;

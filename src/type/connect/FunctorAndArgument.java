@@ -1,6 +1,6 @@
 package type.connect;
 
-import runtime.Functor;
+import runtime.functor.Functor;
 
 class FunctorAndArgument {
 	final Functor functor;

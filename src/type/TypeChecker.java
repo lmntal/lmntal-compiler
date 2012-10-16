@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
-import runtime.Functor;
-import runtime.IntegerFunctor;
-import runtime.SymbolFunctor;
+import runtime.functor.Functor;
+import runtime.functor.IntegerFunctor;
+import runtime.functor.SymbolFunctor;
 import type.argument.ActiveAtomPath;
 import type.argument.ArgumentInferer;
 import type.argument.ConstraintSet;

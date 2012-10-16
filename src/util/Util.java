@@ -7,18 +7,17 @@ import java.util.List;
 
 import runtime.Atom;
 import runtime.Env;
-import runtime.Functor;
-import runtime.IntegerFunctor;
 import runtime.Link;
-import runtime.Membrane;
-import runtime.StringFunctor;
-import runtime.SymbolFunctor;
+import runtime.functor.Functor;
+import runtime.functor.IntegerFunctor;
+import runtime.functor.SymbolFunctor;
 
 /**
  * @author mizuno
  * 汎用ユーティリティメソッド・定数を集めたクラス
  */
-abstract public class Util {
+abstract public class Util
+{
 	public static Functor DOT = new SymbolFunctor(".", 3);
 	public static Functor NIL = new SymbolFunctor("[]", 1);
 	public static final Iterator NULL_ITERATOR = Collections.EMPTY_SET.iterator();
@@ -32,28 +31,19 @@ abstract public class Util {
 		System.err.print(msg);
 	}
 	
-	public static void errPrintln(String msg){
+	public static void errPrintln(Object msg)
+	{
 		System.err.println(msg);
 	}
 	
-	public static void errPrintln(Object msg){
-		errPrintln(msg.toString());
-	}
-	
-	public static void println(String msg){
+	public static void println(Object msg)
+	{
 		System.out.println(msg);
 	}
 	
-	public static void println(Object msg){
-		println(msg.toString());
-	}
-	
-	public static void print(String msg){
+	public static void print(Object msg)
+	{
 		System.out.print(msg);
-	}
-	
-	public static void print(Object msg){
-		print(msg.toString());
 	}
 	
 	/**

@@ -8,12 +8,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import runtime.Env;
-import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.MergedBranchMap;
 import runtime.Rule;
-import runtime.SymbolFunctor;
+import runtime.functor.Functor;
+import runtime.functor.SymbolFunctor;
 import util.Util;
 
 /**

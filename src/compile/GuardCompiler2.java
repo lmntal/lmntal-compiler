@@ -12,6 +12,7 @@ import java.util.Map;
 import runtime.Env;
 import runtime.Instruction;
 import runtime.functor.Functor;
+import runtime.functor.IntegerFunctor;
 import runtime.functor.SymbolFunctor;
 
 import compile.structure.Atom;
@@ -22,11 +23,127 @@ import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
 
-class GuardCompiler extends HeadCompiler
+public class GuardCompiler2 extends HeadCompiler
 {
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
 //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
+
+	private static class ProcessTypeVariable
+	{
+		private String type;
+
+		public ProcessTypeVariable(String type)
+		{
+			this.type = type;
+		}
+
+		public String getType()
+		{
+			return type;
+		}
+
+		public void setType(String type)
+		{
+			this.type = type;
+		}
+
+		public boolean isUntyped()
+		{
+			return type.equals("untyped");
+		}
+
+		public String toString()
+		{
+			return type;
+		}
+	}
+
+	private static class ProcessTypeContext
+	{
+		private Map<ContextDef, String> typeVars = new HashMap<ContextDef, String>();
+		private Map<String, String> varToText = new HashMap<String, String>();
+		private Map<String, ProcessTypeVariable> types = new HashMap<String, ProcessTypeVariable>();
+		private boolean inconsistent = false;
+		
+		public ProcessTypeContext()
+		{
+			putTypedVariable("int", "int");
+			putTypedVariable("float", "float");
+			putTypedVariable("string", "string");
+			putTypedVariable("unary", "unary");
+			putTypedVariable("ground", "ground");
+			inconsistent = false;
+		}
+		
+		public void addTypeVariable(ContextDef def, String v)
+		{
+			varToText.put(v, def.toString());
+			typeVars.put(def, v);
+			putUntypedVariable(v);
+		}
+		
+		public String getTypeVariable(ContextDef def)
+		{
+			return typeVars.get(def);
+		}
+		
+		public boolean unify(String v1, String v2)
+		{
+			ProcessTypeVariable t1 = types.get(v1), t2 = types.get(v2);
+			if (!t1.getType().equals(t2.getType()))
+			{
+				if (t1.isUntyped())
+				{
+					t1.setType(t2.getType());
+				}
+				else if (t2.isUntyped())
+				{
+					t2.setType(t1.getType());
+				}
+				else
+				{
+					System.err.println(String.format(
+						"Inconsistent unification: %s[%s] <-> %s[%s]",
+						varToText.get(v1), t1, varToText.get(v2), t2));
+					inconsistent = true;
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		public boolean isConsistent()
+		{
+			return !inconsistent;
+		}
+		
+		public boolean isAllTyped()
+		{
+			for (ProcessTypeVariable var : types.values())
+			{
+				if (var.isUntyped()) return false;
+			}
+			return true;
+		}
+		
+		public void dump()
+		{
+			System.err.println("typeVars: " + typeVars);
+			System.err.println("types   : " + types);
+		}
+		
+		private void putUntypedVariable(String varName)
+		{
+			types.put(varName, new ProcessTypeVariable("untyped"));
+		}
+		
+		private void putTypedVariable(String varName, String type)
+		{
+			varToText.put(varName, type);
+			types.put(varName, new ProcessTypeVariable(type));
+		}
+	}
 
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
 	HashMap<ContextDef, Integer> typedCxtDataTypes = new HashMap<ContextDef, Integer>();
@@ -59,12 +176,10 @@ class GuardCompiler extends HeadCompiler
 	private static final int ISFLOAT  = Instruction.ISFLOAT;	// 〃 浮動小数点数型
 	private static final int ISSTRING = Instruction.ISSTRING;	// 〃 文字列型
 	private static final int ISMEM    = Instruction.ANYMEM;		// 〃 膜（getRuntime専用）
-//	private static final int ISNAME    = Instruction.ISNAME;   	// 〃 name型 (SLIM専用) //seiji
-//	private static final int ISCONAME  = Instruction.ISCONAME; 	// 〃 coname型 (SLIM専用) //seiji
 	private static final int ISHLINK   = Instruction.ISHLINK; 	// 〃 hlink型 (SLIM専用) //seiji
-	private static Map<Functor, int[]> guardLibrary0 = new HashMap<Functor, int[]>(); // 0入力ガード型制約名//seiji
-	private static Map<Functor, int[]> guardLibrary1 = new HashMap<Functor, int[]>(); // 1入力ガード型制約名
-	private static Map<Functor, int[]> guardLibrary2 = new HashMap<Functor, int[]>(); // 2入力ガード型制約名
+	private static Map<Functor, int[]> guard0 = new HashMap<Functor, int[]>(); // 0入力ガード型制約名//seiji
+	private static Map<Functor, int[]> guard1 = new HashMap<Functor, int[]>(); // 1入力ガード型制約名
+	private static Map<Functor, int[]> guard2 = new HashMap<Functor, int[]>(); // 2入力ガード型制約名
 
 	static
 	{
@@ -97,24 +212,13 @@ class GuardCompiler extends HeadCompiler
 		putLibrary("+."   , 2, 1, array(ISFLOAT,      -1,            ISFLOAT));
 		putLibrary("-."   , 2, 1, array(ISFLOAT, Instruction.FNEG,   ISFLOAT));
 		putLibrary("float", 2, 1, array(ISINT  , Instruction.INT2FLOAT, ISFLOAT));
-		putLibrary("int",   2, 1, array(ISFLOAT, Instruction.FLOAT2INT, ISINT));
+		putLibrary("int"  , 2, 1, array(ISFLOAT, Instruction.FLOAT2INT, ISINT));
 		if (Env.slimcode && Env.hyperLink)
 		{
-			putLibrary("new"       , 1, 0, array(Instruction.NEWHLINK, ISINT));
-			putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
-			putLibrary("hlink"     , 1, 1, array(ISHLINK));
-			putLibrary("num"       , 2, 1, array(ISHLINK, Instruction.GETNUM, ISINT));
-			//putLibrary("name"      , 1, 1, array(ISNAME));
-			//putLibrary("coname"    , 1, 1, array(ISCONAME));
-			//putLibrary("setconame" , 2, 1, array(ISNAME, Instruction.SETCONAME, ISINT));
-			//putLibrary("!"         , 2, 1, array(ISNAME, Instruction.SETCONAME, ISINT));
-			//putLibrary("hasconame" , 1, 1, array(ISNAME, Instruction.HASCONAME));
-			//putLibrary("nhasconame", 1, 1, array(ISNAME, Instruction.NHASCONAME));
-			//putLibrary("getconame" , 2, 1, array(ISNAME, Instruction.GETCONAME, ISINT));
-			//putLibrary("getname"   , 2, 1, array(ISCONAME, Instruction.GETNAME, ISINT));
-			//putLibrary("><"        , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYHLINK, ISINT));
-			//putLibrary("and"       , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYCONAMEAND, ISINT));
-			//putLibrary("or"        , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYCONAMEOR, ISINT));
+			putLibrary("new"   , 1, 0, array(Instruction.NEWHLINK, ISINT));
+			putLibrary("make"  , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
+			putLibrary("hlink" , 1, 1, array(ISHLINK));
+			putLibrary("num"   , 2, 1, array(ISHLINK, Instruction.GETNUM, ISINT));
 		}
 	}
 
@@ -126,9 +230,9 @@ class GuardCompiler extends HeadCompiler
 		Map<Functor, int[]> target = null;
 		switch (input)
 		{
-		case 0: target = guardLibrary0; break;
-		case 1: target = guardLibrary1; break;
-		case 2: target = guardLibrary2; break;
+		case 0: target = guard0; break;
+		case 1: target = guard1; break;
+		case 2: target = guard2; break;
 		default:
 			throw new RuntimeException("Illegal parameter input = " + input);
 		}
@@ -143,12 +247,11 @@ class GuardCompiler extends HeadCompiler
 		return args;
 	}
 
-	//
 	private RuleCompiler rc;			// rc.rs用
 	private List<Atom> typeConstraints;		// 型制約のリスト
 	private Map<String, ContextDef>  typedProcessContexts;	// 型付きプロセス文脈名から定義へのマップ
 
-	GuardCompiler(RuleCompiler rc, HeadCompiler hc)
+	public GuardCompiler2(RuleCompiler rc, HeadCompiler hc)
 	{
 		super();
 		this.rc = rc;
@@ -158,67 +261,75 @@ class GuardCompiler extends HeadCompiler
 		typedProcessContexts = rc.rs.typedProcessContexts;
 
 		putLibrary("string", 1, 1, array(ISSTRING));
-		//guardLibrary2.put(new SymbolFunctor("class",2), new int[]{0,      ISSTRING,Instruction.INSTANCEOF});
-		//guardLibrary1.put(new SymbolFunctor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
 		putLibrary("connectRuntime", 1, 1, array(ISSTRING, Instruction.CONNECTRUNTIME));
 	}
 
 	/** initNormalizedCompiler呼び出し後に呼ばれる。
 	 * 左辺関係型付き$pに対して、ガード用の仮引数番号を
 	 * 変数番号として左辺関係型付き$pのマッチングを取り終わった内部状態を持つようにする。*/
-	private final void initNormalizedGuardCompiler(GuardCompiler gc) {
-		identifiedCxtdefs = (HashSet)gc.identifiedCxtdefs.clone();
-		typedCxtDataTypes = (HashMap)gc.typedCxtDataTypes.clone();
-		typedCxtDefs = (ArrayList)((ArrayList)gc.typedCxtDefs).clone();
-		typedCxtSrcs = (HashMap)gc.typedCxtSrcs.clone();
-		typedCxtTypes = (HashMap)gc.typedCxtTypes.clone();
+	@SuppressWarnings("unchecked")
+	private final void initNormalizedGuardCompiler(GuardCompiler2 gc)
+	{
+		identifiedCxtdefs = (HashSet<ContextDef>)gc.identifiedCxtdefs.clone();
+		typedCxtDataTypes = (HashMap<ContextDef, Integer>)gc.typedCxtDataTypes.clone();
+		typedCxtDefs = (List<ContextDef>)((ArrayList<ContextDef>)gc.typedCxtDefs).clone();
+		typedCxtSrcs = (HashMap<ContextDef, Integer>)gc.typedCxtSrcs.clone();
+		typedCxtTypes = (HashMap<ContextDef, Object>)gc.typedCxtTypes.clone();
 		varCount = gc.varCount;	// 重複
 	}
 
 	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたGuardCompilerを作成して返す。
 	 * 正規化とは、左辺の全てのアトム/膜および左辺関係型付き$pに対して、ガード/ボディ用の仮引数番号を
 	 * 変数番号として左辺と左辺関係型制約のマッチングを取り終わった内部状態を持つようにすることを意味する。*/
-	private final GuardCompiler getNormalizedGuardCompiler() {
-		GuardCompiler gc = new GuardCompiler(rc,this);
+	private final GuardCompiler2 getNormalizedGuardCompiler()
+	{
+		GuardCompiler2 gc = new GuardCompiler2(rc,this);
 		gc.initNormalizedGuardCompiler(this);
 		return gc;
 	}
-	//
 
 	/**
 	 * プロセス文脈のない膜やstableな膜の検査を行う。
 	 * RISC化に伴い、ヘッドコンパイラから移動してきた。 by mizuno
 	 */
-	void checkMembraneStatus() {
+	public void checkMembraneStatus()
+	{
 		// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
-		for (int i = 0; i < mems.size(); i++) {
-			Membrane mem = (Membrane)mems.get(i);
+		for (int i = 0; i < mems.size(); i++)
+		{
+			Membrane mem = mems.get(i);
 			int mempath = memToPath(mem);
 			if (mempath == 0) continue; //本膜に対しては何もしない
-			if (mem.processContexts.isEmpty()) {
+			if (mem.processContexts.isEmpty())
+			{
 				countAtomsOfMembrane(mem);
 				match.add(new Instruction(Instruction.NMEMS,  mempath, mem.mems.size()));
 			}
-			//
-			if (mem.ruleContexts.isEmpty()) {
+			if (mem.ruleContexts.isEmpty())
+			{
 				match.add(new Instruction(Instruction.NORULES, mempath));
 			}
-			if (mem.stable) {
+			if (mem.stable)
+			{
 				match.add(new Instruction(Instruction.STABLE, mempath));
 			}
 		}
 	}
+
 	/** 引数に渡されたアトムのリンクに対してgetlinkを行い、変数番号を登録する。(RISC化)
 	 * <strike>将来的にはリンクオブジェクトをガード命令列の引数に渡すようにするかも知れない。</strike>
 	 * 将来的にはガード命令列はヘッド命令列にインライン展開される予定なので、
 	 * このメソッドで生成されるgetlinkは冗長命令の除去により消せる見込み。*/
-	void getLHSLinks() {
-		for (int i = 0; i < atoms.size(); i++) {
+	void getLHSLinks()
+	{
+		for (int i = 0; i < atoms.size(); i++)
+		{
 			Atom atom = (Atom)atoms.get(i);
 			int atompath = atomToPath(atom);
 			int arity = atom.getArity();
 			int[] paths = new int[arity];
-			for (int j = 0; j < arity; j++) {
+			for (int j = 0; j < arity; j++)
+			{
 				paths[j] = varCount;
 				match.add(new Instruction(Instruction.GETLINK, varCount, atompath, j));
 				varCount++;
@@ -231,7 +342,7 @@ class GuardCompiler extends HeadCompiler
 	 * 型付きプロセス文脈が表すプロセスを一意に決定する。
 	 * このメソッドは長い。
 	 */
-	void fixTypedProcesses() throws CompileException
+	public void fixTypedProcesses() throws CompileException
 	{
 		// STEP 1 - 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
 		identifiedCxtdefs = new HashSet<ContextDef>();
@@ -275,114 +386,12 @@ class GuardCompiler extends HeadCompiler
 		// 型を決定するべきプロセス文脈
 		System.err.println("TypedProcessContexts: " + typedProcessContexts.keySet());
 		
-		class ProcessTypeVariable
-		{
-			private final String name;
-			private String type;
-			public ProcessTypeVariable(String name) { this(name, "untyped"); }
-			public ProcessTypeVariable(String name, String type) { this.name = name; this.type = type; }
-			public String getType() { return type; }
-			public void setType(String type) { this.type = type; }
-			public boolean isUntyped() { return type.equals("untyped"); }
-			public String toString() { return name + " = " + type; }
-		}
-		
-		class ProcessTypeContext
-		{
-			private Map<ContextDef, String> typeVars = new HashMap<ContextDef, String>();
-			private Map<String, String> varToText = new HashMap<String, String>();
-			private Map<String, ProcessTypeVariable> types = new HashMap<String, ProcessTypeVariable>();
-			private boolean inconsistent = false;
-			
-			public ProcessTypeContext()
-			{
-				putTypedVariable("int", "int");
-				putTypedVariable("float", "float");
-				putTypedVariable("string", "string");
-				putTypedVariable("unary", "unary");
-				putTypedVariable("ground", "ground");
-			}
-			
-			public void init()
-			{
-				inconsistent = false;
-			}
-			
-			public void addTypeVariable(ContextDef def, String v)
-			{
-				varToText.put(v, def.toString());
-				typeVars.put(def, v);
-				putUntypedVariable(v);
-			}
-			
-			public String getTypeVariable(ContextDef def)
-			{
-				return typeVars.get(def);
-			}
-			
-			public boolean unify(String v1, String v2)
-			{
-				ProcessTypeVariable t1 = types.get(v1), t2 = types.get(v2);
-				if (!t1.getType().equals(t2.getType()))
-				{
-					if (t1.isUntyped())
-					{
-						t1.setType(t2.getType());
-					}
-					else if (t2.isUntyped())
-					{
-						t2.setType(t1.getType());
-					}
-					else
-					{
-						System.err.println(String.format(
-							"Inconsistent unification: %s[%s] <-> %s[%s]",
-							varToText.get(v1), t1, varToText.get(v2), t2));
-						inconsistent = true;
-						return false;
-					}
-				}
-				return true;
-			}
-			
-			public boolean isConsistent()
-			{
-				return !inconsistent;
-			}
-			
-			public boolean isAllTyped()
-			{
-				for (ProcessTypeVariable var : types.values())
-				{
-					if (var.isUntyped()) return false;
-				}
-				return true;
-			}
-			
-			public void dump()
-			{
-				System.err.println("typeVars: " + typeVars);
-				System.err.println("types   : " + types);
-			}
-			
-			private void putUntypedVariable(String varName)
-			{
-				types.put(varName, new ProcessTypeVariable(varName));
-			}
-			
-			private void putTypedVariable(String varName, String type)
-			{
-				varToText.put(varName, type);
-				types.put(varName, new ProcessTypeVariable(varName, type));
-			}
-		}
-		
 		ProcessTypeContext tu = new ProcessTypeContext();
 		{
 			int i = 0;
 			for (ContextDef def : typedProcessContexts.values())
 			{
-				String v = "" + (char)('A' + i++);
+				String v = "?" + i++;
 				tu.addTypeVariable(def, v);
 			}
 		}
@@ -421,12 +430,12 @@ class GuardCompiler extends HeadCompiler
 			}
 			else if (f.getArity() == 2)
 			{
+				Context pc0 = (Context)c.args[0].buddy.atom;
+				Context pc1 = (Context)c.args[1].buddy.atom;
+				String v0 = tu.getTypeVariable(pc0.def);
+				String v1 = tu.getTypeVariable(pc1.def);
 				if (f.getName().equals("=:="))
 				{
-					Context pc0 = (Context)c.args[0].buddy.atom;
-					Context pc1 = (Context)c.args[1].buddy.atom;
-					String v0 = tu.getTypeVariable(pc0.def);
-					String v1 = tu.getTypeVariable(pc1.def);
 					if (!tu.unify(v0, v1) || !tu.unify(v0, "int") || !tu.unify(v1, "int"))
 					{
 						break;
@@ -435,14 +444,14 @@ class GuardCompiler extends HeadCompiler
 			}
 			else if (f.getArity() == 3)
 			{
+				Context pc0 = (Context)c.args[0].buddy.atom;
+				Context pc1 = (Context)c.args[1].buddy.atom;
+				Context pc2 = (Context)c.args[2].buddy.atom;
+				String v0 = tu.getTypeVariable(pc0.def);
+				String v1 = tu.getTypeVariable(pc1.def);
+				String v2 = tu.getTypeVariable(pc2.def);
 				if (f.getName().equals("+"))
 				{
-					Context pc0 = (Context)c.args[0].buddy.atom;
-					Context pc1 = (Context)c.args[1].buddy.atom;
-					Context pc2 = (Context)c.args[2].buddy.atom;
-					String v0 = tu.getTypeVariable(pc0.def);
-					String v1 = tu.getTypeVariable(pc1.def);
-					String v2 = tu.getTypeVariable(pc2.def);
 					if (!tu.unify(v0, "int") || !tu.unify(v1, "int") || !tu.unify(v2, "int"))
 					{
 						break;
@@ -521,9 +530,9 @@ class GuardCompiler extends HeadCompiler
 					ContextDef def1 = null;
 					ContextDef def2 = null;
 					ContextDef def3 = null;
-					if (func.getArity() > 0)  def1 = ((ProcessContext)cstr.args[0].buddy.atom).def;
-					if (func.getArity() > 1)  def2 = ((ProcessContext)cstr.args[1].buddy.atom).def;
-					if (func.getArity() > 2)  def3 = ((ProcessContext)cstr.args[2].buddy.atom).def;
+					if (func.getArity() > 0) def1 = ((Context)cstr.args[0].buddy.atom).def;
+					if (func.getArity() > 1) def2 = ((Context)cstr.args[1].buddy.atom).def;
+					if (func.getArity() > 2) def3 = ((Context)cstr.args[2].buddy.atom).def;
 
 					if (func.equals("unary", 1))
 					{
@@ -609,7 +618,7 @@ class GuardCompiler extends HeadCompiler
 							if(srcPath==UNBOUND) continue FixType;
 							uniqVars.add(srcPath);
 						}
-						if(func.getName().equals("uniq"))
+						if (func.getName().equals("uniq"))
 						{
 							match.add(new Instruction(Instruction.UNIQ, uniqVars));
 						}
@@ -647,7 +656,8 @@ class GuardCompiler extends HeadCompiler
 							match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
 							match.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
 						}
-						else{
+						else
+						{
 							checkGroundLink(def1);
 							checkGroundLink(def2);
 							if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
@@ -681,23 +691,18 @@ class GuardCompiler extends HeadCompiler
 					else if (func.isInteger())
 					{
 						bindToFunctor(def1, func);
-						typedCxtDataTypes.put(def1, ISINT);
+						typedCxtDataTypes.put(def1, Instruction.ISINT);
 					}
 					else if (func.isNumber())
 					{
 						bindToFunctor(def1, func);
-						typedCxtDataTypes.put(def1, ISFLOAT);
+						typedCxtDataTypes.put(def1, Instruction.ISFLOAT);
 					}
 					else if (func.isString())
 					{
 						bindToFunctor(def1, func);
-						typedCxtDataTypes.put(def1, ISSTRING);
+						typedCxtDataTypes.put(def1, Instruction.ISSTRING);
 					}
-//					else if (func instanceof runtime.ObjectFunctor
-//					&& ((runtime.ObjectFunctor)func).getObject() instanceof String) {
-//					bindToFunctor(def1, func);
-//					typedcxtdatatypes.put(def1, ISSTRING);
-//					}
 					else if (cstr.isSelfEvaluated && func.getArity() == 1)
 					{
 						bindToFunctor(def1, func);
@@ -705,15 +710,17 @@ class GuardCompiler extends HeadCompiler
 					}
 					else if (func.equals(Functor.UNIFY)) // (-X = +Y)
 					{
-						if (!identifiedCxtdefs.contains(def2)) { // (+X = -Y) は (-Y = +X) として処理する
+						if (!identifiedCxtdefs.contains(def2)) // (+X = -Y) は (-Y = +X) として処理する
+						{
 							ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
 							if (!identifiedCxtdefs.contains(def2)) continue;
 						}
 						// 未特定のdef1 = groundのdef2 は許されない
-						if(GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE){
+						if (GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE)
+						{
 							if (!identifiedCxtdefs.contains(def1)) continue;
 						}
-						processEquivalenceConstraint(def1,def2);
+						processEquivalenceConstraint(def1, def2);
 					}
 //					else if (func.equals(new SymbolFunctor("==",2))) { // (+X == +Y)
 //						if (!identifiedCxtdefs.contains(def1)) continue;
@@ -756,9 +763,9 @@ class GuardCompiler extends HeadCompiler
 //						match.add(new Instruction(Instruction.ISHLINK, atomid2));
 //						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
 //					}
-					else if (guardLibrary0.containsKey(func)) // 0入力制約//seiji
+					else if (guard0.containsKey(func)) // 0入力制約//seiji
 					{
-						int[] desc = guardLibrary0.get(func);
+						int[] desc = guard0.get(func);
 						int atomid = varCount++;
 						match.add(new Instruction(desc[0], atomid));
 						bindToUnaryAtom(def1, atomid);
@@ -775,12 +782,14 @@ class GuardCompiler extends HeadCompiler
 							typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
 						}
 					}
-					else if (guardLibrary1.containsKey(func)) // 1入力制約
+					else if (guard1.containsKey(func)) // 1入力制約
 					{
-						int[] desc = guardLibrary1.get(func);
+						int[] desc = guard1.get(func);
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						int atomid1 = loadUnaryAtom(def1);
-						if (desc[0] != 0 && (!typedCxtDataTypes.containsKey(def1) || desc[0] != typedCxtDataTypes.get(def1)))
+						
+						Integer t1 = typedCxtDataTypes.get(def1);
+						if (desc[0] != 0 && (t1 == null || desc[0] != t1))
 						{
 							match.add(new Instruction(desc[0], atomid1));
 							typedCxtDataTypes.put(def1, desc[0]);
@@ -805,8 +814,8 @@ class GuardCompiler extends HeadCompiler
 							}
 							else
 							{
-//								if (func.equals(new SymbolFunctor("getconame", 2))) // getconame制約のための処理
-//									match.add(new Instruction(Instruction.HASCONAME, atomid1));
+								//if (func.equals(new SymbolFunctor("getconame", 2))) // getconame制約のための処理
+								//	match.add(new Instruction(Instruction.HASCONAME, atomid1));
 								atomid2 = varCount++;
 								match.add(new Instruction(desc[1], atomid2, atomid1));
 							}
@@ -817,18 +826,16 @@ class GuardCompiler extends HeadCompiler
 							typedCxtDataTypes.put(def2, desc[2]);
 						}
 					}
-					else if (guardLibrary2.containsKey(func)) // 2入力制約
+					else if (guard2.containsKey(func)) // 2入力制約
 					{
-						int[] desc = guardLibrary2.get(func);
+						int[] desc = guard2.get(func);
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						if (!identifiedCxtdefs.contains(def2)) continue;
 
-						//Util.println("st");
 						int atomid1 = loadUnaryAtom(def1);
 						int atomid2 = loadUnaryAtom(def2);
 						if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
 							connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
-						//Util.println("end");
 
 						Integer t1 = typedCxtDataTypes.get(def1);
 						if (desc[0] != 0 && (t1 == null || desc[0] != t1))
@@ -927,13 +934,16 @@ class GuardCompiler extends HeadCompiler
 	}
 
 	/** 型制約を廃棄する。エラー復帰用メソッド */
-	private void discardTypeConstraint(Atom cstr) throws CompileException{
+	private void discardTypeConstraint(Atom cstr) throws CompileException
+	{
 		match.add(Instruction.fail());
-		for (int i = 0; i < cstr.functor.getArity(); i++) {
-			ContextDef def = ((ProcessContext)cstr.args[i].buddy.atom).def;
-			bindToFunctor(def,new SymbolFunctor("*",1));
+		for (int i = 0; i < cstr.functor.getArity(); i++)
+		{
+			ContextDef def = ((Context)cstr.args[i].buddy.atom).def;
+			bindToFunctor(def, new SymbolFunctor("*",1));
 		}
 	}
+
 	/** 型付きプロセス文脈defを1引数ファンクタfuncで束縛する */
 	private void bindToFunctor(ContextDef def, Functor func) throws CompileException
 	{
@@ -1112,7 +1122,8 @@ class GuardCompiler extends HeadCompiler
 	 * @param def
 	 * @throws CompileException
 	 */
-	private void checkUnaryProcessContext(ContextDef def) throws CompileException{
+	private void checkUnaryProcessContext(ContextDef def) throws CompileException
+	{
 		if(def.lhsOcc == null)
 			error("COMPILE ERROR: unary type process context must occur in LHS");
 		else if(def.lhsOcc.args.length!=1)	
@@ -1126,19 +1137,24 @@ class GuardCompiler extends HeadCompiler
 	 * 
 	 * @param mem 数をチェックする膜
 	 */
-	private void countAtomsOfMembrane(Membrane mem){
-		if(!memToGroundSizes.containsKey(mem)){ // 厳しくRISC化するなら、natomsも分けるべきか
+	private void countAtomsOfMembrane(Membrane mem)
+	{
+		if (!memToGroundSizes.containsKey(mem)) // 厳しくRISC化するなら、natomsも分けるべきか
+		{
 			match.add(new Instruction(Instruction.NATOMS, memToPath(mem),
 					mem.getNormalAtomCount() + mem.typedProcessContexts.size() ));
-		}else{
+		}
+		else
+		{
 			Map<ContextDef, Integer> gmap = memToGroundSizes.get(mem);
 			//普通のアトムの個数と、unaryの個数
 			int ausize = mem.getNormalAtomCount() + mem.typedProcessContexts.size() - gmap.size();
 			int ausfunc = varCount++;
-			match.add(new Instruction(Instruction.LOADFUNC,ausfunc,new runtime.functor.IntegerFunctor(ausize)));
+			match.add(new Instruction(Instruction.LOADFUNC,ausfunc, new IntegerFunctor(ausize)));
 			//各groundについて、isground命令で貰ってきたground構成アトム数を足していく
 			int allfunc = ausfunc;	
-			for(ContextDef def : gmap.keySet()){
+			for (ContextDef def : gmap.keySet())
+			{
 				int natomfp = gmap.get(def).intValue();
 				int newfunc = varCount++;
 				match.add(new Instruction(Instruction.IADDFUNC,newfunc,allfunc,natomfp));
@@ -1154,21 +1170,28 @@ class GuardCompiler extends HeadCompiler
 	/** HeadCompiler.getAtomActualsのオーバーライド。
 	 * GuardCompilerは現状では、atomsに対応する変数番号のリストの後に、
 	 * typedcxtdefsのうちUNARY_ATOM_TYPEであるようなものの変数番号のリストをつなげたArrayListを返す。*/
-	List<Integer> getAtomActuals() {
-		List<Integer> args = new ArrayList<Integer>();		
-		for (int i = 0; i < atoms.size(); i++) {
-			args.add( atomPaths.get(atoms.get(i)) );
+	List<Integer> getAtomActuals()
+	{
+		List<Integer> args = new ArrayList<Integer>();
+		for (int i = 0; i < atoms.size(); i++)
+		{
+			args.add(atomPaths.get(atoms.get(i)));
 		}
-		for(ContextDef def : typedCxtDefs){
+		for (ContextDef def : typedCxtDefs)
+		{
 			if (typedCxtTypes.get(def) == UNARY_ATOM_TYPE)
-				args.add( typedcxtToSrcPath(def) );
+			{
+				args.add(typedcxtToSrcPath(def));
+			}
 		}
 		return args;
 	}
 
 	//
 
-	void error(String text) throws CompileException {
+	@Deprecated
+	void error(String text) throws CompileException
+	{
 		Env.error(text);
 		throw new CompileException("COMPILE ERROR");
 	}
@@ -1221,5 +1244,6 @@ class GuardCompiler extends HeadCompiler
 			}
 		}
 	}
+
 
 }

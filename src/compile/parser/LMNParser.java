@@ -19,8 +19,8 @@ import java.util.Properties;
 
 import java_cup.runtime.Scanner;
 import runtime.Env;
-import runtime.Functor;
-import runtime.SpecialFunctor;
+import runtime.functor.Functor;
+import runtime.functor.SpecialFunctor;
 
 import compile.structure.Atom;
 import compile.structure.Atomic;

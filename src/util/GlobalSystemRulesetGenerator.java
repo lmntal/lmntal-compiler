@@ -6,12 +6,12 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.InterpretedRuleset;
 import runtime.Rule;
-import runtime.SymbolFunctor;
+import runtime.functor.Functor;
+import runtime.functor.SymbolFunctor;
 
 /** システムルールセット
  * <p>todo インスタンスを誰が生成するのか決める</p>

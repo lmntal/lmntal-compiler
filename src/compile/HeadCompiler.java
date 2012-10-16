@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import runtime.Env;
-import runtime.Functor;
 import runtime.Instruction;
 import runtime.InstructionList;
-import runtime.SpecialFunctor;
+import runtime.functor.Functor;
+import runtime.functor.SpecialFunctor;
 import util.Util;
 
 import compile.structure.Atom;
@@ -87,7 +87,8 @@ class HeadCompiler
 
 	protected static final int UNBOUND = -1;
 
-	HeadCompiler() {
+	HeadCompiler()
+	{
 	}
 
 	/** ガード否定条件およびボディのコンパイルで使うために、
@@ -100,37 +101,41 @@ class HeadCompiler
 		mems.addAll(hc.mems);
 		atoms.addAll(hc.atoms);
 		varCount = 0;
-		for(Membrane mem : mems){
-			memPaths.put(mem, new Integer(varCount++));
+		for (Membrane mem : mems)
+		{
+			memPaths.put(mem, varCount++);
 		}
-		Iterator it = atoms.iterator();
-		while (it.hasNext()) {
-			Atom atom = (Atom)it.next();
-			atomPaths.put(atom, new Integer(varCount));
-			atomIds.put(atom, new Integer(varCount++));
-			visited.add(atom);
+		for (Atomic a : atoms)
+		{
+			atomPaths.put(a, varCount);
+			atomIds.put((Atom)a, varCount++);
+			visited.add((Atom)a);
 		}
 	}
 
 	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたHeadCompilerを作成して返す。
 	 * 正規化とは、左辺の全てのアトムおよび膜に対して、ガード/ボディ用の仮引数番号を
 	 * 変数番号として左辺のマッチングを取り終わった内部状態を持つようにすることを意味する。*/
-	final HeadCompiler getNormalizedHeadCompiler() {
+	final HeadCompiler getNormalizedHeadCompiler()
+	{
 		HeadCompiler hc = new HeadCompiler();
 		hc.initNormalizedCompiler(this);
 		return hc;
 	}
 	/** 膜memの子孫の全てのアトムと膜を、それぞれリストatomsとmemsに追加する。
 	 * リスト内の追加された位置がそのアトムおよび膜の仮引数IDになる。*/
-	void enumFormals(Membrane mem) {
+	void enumFormals(Membrane mem)
+	{
 		Env.c("enumFormals");
-		for (Atom atom : mem.atoms) {
+		for (Atom atom : mem.atoms)
+		{
 			// 左辺に出現したアトムを登録する
-			atomIds.put(atom, new Integer(atoms.size()));
+			atomIds.put(atom, atoms.size());
 			atoms.add(atom);
 		}
 		mems.add(mem);	// 本膜はmems[0]
-		for (Membrane m : mem.mems) {
+		for (Membrane m : mem.mems)
+		{
 			enumFormals(m);
 		}
 	}
@@ -285,31 +290,36 @@ class HeadCompiler
 		}
 	}
 
-	private void searchMembrane(Membrane mem, HashSet<Atom> qatoms, Atom firstatom, Membrane firstmem) {
+	private void searchMembrane(Membrane mem, HashSet<Atom> qatoms, Atom firstatom, Membrane firstmem)
+	{
 		if (memVisited.contains(mem)) return;
 		memVisited.add(mem);
 
 		int thismempath = memToPath(mem);
-		for(Atom atom : mem.atoms){
+		for (Atom atom : mem.atoms)
+		{
 			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 			if (atomToPath(atom) != UNBOUND) continue;
 			// 見つかったアトムを変数に取得する
 			int atompath = varCount++;
 			// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
 			Membrane[] testmems = { mem };
-			if (proccxteqMap.containsKey(mem)) {
+			if (proccxteqMap.containsKey(mem))
+			{
 				// $p等式トップレベルのアトムのときは、$pがヘッド出現する膜とも比較する
 				testmems = new Membrane[]{ mem, proccxteqMap.get(mem).def.lhsOcc.mem };
 			}
-			atomPaths.put(atom, new Integer(atompath));
+			atomPaths.put(atom, atompath);
 			searchLinkedGroup(atom, qatoms, firstatom, firstmem);
 		}
-		for(Membrane submem : mem.mems){
+		for (Membrane submem : mem.mems)
+		{
 			int submempath = memToPath(submem);
-			if (submempath == UNBOUND) {
+			if (submempath == UNBOUND)
+			{
 				// 子膜を変数に取得する
 				submempath = varCount++;
-				memPaths.put(submem, new Integer(submempath));
+				memPaths.put(submem, submempath);
 			}
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 			searchMembrane(submem, qatoms, firstatom, firstmem);
@@ -505,41 +515,48 @@ class HeadCompiler
 		// 見つかった新しい子膜にあるアトムを優先的に検査する。
 		// ただしアクティブアトムがある膜を優先する。
 		nextmem:
-			for(Iterator<Membrane> it = newmemlist.iterator(); it.hasNext();){
-				Membrane mem = it.next();
-				for(Atom atom : mem.atoms){
-					if (!isAtomLoaded(atom) && atom.functor.isActive()) {
-						if(Env.findatom2) compileMembraneForSlimcode(mem, list, false);
-						else compileMembrane(mem, list);
-						it.remove();
-						continue nextmem;
-					}
+		for (Iterator<Membrane> it = newmemlist.iterator(); it.hasNext();)
+		{
+			Membrane mem = it.next();
+			for (Atom atom : mem.atoms)
+			{
+				if (!isAtomLoaded(atom) && atom.functor.isActive())
+				{
+					if(Env.findatom2) compileMembraneForSlimcode(mem, list, false);
+					else compileMembrane(mem, list);
+					it.remove();
+					continue nextmem;
 				}
 			}
+		}
 
-		for(Membrane mem : newmemlist){
+		for (Membrane mem : newmemlist)
+		{
 			if(Env.findatom2) compileMembraneForSlimcode(mem, list, false);
 			else compileMembrane(mem, list);
 		}
 	}
 	/** 引き続きこのヘッドを型なしでコンパイルするための準備をする。*/
-	void switchToUntypedCompilation() {
+	void switchToUntypedCompilation()
+	{
 		fFindDataAtoms = true;
 		memVisited.clear();
 	}
 
 	/** 膜および子孫の膜に対してマッチングを行う */
-	void compileMembrane(Membrane mem, InstructionList list) {
-		Env.c("compileMembrane");
-		List<Instruction> insts = list.insts;
+	void compileMembrane(Membrane mem, InstructionList list)
+	{
 		if (memVisited.contains(mem)) return;
 		memVisited.add(mem);
+
+		List<Instruction> insts = list.insts;
+
 		if(debug2){
 			Util.println("\ncompileMembrane called\n" + " mem :"+mem+" list :\n" + list.insts );
 		}
 		int thismempath = memToPath(mem);
-		for(Atom atom : mem.atoms){
-
+		for (Atom atom : mem.atoms)
+		{
 			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 			if (atomToPath(atom) != UNBOUND) continue;
 			// 見つかったアトムを変数に取得する
@@ -555,9 +572,11 @@ class HeadCompiler
 			getLinks(atompath, atom.functor.getArity(), insts);
 			compileLinkedGroup(atom, list);
 		}
-		for(Membrane submem : mem.mems){
+		for (Membrane submem : mem.mems)
+		{
 			int submempath = memToPath(submem);
-			if (submempath == UNBOUND) {
+			if (submempath == UNBOUND)
+			{
 				// !fFindDataAtomsのとき、アクティブアトムを含まない子膜の取得を後回しにする
 				if ( !fFindDataAtoms && !hasActiveAtom(submem)) continue;
 
@@ -579,7 +598,6 @@ class HeadCompiler
 			
 			//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 			compileMembrane(submem, list);
-
 		}
 		if(varCount > maxVarCount)
 			maxVarCount = varCount;
@@ -731,7 +749,7 @@ class HeadCompiler
 							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 						}
 						emitNeqAtoms(mem, atom, atompath, insts);
-						atomPaths.put(atom, new Integer(atompath));
+						atomPaths.put(atom, atompath);
 						if(debug)Util.println("put " + atom);
 
 						//リンクの一括取得(RISC化) by mizuno
@@ -750,7 +768,7 @@ class HeadCompiler
 							diffvarcount = varCount - restvarcount;
 							varCount = restvarcount;
 						}
-						memPaths.put(mems.get(0), new Integer(0));
+						memPaths.put(mems.get(0), 0);
 					}
 					varCount += diffvarcount;
 					if(!groupinst.insts.isEmpty()){
@@ -787,7 +805,7 @@ class HeadCompiler
 							mem.connect(submem, othermem);
 						}
 					}
-					memPaths.put(submem, new Integer(submempath));
+					memPaths.put(submem, submempath);
 				}
 				//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 				compileMembraneForSlimcode(submem, list, false);
@@ -837,7 +855,7 @@ class HeadCompiler
 						} else {
 							insts.add(Instruction.findatom(atompath, thismempath, atom.functor));}
 						emitNeqAtoms(mem, atom, atompath, insts);
-						atomPaths.put(atom, new Integer(atompath));
+						atomPaths.put(atom, atompath);
 
 						//リンクの一括取得(RISC化) by mizuno
 						getLinks(atompath, atom.functor.getArity(), insts);
@@ -884,7 +902,7 @@ class HeadCompiler
 						} else{
 							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));}
 						emitNeqAtoms(mem, atom, atompath, subinst.insts);
-						atomPaths.put(atom, new Integer(atompath));
+						atomPaths.put(atom, atompath);
 
 						//リンクの一括取得(RISC化) by mizuno
 						getLinks(atompath, atom.functor.getArity(), subinst.insts);
@@ -900,7 +918,7 @@ class HeadCompiler
 							diffvarcount = varCount - restvarcount;
 							varCount = restvarcount;
 						}
-						memPaths.put(mems.get(0), new Integer(0));
+						memPaths.put(mems.get(0), 0);
 					}
 					varCount += diffvarcount;
 					if(!groupinst.insts.isEmpty()){
@@ -938,7 +956,7 @@ class HeadCompiler
 							insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
 						}
 					}
-					memPaths.put(submem, new Integer(submempath));
+					memPaths.put(submem, submempath);
 				}
 				//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
 				compileMembraneForSlimcode(submem, list, false);
@@ -974,7 +992,7 @@ class HeadCompiler
 			// リンク束が無い場合
 			if (pc.bundle == null) {
 				insts.add(new Instruction(Instruction.NFREELINKS, thismempath,
-						mem.getFreeLinkAtomCount()));					
+						mem.getFreeLinkAtomCount()));
 			}
 		}
 		for(Membrane submem : mem.mems){
@@ -1125,9 +1143,13 @@ class HeadCompiler
 			}
 		}
 	}
-	private boolean hasActiveAtom(Membrane mem){
-		for(Atom atom : mem.atoms) 
-			if (atom.functor.isActive()) return true;	
+
+	private boolean hasActiveAtom(Membrane mem)
+	{
+		for (Atom atom : mem.atoms)
+		{
+			if (atom.functor.isActive()) return true;
+		}
 		return false;
 	}
 }

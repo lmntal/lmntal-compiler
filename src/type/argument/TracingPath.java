@@ -1,6 +1,6 @@
 package type.argument;
 
-import runtime.Functor;
+import runtime.functor.Functor;
 
 public class TracingPath implements Path {
 

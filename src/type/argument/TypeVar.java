@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 
-import runtime.Functor;
+import runtime.functor.Functor;
 import type.TypeEnv;
 
 

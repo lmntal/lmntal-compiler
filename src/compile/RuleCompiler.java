@@ -12,14 +12,14 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
-import runtime.Functor;
 import runtime.Inline;
 import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Rule;
 import runtime.Ruleset;
-import runtime.SymbolFunctor;
+import runtime.functor.Functor;
+import runtime.functor.SymbolFunctor;
 
 import compile.structure.Atom;
 import compile.structure.Atomic;
@@ -47,7 +47,10 @@ public class RuleCompiler
 	/** コンパイルされるルール構造 */
 	RuleStructure rs;
 
-	/** コンパイルされるルールに対応するルールオブジェクト */
+	/**
+	 * コンパイルされるルールに対応するルールオブジェクト
+	 * 中間命令列
+	 */
 	Rule theRule;
 
 	private List<Instruction> atomMatch;
@@ -62,21 +65,21 @@ public class RuleCompiler
 
 	boolean hasISGROUND = true;
 
-	List<Atom> rhsatoms;
-	//List<Atomic> rhsAtomics;				// プロセス文脈拡張用
-	Map<Atom, Integer>  rhsatompath;		// 右辺のアトム (Atomic) -> 変数番号 (Integer)
-	//Map<Atomic, Integer> rhsAtomicPath;		// プロセス文脈拡張用
-	Map<Membrane, Integer>  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)
-	Map<LinkOccurrence, Integer>  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
-	//List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り血にした
-	List<Atomic> lhsatoms;
-	List<Membrane> lhsmems;
-	Map<Atomic, Integer>  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
-	Map<Membrane, Integer>  lhsmempath;		// 左辺の膜 (Membrane) -> 変数番号 (Integer)
-	Map<LinkOccurrence, Integer>  lhslinkpath = new HashMap<LinkOccurrence, Integer>();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
+	private List<Atom> rhsatoms;
+	//private List<Atomic> rhsAtomics;				// プロセス文脈拡張用
+	private Map<Atom, Integer>  rhsatompath;		// 右辺のアトム (Atomic) -> 変数番号 (Integer)
+	//private Map<Atomic, Integer> rhsAtomicPath;		// プロセス文脈拡張用
+	private Map<Membrane, Integer>  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)
+	private Map<LinkOccurrence, Integer>  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
+	//private List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り血にした
+	private List<Atomic> lhsatoms;
+	private List<Membrane> lhsmems;
+	private Map<Atomic, Integer>  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
+	private Map<Membrane, Integer>  lhsmempath;		// 左辺の膜 (Membrane) -> 変数番号 (Integer)
+	private Map<LinkOccurrence, Integer>  lhslinkpath = new HashMap<LinkOccurrence, Integer>();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
 	// ＜左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])　＞から変更
 
-	HeadCompiler hc, hc2;
+	private HeadCompiler hc, hc2;
 
 	private int lhsmemToPath(Membrane mem) { return lhsmempath.get(mem); }
 	private int rhsmemToPath(Membrane mem) { return rhsmempath.get(mem); }
@@ -151,6 +154,7 @@ public class RuleCompiler
 
 		compile_g();
 
+		// 右辺膜のコンパイル
 		if (isSwapLinkUsable() && (Env.useSwapLink || Env.useCycleLinks))
 		{
 			compile_r_swaplink();
@@ -831,7 +835,7 @@ public class RuleCompiler
 		lhsmems  = hc.mems;
 		lhsatoms = hc.atoms;
 		genLHSPaths();
-		gc = new GuardCompiler(this, hc);		/* 変数番号の正規化 */
+		gc = new GuardCompiler2(this, hc);		/* 変数番号の正規化 */
 		if (guard == null) return;
 		int formals = gc.varCount;
 		gc.getLHSLinks();								/* 左辺の全てのアトムのリンクについてgetlink命令を発行する */
@@ -866,14 +870,14 @@ public class RuleCompiler
 	void fixUniqOrder()
 	{
 		boolean found = guard.contains(Instruction.UNIQ);
-		List vars = new ArrayList();
+		List<Integer> vars = new ArrayList<Integer>();
 		for (Iterator<Instruction> it = guard.iterator(); it.hasNext(); )
 		{
 			Instruction inst = it.next();
 			if (inst.getKind() == Instruction.UNIQ)
 			{
 				found = true;
-				vars.addAll((ArrayList)inst.getArg(0));
+				vars.addAll((List<Integer>)inst.getArg(0));
 				it.remove();
 			}
 		}
@@ -921,7 +925,7 @@ public class RuleCompiler
 
 	// 型付きプロセス文脈関係
 
-	private GuardCompiler gc;
+	private GuardCompiler2 gc;
 	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
 	private HashMap<ProcessContext, Integer> rhstypedcxtpaths = new HashMap<ProcessContext, Integer>();
 	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkのリストを指す)変数番号 */
@@ -1152,42 +1156,60 @@ public class RuleCompiler
 		mem.atoms.addAll(atomlist);
 	}
 
-	/** ルールの左辺と右辺に対してstaticUnifyを呼ぶ */
+	/**
+	 * ルールの左辺と右辺に対してstaticUnifyを呼ぶ
+	 */
 	private void simplify() throws CompileException
 	{
 		staticUnify(rs.leftMem);
 		checkExplicitFreeLinks(rs.leftMem);
+		/*
+		if (!verifyExplicitFreeLinks(rs.leftMem))
+		{
+			throw new CompileException("System error");
+		}
+		*/
+
 		staticUnify(rs.rightMem);
+
 		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning)
 		{
 			Env.warning("WARNING: rule with empty head: " + rs);
 		}
+
+		// ガード膜に関する操作（ここでいいのか？）
 		// その他 unary =/== ground の順番に並べ替える
 		List<Atom> typeConstraints = rs.guardMem.atoms;
-		LinkedList lists[] = {new LinkedList(),new LinkedList(),new LinkedList()};
+		List<Atom> unaryList = new ArrayList<Atom>();
+		List<Atom> unifyList = new ArrayList<Atom>();
+		List<Atom> groundList = new ArrayList<Atom>();
 		Iterator<Atom> it = typeConstraints.iterator();
 		while (it.hasNext())
 		{
 			Atom cstr = it.next();
 			Functor func = cstr.functor;
-			if (func.equals(new SymbolFunctor("unary",1)))  { lists[0].add(cstr); it.remove(); }
-			if (func.equals(Functor.UNIFY))                 { lists[1].add(cstr); it.remove(); }
-			if (func.equals(new SymbolFunctor("==",2)))     { lists[1].add(cstr); it.remove(); }
-			if (func.equals(new SymbolFunctor("\\==",2)))   { lists[1].add(cstr); it.remove(); }
-			if (func.equals(new SymbolFunctor("ground",1))) { lists[2].add(cstr); it.remove(); }
+			if (func.equals("unary", 1))    { unaryList.add(cstr); it.remove(); }
+			if (func.equals(Functor.UNIFY)) { unifyList.add(cstr); it.remove(); }
+			if (func.equals("==", 2))       { unifyList.add(cstr); it.remove(); }
+			if (func.equals("\\==", 2))     { unifyList.add(cstr); it.remove(); }
+			if (func.equals("ground", 1))   { groundList.add(cstr); it.remove(); }
 		}
-		typeConstraints.addAll(lists[0]);
-		typeConstraints.addAll(lists[1]);
-		typeConstraints.addAll(lists[2]);
+		typeConstraints.addAll(unaryList);
+		typeConstraints.addAll(unifyList);
+		typeConstraints.addAll(groundList);
 	}
 
-	/** 指定された膜とその子孫に存在する冗長な =（todo および自由リンク管理アトム）を除去する */
+	/**
+	 * 指定された膜とその子孫に存在する冗長な =（todo および自由リンク管理アトム）を除去する
+	 * { a(X), b(Y), X=Y } <==> { a(X), b(X) }
+	 */
 	private void staticUnify(Membrane mem) throws CompileException
 	{
 		for (Membrane submem : mem.mems)
 		{
 			staticUnify(submem);
 		}
+
 		List<Atom> removedAtoms = new ArrayList<Atom>();
 		for (Atom atom : mem.atoms)
 		{
@@ -1195,9 +1217,10 @@ public class RuleCompiler
 			{
 				LinkOccurrence link1 = atom.args[0].buddy;
 				LinkOccurrence link2 = atom.args[1].buddy;
+
+				// 単一化アトムのリンク先が両方とも他の膜につながっている場合
 				if (link1.atom.mem != mem && link2.atom.mem != mem)
 				{
-					// 単一化アトムのリンク先が両方とも他の膜につながっている場合
 					if (mem == rs.leftMem)
 					{
 						// // <strike> ( X=Y :- p(X,Y) ) は意味解析エラー
@@ -1211,16 +1234,14 @@ public class RuleCompiler
 						continue;
 					}
 				}
+
 				link1.buddy = link2;
 				link2.buddy = link1;
 				link2.name = link1.name;
 				removedAtoms.add(atom);
 			}
 		}
-		for (Atom atom : removedAtoms)
-		{
-			atom.mem.atoms.remove(atom);
-		}
+		mem.atoms.removeAll(removedAtoms);
 	}
 
 	/**
@@ -1234,10 +1255,15 @@ public class RuleCompiler
 		{
 			checkExplicitFreeLinks(submem);
 		}
+
+		// $p[X,X] などを検出
+		// 右辺では許される（単一化）。
+		// 左辺では「内部リンクの存在」という制約を示すと考えられるが、これは意味論エラー。
 		for (ProcessContext pc : mem.processContexts)
 		{
 			if (pc.def.isTyped()) continue;
-			HashSet<String> explicitfreelinks = new HashSet<String>();
+
+			Set<String> explicitfreelinks = new HashSet<String>();
 			for (int i = 0; i < pc.args.length; i++)
 			{
 				LinkOccurrence lnk = pc.args[i];
@@ -1251,6 +1277,46 @@ public class RuleCompiler
 				}
 			}
 		}
+	}
+
+	/**
+	 * 型なしプロセス文脈の明示的な引数を再帰的に検査する．
+	 * 途中で落ちない。
+	 * @param mem
+	 * @throws CompileException
+	 */
+	private boolean verifyExplicitFreeLinks(Membrane mem)
+	{
+		boolean valid = true;
+
+		for (Membrane submem : mem.mems)
+		{
+			valid = verifyExplicitFreeLinks(submem) && valid;
+		}
+
+		// $p[X,X] などを検出
+		// 右辺では許される（単一化）。
+		// 左辺では「内部リンクの存在」という制約を示すと考えられるが、これは意味論エラー。
+		for (ProcessContext pc : mem.processContexts)
+		{
+			if (pc.def.isTyped()) continue;
+
+			Set<String> occuredNames = new HashSet<String>();
+			for (int i = 0; i < pc.args.length; i++)
+			{
+				LinkOccurrence lnk = pc.args[i];
+				if (occuredNames.contains(lnk.name))
+				{
+					Env.error("Syntax error: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
+					valid = false;
+				}
+				else
+				{
+					occuredNames.add(lnk.name);
+				}
+			}
+		}
+		return valid;
 	}
 
 	/** 命令列を最適化する */
@@ -2025,6 +2091,8 @@ public class RuleCompiler
 	/**
 	 * ルール中で変化しないアトムを求める。
 	 * このアルゴリズムは初等的で、ほぼ自明なものしか検出できない。
+	 * つまり、リンク先がルール膜内のプロセスに接続している場合は考慮しない。
+	 * 考慮する場合、接続先の一連のプロセスについて同型性判定を行う必要がある。
 	 */
 	private Set<Atomic> getInvariantAtomics()
 	{
@@ -2347,6 +2415,9 @@ public class RuleCompiler
 
 	////////////////////////////////////////////////////////////////
 
+	/**
+	 * エラー出力とともに例外を発する。
+	 */
 	private void systemError(String text) throws CompileException
 	{
 		Env.error(text);

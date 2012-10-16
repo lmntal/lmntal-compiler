@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.Env;
-import runtime.Functor;
+import runtime.functor.Functor;
 import type.TypeEnv;
 
 import compile.structure.Membrane;

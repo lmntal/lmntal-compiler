@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import runtime.Env;
-import runtime.Functor;
+import runtime.functor.Functor;
 import type.argument.ActiveAtomPath;
 import type.argument.ArgumentInferer;
 import type.argument.ConstraintSet;

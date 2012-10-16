@@ -3,6 +3,8 @@ package runtime;
 import java.util.ArrayList;
 import java.util.List;
 
+import runtime.functor.Functor;
+
 /**
  * ルールの集合。
  * 現在はルールの配列として表現しているが、将来的には複数のルールのマッチングを
