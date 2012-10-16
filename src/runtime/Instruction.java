@@ -69,7 +69,7 @@ public class Instruction implements Cloneable
 	 * 命令の引数を保持する。
 	 * 命令の種類によって引数の型が決まっている。
 	 */
-	public List data = new ArrayList();
+	public List<Object> data = new ArrayList<Object>();
 	
 	//////////
 	// 定数
@@ -1829,48 +1829,23 @@ public class Instruction implements Cloneable
 	public int getID() {
 		return getKind();
 	}
-	public int getIntArg(int pos) {
-		return ((Integer)data.get(pos)).intValue();
-	}
-	public int getIntArg1() {
-		return ((Integer)data.get(0)).intValue();
-	}
-	public int getIntArg2() {
-		return ((Integer)data.get(1)).intValue();
-	}
-	public int getIntArg3() {
-		return ((Integer)data.get(2)).intValue();
-	}
-	public int getIntArg4() {
-		return ((Integer)data.get(3)).intValue();
-	}
-	public int getIntArg5() {
-		return ((Integer)data.get(4)).intValue();
-	}
-	public int getIntArg6(){
-		return ((Integer)data.get(5)).intValue();
-	}
-	public Object getArg(int pos) {
-		return data.get(pos);
-	}
-	public Object getArg1() {
-		return data.get(0);
-	}
-	public Object getArg2() {
-		return data.get(1);
-	}
-	public Object getArg3() {
-		return data.get(2);
-	}
-	public Object getArg4() {
-		return data.get(3);
-	}
-	public Object getArg5() {
-		return data.get(4);
-	}
-	public Object getArg6() {
-		return data.get(5);
-	}
+
+	public int getIntArg(int pos) { return (Integer)data.get(pos); }
+	public int getIntArg1() { return getIntArg(0); }
+	public int getIntArg2() { return getIntArg(1); }
+	public int getIntArg3() { return getIntArg(2); }
+	public int getIntArg4() { return getIntArg(3); }
+	public int getIntArg5() { return getIntArg(4); }
+	public int getIntArg6() { return getIntArg(5); }
+
+	public Object getArg(int pos) { return data.get(pos); }
+	public Object getArg1() { return getArg(0); }
+	public Object getArg2() { return getArg(1); }
+	public Object getArg3() { return getArg(2); }
+	public Object getArg4() { return getArg(3); }
+	public Object getArg5() { return getArg(4); }
+	public Object getArg6() { return getArg(5); }
+
 	/**@deprecated*/
 	public void setArg(int pos, Object arg) {
 		data.set(pos,arg);
@@ -1908,7 +1883,7 @@ public class Instruction implements Cloneable
 	 * 引数を追加するマクロ。
 	 * @param n int 型の引数
 	 */
-	public final void add(int n) { data.add(new Integer(n)); }
+	public final void add(int n) { data.add(n); }
 
 	////////////////////////////////////////////////////////////////
 
@@ -2212,30 +2187,41 @@ public class Instruction implements Cloneable
 	}
 
 	/** パーザー用コンストラクタ */
-	public Instruction(String name, List data) {
-		try {
+	public Instruction(String name, List<Object> data)
+	{
+		try
+		{
 			Field f = Instruction.class.getField(name.toUpperCase());
 			this.kind = f.getInt(null);
 			this.data = data;
 			return;
-		} catch (NoSuchFieldException e) {
-		} catch (IllegalAccessException e) {
+		}
+		catch (NoSuchFieldException e)
+		{
+		}
+		catch (IllegalAccessException e)
+		{
 		}
 		//例外発生時
 		throw new RuntimeException("invalid instruction name : " + name);
 	}
 
-	public Object clone() {
+	public Object clone()
+	{
 		Instruction c = new Instruction();
 		c.kind = this.kind;
-		Iterator it = this.data.iterator();
-		while (it.hasNext()) {
-			Object o = it.next();
-			if (o instanceof ArrayList) {
+		for (Object o : data)
+		{
+			if (o instanceof ArrayList)
+			{
 				c.data.add(((ArrayList)o).clone());
-			} else if (kind != Instruction.JUMP && o instanceof InstructionList) {
+			}
+			else if (kind != Instruction.JUMP && o instanceof InstructionList)
+			{
 				c.data.add(((InstructionList)o).clone());
-			} else {
+			}
+			else
+			{
 				c.data.add(o);
 			}
 		}
@@ -2248,17 +2234,20 @@ public class Instruction implements Cloneable
 
 	// todo argtype は signature に名称変更するとよい
 
-	private static void setArgType(int kind, ArgType argtype) {	
-		if (argTypeTable.containsKey(new Integer(kind))) {
+	private static void setArgType(int kind, ArgType argtype)
+	{
+		if (argTypeTable.containsKey(kind))
+		{
 			throw new RuntimeException("setArgType for '" + kind + "' was called more than once");
 		}
-		argTypeTable.put(new Integer(kind), argtype);
+		argTypeTable.put(kind, argtype);
 	}
 
-	private static class ArgType {
+	private static class ArgType
+	{
+		private boolean output;
+		private int[] type;
 
-		boolean output;
-		int[] type;
 		ArgType(boolean output) {
 			this.output = output;
 			type = new int[0];
@@ -2296,7 +2285,7 @@ public class Instruction implements Cloneable
 	public ArrayList getVarArgs(HashMap<Integer, Integer> listn) {
 		ArrayList ret = new ArrayList();
 		listn.clear();
-		ArgType argtype = (ArgType)argTypeTable.get(new Integer(getKind()));
+		ArgType argtype = argTypeTable.get(getKind());
 		int i = 0;
 		int j = 0;
 		if (getOutputType() != -1) {
@@ -2308,7 +2297,7 @@ public class Instruction implements Cloneable
 				case ARG_MEM:
 				case ARG_VAR:
 					ret.add(getArg(i));
-					listn.put(j, new Integer(i));
+					listn.put(j, i);
 					j++;
 			}
 		}
@@ -2318,13 +2307,19 @@ public class Instruction implements Cloneable
 	/**
 	 * 同一命令かどうかを
 	 */
-	public boolean equalsInst(Instruction inst){
+	public boolean equalsInst(Instruction inst)
+	{
 		if (kind == JUMP || inst.getKind() == JUMP) return false;
 		if (kind != inst.getKind()) return false;
-		List data2 = inst.data;
-		if (data.size() != data2.size()) return false;
-		else {
-			for(int i=0; i<data.size(); i++){
+		List<Object> data2 = inst.data;
+		if (data.size() != data2.size())
+		{
+			return false;
+		}
+		else
+		{
+			for (int i = 0; i < data.size(); i++)
+			{
 				if (data.get(i) == null && data2.get(i) == null) return true;
 				if (data.get(i) == null || data2.get(i) == null) return false;
 				if (!data.get(i).equals(data2.get(i))) return false;
@@ -2340,18 +2335,23 @@ public class Instruction implements Cloneable
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeAtomVar(List<Instruction> list, Map<Integer, Integer> map) {
-		for(Instruction inst : list){
-			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
-			for (int i = 0; i < inst.data.size(); i++) {
-				switch (argtype.type[i]) {
+	public static void changeAtomVar(List<Instruction> list, Map<Integer, Integer> map)
+	{
+		for (Instruction inst : list)
+		{
+			ArgType argtype = argTypeTable.get(inst.getKind());
+			for (int i = 0; i < inst.data.size(); i++)
+			{
+				switch (argtype.type[i])
+				{
 					case ARG_ATOM:
-						changeArg(inst, i+1, map);
+						changeArg(inst, i + 1, map);
 						break;
 				}
 			}
 		}
 	}
+
 	/**
 	 * 与えられた対応表によって、ボディ命令列中の膜変数を書き換える。<br>
 	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
@@ -2359,18 +2359,23 @@ public class Instruction implements Cloneable
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeMemVar(List<Instruction> list, Map<Integer, Integer> map) {
-		for(Instruction inst : list){
-			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
-			for (int i = 0; i < inst.data.size(); i++) {
-				switch (argtype.type[i]) {
+	public static void changeMemVar(List<Instruction> list, Map<Integer, Integer> map)
+	{
+		for (Instruction inst : list)
+		{
+			ArgType argtype = argTypeTable.get(inst.getKind());
+			for (int i = 0; i < inst.data.size(); i++)
+			{
+				switch (argtype.type[i])
+				{
 					case ARG_MEM:
-						changeArg(inst, i+1, map);
+						changeArg(inst, i + 1, map);
 						break;
 				}
 			}
 		}
 	}
+
 	/**
 	 * 与えられた対応表によって、ボディ命令列中のアトム・膜以外の変数を書き換える。<br>
 	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
@@ -2378,18 +2383,23 @@ public class Instruction implements Cloneable
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void changeOtherVar(List<Instruction> list, Map<Integer, Integer> map) {
-		for(Instruction inst : list){
-			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
-			for (int i = 0; i < inst.data.size(); i++) {
-				switch (argtype.type[i]) {
+	public static void changeOtherVar(List<Instruction> list, Map<Integer, Integer> map)
+	{
+		for (Instruction inst : list)
+		{
+			ArgType argtype = argTypeTable.get(inst.getKind());
+			for (int i = 0; i < inst.data.size(); i++)
+			{
+				switch (argtype.type[i])
+				{
 					case ARG_VAR:
-						changeArg(inst, i+1, map);
+						changeArg(inst, i + 1, map);
 						break;
 				}
 			}
 		}
 	}
+
 	/**
 	 * 与えられた対応表によって、ボディ命令列中のすべての変数を書き換える。<br>
 	 * 命令列中の変数が、対応表のキーに出現する場合、対応する値に書き換えます。
@@ -2397,15 +2407,19 @@ public class Instruction implements Cloneable
 	 * @param list 書き換える命令列
 	 * @param map 変数の対応表。
 	 */
-	public static void applyVarRewriteMap(List<Instruction> list, Map<Integer, Integer> map) {
-		for(Instruction inst : list){
-			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
-			for (int i = 0; i < inst.data.size(); i++) {
-				switch (argtype.type[i]) {
+	public static void applyVarRewriteMap(List<Instruction> list, Map<Integer, Integer> map)
+	{
+		for (Instruction inst : list)
+		{
+			ArgType argtype = argTypeTable.get(inst.getKind());
+			for (int i = 0; i < inst.data.size(); i++)
+			{
+				switch (argtype.type[i])
+				{
 					case ARG_MEM:
 					case ARG_ATOM:
 					case ARG_VAR:
-						changeArg(inst, i+1, map);
+						changeArg(inst, i + 1, map);
 						break;
 					case ARG_LABEL:
 						if (inst.getKind() == JUMP) break; // JUMP命令のLABEL引数はただのラベルなので除外
@@ -2413,12 +2427,18 @@ public class Instruction implements Cloneable
 						break;
 					case ARG_INSTS:
 						if(inst.getKind() == Instruction.SYSTEMRULESETS)
+						{
 							applyVarRewriteMap( ((InstructionList)inst.data.get(i)).insts, map);
-						else applyVarRewriteMap( (List<Instruction>)inst.data.get(i), map);
+						}
+						else
+						{
+							applyVarRewriteMap( (List<Instruction>)inst.data.get(i), map);
+						}
 						break;
 					case ARG_VARS:
 						ListIterator li = ((List)inst.data.get(i)).listIterator();
-						while (li.hasNext()) {
+						while (li.hasNext())
+						{
 							Object varnum = li.next();
 							if (map.containsKey(varnum)) li.set(map.get(varnum));
 						}
@@ -2428,9 +2448,11 @@ public class Instruction implements Cloneable
 			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS) break;
 		}
 	}
+
 	/** 命令列後半部分に対して変数番号を付け替える */
-	public static void applyVarRewriteMapFrom(List<Instruction> list, Map<Integer, Integer> map, int start) {
-		applyVarRewriteMap( list.subList(start, list.size()), map );
+	public static void applyVarRewriteMapFrom(List<Instruction> list, Map<Integer, Integer> map, int start)
+	{
+		applyVarRewriteMap(list.subList(start, list.size()), map);
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -2441,9 +2463,11 @@ public class Instruction implements Cloneable
 	 * @param pos 書き換える引数番号
 	 * @param map 書き換えマップ
 	 */
-	private static void changeArg(Instruction inst, int pos, Map<Integer, Integer> map) {
+	private static void changeArg(Instruction inst, int pos, Map<Integer, Integer> map)
+	{
 		Integer id = (Integer)inst.data.get(pos - 1);
-		if (map.containsKey(id)) {
+		if (map.containsKey(id))
+		{
 			inst.data.set(pos - 1, map.get(id));
 		}
 	}
@@ -2452,21 +2476,26 @@ public class Instruction implements Cloneable
 	 * @param list   命令列
 	 * @param varnum 変数番号
 	 * @author n-kato */
-	public static int getVarUseCount(List<Instruction> list, Integer varnum) {
+	public static int getVarUseCount(List<Instruction> list, Integer varnum)
+	{
 		int count = 0;
-		for(Instruction inst : list){
-			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS) {
+		for (Instruction inst : list)
+		{
+			if (inst.getKind() == RESETVARS || inst.getKind() == CHANGEVARS)
+			{
 				// (n-kato 2008.01.15) TODO 誰かがこれを実装する↓
 				/* if (inst contains varnum) varnum = lookupNewVarnum(inst,varnum);
 				 * else return count;
 				 * continue;
 				 */
 			}
-			ArgType argtype = (ArgType)argTypeTable.get(new Integer(inst.getKind()));
+			ArgType argtype = argTypeTable.get(inst.getKind());
 			int i = 0;
 			if (argtype.output) i++;
-			for (; i < inst.data.size(); i++) {
-				switch (argtype.type[i]) {
+			for (; i < inst.data.size(); i++)
+			{
+				switch (argtype.type[i])
+				{
 					case ARG_MEM:
 					case ARG_ATOM:
 					case ARG_VAR:
@@ -2483,7 +2512,8 @@ public class Instruction implements Cloneable
 					case ARG_VARS:
 						if (inst.getKind() == RESETVARS) break; // <strike>RESETVARS命令のVARS引数はただのラベルなので除外</strike>
 						Iterator it2 = ((List)inst.data.get(i)).iterator();
-						while (it2.hasNext()) {
+						while (it2.hasNext())
+						{
 							if (it2.next().equals(varnum)) count++;
 						}
 						break;
@@ -2492,12 +2522,14 @@ public class Instruction implements Cloneable
 		}
 		return count;
 	}
+
 	/** 指定された命令列後半部分で変数が参照される回数を返す（代入は含まない）
 	 * @param list   命令列
 	 * @param varnum 変数番号
 	 * @param start  開始位置
 	 * @see getVarUseCount */
-	public static int getVarUseCountFrom(List<Instruction> list, Integer varnum, int start) {
+	public static int getVarUseCountFrom(List<Instruction> list, Integer varnum, int start)
+	{
 		return getVarUseCount( list.subList(start, list.size()), varnum );
 	}
 
@@ -2506,20 +2538,27 @@ public class Instruction implements Cloneable
 	 * この命令が出力命令の場合、出力の種類を返す。
 	 * そうでない場合、-1を返す。
 	 */
-	public int getOutputType() {
-		ArgType argtype = (ArgType)argTypeTable.get(new Integer(kind));
-		if (argtype.output) {
+	public int getOutputType()
+	{
+		ArgType argtype = argTypeTable.get(kind);
+		if (argtype.output)
+		{
 			return argtype.type[0];
-		} else {
+		}
+		else
+		{
 			return -1;
 		}
 	}
+
 	/** この命令が副作用を持つ可能性があるかどうかを返す。不明な場合trueを返さなければならない。
 	 * ただし膜のロック取得は副作用とは見なさない。
 	 * <p>どうやら、従来「ガード命令」と呼んでいたものに相当するらしい。*/
-	public boolean hasSideEffect() {
+	public boolean hasSideEffect()
+	{
 		// todo 水野君方式のかっこいい管理にして正しく実装する予定
-		switch (getKind()) {
+		switch (getKind())
+		{
 			case Instruction.DEREF:
 			case Instruction.DEREFATOM:
 			case Instruction.DEREFLINK:
@@ -2547,11 +2586,14 @@ public class Instruction implements Cloneable
 		}
 		return true;
 	}
+
 	/** この命令が制御動作をする可能性があるかどうかを返す。
 	 * 制御動作とは失敗や反復などを表す。不明な場合trueを返さなければならない。*/
-	public boolean hasControlEffect() {
+	public boolean hasControlEffect()
+	{
 		// todo 水野君方式のかっこいい管理にして正しく実装する予定
-		switch (getKind()) {
+		switch (getKind())
+		{
 			case Instruction.DEREFATOM:
 			case Instruction.DEREFFUNC:
 			case Instruction.GETFUNC:
@@ -2574,7 +2616,8 @@ public class Instruction implements Cloneable
 	}
 
 	/*比較系の命令であればtrueを返す。*/
-	public boolean isCompareInst() {
+	public boolean isCompareInst()
+	{
 		switch (getKind()) {
 		case Instruction.SAMEFUNC:
 		case Instruction.EQATOM:
@@ -2758,7 +2801,7 @@ public class Instruction implements Cloneable
 		StringBuilder buffer = new StringBuilder();
 		String instName = getInstructionString(kind);
 		int spaces = 15;
-		ArgType argtype = (ArgType)argTypeTable.get(kind);
+		ArgType argtype = argTypeTable.get(kind);
 		if (argtype.output)
 		{
 			spaces -= 2;
