@@ -43,7 +43,7 @@ import util.Util;
 public class Instruction implements Cloneable
 {
 	/** 命令毎の引数情報を入れるテーブル */
-	private static HashMap<Integer, ArgType> argTypeTable = new HashMap<Integer, ArgType>();
+	private static Map<Integer, ArgType> argTypeTable = new HashMap<Integer, ArgType>();
 	/**アトム*/
 	public static final int ARG_ATOM = 0;
 	/**膜*/
