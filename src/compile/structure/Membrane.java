@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import runtime.InterpretedRuleset;
-import runtime.Ruleset;
+import java.util.Map;
 
 import runtime.Env;
+import runtime.InterpretedRuleset;
+import runtime.Ruleset;
 import runtime.functor.Functor;
 
 /** 
@@ -257,67 +257,75 @@ public final class Membrane
 		rg.addAll(mems);
 	}
 
-	public Collection<LinkedList> allKnownElements() {
+	public Collection<List<Object>> allKnownElements() {
 		return rg.allKnownElements();
 	}
 }
 
 class RependenceGraph {
-	private List<Membrane> mems;
-	private List<Atomic> atoms;
-	private List atomandmems;
 	private UnionFind uf;
 
-	RependenceGraph(){
-		atoms = new LinkedList<Atomic>();
-		mems = new LinkedList<Membrane>();
+	RependenceGraph()
+	{
 		uf = new UnionFind();
 	}
-	RependenceGraph(List<Atomic> atoms, List<Membrane> mems){
-		this.atoms = atoms;
-		this.mems = mems;
+
+	RependenceGraph(List<Atomic> atoms, List<Membrane> mems)
+	{
 		uf = new UnionFind();
 		uf.addAll(atoms);
 		uf.addAll(mems);
 	}
-	void addAll(List x){
+
+	void addAll(List<? extends Object> x)
+	{
 		uf.addAll(x);
 	}
-	void connect(Object x, Object y){
+
+	void connect(Object x, Object y)
+	{
 		uf.union(x,y);
 	}
 
-	private void reachable(Object x, Object y){
+	private void reachable(Object x, Object y)
+	{
 		uf.areUnified(x, y);
 	}
 
-	public String toString(){
+	public String toString()
+	{
 		return uf.allKnownElements().toString();
 	}
 
-	Collection<LinkedList> allKnownElements() {
+	public Collection<List<Object>> allKnownElements()
+	{
 		return uf.allKnownElements();
 	}
 
-	private class UnionFind {
-		private HashMap<Object, Object> lnk = new HashMap();
-		private HashMap<Object, Integer> lnkSiz = new HashMap();
-		private HashMap<Object, LinkedList> lists = new HashMap();
+	private static class UnionFind
+	{
+		private Map<Object, Object> lnk = new HashMap<Object, Object>();
+		private Map<Object, Integer> lnkSiz = new HashMap<Object, Integer>();
+		private Map<Object, List<Object>> lists = new HashMap<Object, List<Object>>();
 
-		private void union( Object x, Object y ){
-			if(!lnkSiz.containsKey(x))
+		private void union(Object x, Object y)
+		{
+			if (!lnkSiz.containsKey(x))
 				add(x);
-			if(!lnkSiz.containsKey(y))
+			if (!lnkSiz.containsKey(y))
 				add(y);
 			Object tx = find(x);
 			Object ty = find(y);
 			Object temp = link_repr(tx, ty);
-			LinkedList listx = lists.get(tx);
-			LinkedList listy = lists.get(ty);
-			if(temp == tx){
+			List<Object> listx = lists.get(tx);
+			List<Object> listy = lists.get(ty);
+			if (temp == tx)
+			{
 				listx.addAll(listy);
 				lists.remove(ty);
-			} else if(temp == ty) {
+			}
+			else if(temp == ty)
+			{
 				listy.addAll(listx);
 				lists.remove(tx);
 			}
@@ -329,47 +337,50 @@ class RependenceGraph {
 
 		private void add(Object x)
 		{
-			if(!lnkSiz.containsKey(x))
+			if (!lnkSiz.containsKey(x))
 			{
 				lnkSiz.put(x, 1);
-				LinkedList<Object> list = new LinkedList();
+				List<Object> list = new LinkedList<Object>();
 				list.add(x);
 				lists.put(x, list);
 			}
 		}
-		private void addAll(Collection c){
-			Iterator it = c.iterator();
-			while(it.hasNext())
-				add(it.next());
+		private void addAll(Collection<? extends Object> c)
+		{
+			for (Object o : c) add(o);
 		}
 
-		private boolean areUnified(Object x, Object y){
+		private boolean areUnified(Object x, Object y)
+		{
 			return find(x) == find(y);
 		}
 
-		Collection<LinkedList> allKnownElements(){
+		public Collection<List<Object>> allKnownElements()
+		{
 			return lists.values();
 		}
 
-		private	Object find( Object x )
+		private Object find(Object x)
 		{
 			// ここでPath圧縮すると計算量が nlog(n) から n ack^-1(n) に
-			while(lnk.containsKey(x))
+			while (lnk.containsKey(x))
 				x = lnk.get(x);
 			return x;
 		}
 
-		private	Object link_repr( Object x, Object y )
+		private Object link_repr(Object x, Object y)
 		{
-			if( x == y )
+			if (x == y)
 				return -1;
 
 			// グループ化
-			if( lnkSiz.get(x) < lnkSiz.get(y) ) {
+			if (lnkSiz.get(x) < lnkSiz.get(y)){
 				lnk.put(x, y);
 				lnkSiz.put(y, lnkSiz.get(y)+lnkSiz.get(x));
 				return y;
-			} else {
+			}
+			else
+			{
 				lnk.put(y,x);
 				lnkSiz.put(x, lnkSiz.get(x)+lnkSiz.get(y));
 				return x;
