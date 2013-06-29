@@ -2126,20 +2126,22 @@ public class RuleCompiler
 	private void enqueueRHSAtoms()
 	{
 		int index = body.size(); // 末尾再帰最適化の効果を最大化するため、逆順に積む（コードがセコい）
-		for(Atom atom : rhsatoms){
-			if (atom.functor.isSymbol() && atom.functor.isActive() ) {
+		for (Atom atom : rhsatoms)
+		{
+			if (atom.functor.isSymbol() && atom.functor.isActive())
+			{
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
 			}
 		}
 	}
-	
+
 	/**
 	 * 右辺のアトムを実行アトムスタックに積む(swaplink版)
 	 */
 	private void enqueueRHSAtoms_swaplink(Set<Atomic> created, Set<Atom> reused)
 	{
 		int index = body.size();
-		
+
 		// 生成されたアトム
 		for(Atomic a : created)
 		{
@@ -2149,7 +2151,7 @@ public class RuleCompiler
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(a)));
 			}
 		}
-		
+
 		// 再利用されたアトム
 		for(Atom atom : reused)
 		{
@@ -2163,35 +2165,37 @@ public class RuleCompiler
 
 	/**
 	 * hyperlink関連の命令列を生成する
+	 * @author Seiji Ogawa
 	 */
 	private void addHyperlink()
-	{ //seiji
+	{
 		for (Atom atom : rhsatoms)
 		{
 			int atomID = rhsatomToPath(atom);
-			if (atom.functor.equals(new SymbolFunctor("-", 2)))
+			Functor f = atom.functor;
+			Membrane mem = atom.mem;
+			if (f.equals(new SymbolFunctor("-", 2)))
 			{
-				; //body.add( new Instruction(Instruction.REVERSEHLINK, rhsmemToPath(atom.mem), atomID));
+				//body.add( new Instruction(Instruction.REVERSEHLINK, rhsmemToPath(mem), atomID));
 			}
-			else if (atom.functor.equals(new SymbolFunctor("><", 2)))
+			else if (f.equals(new SymbolFunctor("><", 2)))
 			{
-				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(mem), atomID));
 			}
-			else if (atom.functor.equals(new SymbolFunctor(">*<", 2)))
+			else if (f.equals(new SymbolFunctor(">*<", 2)))
 			{
-				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(mem), atomID));
 			}
-			else if (atom.functor.equals(new SymbolFunctor(">+<", 2)))
+			else if (f.equals(new SymbolFunctor(">+<", 2)))
 			{
-				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(atom.mem), atomID));
+				body.add( new Instruction(Instruction.UNIFYHLINKS, rhsmemToPath(mem), atomID));
 			}
-			else if (atom.functor.equals(new SymbolFunctor(">>", 2)))
+			else if (f.equals(new SymbolFunctor(">>", 2)))
 			{
-				; //body.add( new Instruction(Instruction.UNIFYNAMECONAME, rhsmemToPath(atom.mem), atomID));
+				//body.add( new Instruction(Instruction.UNIFYNAMECONAME, rhsmemToPath(mem), atomID));
 			}
-			else if (atom.functor.equals(new SymbolFunctor("<<", 2)))
+			else if (f.equals(new SymbolFunctor("<<", 2)))
 			{
-				;
 			}
 		}
 	}
@@ -2222,11 +2226,11 @@ public class RuleCompiler
 			Inline.register(unitName, atom.functor.getName());
 			int codeID = Inline.getCodeID(unitName, atom.functor.getName());
 			if (codeID == -1) continue;
-			body.add( new Instruction(Instruction.INLINE, atomID, unitName, codeID));
+			body.add(new Instruction(Instruction.INLINE, atomID, unitName, codeID));
 		}
 	}
 
-	static final Functor FUNC_USE = new SymbolFunctor("use",1);
+	private static final Functor FUNCTOR_USE = new SymbolFunctor("use",1);
 
 	/**
 	 * モジュールを読み込む
@@ -2242,13 +2246,13 @@ public class RuleCompiler
 			}
 
 			//LOAD
-			if (atom.functor.equals(FUNC_USE))
+			if (atom.functor.equals(FUNCTOR_USE))
 			{
-				body.add( new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
-						atom.args[0].buddy.atom.getName()) );
+				body.add(new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem),
+						atom.args[0].buddy.atom.getName()));
 			}
 			String path = atom.getPath(); // .functor.path;
-			if (path!=null && !path.equals(atom.mem.name))
+			if (path != null && !path.equals(atom.mem.name))
 			{
 				// この時点では解決できないモジュールがあるので名前にしておく
 				body.add(new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem), path));
