@@ -273,7 +273,7 @@ class GuardCompiler extends HeadCompiler
 		}
 
 		// 型を決定するべきプロセス文脈
-		System.err.println("TypedProcessContexts: " + typedProcessContexts.keySet());
+		//System.err.println("TypedProcessContexts: " + typedProcessContexts.keySet());
 		
 		class ProcessTypeVariable
 		{
@@ -386,11 +386,11 @@ class GuardCompiler extends HeadCompiler
 				tu.addTypeVariable(def, v);
 			}
 		}
-		tu.dump();
+		//tu.dump();
 		for (Atom c : typeConstraints)
 		{
 			Functor f = c.functor;
-			System.err.println("Constraint: " + c.toStringAsTypeConstraint());
+			//System.err.println("Constraint: " + c.toStringAsTypeConstraint());
 			if (f.isInteger())
 			{
 				Context pc = (Context)c.args[0].buddy.atom;
@@ -455,6 +455,7 @@ class GuardCompiler extends HeadCompiler
 				System.exit(1);
 			}
 		}
+		/*
 		System.err.println("== RESULT ==");
 		tu.dump();
 		if (tu.isConsistent() && tu.isAllTyped())
@@ -470,18 +471,21 @@ class GuardCompiler extends HeadCompiler
 				System.err.println("Undecidable.");
 		}
 		System.err.println("============");
+		*/
 
 		// STEP 2 - 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
 		List<Atom> cstrs = new LinkedList<Atom>(typeConstraints);
 
 		// 制約
 		// 繋がっている先はプロセス文脈
+		/*
 		System.err.print("Constraints:");
 		for (Atom a : cstrs)
 		{
 			System.err.print(" " + a.toStringAsTypeConstraint());
 		}
 		System.err.println();
+		*/
 
 		{
 			// uniq, not_uniq を最初に（少なくともint, unary などの前に）処理する
