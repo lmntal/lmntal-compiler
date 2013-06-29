@@ -26,9 +26,9 @@ import compile.structure.ProcessContext;
 
 public class GuardCompiler2 extends HeadCompiler
 {
-	static final Object UNARY_ATOM_TYPE  = "U"; // 1°ú¿ô¥¢¥È¥à
-	static final Object GROUND_LINK_TYPE = "G"; // ´ğÄì¹à¥×¥í¥»¥¹
-//	static final Object LINEAR_ATOM_TYPE = "L"; // Ç¤°Õ¤Î¥×¥í¥»¥¹ $p[X|*V]
+	static final Object UNARY_ATOM_TYPE  = "U"; // 1å¼•æ•°ã‚¢ãƒˆãƒ 
+	static final Object GROUND_LINK_TYPE = "G"; // åŸºåº•é …ãƒ—ãƒ­ã‚»ã‚¹
+//	static final Object LINEAR_ATOM_TYPE = "L"; // ä»»æ„ã®ãƒ—ãƒ­ã‚»ã‚¹ $p[X|*V]
 
 	private static class ProcessTypeVariable
 	{
@@ -146,21 +146,21 @@ public class GuardCompiler2 extends HeadCompiler
 		}
 	}
 
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ (ContextDef) -> ¥Ç¡¼¥¿·¿¤Î¼ïÎà¤òÉ½¤¹¥é¥Ã¥×¤µ¤ì¤¿·¿¸¡ººÌ¿ÎáÈÖ¹æ(Integer) */
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾© (ContextDef) -> ãƒ‡ãƒ¼ã‚¿å‹ã®ç¨®é¡ã‚’è¡¨ã™ãƒ©ãƒƒãƒ—ã•ã‚ŒãŸå‹æ¤œæŸ»å‘½ä»¤ç•ªå·(Integer) */
 	private Map<ContextDef, Integer> typedCxtDataTypes = new HashMap<ContextDef, Integer>();
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ (ContextDef) -> ¥Ç¡¼¥¿·¿¤Î¥Ñ¥¿¡¼¥ó¤òÉ½¤¹Äê¿ô¥ª¥Ö¥¸¥§¥¯¥È */
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾© (ContextDef) -> ãƒ‡ãƒ¼ã‚¿å‹ã®ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’è¡¨ã™å®šæ•°ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ */
 	Map<ContextDef, Object> typedCxtTypes = new HashMap<ContextDef, Object>();
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ (ContextDef) -> ¥½¡¼¥¹½Ğ¸½¡Ê¥³¥Ô¡¼¸µ¤È¤¹¤ë½Ğ¸½¡Ë¤ÎÊÑ¿ôÈÖ¹æ */
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾© (ContextDef) -> ã‚½ãƒ¼ã‚¹å‡ºç¾ï¼ˆã‚³ãƒ”ãƒ¼å…ƒã¨ã™ã‚‹å‡ºç¾ï¼‰ã®å¤‰æ•°ç•ªå· */
 	private Map<ContextDef, Integer> typedCxtSrcs  = new HashMap<ContextDef, Integer>();
-	/** ground·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ(ContextDef) -> ¥ê¥ó¥¯¤Î¥½¡¼¥¹½Ğ¸½¡Ê¥³¥Ô¡¼¸µ¤È¤¹¤ë½Ğ¸½¡Ë¤Î¥ê¥¹¥È¤ÎÊÑ¿ôÈÖ¹æ */
+	/** groundå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾©(ContextDef) -> ãƒªãƒ³ã‚¯ã®ã‚½ãƒ¼ã‚¹å‡ºç¾ï¼ˆã‚³ãƒ”ãƒ¼å…ƒã¨ã™ã‚‹å‡ºç¾ï¼‰ã®ãƒªã‚¹ãƒˆã®å¤‰æ•°ç•ªå· */
 	Map<ContextDef, Integer> groundSrcs = new HashMap<ContextDef, Integer>();
-	/** Ëì(Membrane) -> (¤½¤ÎËì¤ËÂ¸ºß¤¹¤ëground·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ(ContextDef) -> ¹½À®¥¢¥È¥à¿ô)¤È¤¤¤¦¥Ş¥Ã¥× */
+	/** è†œ(Membrane) -> (ãã®è†œã«å­˜åœ¨ã™ã‚‹groundå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾©(ContextDef) -> æ§‹æˆã‚¢ãƒˆãƒ æ•°)ã¨ã„ã†ãƒãƒƒãƒ— */
 	private Map<Membrane, HashMap<ContextDef, Integer>> memToGroundSizes = new HashMap<Membrane, HashMap<ContextDef, Integer>>();
-	/** ¥½¡¼¥¹½Ğ¸½¤¬ÆÃÄê¤µ¤ì¤¿·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ¤Î¥»¥Ã¥È
-	 * <p>identifiedCxtdefs.contains(x) ¤Ï¡¢º¸ÊÕ¤Ë½Ğ¸½¤¹¤ë¤«¤Ş¤¿¤Ïloaded¤Ç¤¢¤ë¤³¤È¤òÉ½¤¹¡£*/
+	/** ã‚½ãƒ¼ã‚¹å‡ºç¾ãŒç‰¹å®šã•ã‚ŒãŸå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾©ã®ã‚»ãƒƒãƒˆ
+	 * <p>identifiedCxtdefs.contains(x) ã¯ã€å·¦è¾ºã«å‡ºç¾ã™ã‚‹ã‹ã¾ãŸã¯loadedã§ã‚ã‚‹ã“ã¨ã‚’è¡¨ã™ã€‚*/
 	private Set<ContextDef> identifiedCxtdefs = new HashSet<ContextDef>(); 
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ¤Î¥ê¥¹¥È¡Ê²¾°ú¿ôID¤Î´ÉÍı¤Ë»ÈÍÑ¤¹¤ë¡Ë
-	 * <p>¼Âºİ¤Ë¤Ïtypedcxtsrcs¤Î¥­¡¼¤òÄÉ²Ã¤µ¤ì¤¿½çÈÖ¤ËÊÂ¤Ù¤¿¤â¤Î¡£*/
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾©ã®ãƒªã‚¹ãƒˆï¼ˆä»®å¼•æ•°IDã®ç®¡ç†ã«ä½¿ç”¨ã™ã‚‹ï¼‰
+	 * <p>å®Ÿéš›ã«ã¯typedcxtsrcsã®ã‚­ãƒ¼ã‚’è¿½åŠ ã•ã‚ŒãŸé †ç•ªã«ä¸¦ã¹ãŸã‚‚ã®ã€‚*/
 	List<ContextDef> typedCxtDefs = new ArrayList<ContextDef>();
 
 	private int typedcxtToSrcPath(ContextDef def)
@@ -176,18 +176,18 @@ public class GuardCompiler2 extends HeadCompiler
 	}
 
 	private static final int UNBOUND  = -1;
-	private static final int ISINT    = Instruction.ISINT;     // ·¿À©Ìó¤Î°ú¿ô¤¬À°¿ô·¿¤Ç¤¢¤ë¤³¤È¤òÉ½¤¹
-	private static final int ISFLOAT  = Instruction.ISFLOAT;   // ÉâÆ°¾®¿ôÅÀ¿ô·¿
-	private static final int ISSTRING = Instruction.ISSTRING;  // Ê¸»úÎó·¿
-	private static final int ISMEM    = Instruction.ANYMEM;    // Ëì¡ÊgetRuntimeÀìÍÑ¡Ë
-	private static final int ISHLINK  = Instruction.ISHLINK;   // hlink·¿ (SLIMÀìÍÑ) //seiji
-	private static Map<Functor, int[]> guard0 = new HashMap<Functor, int[]>(); // 0ÆşÎÏ¥¬¡¼¥É·¿À©ÌóÌ¾//seiji
-	private static Map<Functor, int[]> guard1 = new HashMap<Functor, int[]>(); // 1ÆşÎÏ¥¬¡¼¥É·¿À©ÌóÌ¾
-	private static Map<Functor, int[]> guard2 = new HashMap<Functor, int[]>(); // 2ÆşÎÏ¥¬¡¼¥É·¿À©ÌóÌ¾
+	private static final int ISINT    = Instruction.ISINT;     // å‹åˆ¶ç´„ã®å¼•æ•°ãŒæ•´æ•°å‹ã§ã‚ã‚‹ã“ã¨ã‚’è¡¨ã™
+	private static final int ISFLOAT  = Instruction.ISFLOAT;   // æµ®å‹•å°æ•°ç‚¹æ•°å‹
+	private static final int ISSTRING = Instruction.ISSTRING;  // æ–‡å­—åˆ—å‹
+	private static final int ISMEM    = Instruction.ANYMEM;    // è†œï¼ˆgetRuntimeå°‚ç”¨ï¼‰
+	private static final int ISHLINK  = Instruction.ISHLINK;   // hlinkå‹ (SLIMå°‚ç”¨) //seiji
+	private static Map<Functor, int[]> guard0 = new HashMap<Functor, int[]>(); // 0å…¥åŠ›ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„å//seiji
+	private static Map<Functor, int[]> guard1 = new HashMap<Functor, int[]>(); // 1å…¥åŠ›ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„å
+	private static Map<Functor, int[]> guard2 = new HashMap<Functor, int[]>(); // 2å…¥åŠ›ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„å
 
 	static
 	{
-		// ¥¬¡¼¥ÉÀ©Ìó¤òÍ½¤á¡Ê¼êÆ°¡Ë¥³¥ó¥Ñ¥¤¥ë¤·¤Æ¤ª¤¯
+		// ã‚¬ãƒ¼ãƒ‰åˆ¶ç´„ã‚’äºˆã‚ï¼ˆæ‰‹å‹•ï¼‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã—ã¦ãŠã
 		putLibrary("<."   , 2, 2, new int[] { ISFLOAT, ISFLOAT, Instruction.FLT });
 		putLibrary("=<."  , 2, 2, new int[] { ISFLOAT, ISFLOAT, Instruction.FLE });
 		putLibrary(">."   , 2, 2, new int[] { ISFLOAT, ISFLOAT, Instruction.FGT });
@@ -227,7 +227,7 @@ public class GuardCompiler2 extends HeadCompiler
 	}
 
 	/**
-	 * Ì¾Á°¡¢¥¢¥ê¥Æ¥£¤Ë¤è¤Ã¤ÆÉ½¤µ¤ì¤ë {@code input} ÆşÎÏ¥¬¡¼¥ÉÀ©Ìó¤Ë¥³¥ó¥Ñ¥¤¥ëºÑ¤ß¥³¡¼¥É¤òÄêµÁ¤¹¤ë¡£
+	 * åå‰ã€ã‚¢ãƒªãƒ†ã‚£ã«ã‚ˆã£ã¦è¡¨ã•ã‚Œã‚‹ {@code input} å…¥åŠ›ã‚¬ãƒ¼ãƒ‰åˆ¶ç´„ã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ¸ˆã¿ã‚³ãƒ¼ãƒ‰ã‚’å®šç¾©ã™ã‚‹ã€‚
 	 */
 	private static void putLibrary(String name, int arity, int input, int[] instructions)
 	{
@@ -246,9 +246,9 @@ public class GuardCompiler2 extends HeadCompiler
 		}
 	}
 
-	private RuleCompiler rc;			// rc.rsÍÑ
-	private List<Atom> typeConstraints;		// ·¿À©Ìó¤Î¥ê¥¹¥È
-	private Map<String, ContextDef>  typedProcessContexts;	// ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®Ì¾¤«¤éÄêµÁ¤Ø¤Î¥Ş¥Ã¥×
+	private RuleCompiler rc;			// rc.rsç”¨
+	private List<Atom> typeConstraints;		// å‹åˆ¶ç´„ã®ãƒªã‚¹ãƒˆ
+	private Map<String, ContextDef>  typedProcessContexts;	// å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆåã‹ã‚‰å®šç¾©ã¸ã®ãƒãƒƒãƒ—
 
 	//public List<Instruction> match;
 	//public List<Membrane> mems;
@@ -265,9 +265,9 @@ public class GuardCompiler2 extends HeadCompiler
 		putLibrary("connectRuntime", 1, 1, new int[] { ISSTRING, Instruction.CONNECTRUNTIME });
 	}
 
-	/** initNormalizedCompiler¸Æ¤Ó½Ğ¤·¸å¤Ë¸Æ¤Ğ¤ì¤ë¡£
-	 * º¸ÊÕ´Ø·¸·¿ÉÕ¤­$p¤ËÂĞ¤·¤Æ¡¢¥¬¡¼¥ÉÍÑ¤Î²¾°ú¿ôÈÖ¹æ¤ò
-	 * ÊÑ¿ôÈÖ¹æ¤È¤·¤Æº¸ÊÕ´Ø·¸·¿ÉÕ¤­$p¤Î¥Ş¥Ã¥Á¥ó¥°¤ò¼è¤ê½ª¤ï¤Ã¤¿ÆâÉô¾õÂÖ¤ò»ı¤Ä¤è¤¦¤Ë¤¹¤ë¡£
+	/** initNormalizedCompilerå‘¼ã³å‡ºã—å¾Œã«å‘¼ã°ã‚Œã‚‹ã€‚
+	 * å·¦è¾ºé–¢ä¿‚å‹ä»˜ã$pã«å¯¾ã—ã¦ã€ã‚¬ãƒ¼ãƒ‰ç”¨ã®ä»®å¼•æ•°ç•ªå·ã‚’
+	 * å¤‰æ•°ç•ªå·ã¨ã—ã¦å·¦è¾ºé–¢ä¿‚å‹ä»˜ã$pã®ãƒãƒƒãƒãƒ³ã‚°ã‚’å–ã‚Šçµ‚ã‚ã£ãŸå†…éƒ¨çŠ¶æ…‹ã‚’æŒã¤ã‚ˆã†ã«ã™ã‚‹ã€‚
 	 */
 	/*
 	private final void initNormalizedGuardCompiler(GuardCompiler2 gc)
@@ -277,13 +277,13 @@ public class GuardCompiler2 extends HeadCompiler
 		typedCxtDefs = new ArrayList<ContextDef>(gc.typedCxtDefs);
 		typedCxtSrcs = new HashMap<ContextDef, Integer>(gc.typedCxtSrcs);
 		typedCxtTypes = new HashMap<ContextDef, Object>(gc.typedCxtTypes);
-		varCount = gc.varCount;	// ½ÅÊ£
+		varCount = gc.varCount;	// é‡è¤‡
 	}
 	*/
 
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤Î¥³¥ó¥Ñ¥¤¥ë¤Ç»È¤¦¤¿¤á¤Ëthis¤ËÂĞ¤¹¤ëÀµµ¬²½¤µ¤ì¤¿GuardCompiler¤òºîÀ®¤·¤ÆÊÖ¤¹¡£
-	 * Àµµ¬²½¤È¤Ï¡¢º¸ÊÕ¤ÎÁ´¤Æ¤Î¥¢¥È¥à/Ëì¤ª¤è¤Óº¸ÊÕ´Ø·¸·¿ÉÕ¤­$p¤ËÂĞ¤·¤Æ¡¢¥¬¡¼¥É/¥Ü¥Ç¥£ÍÑ¤Î²¾°ú¿ôÈÖ¹æ¤ò
-	 * ÊÑ¿ôÈÖ¹æ¤È¤·¤Æº¸ÊÕ¤Èº¸ÊÕ´Ø·¸·¿À©Ìó¤Î¥Ş¥Ã¥Á¥ó¥°¤ò¼è¤ê½ª¤ï¤Ã¤¿ÆâÉô¾õÂÖ¤ò»ı¤Ä¤è¤¦¤Ë¤¹¤ë¤³¤È¤ò°ÕÌ£¤¹¤ë¡£
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã§ä½¿ã†ãŸã‚ã«thisã«å¯¾ã™ã‚‹æ­£è¦åŒ–ã•ã‚ŒãŸGuardCompilerã‚’ä½œæˆã—ã¦è¿”ã™ã€‚
+	 * æ­£è¦åŒ–ã¨ã¯ã€å·¦è¾ºã®å…¨ã¦ã®ã‚¢ãƒˆãƒ /è†œãŠã‚ˆã³å·¦è¾ºé–¢ä¿‚å‹ä»˜ã$pã«å¯¾ã—ã¦ã€ã‚¬ãƒ¼ãƒ‰/ãƒœãƒ‡ã‚£ç”¨ã®ä»®å¼•æ•°ç•ªå·ã‚’
+	 * å¤‰æ•°ç•ªå·ã¨ã—ã¦å·¦è¾ºã¨å·¦è¾ºé–¢ä¿‚å‹åˆ¶ç´„ã®ãƒãƒƒãƒãƒ³ã‚°ã‚’å–ã‚Šçµ‚ã‚ã£ãŸå†…éƒ¨çŠ¶æ…‹ã‚’æŒã¤ã‚ˆã†ã«ã™ã‚‹ã“ã¨ã‚’æ„å‘³ã™ã‚‹ã€‚
 	 */
 	/*
 	private final GuardCompiler2 getNormalizedGuardCompiler()
@@ -295,17 +295,17 @@ public class GuardCompiler2 extends HeadCompiler
 	*/
 
 	/**
-	 * ¥×¥í¥»¥¹Ê¸Ì®¤Î¤Ê¤¤Ëì¤ästable¤ÊËì¤Î¸¡ºº¤ò¹Ô¤¦¡£
-	 * RISC²½¤ËÈ¼¤¤¡¢¥Ø¥Ã¥É¥³¥ó¥Ñ¥¤¥é¤«¤é°ÜÆ°¤·¤Æ¤­¤¿¡£ by mizuno
+	 * ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®ãªã„è†œã‚„stableãªè†œã®æ¤œæŸ»ã‚’è¡Œã†ã€‚
+	 * RISCåŒ–ã«ä¼´ã„ã€ãƒ˜ãƒƒãƒ‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ã‹ã‚‰ç§»å‹•ã—ã¦ããŸã€‚ by mizuno
 	 */
 	public void checkMembraneStatus()
 	{
-		// ¥×¥í¥»¥¹Ê¸Ì®¤¬¤Ê¤¤¤È¤­¤Ï¡¢¥¢¥È¥à¤È»ÒËì¤Î¸Ä¿ô¤¬¥Ş¥Ã¥Á¤¹¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë
+		// ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒãªã„ã¨ãã¯ã€ã‚¢ãƒˆãƒ ã¨å­è†œã®å€‹æ•°ãŒãƒãƒƒãƒã™ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹
 		for (int i = 0; i < mems.size(); i++)
 		{
 			Membrane mem = mems.get(i);
 			int mempath = memToPath(mem);
-			if (mempath == 0) continue; //ËÜËì¤ËÂĞ¤·¤Æ¤Ï²¿¤â¤·¤Ê¤¤
+			if (mempath == 0) continue; //æœ¬è†œã«å¯¾ã—ã¦ã¯ä½•ã‚‚ã—ãªã„
 			if (mem.processContexts.isEmpty())
 			{
 				countAtomsOfMembrane(mem);
@@ -322,10 +322,10 @@ public class GuardCompiler2 extends HeadCompiler
 		}
 	}
 
-	/** °ú¿ô¤ËÅÏ¤µ¤ì¤¿¥¢¥È¥à¤Î¥ê¥ó¥¯¤ËÂĞ¤·¤Ægetlink¤ò¹Ô¤¤¡¢ÊÑ¿ôÈÖ¹æ¤òÅĞÏ¿¤¹¤ë¡£(RISC²½)
-	 * <strike>¾­ÍèÅª¤Ë¤Ï¥ê¥ó¥¯¥ª¥Ö¥¸¥§¥¯¥È¤ò¥¬¡¼¥ÉÌ¿ÎáÎó¤Î°ú¿ô¤ËÅÏ¤¹¤è¤¦¤Ë¤¹¤ë¤«¤âÃÎ¤ì¤Ê¤¤¡£</strike>
-	 * ¾­ÍèÅª¤Ë¤Ï¥¬¡¼¥ÉÌ¿ÎáÎó¤Ï¥Ø¥Ã¥ÉÌ¿ÎáÎó¤Ë¥¤¥ó¥é¥¤¥óÅ¸³«¤µ¤ì¤ëÍ½Äê¤Ê¤Î¤Ç¡¢
-	 * ¤³¤Î¥á¥½¥Ã¥É¤ÇÀ¸À®¤µ¤ì¤ëgetlink¤Ï¾éÄ¹Ì¿Îá¤Î½üµî¤Ë¤è¤ê¾Ã¤»¤ë¸«¹ş¤ß¡£*/
+	/** å¼•æ•°ã«æ¸¡ã•ã‚ŒãŸã‚¢ãƒˆãƒ ã®ãƒªãƒ³ã‚¯ã«å¯¾ã—ã¦getlinkã‚’è¡Œã„ã€å¤‰æ•°ç•ªå·ã‚’ç™»éŒ²ã™ã‚‹ã€‚(RISCåŒ–)
+	 * <strike>å°†æ¥çš„ã«ã¯ãƒªãƒ³ã‚¯ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ã‚¬ãƒ¼ãƒ‰å‘½ä»¤åˆ—ã®å¼•æ•°ã«æ¸¡ã™ã‚ˆã†ã«ã™ã‚‹ã‹ã‚‚çŸ¥ã‚Œãªã„ã€‚</strike>
+	 * å°†æ¥çš„ã«ã¯ã‚¬ãƒ¼ãƒ‰å‘½ä»¤åˆ—ã¯ãƒ˜ãƒƒãƒ‰å‘½ä»¤åˆ—ã«ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å±•é–‹ã•ã‚Œã‚‹äºˆå®šãªã®ã§ã€
+	 * ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã§ç”Ÿæˆã•ã‚Œã‚‹getlinkã¯å†—é•·å‘½ä»¤ã®é™¤å»ã«ã‚ˆã‚Šæ¶ˆã›ã‚‹è¦‹è¾¼ã¿ã€‚*/
 	public void getLHSLinks()
 	{
 		for (int i = 0; i < atoms.size(); i++)
@@ -345,26 +345,26 @@ public class GuardCompiler2 extends HeadCompiler
 	}
 
 	/**
-	 * ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤¬É½¤¹¥×¥í¥»¥¹¤ò°ì°Õ¤Ë·èÄê¤¹¤ë¡£
-	 * ¤³¤Î¥á¥½¥Ã¥É¤ÏÄ¹¤¤¡£
+	 * å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒè¡¨ã™ãƒ—ãƒ­ã‚»ã‚¹ã‚’ä¸€æ„ã«æ±ºå®šã™ã‚‹ã€‚
+	 * ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯é•·ã„ã€‚
 	 */
 	public void fixTypedProcesses() throws CompileException
 	{
-		// STEP 1 - º¸ÊÕ¤Ë½Ğ¸½¤¹¤ë·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤òÆÃÄê¤µ¤ì¤¿¤â¤Î¤È¤·¤Æ¥Ş¡¼¥¯¤¹¤ë¡£
+		// STEP 1 - å·¦è¾ºã«å‡ºç¾ã™ã‚‹å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã‚’ç‰¹å®šã•ã‚ŒãŸã‚‚ã®ã¨ã—ã¦ãƒãƒ¼ã‚¯ã™ã‚‹ã€‚
 		identifiedCxtdefs = new HashSet<ContextDef>();
 		for (ContextDef def : typedProcessContexts.values())
 		{
 			if (def.lhsOcc != null)
 			{
 				identifiedCxtdefs.add(def);
-				// º¸ÊÕ¤Î·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯¤ÎÀè¤¬¡¢º¸ÊÕ¤Î¥¢¥È¥à¤Ë½Ğ¸½¤¹¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë¡£
-				// ½Ğ¸½¤·¤Ê¤¤¾ì¹ç¤Ï¥³¥ó¥Ñ¥¤¥ë¥¨¥é¡¼¤È¤¹¤ë¡£¤³¤ÎÀ©¸Â¤ò¡Ö¥Ñ¥Ã¥·¥Ö·¿À©¸Â¡×¤È¸Æ¤Ö¤³¤È¤Ë¤¹¤ë¡£
-				// ¡ÚÃí°Õ¡Û¥Ñ¥Ã¥·¥Ö·¿À©¸Â¤Ï¡¢·¿¤ÏÈó¥¢¥¯¥Æ¥£¥Ö¤Ê¥Ç¡¼¥¿¤òÉ½¤¹¤³¤È¤òÁÛÄê¤¹¤ë¤³¤È¤Ë¤è¤êÀµÅö²½¤µ¤ì¤ë¡£
-				// ¤Ä¤Ş¤ê¡¢( 2(X) :- found(X) ) ¤ä ( 2(3) :- ok ) ¤Ç2¤ä3¤ò$p¤ÇÉ½¤¹¤³¤È¤Ï¤Ç¤­¤Ê¤¤¡£
-				// ¤·¤«¤·¼Âºİ¤Ë¤Ï½èÍı·ÏÂ¦¤ÎÅÔ¹ç¤Ë¤è¤ëÀ©¸Â¤Ç¤¢¤ë¡£
-				// ¤Ê¤ª¡¢¥×¥í¥°¥é¥ß¥ó¥°¤Î´ÑÅÀ¤«¤é¡¢±¦ÊÕ¤Î·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯¤ÎÀè¤ÏÇ¤°Õ¤È¤·¤Æ¤¤¤ë¡£
+				// å·¦è¾ºã®å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®æ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯ã®å…ˆãŒã€å·¦è¾ºã®ã‚¢ãƒˆãƒ ã«å‡ºç¾ã™ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹ã€‚
+				// å‡ºç¾ã—ãªã„å ´åˆã¯ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚¨ãƒ©ãƒ¼ã¨ã™ã‚‹ã€‚ã“ã®åˆ¶é™ã‚’ã€Œãƒ‘ãƒƒã‚·ãƒ–å‹åˆ¶é™ã€ã¨å‘¼ã¶ã“ã¨ã«ã™ã‚‹ã€‚
+				// ã€æ³¨æ„ã€‘ãƒ‘ãƒƒã‚·ãƒ–å‹åˆ¶é™ã¯ã€å‹ã¯éã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªãƒ‡ãƒ¼ã‚¿ã‚’è¡¨ã™ã“ã¨ã‚’æƒ³å®šã™ã‚‹ã“ã¨ã«ã‚ˆã‚Šæ­£å½“åŒ–ã•ã‚Œã‚‹ã€‚
+				// ã¤ã¾ã‚Šã€( 2(X) :- found(X) ) ã‚„ ( 2(3) :- ok ) ã§2ã‚„3ã‚’$pã§è¡¨ã™ã“ã¨ã¯ã§ããªã„ã€‚
+				// ã—ã‹ã—å®Ÿéš›ã«ã¯å‡¦ç†ç³»å´ã®éƒ½åˆã«ã‚ˆã‚‹åˆ¶é™ã§ã‚ã‚‹ã€‚
+				// ãªãŠã€ãƒ—ãƒ­ã‚°ãƒ©ãƒŸãƒ³ã‚°ã®è¦³ç‚¹ã‹ã‚‰ã€å³è¾ºã®å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®æ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯ã®å…ˆã¯ä»»æ„ã¨ã—ã¦ã„ã‚‹ã€‚
 				//
-				// ( 2006/09/13 kudo ) 2°ú¿ô°Ê¾å¤Î·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÆ³Æş¤ËÈ¼¤¤¡¤Á´¤Æ¤Î°ú¿ô¤ò¥Á¥§¥Ã¥¯¤¹¤ë¤è¤¦¤Ë¤¹¤ë
+				// ( 2006/09/13 kudo ) 2å¼•æ•°ä»¥ä¸Šã®å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®å°å…¥ã«ä¼´ã„ï¼Œå…¨ã¦ã®å¼•æ•°ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 				for (int i = 0; i < def.lhsOcc.args.length; i++)
 				{
 					if (!atomPaths.containsKey(def.lhsOcc.args[i].buddy.atom))
@@ -377,7 +377,7 @@ public class GuardCompiler2 extends HeadCompiler
 			{
 				if (def.lhsMem.pragmaAtHost.def == def)
 				{
-					// º¸ÊÕ¤Î¡÷»ØÄê¤ÇÄêµÁ¤µ¤ì¤ë¾ì¹ç
+					// å·¦è¾ºã®ï¼ æŒ‡å®šã§å®šç¾©ã•ã‚Œã‚‹å ´åˆ
 					identifiedCxtdefs.add(def);
 					int atomid = varCount++;
 					match.add(new Instruction(Instruction.GETRUNTIME, atomid, memToPath(def.lhsMem)));
@@ -389,7 +389,7 @@ public class GuardCompiler2 extends HeadCompiler
 			}
 		}
 
-		// ·¿¤ò·èÄê¤¹¤ë¤Ù¤­¥×¥í¥»¥¹Ê¸Ì®
+		// å‹ã‚’æ±ºå®šã™ã‚‹ã¹ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆ
 		System.err.println("TypedProcessContexts: " + typedProcessContexts.keySet());
 		
 		ProcessTypeContext tu = new ProcessTypeContext();
@@ -486,11 +486,11 @@ public class GuardCompiler2 extends HeadCompiler
 		}
 		System.err.println("============");
 
-		// STEP 2 - Á´¤Æ¤Î·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤¬ÆÃÄê¤µ¤ì¡¢·¿¤¬·èÄê¤¹¤ë¤Ş¤Ç·«¤êÊÖ¤¹
+		// STEP 2 - å…¨ã¦ã®å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒç‰¹å®šã•ã‚Œã€å‹ãŒæ±ºå®šã™ã‚‹ã¾ã§ç¹°ã‚Šè¿”ã™
 		List<Atom> cstrs = new LinkedList<Atom>(typeConstraints);
 
-		// À©Ìó
-		// ·Ò¤¬¤Ã¤Æ¤¤¤ëÀè¤Ï¥×¥í¥»¥¹Ê¸Ì®
+		// åˆ¶ç´„
+		// ç¹‹ãŒã£ã¦ã„ã‚‹å…ˆã¯ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆ
 		System.err.print("Constraints:");
 		for (Atom a : cstrs)
 		{
@@ -499,7 +499,7 @@ public class GuardCompiler2 extends HeadCompiler
 		System.err.println();
 
 		{
-			// uniq, not_uniq ¤òºÇ½é¤Ë¡Ê¾¯¤Ê¤¯¤È¤âint, unary ¤Ê¤É¤ÎÁ°¤Ë¡Ë½èÍı¤¹¤ë
+			// uniq, not_uniq ã‚’æœ€åˆã«ï¼ˆå°‘ãªãã¨ã‚‚int, unary ãªã©ã®å‰ã«ï¼‰å‡¦ç†ã™ã‚‹
 			List<Atom> tmpFirst = new LinkedList<Atom>();
 			List<Atom> tmpLast = new LinkedList<Atom>();
 			for (Iterator<Atom> it = cstrs.iterator(); it.hasNext(); )
@@ -552,7 +552,7 @@ public class GuardCompiler2 extends HeadCompiler
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						checkGroundLink(def1);
 					}
-					// ¥¬¡¼¥É¥¤¥ó¥é¥¤¥ó
+					// ã‚¬ãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³
 					else if (func.getName().startsWith("custom_"))
 					{
 						boolean hasError=false;
@@ -574,10 +574,10 @@ public class GuardCompiler2 extends HeadCompiler
 
 						String guardID = func.getName().substring(7+func.getArity()+1);
 						List<Integer> vars = new ArrayList<Integer>();
-						List<Integer> out = new ArrayList<Integer>(); // ½ĞÎÏ°ú¿ô
+						List<Integer> out = new ArrayList<Integer>(); // å‡ºåŠ›å¼•æ•°
 						for(int k=0;k<cstr.args.length;k++) {
 							ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
-							// ÆşÎÏ°ú¿ô¤¬Ì¤Â«Çû¤Ê¤é±ä´ü
+							// å…¥åŠ›å¼•æ•°ãŒæœªæŸç¸›ãªã‚‰å»¶æœŸ
 							if (isIn[k] && !identifiedCxtdefs.contains(defK)) {
 								continue FixType;
 							}
@@ -613,7 +613,7 @@ public class GuardCompiler2 extends HeadCompiler
 						for (int k = 0; k < cstr.args.length; k++)
 						{
 							ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
-							if (!identifiedCxtdefs.contains(defK)) continue FixType; // Ì¤³ä¤êÅö¤Æ¤Î¥×¥í¥»¥¹¡ÊÉ½µ­¤Ë-¤¬ÉÕ¤¯¤â¤Î¡Ë¤ÏÇ§¤á¤Ê¤¤
+							if (!identifiedCxtdefs.contains(defK)) continue FixType; // æœªå‰²ã‚Šå½“ã¦ã®ãƒ—ãƒ­ã‚»ã‚¹ï¼ˆè¡¨è¨˜ã«-ãŒä»˜ãã‚‚ã®ï¼‰ã¯èªã‚ãªã„
 							int srcPath;
 //							srcPath = typedcxtToSrcPath(defK);
 //							Env.p("VAR# "+srcPath);
@@ -637,16 +637,16 @@ public class GuardCompiler2 extends HeadCompiler
 					}
 					else if (func.equals("\\=", 2))
 					{
-						// NSAMEFUNC ¤òºî¤ë¤«¡©
+						// NSAMEFUNC ã‚’ä½œã‚‹ã‹ï¼Ÿ
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						if (!identifiedCxtdefs.contains(def2)) continue;
 
-						//ground¤ÎÈİÄê¤Ë¤·¤¿¡£(2006-02-18 by kudo)
+						//groundã®å¦å®šã«ã—ãŸã€‚(2006-02-18 by kudo)
 						// .. :- unary(A),A\=B | ..
-						//¤Î¾ì¹ç¡¢B¤¬ground¤Ç¹½¤ï¤Ê¤¤¡£A¤¬unary¤Ç¡¢¤«¤ÄB¤¬°Û¤Ê¤ë¹½Â¤¤Î»ş¤ËÈ¿±ş¤¹¤ë¡£
-						//¤³¤ÎÅÀ¤Ï¡¢==¤È¤Ï°ã¤¦¡£==¤Î¾ì¹ç¡¢¤½¤â¤½¤âÆ±¤¸·¿¤Ç¤Ê¤±¤ì¤Ğ¥Ş¥Ã¥Á¤·¤Ê¤¤¤¿¤á¡£
-						//B¤¬unary¤Î»ş¤Ë¸ÂÄê¤·¤¿¤±¤ì¤Ğ¡¢unary(B)¤ò½ñ¤­²Ã¤¨¤ì¤Ğ¤è¤¤¡£
-						//(²¿¤â¹Í¤¨¤º¤Ë¼ÂÁõ¤·¤¿¤é¤½¤¦¤Ê¤Ã¤¿¤Î¤À¤¬¡¢·ë²ÌÅª¤Ë°ìÈÖ½ÀÆğ¤ÇÄ¾´¶Åª¤Ê·Á¤À¤È»×¤¦¡£)
+						//ã®å ´åˆã€BãŒgroundã§æ§‹ã‚ãªã„ã€‚AãŒunaryã§ã€ã‹ã¤BãŒç•°ãªã‚‹æ§‹é€ ã®æ™‚ã«åå¿œã™ã‚‹ã€‚
+						//ã“ã®ç‚¹ã¯ã€==ã¨ã¯é•ã†ã€‚==ã®å ´åˆã€ãã‚‚ãã‚‚åŒã˜å‹ã§ãªã‘ã‚Œã°ãƒãƒƒãƒã—ãªã„ãŸã‚ã€‚
+						//BãŒunaryã®æ™‚ã«é™å®šã—ãŸã‘ã‚Œã°ã€unary(B)ã‚’æ›¸ãåŠ ãˆã‚Œã°ã‚ˆã„ã€‚
+						//(ä½•ã‚‚è€ƒãˆãšã«å®Ÿè£…ã—ãŸã‚‰ãã†ãªã£ãŸã®ã ãŒã€çµæœçš„ã«ä¸€ç•ªæŸ”è»Ÿã§ç›´æ„Ÿçš„ãªå½¢ã ã¨æ€ã†ã€‚)
 						if(!GROUND_ALLOWED ||
 							typedCxtTypes.get(def1) == UNARY_ATOM_TYPE ||
 							typedCxtTypes.get(def2) == UNARY_ATOM_TYPE)
@@ -717,12 +717,12 @@ public class GuardCompiler2 extends HeadCompiler
 					}
 					else if (func.equals(Functor.UNIFY)) // (-X = +Y)
 					{
-						if (!identifiedCxtdefs.contains(def2)) // (+X = -Y) ¤Ï (-Y = +X) ¤È¤·¤Æ½èÍı¤¹¤ë
+						if (!identifiedCxtdefs.contains(def2)) // (+X = -Y) ã¯ (-Y = +X) ã¨ã—ã¦å‡¦ç†ã™ã‚‹
 						{
 							ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
 							if (!identifiedCxtdefs.contains(def2)) continue;
 						}
-						// Ì¤ÆÃÄê¤Îdef1 = ground¤Îdef2 ¤Ïµö¤µ¤ì¤Ê¤¤
+						// æœªç‰¹å®šã®def1 = groundã®def2 ã¯è¨±ã•ã‚Œãªã„
 						if (GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE)
 						{
 							if (!identifiedCxtdefs.contains(def1)) continue;
@@ -736,7 +736,7 @@ public class GuardCompiler2 extends HeadCompiler
 //					}
 					else if (func.equals("==", 2)) // (+X == +Y) //seiji
 					{
-						/* unaryÍÑÈæ³Ó±é»»»Ò (10/07/07 seiji) */
+						/* unaryç”¨æ¯”è¼ƒæ¼”ç®—å­ (10/07/07 seiji) */
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						if (!identifiedCxtdefs.contains(def2)) continue;
 						int atomid1 = loadUnaryAtom(def1);
@@ -747,7 +747,7 @@ public class GuardCompiler2 extends HeadCompiler
 					}
 					else if (func.equals("\\==", 2)) // (+X \== +Y) //seiji
 					{
-						/* unaryÍÑÈæ³Ó±é»»»Ò (11/01/25 seiji) */
+						/* unaryç”¨æ¯”è¼ƒæ¼”ç®—å­ (11/01/25 seiji) */
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						if (!identifiedCxtdefs.contains(def2)) continue;
 						int atomid1 = loadUnaryAtom(def1);
@@ -761,7 +761,7 @@ public class GuardCompiler2 extends HeadCompiler
 						match.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
 					}
 //					else if (func.equals(new SymbolFunctor("===",2))) { // (+X === +Y) //seiji
-//						/* hlinkÍÑÈæ³Ó±é»»»Ò (10/07/07 seiji) */
+//						/* hlinkç”¨æ¯”è¼ƒæ¼”ç®—å­ (10/07/07 seiji) */
 //						if (!identifiedCxtdefs.contains(def1)) continue;
 //						if (!identifiedCxtdefs.contains(def2)) continue;
 //						int atomid1 = loadUnaryAtom(def1);
@@ -770,7 +770,7 @@ public class GuardCompiler2 extends HeadCompiler
 //						match.add(new Instruction(Instruction.ISHLINK, atomid2));
 //						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
 //					}
-					else if (guard0.containsKey(func)) // 0ÆşÎÏÀ©Ìó//seiji
+					else if (guard0.containsKey(func)) // 0å…¥åŠ›åˆ¶ç´„//seiji
 					{
 						int[] desc = guard0.get(func);
 						int atomid = varCount++;
@@ -789,7 +789,7 @@ public class GuardCompiler2 extends HeadCompiler
 							typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
 						}
 					}
-					else if (guard1.containsKey(func)) // 1ÆşÎÏÀ©Ìó
+					else if (guard1.containsKey(func)) // 1å…¥åŠ›åˆ¶ç´„
 					{
 						int[] desc = guard1.get(func);
 						if (!identifiedCxtdefs.contains(def1)) continue;
@@ -805,23 +805,23 @@ public class GuardCompiler2 extends HeadCompiler
 						if (func.getArity() == 1) // {t1,inst} --> p(+X1)
 						{
 							// // 060831okabe
-							// // °Ê²¼¤ò¥³¥á¥ó¥È¥¢¥¦¥È¡¥
-							// // ¤Ä¤Ş¤êconnectruntime ¤Ïput ¤·¤Æget ¤µ¤ì¤ë¤À¤±¡¥
-							// // TODO ¤è¤Ã¤Æconnectruntime ¤Ï¤¤¤é¤Ê¤¤¤Î¤Ç²¿¤È¤«¤¹¤ë¡¥¡Ê¥é¥¤¥Ö¥é¥ê¤ò»È¤Ã¤¿Ê¬»¶¤òºî¤ë¤È¤­¤Ş¤ÇÊüÃÖ¤Ç¤è¤¤¡Ë
-							// hyperlink¤Î¤¿¤á¤Ë¥³¥á¥ó¥È¥¢¥¦¥È²ò½ü (2010/07/07 seiji)
+							// // ä»¥ä¸‹ã‚’ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆï¼
+							// // ã¤ã¾ã‚Šconnectruntime ã¯put ã—ã¦get ã•ã‚Œã‚‹ã ã‘ï¼
+							// // TODO ã‚ˆã£ã¦connectruntime ã¯ã„ã‚‰ãªã„ã®ã§ä½•ã¨ã‹ã™ã‚‹ï¼ï¼ˆãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’ä½¿ã£ãŸåˆ†æ•£ã‚’ä½œã‚‹ã¨ãã¾ã§æ”¾ç½®ã§ã‚ˆã„ï¼‰
+							// hyperlinkã®ãŸã‚ã«ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆè§£é™¤ (2010/07/07 seiji)
 							if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
 						}
 						else // {t1,inst,t2} --> p(+X1,-X2)
 						{
 							int atomid2;
-							if (desc[1] == -1) // Ã±¹à + ¤È +. ¤À¤±ÆÃÊÌ°·¤¤
+							if (desc[1] == -1) // å˜é … + ã¨ +. ã ã‘ç‰¹åˆ¥æ‰±ã„
 							{
 								atomid2 = atomid1;
-								//bindToUnaryAtom Æâ¤Ç¡¢¼Âºİ¤Ë»È¤¦¥¢¥È¥à¤òÀ¸À®¤·¤Æ¤¤¤ë¡£
+								//bindToUnaryAtom å†…ã§ã€å®Ÿéš›ã«ä½¿ã†ã‚¢ãƒˆãƒ ã‚’ç”Ÿæˆã—ã¦ã„ã‚‹ã€‚
 							}
 							else
 							{
-								//if (func.equals(new SymbolFunctor("getconame", 2))) // getconameÀ©Ìó¤Î¤¿¤á¤Î½èÍı
+								//if (func.equals(new SymbolFunctor("getconame", 2))) // getconameåˆ¶ç´„ã®ãŸã‚ã®å‡¦ç†
 								//	match.add(new Instruction(Instruction.HASCONAME, atomid1));
 								atomid2 = varCount++;
 								match.add(new Instruction(desc[1], atomid2, atomid1));
@@ -833,7 +833,7 @@ public class GuardCompiler2 extends HeadCompiler
 							typedCxtDataTypes.put(def2, desc[2]);
 						}
 					}
-					else if (guard2.containsKey(func)) // 2ÆşÎÏÀ©Ìó
+					else if (guard2.containsKey(func)) // 2å…¥åŠ›åˆ¶ç´„
 					{
 						int[] desc = guard2.get(func);
 						if (!identifiedCxtdefs.contains(def1)) continue;
@@ -873,7 +873,7 @@ public class GuardCompiler2 extends HeadCompiler
 					else
 					{
 						error("COMPILE ERROR: unrecognized type constraint: " + cstr);
-						discardTypeConstraint(cstr); // ¤³¤³¤Ë¤ÏÍè¤Ê¤¤
+						discardTypeConstraint(cstr); // ã“ã“ã«ã¯æ¥ãªã„
 					}
 					lit.remove();
 					changed = true;
@@ -882,7 +882,7 @@ public class GuardCompiler2 extends HeadCompiler
 		}
 		while (changed);
 
-		// STEP 3 - ·¿ÉÕ¤±¼ºÇÔ
+		// STEP 3 - å‹ä»˜ã‘å¤±æ•—
 		String text = "";
 		for (Atom cstr : cstrs)
 		{
@@ -894,12 +894,12 @@ public class GuardCompiler2 extends HeadCompiler
 	}
 
 	private boolean GROUND_ALLOWED = true;
-	/** À©Ìó X=Y ¤Ş¤¿¤Ï X==Y ¤ò½èÍı¤¹¤ë¡£¤¿¤À¤·def2¤ÏÆÃÄê¤µ¤ì¤Æ¤¤¤Ê¤±¤ì¤Ğ¤Ê¤é¤Ê¤¤¡£*/
+	/** åˆ¶ç´„ X=Y ã¾ãŸã¯ X==Y ã‚’å‡¦ç†ã™ã‚‹ã€‚ãŸã ã—def2ã¯ç‰¹å®šã•ã‚Œã¦ã„ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚*/
 	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) throws CompileException{
 		boolean checkNeeded = (typedCxtTypes.get(def1) == null
-				&& typedCxtTypes.get(def2) == null); // ·¿ÉÕ¤­¤Ç¤¢¤ë¤³¤È¤Î¸¡ºº¤¬É¬Í×¤«¤É¤¦¤«
+				&& typedCxtTypes.get(def2) == null); // å‹ä»˜ãã§ã‚ã‚‹ã“ã¨ã®æ¤œæŸ»ãŒå¿…è¦ã‹ã©ã†ã‹
 		//boolean GROUND_ALLOWED = true;
-		// GROUND_ALLOWED ¤Î¤È¤­ (unary = ?) ¤Ï (? = unary) ¤È¤·¤Æ½èÍı¤¹¤ë¡Ê¤¿¤À¤·?¤Ïground¤Ş¤¿¤Ïnull¡Ë
+		// GROUND_ALLOWED ã®ã¨ã (unary = ?) ã¯ (? = unary) ã¨ã—ã¦å‡¦ç†ã™ã‚‹ï¼ˆãŸã ã—?ã¯groundã¾ãŸã¯nullï¼‰
 		if (GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE) {
 			if (typedCxtTypes.get(def1) == UNARY_ATOM_TYPE) {
 				ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
@@ -913,14 +913,14 @@ public class GuardCompiler2 extends HeadCompiler
 			int linkid1 = loadGroundLink(def1);
 			int linkid2 = loadGroundLink(def2);
 
-			/** ground¤Ë¤Ä¤¤¤Æ¤Ï¡¢(Ì¤ÆÃÄê¤Î$p1)=(ÆÃÄêºÑ¤Î$p2)¤È¤¤¤¦·Á¤Ïµö¤µ¤ì¤Ê¤¤¤â¤Î¤È¤¹¤ë¡£fix..¤Ç¤Ï¤¸¤¯ */
+			/** groundã«ã¤ã„ã¦ã¯ã€(æœªç‰¹å®šã®$p1)=(ç‰¹å®šæ¸ˆã®$p2)ã¨ã„ã†å½¢ã¯è¨±ã•ã‚Œãªã„ã‚‚ã®ã¨ã™ã‚‹ã€‚fix..ã§ã¯ã˜ã */
 			match.add(new Instruction(Instruction.EQGROUND,linkid1,linkid2));
 		}
 		else {
 			int atomid2 = loadUnaryAtom(def2);
 			if (checkNeeded) match.add(new Instruction(Instruction.ISUNARY, atomid2));
-			if (!identifiedCxtdefs.contains(def1)) { // (Ì¤ÆÃÄê¤Î$p1)=(ÆÃÄêºÑ¤Î$p2) 
-				// todo Æ±¤¸ÊÑ¿ô¤ò¶¦Í­¤·¤¿Êı¤¬¤è¤¤¡£¤Ç¤­¤ë¤«¡©
+			if (!identifiedCxtdefs.contains(def1)) { // (æœªç‰¹å®šã®$p1)=(ç‰¹å®šæ¸ˆã®$p2) 
+				// todo åŒã˜å¤‰æ•°ã‚’å…±æœ‰ã—ãŸæ–¹ãŒã‚ˆã„ã€‚ã§ãã‚‹ã‹ï¼Ÿ
 				int funcid2 = varCount++;
 				match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
 				int atomid1 = varCount++;
@@ -940,7 +940,7 @@ public class GuardCompiler2 extends HeadCompiler
 			connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 	}
 
-	/** ·¿À©Ìó¤òÇÑ´ş¤¹¤ë¡£¥¨¥é¡¼Éüµ¢ÍÑ¥á¥½¥Ã¥É */
+	/** å‹åˆ¶ç´„ã‚’å»ƒæ£„ã™ã‚‹ã€‚ã‚¨ãƒ©ãƒ¼å¾©å¸°ç”¨ãƒ¡ã‚½ãƒƒãƒ‰ */
 	private void discardTypeConstraint(Atom cstr) throws CompileException
 	{
 		match.add(Instruction.fail());
@@ -951,7 +951,7 @@ public class GuardCompiler2 extends HeadCompiler
 		}
 	}
 
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®def¤ò1°ú¿ô¥Õ¥¡¥ó¥¯¥¿func¤ÇÂ«Çû¤¹¤ë */
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆdefã‚’1å¼•æ•°ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿funcã§æŸç¸›ã™ã‚‹ */
 	private void bindToFunctor(ContextDef def, Functor func) throws CompileException
 	{
 		if (!identifiedCxtdefs.contains(def))
@@ -968,7 +968,7 @@ public class GuardCompiler2 extends HeadCompiler
 			int atomid = typedcxtToSrcPath(def);
 			if (atomid == UNBOUND)
 			{
-				LinkOccurrence srclink = def.lhsOcc.args[0].buddy; // def¤Î¥½¡¼¥¹½Ğ¸½¤ò»Ø¤¹¥¢¥È¥àÂ¦¤Î°ú¿ô
+				LinkOccurrence srclink = def.lhsOcc.args[0].buddy; // defã®ã‚½ãƒ¼ã‚¹å‡ºç¾ã‚’æŒ‡ã™ã‚¢ãƒˆãƒ å´ã®å¼•æ•°
 				atomid = varCount++;
 				match.add(new Instruction(Instruction.DEREFATOM,
 						atomid, atomToPath(srclink.atom), srclink.pos));
@@ -985,7 +985,7 @@ public class GuardCompiler2 extends HeadCompiler
 		typedCxtTypes.put(def, UNARY_ATOM_TYPE);
 	}
 
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®def¤ò1°ú¿ô¥¢¥È¥à$atomid¤Î¥Õ¥¡¥ó¥¯¥¿¤ÇÂ«Çû¤¹¤ë */
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆdefã‚’1å¼•æ•°ã‚¢ãƒˆãƒ $atomidã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã§æŸç¸›ã™ã‚‹ */
 	private void bindToUnaryAtom(ContextDef def, int atomid) {
 		if (!identifiedCxtdefs.contains(def)) {
 			identifiedCxtdefs.add(def);
@@ -1014,10 +1014,10 @@ public class GuardCompiler2 extends HeadCompiler
 		}
 		typedCxtTypes.put(def, UNARY_ATOM_TYPE);
 	}
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®def¤Î¡ÊÆÃÄê¤µ¤ì¤Æ¤¤¤ë¡Ë¥½¡¼¥¹½Ğ¸½¤Î
-	 * ¡ÊÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯¤¬½Ğ¸½¤¹¤ë¡Ë¥¢¥È¥à¤ò¼èÆÀ¤¹¤ë¡£
-	 * ¤Ş¤¿¡¢¤³¤Î¥¢¥È¥à¤¬1°ú¿ô¤Ç¤¢¤ë¤È²¾Äê¤·¤Æ¡¢·¿¾ğÊó¤ò¹¹¿·¤¹¤ë¡£
-	 * @return ¼èÆÀ¤·¤¿¥¢¥È¥à¤ÎÊÑ¿ôÈÖ¹æ */
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆdefã®ï¼ˆç‰¹å®šã•ã‚Œã¦ã„ã‚‹ï¼‰ã‚½ãƒ¼ã‚¹å‡ºç¾ã®
+	 * ï¼ˆæ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯ãŒå‡ºç¾ã™ã‚‹ï¼‰ã‚¢ãƒˆãƒ ã‚’å–å¾—ã™ã‚‹ã€‚
+	 * ã¾ãŸã€ã“ã®ã‚¢ãƒˆãƒ ãŒ1å¼•æ•°ã§ã‚ã‚‹ã¨ä»®å®šã—ã¦ã€å‹æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹ã€‚
+	 * @return å–å¾—ã—ãŸã‚¢ãƒˆãƒ ã®å¤‰æ•°ç•ªå· */
 	private int loadUnaryAtom(ContextDef def) throws CompileException{
 		int atomid = typedcxtToSrcPath(def);
 		if (atomid == UNBOUND) {
@@ -1034,12 +1034,12 @@ public class GuardCompiler2 extends HeadCompiler
 		return atomid;
 	}	
 
-	/** ·¿ÉÕ¥×¥í¥»¥¹Ê¸Ì®def¤Î¡ÊÆÃÄê¤µ¤ì¤Æ¤¤¤ë¡Ë¥½¡¼¥¹½Ğ¸½¤Î¥ê¥ó¥¯¤ò¼èÆÀ¤¹¤ë¡£
-	 *  ¤½¤ì¤é¤ò¥ê¥¹¥ÈÊÑ¿ô¤Ë³ÊÇ¼¤¹¤ë¡¥
-	 *  ¤½¤ÎÊÑ¿ôÈÖ¹æ¤ògroundsrcs¤ËÄÉ²Ã¤¹¤ë¡£
-	 *  ·¿¾ğÊó¤ò¹¹¿·¤¹¤ë¡£
-	 *  @param def ¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ
-	 *  @return ¥ê¥ó¥¯¥ê¥¹¥È¤ÎÊÑ¿ôÈÖ¹æ */
+	/** å‹ä»˜ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆdefã®ï¼ˆç‰¹å®šã•ã‚Œã¦ã„ã‚‹ï¼‰ã‚½ãƒ¼ã‚¹å‡ºç¾ã®ãƒªãƒ³ã‚¯ã‚’å–å¾—ã™ã‚‹ã€‚
+	 *  ãã‚Œã‚‰ã‚’ãƒªã‚¹ãƒˆå¤‰æ•°ã«æ ¼ç´ã™ã‚‹ï¼
+	 *  ãã®å¤‰æ•°ç•ªå·ã‚’groundsrcsã«è¿½åŠ ã™ã‚‹ã€‚
+	 *  å‹æƒ…å ±ã‚’æ›´æ–°ã™ã‚‹ã€‚
+	 *  @param def ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾©
+	 *  @return ãƒªãƒ³ã‚¯ãƒªã‚¹ãƒˆã®å¤‰æ•°ç•ªå· */
 	private int loadGroundLink(ContextDef def) {
 //		ArrayList linkids = groundToSrcPath(def);
 		int linkids = groundToSrcPath(def);
@@ -1058,14 +1058,14 @@ public class GuardCompiler2 extends HeadCompiler
 		return linkids;
 	}
 
-	//º¸ÊÕ¤ÎËì(Membrane) -> ¤½¤ÎËì¤Î¥¢¥È¥à¤¬Æş¤Ã¤¿set¤ò»Ø¤¹ÊÑ¿ôÈÖ¹æ(Integer)
+	//å·¦è¾ºã®è†œ(Membrane) -> ãã®è†œã®ã‚¢ãƒˆãƒ ãŒå…¥ã£ãŸsetã‚’æŒ‡ã™å¤‰æ•°ç•ªå·(Integer)
 //	HashMap memToAtomSetPath = new HashMap();
 
-	//º¸ÊÕ¤ÎËì(Membrane) -> ¤½¤ÎËì¤Î¥¢¥È¥à¤ÎÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯¤¬Æş¤Ã¤¿list¤ò»Ø¤¹ÊÑ¿ôÈÖ¹æ(Integer)
+	//å·¦è¾ºã®è†œ(Membrane) -> ãã®è†œã®ã‚¢ãƒˆãƒ ã®æ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯ãŒå…¥ã£ãŸlistã‚’æŒ‡ã™å¤‰æ•°ç•ªå·(Integer)
 //	HashMap memToLinkListPath = new HashMap();
 
-	/** ·¿ÉÕ¥×¥í¥»¥¹Ê¸Ì®def¤¬¡¢´ğÄì¹à¥×¥í¥»¥¹¤«¤É¤¦¤«¸¡ºº¤¹¤ë¡£
-	 *  @param def ¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ */
+	/** å‹ä»˜ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆdefãŒã€åŸºåº•é …ãƒ—ãƒ­ã‚»ã‚¹ã‹ã©ã†ã‹æ¤œæŸ»ã™ã‚‹ã€‚
+	 *  @param def ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾© */
 	private void checkGroundLink(ContextDef def) {
 		if(typedCxtTypes.get(def) != UNARY_ATOM_TYPE && typedCxtTypes.get(def) != GROUND_LINK_TYPE){
 			typedCxtTypes.put(def,GROUND_LINK_TYPE);
@@ -1075,28 +1075,28 @@ public class GuardCompiler2 extends HeadCompiler
 			int srclinklistpath;
 //			if(!memToLinkListPath.containsKey(def.lhsOcc.mem)){
 			srclinklistpath = varCount++;
-			// Èò¤±¤ë¥ê¥ó¥¯¤Î¥ê¥¹¥È
+			// é¿ã‘ã‚‹ãƒªãƒ³ã‚¯ã®ãƒªã‚¹ãƒˆ
 			match.add(new Instruction(Instruction.NEWLIST,srclinklistpath));
 
-			// º¸ÊÕ½Ğ¸½¥¢¥È¥à¤Î¡¤Á´¤Æ¤Î°ú¿ô(¤ò»Ø¤¹¥ê¥ó¥¯)¤Î¤¦¤Á,
-			// º¸ÊÕ¤Î¼«Í³¥ê¥ó¥¯¤â¤·¤¯¤ÏÆ±¤¸Ëì¤Î¥×¥í¥»¥¹Ê¸Ì®¤ËÀÜÂ³¤·¤Æ¤¤¤Æ
-			// ¤³¤Î¥×¥í¥»¥¹Ê¸Ì®¤Îº¬¤Ç¤Ê¤¤¤â¤Î¤ò¥ê¥¹¥È¤ËÄÉ²Ã¤¹¤ë
+			// å·¦è¾ºå‡ºç¾ã‚¢ãƒˆãƒ ã®ï¼Œå…¨ã¦ã®å¼•æ•°(ã‚’æŒ‡ã™ãƒªãƒ³ã‚¯)ã®ã†ã¡,
+			// å·¦è¾ºã®è‡ªç”±ãƒªãƒ³ã‚¯ã‚‚ã—ãã¯åŒã˜è†œã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«æ¥ç¶šã—ã¦ã„ã¦
+			// ã“ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®æ ¹ã§ãªã„ã‚‚ã®ã‚’ãƒªã‚¹ãƒˆã«è¿½åŠ ã™ã‚‹
 			for(Atom atom : def.lhsOcc.mem.atoms){
 //				Util.println("checkGroundLink"+atom);
 				int[] paths = (int[])linkPaths.get(atomToPath(atom));
 				for(int i=0;i<atom.args.length;i++){
 //					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
-					if(def.lhsOcc.mem.parent == null){ // º¸ÊÕ½Ğ¸½¤¬¥ë¡¼¥ëºÇ³°Éô
+					if(def.lhsOcc.mem.parent == null){ // å·¦è¾ºå‡ºç¾ãŒãƒ«ãƒ¼ãƒ«æœ€å¤–éƒ¨
 						if( atom.args[i].buddy.atom.mem!=rc.rs.rightMem)
-							// È¿ÂĞÂ¦¤¬±¦ÊÕ½Ğ¸½¤Î»ş¤Î¤ßÄÉ²Ã
+							// åå¯¾å´ãŒå³è¾ºå‡ºç¾ã®æ™‚ã®ã¿è¿½åŠ 
 							if(!def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom))
 								continue;
-					}else{ // º¸ÊÕ½Ğ¸½¤¬ËìÆâ
-						if(!def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom))  // È¿ÂĞÂ¦¤¬¥×¥í¥»¥¹Ê¸Ì®¤Î°ú¿ô¤Î»ş¤Î¤ßÄÉ²Ã
+					}else{ // å·¦è¾ºå‡ºç¾ãŒè†œå†…
+						if(!def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom))  // åå¯¾å´ãŒãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®å¼•æ•°ã®æ™‚ã®ã¿è¿½åŠ 
 							if(!def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom))
 								continue;
 					}
-					boolean flgNotAdd = false; // ¤½¤Î°ú¿ô¤òÈò¤±¤ë¤Ù¤­¥ê¥¹¥È¤Ë¡Ö²Ã¤¨¤Ê¤¤¡×¾ì¹çtrue
+					boolean flgNotAdd = false; // ãã®å¼•æ•°ã‚’é¿ã‘ã‚‹ã¹ããƒªã‚¹ãƒˆã«ã€ŒåŠ ãˆãªã„ã€å ´åˆtrue
 					for(int j=0;j<def.lhsOcc.args.length;j++){
 						LinkOccurrence ro = def.lhsOcc.args[j].buddy;
 						if(ro == atom.args[i])
@@ -1123,7 +1123,7 @@ public class GuardCompiler2 extends HeadCompiler
 	}
 
 	/**
-	 * unary·¿¤ËÀ©Ìó¤µ¤ì¤¿¥×¥í¥»¥¹Ê¸Ì®¤¬º¸ÊÕ¤Ë½Ğ¸½¤·¡¢1°ú¿ô¤Ç¤¢¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë¡¥
+	 * unaryå‹ã«åˆ¶ç´„ã•ã‚ŒãŸãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒå·¦è¾ºã«å‡ºç¾ã—ã€1å¼•æ•°ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹ï¼
 	 * @param def
 	 * @throws CompileException
 	 */
@@ -1137,14 +1137,14 @@ public class GuardCompiler2 extends HeadCompiler
 
 
 	/**
-	 * ËìÆâ¤Î¥¢¥È¥à¿ô¤ò¿ô¤¨¤ë¡£$p¤¬Ìµ¤¤¤³¤È¤¬¾ò·ï¡£
-	 * ground,unary¤Ë¤Ä¤¤¤Æ¤â¤­¤Á¤ó¤È¹Í¤¨¤ë¡£
+	 * è†œå†…ã®ã‚¢ãƒˆãƒ æ•°ã‚’æ•°ãˆã‚‹ã€‚$pãŒç„¡ã„ã“ã¨ãŒæ¡ä»¶ã€‚
+	 * ground,unaryã«ã¤ã„ã¦ã‚‚ãã¡ã‚“ã¨è€ƒãˆã‚‹ã€‚
 	 * 
-	 * @param mem ¿ô¤ò¥Á¥§¥Ã¥¯¤¹¤ëËì
+	 * @param mem æ•°ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹è†œ
 	 */
 	private void countAtomsOfMembrane(Membrane mem)
 	{
-		if (!memToGroundSizes.containsKey(mem)) // ¸·¤·¤¯RISC²½¤¹¤ë¤Ê¤é¡¢natoms¤âÊ¬¤±¤ë¤Ù¤­¤«
+		if (!memToGroundSizes.containsKey(mem)) // å³ã—ãRISCåŒ–ã™ã‚‹ãªã‚‰ã€natomsã‚‚åˆ†ã‘ã‚‹ã¹ãã‹
 		{
 			match.add(new Instruction(Instruction.NATOMS, memToPath(mem),
 					mem.getNormalAtomCount() + mem.typedProcessContexts.size() ));
@@ -1152,11 +1152,11 @@ public class GuardCompiler2 extends HeadCompiler
 		else
 		{
 			Map<ContextDef, Integer> gmap = memToGroundSizes.get(mem);
-			//ÉáÄÌ¤Î¥¢¥È¥à¤Î¸Ä¿ô¤È¡¢unary¤Î¸Ä¿ô
+			//æ™®é€šã®ã‚¢ãƒˆãƒ ã®å€‹æ•°ã¨ã€unaryã®å€‹æ•°
 			int ausize = mem.getNormalAtomCount() + mem.typedProcessContexts.size() - gmap.size();
 			int ausfunc = varCount++;
 			match.add(new Instruction(Instruction.LOADFUNC,ausfunc, new IntegerFunctor(ausize)));
-			//³Æground¤Ë¤Ä¤¤¤Æ¡¢isgroundÌ¿Îá¤ÇÌã¤Ã¤Æ¤­¤¿ground¹½À®¥¢¥È¥à¿ô¤òÂ­¤·¤Æ¤¤¤¯
+			//å„groundã«ã¤ã„ã¦ã€isgroundå‘½ä»¤ã§è²°ã£ã¦ããŸgroundæ§‹æˆã‚¢ãƒˆãƒ æ•°ã‚’è¶³ã—ã¦ã„ã
 			int allfunc = ausfunc;	
 			for (ContextDef def : gmap.keySet())
 			{
@@ -1172,9 +1172,9 @@ public class GuardCompiler2 extends HeadCompiler
 
 	////////////////////////////////////////////////////////////////
 
-	/** HeadCompiler.getAtomActuals¤Î¥ª¡¼¥Ğ¡¼¥é¥¤¥É¡£
-	 * GuardCompiler¤Ï¸½¾õ¤Ç¤Ï¡¢atoms¤ËÂĞ±ş¤¹¤ëÊÑ¿ôÈÖ¹æ¤Î¥ê¥¹¥È¤Î¸å¤Ë¡¢
-	 * typedcxtdefs¤Î¤¦¤ÁUNARY_ATOM_TYPE¤Ç¤¢¤ë¤è¤¦¤Ê¤â¤Î¤ÎÊÑ¿ôÈÖ¹æ¤Î¥ê¥¹¥È¤ò¤Ä¤Ê¤²¤¿ArrayList¤òÊÖ¤¹¡£*/
+	/** HeadCompiler.getAtomActualsã®ã‚ªãƒ¼ãƒãƒ¼ãƒ©ã‚¤ãƒ‰ã€‚
+	 * GuardCompilerã¯ç¾çŠ¶ã§ã¯ã€atomsã«å¯¾å¿œã™ã‚‹å¤‰æ•°ç•ªå·ã®ãƒªã‚¹ãƒˆã®å¾Œã«ã€
+	 * typedcxtdefsã®ã†ã¡UNARY_ATOM_TYPEã§ã‚ã‚‹ã‚ˆã†ãªã‚‚ã®ã®å¤‰æ•°ç•ªå·ã®ãƒªã‚¹ãƒˆã‚’ã¤ãªã’ãŸArrayListã‚’è¿”ã™ã€‚*/
 	List<Integer> getAtomActuals()
 	{
 		List<Integer> args = new ArrayList<Integer>();

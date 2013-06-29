@@ -6,54 +6,54 @@ import util.Util;
 import compile.parser.SrcName;
 
 /**
- * String¤ÎÌ¾Á°¤È¥ê¥ó¥¯¿ô¤ÎÁÈ¤«¤é¤Ê¤ë¥¢¥È¥à¤ÎFunctor¤òÉ½¤¹Ãê¾İ¥¯¥é¥¹¡£
- * ¤³¤Î¥¯¥é¥¹¤ÏÌ¾Á°¤È¥ê¥ó¥¯¿ô¤Î¥Õ¥£¡¼¥ë¥É¤Ï»ı¤Ã¤Æ¤¤¤Ê¤¤¤Î¤Ç¡¤
- * ¥µ¥Ö¥¯¥é¥¹¤Ï¤³¤ì¤é¤Î¾ğÊó¤ò¼èÆÀ¤¹¤ë getName, getArity ¤ò¼ÂÁõ¤¹¤ë¡¥
- * ¥ª¥Ö¥¸¥§¥¯¥È¤ÎÀ¸À®¤Ï³Æ¥µ¥Ö¥¯¥é¥¹¤ò new ¤¹¤ëÂ¾¤Ë build ¥á¥½¥Ã¥É¤ò»È¤¦¤³¤È¤¬½ĞÍè¤ë¡¥
+ * Stringã®åå‰ã¨ãƒªãƒ³ã‚¯æ•°ã®çµ„ã‹ã‚‰ãªã‚‹ã‚¢ãƒˆãƒ ã®Functorã‚’è¡¨ã™æŠ½è±¡ã‚¯ãƒ©ã‚¹ã€‚
+ * ã“ã®ã‚¯ãƒ©ã‚¹ã¯åå‰ã¨ãƒªãƒ³ã‚¯æ•°ã®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¯æŒã£ã¦ã„ãªã„ã®ã§ï¼Œ
+ * ã‚µãƒ–ã‚¯ãƒ©ã‚¹ã¯ã“ã‚Œã‚‰ã®æƒ…å ±ã‚’å–å¾—ã™ã‚‹ getName, getArity ã‚’å®Ÿè£…ã™ã‚‹ï¼
+ * ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆã¯å„ã‚µãƒ–ã‚¯ãƒ©ã‚¹ã‚’ new ã™ã‚‹ä»–ã« build ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ã†ã“ã¨ãŒå‡ºæ¥ã‚‹ï¼
  */
 public abstract class Functor
 {
 	/**
-	 * Ëì¤ÎÆâÂ¦¤Î¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥à¤òÉ½¤¹¥Õ¥¡¥ó¥¯¥¿ $in/2
+	 * è†œã®å†…å´ã®è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ ã‚’è¡¨ã™ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ $in/2
 	 */
 	public static final Functor INSIDE_PROXY = new SpecialFunctor(SpecialFunctor.INSIDE_PROXY_NAME, 2);
 
 	/**
-	 * Ëì¤Î³°Â¦¤Î¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥à¤òÉ½¤¹¥Õ¥¡¥ó¥¯¥¿ $out/2
+	 * è†œã®å¤–å´ã®è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ ã‚’è¡¨ã™ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ $out/2
 	 */
 	public static final Functor OUTSIDE_PROXY = new SpecialFunctor(SpecialFunctor.OUTSIDE_PROXY_NAME, 2);
 
 	/**
-	 * $p¤Ë¥Ş¥Ã¥Á¤·¤¿¥×¥í¥»¥¹¤Î¼«Í³¥ê¥ó¥¯¤Î¤¿¤á¤Ë°ì»şÅª¤Ë»ÈÍÑ¤µ¤ì¤ë¥¢¥È¥à ¤òÉ½¤¹¥Õ¥¡¥ó¥¯¥¿ transient_inside_proxy
-	 * ¡ÊÄÌ¾Î:star¡Ë
+	 * $pã«ãƒãƒƒãƒã—ãŸãƒ—ãƒ­ã‚»ã‚¹ã®è‡ªç”±ãƒªãƒ³ã‚¯ã®ãŸã‚ã«ä¸€æ™‚çš„ã«ä½¿ç”¨ã•ã‚Œã‚‹ã‚¢ãƒˆãƒ  ã‚’è¡¨ã™ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ transient_inside_proxy
+	 * ï¼ˆé€šç§°:starï¼‰
 	 */
 	public static final Functor STAR = new SpecialFunctor("$star", 2);
 
 	/**
-	 * cons ¥¢¥È¥à¤òÉ½¤¹¥Õ¥¡¥ó¥¯¥¿ ./3
+	 * cons ã‚¢ãƒˆãƒ ã‚’è¡¨ã™ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ ./3
 	 */
 	public static final Functor CONS = new SymbolFunctor(".", 3);
 
 	/**
-	 * nil ¥¢¥È¥à¤òÉ½¤¹¥Õ¥¡¥ó¥¯¥¿ []/1
+	 * nil ã‚¢ãƒˆãƒ ã‚’è¡¨ã™ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ []/1
 	 */
 	public static final Functor NIL = new SymbolFunctor("[]", 1);
 
 	/**
-	 * Ã±°ì²½¤ò°ÕÌ£¤¹¤ë¥Õ¥¡¥ó¥¯¥¿¡£=/2
+	 * å˜ä¸€åŒ–ã‚’æ„å‘³ã™ã‚‹ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã€‚=/2
 	 */
 	public static final Functor UNIFY = new SymbolFunctor("=", 2);
 
 	/**
-	 * °ú¿ô¤ò¤â¤Ä¥¢¥È¥à¤ÎÌ¾Á°¤È¤·¤ÆÉ½¼¨Ì¾¤ò°õ»ú¤¹¤ë¤¿¤á¤ÎÊ¸»úÎó¤òÊÖ¤¹¡£ ÄÌ¾ï¤ÎÌ¾Á°°Ê³°¡Ê¿ôÃÍ¤äµ­¹æ¡Ë¤Î¾ì¹ç¡¢¥¯¥©¡¼¥È¤·¤ÆÊÖ¤¹¡£
+	 * å¼•æ•°ã‚’ã‚‚ã¤ã‚¢ãƒˆãƒ ã®åå‰ã¨ã—ã¦è¡¨ç¤ºåã‚’å°å­—ã™ã‚‹ãŸã‚ã®æ–‡å­—åˆ—ã‚’è¿”ã™ã€‚ é€šå¸¸ã®åå‰ä»¥å¤–ï¼ˆæ•°å€¤ã‚„è¨˜å·ï¼‰ã®å ´åˆã€ã‚¯ã‚©ãƒ¼ãƒˆã—ã¦è¿”ã™ã€‚
 	 */
 	public String getQuotedFunctorName() {
 		return quoteFunctorName(getAbbrName());
 	}
 
 	/**
-	 * ²ş¹ÔÊ¸»ú¤ò¼è¤ê½ü¤¤¤¿¥Õ¥¡¥ó¥¯¥¿Ì¾¤òÊÖ¤¹
-	 * @return ²ş¹ÔÊ¸»ú¤ò¼è¤ê½ü¤¤¤¿¥Õ¥¡¥ó¥¯¥¿Ì¾
+	 * æ”¹è¡Œæ–‡å­—ã‚’å–ã‚Šé™¤ã„ãŸãƒ•ã‚¡ãƒ³ã‚¯ã‚¿åã‚’è¿”ã™
+	 * @return æ”¹è¡Œæ–‡å­—ã‚’å–ã‚Šé™¤ã„ãŸãƒ•ã‚¡ãƒ³ã‚¯ã‚¿å
 	 */
 	public String getQuotedFullyFunctorName() {
 		return quoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
@@ -75,14 +75,14 @@ public abstract class Functor
 	}
 	
 	/**
-	 * °ú¿ô¤ò¤â¤¿¤Ê¤¤¥¢¥È¥à¤ÎÌ¾Á°¤È¤·¤ÆÉ½¼¨Ì¾¤ò°õ»ú¤¹¤ë¤¿¤á¤ÎÊ¸»úÎó¤òÊÖ¤¹¡£
-	 * ÄÌ¾ï¤ÎÌ¾Á°°Ê³°¤Î¤â¤Î¤Î¤¦¤Á¡¢¥ê¥¹¥È¹½À®Í×ÁÇ¤ä¿ôÃÍ°Ê³°¤Î¤â¤Î¤Ï¥¯¥©¡¼¥È¤·¤ÆÊÖ¤¹¡£
+	 * å¼•æ•°ã‚’ã‚‚ãŸãªã„ã‚¢ãƒˆãƒ ã®åå‰ã¨ã—ã¦è¡¨ç¤ºåã‚’å°å­—ã™ã‚‹ãŸã‚ã®æ–‡å­—åˆ—ã‚’è¿”ã™ã€‚
+	 * é€šå¸¸ã®åå‰ä»¥å¤–ã®ã‚‚ã®ã®ã†ã¡ã€ãƒªã‚¹ãƒˆæ§‹æˆè¦ç´ ã‚„æ•°å€¤ä»¥å¤–ã®ã‚‚ã®ã¯ã‚¯ã‚©ãƒ¼ãƒˆã—ã¦è¿”ã™ã€‚
 	 */
 	public abstract String getQuotedAtomName();
 
 	/**
-	 * ¥¯¥ª¡¼¥È¤µ¤ì¤¿¾ÊÎ¬¤·¤Ê¤¤¥¢¥È¥àÌ¾¤òÊÖ¤¹
-	 * @return ¥¯¥ª¡¼¥È¤µ¤ì¤¿¾ÊÎ¬¤·¤Ê¤¤¥¢¥È¥àÌ¾
+	 * ã‚¯ã‚ªãƒ¼ãƒˆã•ã‚ŒãŸçœç•¥ã—ãªã„ã‚¢ãƒˆãƒ åã‚’è¿”ã™
+	 * @return ã‚¯ã‚ªãƒ¼ãƒˆã•ã‚ŒãŸçœç•¥ã—ãªã„ã‚¢ãƒˆãƒ å
 	 */
 	public String getQuotedFullyAtomName() {
 		return quoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
@@ -101,13 +101,13 @@ public abstract class Functor
 	}
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ê¸»úÎó¤òÉ½¤¹¥·¥ó¥Ü¥ë¥ê¥Æ¥é¥ë¤Î¥Æ¥­¥¹¥ÈÉ½¸½¤ò¼èÆÀ¤¹¤ë¡£ Îã¤¨¤Ğ a'b ¤òÅÏ¤¹¤È 'a\'b' ¤¬ÊÖ¤ë¡£
+	 * æŒ‡å®šã•ã‚ŒãŸæ–‡å­—åˆ—ã‚’è¡¨ã™ã‚·ãƒ³ãƒœãƒ«ãƒªãƒ†ãƒ©ãƒ«ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¾ã‚’å–å¾—ã™ã‚‹ã€‚ ä¾‹ãˆã° a'b ã‚’æ¸¡ã™ã¨ 'a\'b' ãŒè¿”ã‚‹ã€‚
 	 */
 	static final String quoteName(String text) {
 		return Util.quoteString(text, '\'');
 	}
 
-	/** Å¬ÀÚ¤Ë¾ÊÎ¬¤µ¤ì¤¿É½¼¨Ì¾¤ò¼èÆÀ */
+	/** é©åˆ‡ã«çœç•¥ã•ã‚ŒãŸè¡¨ç¤ºåã‚’å–å¾— */
 	protected String getAbbrName() {
 		String full = getName();
 		return full.length() > Env.printLength ? full.substring(0,
@@ -116,9 +116,9 @@ public abstract class Functor
 	}
 
 	/**
-	 * ¥Õ¥¡¥ó¥¯¥¿¤¬½êÂ°¤¹¤ë¥â¥¸¥å¡¼¥ëÌ¾¤òÊÖ¤¹
-	 * ¡ÊSymbolFunctor °Ê³°¤Ï ¾ï¤Ë null ¤òÊÖ¤¹¡Ë
-	 * @return ¥Õ¥¡¥ó¥¯¥¿¤¬½êÂ°¤¹¤ë¥â¥¸¥å¡¼¥ëÌ¾
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ‰€å±ã™ã‚‹ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åã‚’è¿”ã™
+	 * ï¼ˆSymbolFunctor ä»¥å¤–ã¯ å¸¸ã« null ã‚’è¿”ã™ï¼‰
+	 * @return ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ‰€å±ã™ã‚‹ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«å
 	 */
 	public String getPath() {
 		return null;
@@ -131,16 +131,16 @@ public abstract class Functor
 	}
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥Õ¥¡¥ó¥¯¥¿¤òÀ¸À®¤¹¤ë¡£¡Ê²¾¡Ë
+	 * æŒ‡å®šã•ã‚ŒãŸãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’ç”Ÿæˆã™ã‚‹ã€‚ï¼ˆä»®ï¼‰
 	 * <p>
-	 * compile.parser.LMNParser.addSrcAtomToMem¤«¤é°ÜÆ°¤·¤Æ¤­¤¿¡£
+	 * compile.parser.LMNParser.addSrcAtomToMemã‹ã‚‰ç§»å‹•ã—ã¦ããŸã€‚
 	 * 
 	 * @param name
-	 *            Ì¾Á°¥È¡¼¥¯¥ó¤ÎÉ½¤¹Ê¸»úÎó
+	 *            åå‰ãƒˆãƒ¼ã‚¯ãƒ³ã®è¡¨ã™æ–‡å­—åˆ—
 	 * @param arity
-	 *            ¥Õ¥¡¥ó¥¯¥¿¤Î¥¢¥ê¥Æ¥£
+	 *            ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®ã‚¢ãƒªãƒ†ã‚£
 	 * @param nametype
-	 *            Ì¾Á°¥È¡¼¥¯¥ó¤Î¼ïÎà¡Êcompile.parser.SrcName¤ÇÄêµÁ¤µ¤ì¤ëÄê¿ô¤Î¤¤¤º¤ì¤«¡Ë
+	 *            åå‰ãƒˆãƒ¼ã‚¯ãƒ³ã®ç¨®é¡ï¼ˆcompile.parser.SrcNameã§å®šç¾©ã•ã‚Œã‚‹å®šæ•°ã®ã„ãšã‚Œã‹ï¼‰
 	 */
 	public static Functor build(String name, int arity, int nametype) {
 		String path = null;
@@ -155,10 +155,10 @@ public abstract class Functor
 					int radix = 10;
 					if (name.matches("\\+[0-9]+")) {
 						name = name.substring(1);
-					} else if (name.matches("\\+0x[0-9a-fA-F]+")) {//+16¿Ê 2006.6.26 by inui
+					} else if (name.matches("\\+0x[0-9a-fA-F]+")) {//+16é€² 2006.6.26 by inui
 						name = name.substring(3);
 						radix = 16;
-					} else if (name.matches("0x[0-9a-fA-F]+")) {//16¿Ê 2006.6.26 by inui
+					} else if (name.matches("0x[0-9a-fA-F]+")) {//16é€² 2006.6.26 by inui
 						name = name.substring(2);
 						radix = 16;
 					}
@@ -182,57 +182,57 @@ public abstract class Functor
 	public abstract boolean equals(Object o);
 
 	/**
-	 * ¥·¥ó¥Ü¥ë¥Õ¥¡¥ó¥¯¥¿¤«¤É¤¦¤«¤òÈ½Äê¤¹¤ë
-	 * @return ¥·¥ó¥Ü¥ë¤òÉ½¤¹¥Õ¥¡¥ó¥¯¥¿¤Ê¤é true 
+	 * ã‚·ãƒ³ãƒœãƒ«ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
+	 * @return ã‚·ãƒ³ãƒœãƒ«ã‚’è¡¨ã™ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãªã‚‰ true 
 	 */
 	public abstract boolean isSymbol();
 
 	/**
-	 * inside_proxy ¤«¤É¤¦¤«¤òÊÖ¤¹¡¥SpecialFunctor °Ê³°¤Ï¾ï¤Ë false
-	 * @return inside_proxy ¤Ê¤é true
+	 * inside_proxy ã‹ã©ã†ã‹ã‚’è¿”ã™ï¼SpecialFunctor ä»¥å¤–ã¯å¸¸ã« false
+	 * @return inside_proxy ãªã‚‰ true
 	 */
 	public abstract boolean isInsideProxy();
 	
 	/**
-	 * outside_proxy ¤«¤É¤¦¤«¤òÊÖ¤¹¡¥SpecialFunctor °Ê³°¤Ï¾ï¤Ë false
-	 * @return outside_proxy ¤Ê¤é true
+	 * outside_proxy ã‹ã©ã†ã‹ã‚’è¿”ã™ï¼SpecialFunctor ä»¥å¤–ã¯å¸¸ã« false
+	 * @return outside_proxy ãªã‚‰ true
 	 */
 	public abstract boolean isOutsideProxy();
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬¥¢¥¯¥Æ¥£¥Ö¤«¤É¤¦¤«¤òÈ½Äê¤¹¤ë¡£
-	 * @return ¥¢¥¯¥Æ¥£¥Ö¤Ê¤é true
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹ã€‚
+	 * @return ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªã‚‰ true
 	 */
 	public abstract boolean isActive();
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬¿ôÃÍ¥¢¥È¥à¤«¤É¤¦¤«¤òÈ½Äê¤¹¤ë¡£
-	 * @return ¿ôÃÍ¥¢¥È¥à¤Ê¤é true
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ•°å€¤ã‚¢ãƒˆãƒ ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹ã€‚
+	 * @return æ•°å€¤ã‚¢ãƒˆãƒ ãªã‚‰ true
 	 */
 	public abstract boolean isNumber();
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬ int ·¿¤Î¥¢¥È¥à¤«¤É¤¦¤«¤òÈ½Äê¤¹¤ë¡£
-	 * @return int ·¿¤Î¥¢¥È¥à¤Ê¤é true
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒ int å‹ã®ã‚¢ãƒˆãƒ ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹ã€‚
+	 * @return int å‹ã®ã‚¢ãƒˆãƒ ãªã‚‰ true
 	 */
 	public abstract boolean isInteger();
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬ String ·¿¤Î¥¢¥È¥à¤«¤É¤¦¤«¤òÈ½Äê¤¹¤ë
-	 * @return String ·¿¤Î¥¢¥È¥à¤Ê¤é true
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒ String å‹ã®ã‚¢ãƒˆãƒ ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
+	 * @return String å‹ã®ã‚¢ãƒˆãƒ ãªã‚‰ true
 	 */
 	public abstract boolean isString();
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤ÎÃÍ¤òÊÖ¤¹
-	 * @return ¥Õ¥¡¥ó¥¯¥¿¤ÎÃÍ
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®å€¤ã‚’è¿”ã™
+	 * @return ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®å€¤
 	 */
 	public abstract Object getValue();
 	
-	/** Ì¾Á°¤ÎÉ½¼¨Ì¾¤ò¼èÆÀ¤¹¤ë¡£¥µ¥Ö¥¯¥é¥¹¤Ï¶õÊ¸»úÎó¤¬½ĞÎÏ¤µ¤ì¤Ê¤¤¤è¤¦¤Ë¥ª¡¼¥Ğ¡¼¥é¥¤¥É¤¹¤ë¤³¤È¡£ */
+	/** åå‰ã®è¡¨ç¤ºåã‚’å–å¾—ã™ã‚‹ã€‚ã‚µãƒ–ã‚¯ãƒ©ã‚¹ã¯ç©ºæ–‡å­—åˆ—ãŒå‡ºåŠ›ã•ã‚Œãªã„ã‚ˆã†ã«ã‚ªãƒ¼ãƒãƒ¼ãƒ©ã‚¤ãƒ‰ã™ã‚‹ã“ã¨ã€‚ */
 	public abstract String getName();
 
-	/** ¥¢¥ê¥Æ¥£¤ò¼èÆÀ¤¹¤ë¡£ */
+	/** ã‚¢ãƒªãƒ†ã‚£ã‚’å–å¾—ã™ã‚‹ã€‚ */
 	public abstract int getArity();
 
 	public boolean equals(String name, int arity)

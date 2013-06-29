@@ -4,30 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * compile.RulesetCompiler ¤Ë¤è¤Ã¤ÆÀ¸À®¤µ¤ì¤ë¡£
+ * compile.RulesetCompiler ã«ã‚ˆã£ã¦ç”Ÿæˆã•ã‚Œã‚‹ã€‚
  * @author hara, nakajima, n-kato
  */
 public final class InterpretedRuleset extends Ruleset
 {
-	/** ¤³¤Î¥ë¡¼¥ë¥»¥Ã¥È¤Î¥í¡¼¥«¥ëID */
+	/** ã“ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ãƒ­ãƒ¼ã‚«ãƒ«ID */
 	private int id;
 	private static int lastId = 600;
 
-	/** ¤È¤ê¤¢¤¨¤º¥ë¡¼¥ë¤ÎÇÛÎó¤È¤·¤Æ¼ÂÁõ */
+	/** ã¨ã‚Šã‚ãˆãšãƒ«ãƒ¼ãƒ«ã®é…åˆ—ã¨ã—ã¦å®Ÿè£… */
 	public List<Rule> rules;
 	
-	/** ÊÔ¤ß¾å¤²¸å¤ÎÌ¿ÎáÎó */
+	/** ç·¨ã¿ä¸Šã’å¾Œã®å‘½ä»¤åˆ— */
 	public MergedBranchMap branchmap;
 	public MergedBranchMap systemrulemap;
 	
-	/** ¸½ºß¼Â¹ÔÃæ¤Î¥ë¡¼¥ë */
+	/** ç¾åœ¨å®Ÿè¡Œä¸­ã®ãƒ«ãƒ¼ãƒ« */
 	public Rule currentRule;
 	
 	private int backtracks, lockfailure;
 
 	/**
-	 * RuleCompiler ¤Ç¤Ï¡¢¤Ş¤ºÀ¸À®¤·¤Æ¤«¤é¥Ç¡¼¥¿¤òÆş¤ì¹ş¤à¡£
-	 * ¤Î¤Ç¡¢ÆÃ¤Ë¤Ê¤Ë¤â¤·¤Ê¤¤
+	 * RuleCompiler ã§ã¯ã€ã¾ãšç”Ÿæˆã—ã¦ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’å…¥ã‚Œè¾¼ã‚€ã€‚
+	 * ã®ã§ã€ç‰¹ã«ãªã«ã‚‚ã—ãªã„
 	 */
 	public InterpretedRuleset()
 	{
@@ -37,19 +37,19 @@ public final class InterpretedRuleset extends Ruleset
 		systemrulemap = null;
 	}
 
-	/** ¥°¥í¡¼¥Ğ¥ë¥ë¡¼¥ë¥»¥Ã¥ÈID¡ÊÌ¤ÄêµÁ¤Î¾ì¹ç¤Ïnull¡Ë*/
+	/** ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆIDï¼ˆæœªå®šç¾©ã®å ´åˆã¯nullï¼‰*/
 	private String globalRulesetID;
 
-	/**¤³¤Î¥ë¡¼¥ë¥»¥Ã¥È¤Î¥í¡¼¥«¥ëID¤ò¼èÆÀ¤¹¤ë¡£*/
+	/**ã“ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ãƒ­ãƒ¼ã‚«ãƒ«IDã‚’å–å¾—ã™ã‚‹ã€‚*/
 	public int getId()
 	{
 		return id;
 	}
 
-	/**¡Ê²¾¡Ë*/
-	// 061129 okabe runtimeid ÇÑ»ß¤Ë¤è¤ë
+	/**ï¼ˆä»®ï¼‰*/
+	// 061129 okabe runtimeid å»ƒæ­¢ã«ã‚ˆã‚‹
 //	public String getGlobalRulesetID() {
-//		// todo ¥é¥ó¥¿¥¤¥àID¤ÎÍ­¸ú´ü´Ö¤ò¸«Ä¾¤¹
+//		// todo ãƒ©ãƒ³ã‚¿ã‚¤ãƒ IDã®æœ‰åŠ¹æœŸé–“ã‚’è¦‹ç›´ã™
 //		if (globalRulesetID == null) {
 //			globalRulesetID = Env.theRuntime.getRuntimeID() + ":" + id;
 ////			IDConverter.registerRuleset(globalRulesetID, this);

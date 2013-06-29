@@ -1,7 +1,7 @@
 package type.quantity;
 
 /**
- * ¶è´ÖÃÍ
+ * åŒºé–“å€¤
  * @author kudo
  *
  */

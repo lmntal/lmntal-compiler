@@ -2,7 +2,7 @@ package runtime.functor;
 
 
 /**
- * ÆÃ¼ì¤Ê¥Õ¥¡¥ó¥¯¥¿ (inside_proxy, outside_proxy, star) ¤òÉ½¤¹¥¯¥é¥¹
+ * ç‰¹æ®Šãªãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ (inside_proxy, outside_proxy, star) ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  */
 public class SpecialFunctor extends Functor {
 	static final String OUTSIDE_PROXY_NAME = "$out".intern();
@@ -30,44 +30,44 @@ public class SpecialFunctor extends Functor {
 	}
 	
 	/**
-	 * outside_proxy ¤«¤É¤¦¤«¤òÈ½Äê¤¹¤ë
-	 * @return outside_proxy ¤Ê¤é true
+	 * outside_proxy ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
+	 * @return outside_proxy ãªã‚‰ true
 	 */
 	public boolean isOutsideProxy(){
 		return name == OUTSIDE_PROXY_NAME;
 	}
 	
 	/**
-	 * inside_proxy ¤«¤É¤¦¤«¤òÈ½Äê¤¹¤ë
-	 * @return outside_proxy ¤Ê¤é true
+	 * inside_proxy ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
+	 * @return outside_proxy ãªã‚‰ true
 	 */
 	public boolean isInsideProxy(){
 		return name == INSIDE_PROXY_NAME;
 	}
 	
 	/**
-	 * ¥Õ¥¡¥ó¥¯¥¿Ì¾¤òÊÖ¤¹
-	 * @return ¥Õ¥¡¥ó¥¯¥¿Ì¾¤òÊÖ¤¹
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿åã‚’è¿”ã™
+	 * @return ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿åã‚’è¿”ã™
 	 */
 	public String getName() {
 		return name + (kind==0 ? "" : ""+kind); 
 	}
 	/**
-	 * °ú¿ô¤Ä¤­¤Î¥Õ¥¡¥ó¥¯¥¿Ì¾¤òÊÖ¤¹
-	 * @return °ú¿ô¤Ä¤­¤Î¥Õ¥¡¥ó¥¯¥¿Ì¾
+	 * å¼•æ•°ã¤ãã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿åã‚’è¿”ã™
+	 * @return å¼•æ•°ã¤ãã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿å
 	 */
 	public String toString() {
 		return name + (kind==0 ? "" : ""+kind) + "_" + getArity();
 	}
 	/**
-	 * Ëì¤Î¥¿¥¤¥×¤òÊÖ¤¹
-	 * @return Ëì¤Î¥¿¥¤¥×
+	 * è†œã®ã‚¿ã‚¤ãƒ—ã‚’è¿”ã™
+	 * @return è†œã®ã‚¿ã‚¤ãƒ—
 	 */
 	public int getKind() {
 		return kind;
 	}
 
-	/** °ú¿ô¤ò¤â¤Ä¥¢¥È¥à¤ÎÌ¾Á°¤È¤·¤ÆÉ½¼¨Ì¾¤ò°õ»ú¤¹¤ë¤¿¤á¤ÎÊ¸»úÎó¤òÊÖ¤¹ */
+	/** å¼•æ•°ã‚’ã‚‚ã¤ã‚¢ãƒˆãƒ ã®åå‰ã¨ã—ã¦è¡¨ç¤ºåã‚’å°å­—ã™ã‚‹ãŸã‚ã®æ–‡å­—åˆ—ã‚’è¿”ã™ */
 	public String getQuotedFunctorName() {
 		return getAbbrName();
 	}
@@ -78,7 +78,7 @@ public class SpecialFunctor extends Functor {
 	}
 	
 	/**
-	 * ¥·¥ó¥Ü¥ë¥Õ¥¡¥ó¥¯¥¿¤«¤É¤¦¤«¤òÄ´¤Ù¤ë¡¥
+	 * ã‚·ãƒ³ãƒœãƒ«ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‹ã©ã†ã‹ã‚’èª¿ã¹ã‚‹ï¼
 	 * @return false
 	 */
 	public boolean isSymbol() {
@@ -86,7 +86,7 @@ public class SpecialFunctor extends Functor {
 	}
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬¥¢¥¯¥Æ¥£¥Ö¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
 	 * @return false
 	 */
 	public boolean isActive() {
@@ -94,21 +94,21 @@ public class SpecialFunctor extends Functor {
 	}
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬¿ôÃÍ¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ•°å€¤ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
 	 * @return false
 	 */
 	public boolean isNumber() {
 		return false;
 	}
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬ int ·¿¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒ int å‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
 	 * @return false
 	 */
 	public boolean isInteger() {
 		return false;
 	}
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬ String ·¿¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒ String å‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
 	 * @return false
 	 */
 	public boolean isString() {
@@ -116,16 +116,16 @@ public class SpecialFunctor extends Functor {
 	}
 	
 	/**
-	 * ¥Õ¥¡¥ó¥¯¥¿¤ÎÃÍ¤òÊÖ¤¹
-	 * @return ¥Õ¥¡¥ó¥¯¥¿¤ÎÌ¾Á°
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®å€¤ã‚’è¿”ã™
+	 * @return ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®åå‰
 	 */
 	public Object getValue() {
 		return name;
 	}
 	
 	/**
-	 * ¥Ï¥Ã¥·¥å¥³¡¼¥É¤ò·×»»¤¹¤ë
-	 * @return ¥Ï¥Ã¥·¥å¥³¡¼¥É
+	 * ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã‚’è¨ˆç®—ã™ã‚‹
+	 * @return ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰
 	 */
 	public int hashCode() {
 		return getName().hashCode() + getArity();

@@ -1,5 +1,5 @@
 /*
- * ºîÀ®Æü: 2003/11/18
+ * ä½œæˆæ—¥: 2003/11/18
  *
  */
 package compile;
@@ -24,7 +24,7 @@ import compile.structure.Membrane;
 import compile.structure.RuleStructure;
 
 /**
- * ¥ë¡¼¥ë¥»¥Ã¥È¤òÀ¸À®¤·¤ÆÊÖ¤¹¡£
+ * ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’ç”Ÿæˆã—ã¦è¿”ã™ã€‚
  * @author hara
  * 
  */
@@ -33,12 +33,12 @@ public class RulesetCompiler
 	private static boolean recursived = false;
 
 	/**
-	 * Í¿¤¨¤é¤ì¤¿Ëì¹½Â¤¤òÀ¸À®¤¹¤ëreact¥á¥½¥Ã¥É¤ò¼ÂÁõ¤¹¤ë¥ë¡¼¥ë¥»¥Ã¥È¤òÀ¸À®¤¹¤ë¡£
-	 * ¥á¥½¥Ã¥É¼Â¹ÔÃæ¡¢Ëì¹½Â¤ÆâÉô¤Ë¤¢¤ë¥ë¡¼¥ë¹½Â¤¤¬ºÆµ¢Åª¤Ë¥ë¡¼¥ë¥»¥Ã¥È¤Ë¥³¥ó¥Ñ¥¤¥ë¤µ¤ì¤ë¡£
+	 * ä¸ãˆã‚‰ã‚ŒãŸè†œæ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹reactãƒ¡ã‚½ãƒƒãƒ‰ã‚’å®Ÿè£…ã™ã‚‹ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’ç”Ÿæˆã™ã‚‹ã€‚
+	 * ãƒ¡ã‚½ãƒƒãƒ‰å®Ÿè¡Œä¸­ã€è†œæ§‹é€ å†…éƒ¨ã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«æ§‹é€ ãŒå†å¸°çš„ã«ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã•ã‚Œã‚‹ã€‚
 	 * 
-	 * @param unitName ¥Õ¥¡¥¤¥ëÌ¾
-	 * @param m Ëì¹½Â¤
-	 * @return (:-m)¤È¤¤¤¦¥ë¡¼¥ë1¤Ä¤À¤±¤«¤é¤Ê¤ë¥ë¡¼¥ë¥»¥Ã¥È
+	 * @param unitName ãƒ•ã‚¡ã‚¤ãƒ«å
+	 * @param m è†œæ§‹é€ 
+	 * @return (:-m)ã¨ã„ã†ãƒ«ãƒ¼ãƒ«1ã¤ã ã‘ã‹ã‚‰ãªã‚‹ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆ
 	 */
 	public static Ruleset compileMembrane(Membrane m, String unitName)
 	{
@@ -51,22 +51,22 @@ public class RulesetCompiler
 	}
 
 	/**
-	 * Í¿¤¨¤é¤ì¤¿Ëì¹½Â¤¤òÀ¸À®¤¹¤ë¥ë¡¼¥ë1¤Ä¤À¤±¤òÍ×ÁÇ¤Ë»ı¤ÄËì¤òÀ¸À®¤¹¤ë¡£
-	 * ¤è¤êÀµ³Î¤Ë¸À¤¦¤È¡¢Í¿¤¨¤é¤ì¤¿Ëì¹½Â¤¤ÎÆâÍÆ¤ËÂĞ±ş¤¹¤ë¥×¥í¥»¥¹¤ò1²ó¤À¤±À¸À®¤¹¤ëreact¥á¥½¥Ã¥É¤ò
-	 * ¼ÂÁõ¤¹¤ë¥ë¡¼¥ë¥»¥Ã¥È¤òÍ£°ì¤Î¥ë¡¼¥ë¥»¥Ã¥È¤È¤·¤Æ»ı¤ÄËì¹½Â¤¤òÀ¸À®¤¹¤ë¡£
-	 * ¥á¥½¥Ã¥É¼Â¹ÔÃæ¡¢Ëì¹½Â¤ÆâÉô¤Ë¤¢¤ë¥ë¡¼¥ë¹½Â¤¤¬ºÆµ¢Åª¤Ë¥ë¡¼¥ë¥»¥Ã¥È¤Ë¥³¥ó¥Ñ¥¤¥ë¤µ¤ì¤ë¡£
-	 * @param m Ëì¹½Â¤
+	 * ä¸ãˆã‚‰ã‚ŒãŸè†œæ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹ãƒ«ãƒ¼ãƒ«1ã¤ã ã‘ã‚’è¦ç´ ã«æŒã¤è†œã‚’ç”Ÿæˆã™ã‚‹ã€‚
+	 * ã‚ˆã‚Šæ­£ç¢ºã«è¨€ã†ã¨ã€ä¸ãˆã‚‰ã‚ŒãŸè†œæ§‹é€ ã®å†…å®¹ã«å¯¾å¿œã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹ã‚’1å›ã ã‘ç”Ÿæˆã™ã‚‹reactãƒ¡ã‚½ãƒƒãƒ‰ã‚’
+	 * å®Ÿè£…ã™ã‚‹ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’å”¯ä¸€ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã¨ã—ã¦æŒã¤è†œæ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹ã€‚
+	 * ãƒ¡ã‚½ãƒƒãƒ‰å®Ÿè¡Œä¸­ã€è†œæ§‹é€ å†…éƒ¨ã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«æ§‹é€ ãŒå†å¸°çš„ã«ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã•ã‚Œã‚‹ã€‚
+	 * @param m è†œæ§‹é€ 
 	 * @param unitName
-	 * @return À¸À®¤·¤¿¥ë¡¼¥ë¥»¥Ã¥È¤ò»ı¤ÄËì¹½Â¤
+	 * @return ç”Ÿæˆã—ãŸãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’æŒã¤è†œæ§‹é€ 
 	 */
 	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName)
 	{
 		Env.c("RulesetGenerator.runStartWithNull");
 
-		// ¥°¥í¡¼¥Ğ¥ë¥ë¡¼¥ÈËì
+		// ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ«ãƒ¼ãƒˆè†œ
 		Membrane root = new Membrane(null);
 
-		// ½é´ü¹½Â¤¤òÀ¸À®¤¹¤ë¥ë¡¼¥ë
+		// åˆæœŸæ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹ãƒ«ãƒ¼ãƒ«
 		RuleStructure rs = new RuleStructure(root, "(initial rule)");
 		rs.fSuppressEmptyHeadWarning = true;
 		rs.leftMem  = new Membrane(null);
@@ -83,10 +83,10 @@ public class RulesetCompiler
 	}
 
 	/**
-	 * Í¿¤¨¤é¤ì¤¿Ëì¤Î³¬ÁØ²¼¤Ë¤¢¤ëÁ´¤Æ¤Î RuleStructure ¤Ë¤Ä¤¤¤Æ¡¢
-	 * ÂĞ±ş¤¹¤ë Rule ¤òÀ¸À®¤·¤Æ¤½¤ÎËì¤Î¥ë¡¼¥ë¥»¥Ã¥È¤ËÄÉ²Ã¤¹¤ë¡£
-	 * <p>¥ë¡¼¥ë¤ò¤Á¤ç¤¦¤É1¤Ä»ı¤ÄËì¤Ë¤Ï¤Á¤ç¤¦¤É1¤Ä¤Î¥ë¡¼¥ë¥»¥Ã¥È¤¬ÄÉ²Ã¤µ¤ì¤ë¡£
-	 * @param mem ÂĞ¾İ¤È¤Ê¤ëËì
+	 * ä¸ãˆã‚‰ã‚ŒãŸè†œã®éšå±¤ä¸‹ã«ã‚ã‚‹å…¨ã¦ã® RuleStructure ã«ã¤ã„ã¦ã€
+	 * å¯¾å¿œã™ã‚‹ Rule ã‚’ç”Ÿæˆã—ã¦ãã®è†œã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«è¿½åŠ ã™ã‚‹ã€‚
+	 * <p>ãƒ«ãƒ¼ãƒ«ã‚’ã¡ã‚‡ã†ã©1ã¤æŒã¤è†œã«ã¯ã¡ã‚‡ã†ã©1ã¤ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆãŒè¿½åŠ ã•ã‚Œã‚‹ã€‚
+	 * @param mem å¯¾è±¡ã¨ãªã‚‹è†œ
 	 */
 	public static void processMembrane(Membrane mem)
 	{
@@ -94,13 +94,13 @@ public class RulesetCompiler
 	}
 
 	/**
-	 * Í¿¤¨¤é¤ì¤¿Ëì¤Î³¬ÁØ²¼¤Ë¤¢¤ëÁ´¤Æ¤Î {@code RuleStructure} ¤Ë¤Ä¤¤¤Æ¡¢ÂĞ±ş¤¹¤ë {@code Rule} ¤òÀ¸À®¤·¤Æ¤½¤ÎËì¤Î¥ë¡¼¥ë¥»¥Ã¥È¤ËÄÉ²Ã¤¹¤ë¡£
-	 * <p>¥ë¡¼¥ë¤ò¤Á¤ç¤¦¤É1¤Ä»ı¤ÄËì¤Ë¤Ï¤Á¤ç¤¦¤É1¤Ä¤Î¥ë¡¼¥ë¥»¥Ã¥È¤¬ÄÉ²Ã¤µ¤ì¤ë¡£</p>
-	 * @param mem ÂĞ¾İ¤È¤Ê¤ëËì
+	 * ä¸ãˆã‚‰ã‚ŒãŸè†œã®éšå±¤ä¸‹ã«ã‚ã‚‹å…¨ã¦ã® {@code RuleStructure} ã«ã¤ã„ã¦ã€å¯¾å¿œã™ã‚‹ {@code Rule} ã‚’ç”Ÿæˆã—ã¦ãã®è†œã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«è¿½åŠ ã™ã‚‹ã€‚
+	 * <p>ãƒ«ãƒ¼ãƒ«ã‚’ã¡ã‚‡ã†ã©1ã¤æŒã¤è†œã«ã¯ã¡ã‚‡ã†ã©1ã¤ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆãŒè¿½åŠ ã•ã‚Œã‚‹ã€‚</p>
+	 * @param mem å¯¾è±¡ã¨ãªã‚‹è†œ
 	 */
 	public static void processMembrane(Membrane mem, String unitName)
 	{
-		// »ÒËì¤Ë¤¢¤ë¥ë¡¼¥ë¤ò¥ë¡¼¥ë¥»¥Ã¥È¤Ë¥³¥ó¥Ñ¥¤¥ë¤¹¤ë
+		// å­è†œã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«ã‚’ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹
 		for (Membrane submem : mem.mems)
 		{
 			processMembrane(submem, unitName);
@@ -108,11 +108,11 @@ public class RulesetCompiler
 
 		List<Rule> rules = new ArrayList<Rule>();
 
-		// ¤³¤ÎËì¤Ë¤¢¤ë¥ë¡¼¥ë¹½Â¤¤ò¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤Ë¥³¥ó¥Ñ¥¤¥ë¤¹¤ë
+		// ã“ã®è†œã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«æ§‹é€ ã‚’ãƒ«ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹
 		for (RuleStructure rs : mem.rules)
 		{
-			// ¥ë¡¼¥ë¤Î±¦ÊÕËì°Ê²¼¤Ë¤¢¤ë»Ò¥ë¡¼¥ë¤ò¥ë¡¼¥ë¥»¥Ã¥È¤Ë¥³¥ó¥Ñ¥¤¥ë¤¹¤ë
-			processMembrane(rs.leftMem, unitName); // °ì±şº¸ÊÕ¤â
+			// ãƒ«ãƒ¼ãƒ«ã®å³è¾ºè†œä»¥ä¸‹ã«ã‚ã‚‹å­ãƒ«ãƒ¼ãƒ«ã‚’ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹
+			processMembrane(rs.leftMem, unitName); // ä¸€å¿œå·¦è¾ºã‚‚
 			processMembrane(rs.rightMem, unitName);
 
 			RuleCompiler rc = null;
@@ -120,7 +120,7 @@ public class RulesetCompiler
 			{
 				rc = new RuleCompiler(rs, unitName);
 				rc.compile();
-				//2006.1.22 Rule¤Ë¹ÔÈÖ¹æ¤òÅÏ¤¹ by inui
+				//2006.1.22 Ruleã«è¡Œç•ªå·ã‚’æ¸¡ã™ by inui
 				rc.theRule.lineno = rs.lineno;
 			}
 			catch (CompileException e)
@@ -130,7 +130,7 @@ public class RulesetCompiler
 			rules.add(rc.theRule);
 		}
 
-		// ÊÔ¤ß¾å¤²¤ò¹Ô¤¦
+		// ç·¨ã¿ä¸Šã’ã‚’è¡Œã†
 		Merger merger = new Merger();
 		MergedBranchMap mbm = null;
 		MergedBranchMap systemmbm = null;
@@ -141,7 +141,7 @@ public class RulesetCompiler
 			systemmbm = merger.createSystemRulesetsMap();
 		}
 
-		// À¸À®¤·¤¿¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤Î¥ê¥¹¥È¤ò¥ë¡¼¥ë¥»¥Ã¥È¡Ê¤Î¥»¥Ã¥È¡Ë¤Ë¥³¥ó¥Ñ¥¤¥ë¤¹¤ë
+		// ç”Ÿæˆã—ãŸãƒ«ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒªã‚¹ãƒˆã‚’ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆï¼ˆã®ã‚»ãƒƒãƒˆï¼‰ã«ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹
 		if (!rules.isEmpty())
 		{
 			InterpretedRuleset ruleset = new InterpretedRuleset();
@@ -154,7 +154,7 @@ public class RulesetCompiler
 			Ruleset compiledRuleset = compileRuleset(ruleset);
 			mem.rulesets.add(ruleset);
 		}
-		// É¬Í×¤Ê¤é¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤ËÅĞÏ¿
+		// å¿…è¦ãªã‚‰ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«ç™»éŒ²
 		boolean isSystemRuleset = false;
 		for (Atom atom : mem.atoms)
 		{
@@ -177,6 +177,6 @@ public class RulesetCompiler
 
 	public static Ruleset compileRuleset(InterpretedRuleset rs)
 	{
-		return rs; //ÊÖ¤¹¥ë¡¼¥ë¥»¥Ã¥È¤Ï¤½¤Î¤Ş¤Ş¡£¤É¤¦¤¹¤ë¤Î¤¬ÎÉ¤¤¤Î¤À¤í¤¦¤«¡©
+		return rs; //è¿”ã™ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã¯ãã®ã¾ã¾ã€‚ã©ã†ã™ã‚‹ã®ãŒè‰¯ã„ã®ã ã‚ã†ã‹ï¼Ÿ
 	}
 }

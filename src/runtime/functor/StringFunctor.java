@@ -3,15 +3,15 @@ package runtime.functor;
 import runtime.Env;
 import util.Util;
 
-/** Äê¿ôÊ¸»úÎó¤òÉ½¸½¤¹¤ë¤¿¤á¤Î1°ú¿ô¥Õ¥¡¥ó¥¯¥¿¤òÉ½¤¹¥¯¥é¥¹
- * todo inline¤Î°·¤¤¤¬¤ª¤«¤·¤¤¤Î¤Ç²¿¤È¤«¤¹¤ë
+/** å®šæ•°æ–‡å­—åˆ—ã‚’è¡¨ç¾ã™ã‚‹ãŸã‚ã®1å¼•æ•°ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
+ * todo inlineã®æ‰±ã„ãŒãŠã‹ã—ã„ã®ã§ä½•ã¨ã‹ã™ã‚‹
  * @author n-kato
  * @see ObjectFunctor#getName() */
 public class StringFunctor extends ObjectFunctor {
 	public StringFunctor(String data) { super(data); }
 	
 	public String getQuotedAtomName() {
-		//¥À¥Ö¥ë¥¯¥ª¡¼¥È¤·¤¿Ì¾Á°¤òÊÖ¤¹
+		//ãƒ€ãƒ–ãƒ«ã‚¯ã‚ªãƒ¼ãƒˆã—ãŸåå‰ã‚’è¿”ã™
 		String quotedAtomName = Util.quoteString(getName(), '\"');
 		return quotedAtomName;
 	}

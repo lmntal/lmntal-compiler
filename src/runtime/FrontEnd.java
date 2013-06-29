@@ -50,14 +50,14 @@ public class FrontEnd
 	}
 
 	/**
-	 * Java¤Î¥Ğ¡¼¥¸¥ç¥ó¤ò¥Á¥§¥Ã¥¯¤¹¤ë
+	 * Javaã®ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 	 * <p>
-	 * java1.4°Ê¾å¤ò»È¤Ã¤Æ¤¤¤Ê¤¤¤È¥¨¥é¡¼½ĞÎÏ¤¹¤ë
+	 * java1.4ä»¥ä¸Šã‚’ä½¿ã£ã¦ã„ãªã„ã¨ã‚¨ãƒ©ãƒ¼å‡ºåŠ›ã™ã‚‹
 	 * </p>
 	 */
 	public static void checkVersion()
 	{
-		// ¥Ğ¡¼¥¸¥ç¥ó¥Á¥§¥Ã¥¯ by ¿åÌî
+		// ãƒãƒ¼ã‚¸ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯ by æ°´é‡
 		try {
 			String ver = System.getProperty("java.version");
 			StringTokenizer tokenizer = new StringTokenizer(ver, ".");
@@ -69,7 +69,7 @@ public class FrontEnd
 			}
 			Env.majorVersion = major;
 			Env.minorVersion = minor;
-			// ¤¦¤Ş¤¯¤¤¤«¤Ê¤«¤Ã¤¿¾ì¹ç¤ÏÌµ»ë¤¹¤ë
+			// ã†ã¾ãã„ã‹ãªã‹ã£ãŸå ´åˆã¯ç„¡è¦–ã™ã‚‹
 		} catch (SecurityException e) {
 		} catch (NoSuchElementException e) {
 		} catch (NumberFormatException e) {
@@ -77,24 +77,24 @@ public class FrontEnd
 	}
 
 	/**
-	 * ¥³¥Ş¥ó¥É¥é¥¤¥ó°ú¿ô¤Î½èÍı
-	 * 2011-10-04 ÄÉµ­ (shinobu): ¥³¥Ş¥ó¥É¥é¥¤¥ó¥ª¥×¥·¥ç¥ó¤ÎHelpÍÑÊ¸»úÎó¤Îµ­½Ò¤Ï
-	 * ¹Ô¥³¥á¥ó¥È¤ÎËÁÆ¬¤ò "//@ " ¤È¤¹¤ë¤è¤¦¤ËÅı°ì¤·¤Ş¤·¤¿¡Êhelp_gen.pl¤â½¤ÀµºÑ¤ß¡Ë
+	 * ã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³å¼•æ•°ã®å‡¦ç†
+	 * 2011-10-04 è¿½è¨˜ (shinobu): ã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã®Helpç”¨æ–‡å­—åˆ—ã®è¨˜è¿°ã¯
+	 * è¡Œã‚³ãƒ¡ãƒ³ãƒˆã®å†’é ­ã‚’ "//@ " ã¨ã™ã‚‹ã‚ˆã†ã«çµ±ä¸€ã—ã¾ã—ãŸï¼ˆhelp_gen.plã‚‚ä¿®æ­£æ¸ˆã¿ï¼‰
 	 * @param args
-	 *            °ú¿ô
+	 *            å¼•æ•°
 	 */
 	public static void processOptions(String[] args) {
-		// --args °Ê¹ß¤Ê¤é¤Ğfalse
+		// --args ä»¥é™ãªã‚‰ã°false
 		boolean isSrcs = true;
 		for (int i = 0; i < args.length; i++) {
-			// É¬¤ºlength>0, '-'¤Ê¤é¥ª¥×¥·¥ç¥ó
-			// -> °ú¿ô¤ò "" ¤Ë¤¹¤ë¤ÈÄ¹¤µ 0 ¤Ë¤Ê¤ë¤Î¤Ç¥Á¥§¥Ã¥¯¤¹¤ë¡£
-			// 2006/07/11 --args¡¡°Ê¹ß¤òÁ´¤ÆLMNtal¥×¥í¥°¥é¥à¤Ø¤Î¥³¥Ş¥ó¥É¥é¥¤¥ó°ú¿ô¤È¤¹¤ë¤è¤¦¤ËÊÑ¹¹ by kudo
+			// å¿…ãšlength>0, '-'ãªã‚‰ã‚ªãƒ—ã‚·ãƒ§ãƒ³
+			// -> å¼•æ•°ã‚’ "" ã«ã™ã‚‹ã¨é•·ã• 0 ã«ãªã‚‹ã®ã§ãƒã‚§ãƒƒã‚¯ã™ã‚‹ã€‚
+			// 2006/07/11 --argsã€€ä»¥é™ã‚’å…¨ã¦LMNtalãƒ—ãƒ­ã‚°ãƒ©ãƒ ã¸ã®ã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³å¼•æ•°ã¨ã™ã‚‹ã‚ˆã†ã«å¤‰æ›´ by kudo
 			if (isSrcs && (args[i].length() > 0) && (args[i].charAt(0) == '-')) {
-				if (args[i].length() < 2) { // '-'¤Î¤ß¤Î»ş
-					Util.errPrintln("ÉÔÌÀ¤Ê¥ª¥×¥·¥ç¥ó:" + args[i]);
+				if (args[i].length() < 2) { // '-'ã®ã¿ã®æ™‚
+					Util.errPrintln("ä¸æ˜ãªã‚ªãƒ—ã‚·ãƒ§ãƒ³:" + args[i]);
 					System.exit(-1);
-				} else { // ¥ª¥×¥·¥ç¥ó²ò¼áÉô
+				} else { // ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£é‡ˆéƒ¨
 					switch (args[i].charAt(1)) {
 					case 'e':
 						//@ -e <LMNtal program>
@@ -181,19 +181,19 @@ public class FrontEnd
 						}
 						i += 2;
 						break;
-					case '-': // Ê¸»úÎó¥ª¥×¥·¥ç¥ó
+					case '-': // æ–‡å­—åˆ—ã‚ªãƒ—ã‚·ãƒ§ãƒ³
 						if (args[i].equals("--compileonly")) {
-							// ¥³¥ó¥Ñ¥¤¥ë¸å¤ÎÃæ´ÖÌ¿ÎáÎó¤ò½ĞÎÏ¤¹¤ë¥â¡¼¥É
+							// ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«å¾Œã®ä¸­é–“å‘½ä»¤åˆ—ã‚’å‡ºåŠ›ã™ã‚‹ãƒ¢ãƒ¼ãƒ‰
 							Env.compileonly = true;
 						} else if (args[i].equals("--slimcode")) {
-							// ¥³¥ó¥Ñ¥¤¥ë¸å¤ÎÃæ´ÖÌ¿ÎáÎó¤ò½ĞÎÏ¤¹¤ë¥â¡¼¥É
+							// ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«å¾Œã®ä¸­é–“å‘½ä»¤åˆ—ã‚’å‡ºåŠ›ã™ã‚‹ãƒ¢ãƒ¼ãƒ‰
 							Env.compileonly = true;
 							Env.slimcode = true;
 						} else if (args[i].equals("--use-findatom2")) {
 							// Env.compileonly = true;
 							Env.slimcode = true;
 							Env.findatom2 = true;
-							Optimizer.fGuardMove = true; // ¤³¤ì¤òtrue¤Ë¤·¤Ê¤¤¤ÈÆ°¤«¤Ê¤¤
+							Optimizer.fGuardMove = true; // ã“ã‚Œã‚’trueã«ã—ãªã„ã¨å‹•ã‹ãªã„
 						} else if (args[i].equals("--memtest-only")) {
 							Env.memtestonly = true;
 						} else if (args[i].equals("--help")) {
@@ -242,7 +242,7 @@ public class FrontEnd
 						} else if (args[i].equals("--optimize-slimoptimizer")) {
 
 						} else if (args[i].equals("--pp0")) {
-							// »ÃÄê¥ª¥×¥·¥ç¥ó
+							// æš«å®šã‚ªãƒ—ã‚·ãƒ§ãƒ³
 							Env.preProcess0 = true;
 						} else if (args[i].equals("--stdin-lmn")) { // 2006.07.11
 							// inui
@@ -272,7 +272,7 @@ public class FrontEnd
 						} else if (args[i].equals("--type")) {
 							// --type
 							// enable type check
-							// ( º£¤Ï¤Ş¤ÀÈó¸ø³« )
+							// ( ä»Šã¯ã¾ã éå…¬é–‹ )
 							Env.fType = true;
 						} else if (args[i].startsWith("--type-count-level=")) {
 							// --type-count-level
@@ -282,7 +282,7 @@ public class FrontEnd
 								ctlevel = Integer.parseInt(args[i]
 								                                .substring(19));
 							} catch (NumberFormatException e) {
-								ctlevel = Env.COUNT_DEFAULT; // ºÇÂç¸Â
+								ctlevel = Env.COUNT_DEFAULT; // æœ€å¤§é™
 							}
 							if (ctlevel > Env.COUNT_APPLYANDMERGEDETAIL)
 								ctlevel = Env.COUNT_APPLYANDMERGEDETAIL;
@@ -345,7 +345,7 @@ public class FrontEnd
 					System.exit(-1);
 					}
 				}
-			} else { // '-'°Ê³°¤Ç»Ï¤Ş¤ë¤â¤Î¤Ï (¼Â¹Ô¥Õ¥¡¥¤¥ëÌ¾, argv[0], argv[1], ...) ¤È¤ß¤Ê¤¹
+			} else { // '-'ä»¥å¤–ã§å§‹ã¾ã‚‹ã‚‚ã®ã¯ (å®Ÿè¡Œãƒ•ã‚¡ã‚¤ãƒ«å, argv[0], argv[1], ...) ã¨ã¿ãªã™
 				if (isSrcs) {
 					Env.srcs.add(args[i]);
 				} else {
@@ -361,8 +361,8 @@ public class FrontEnd
 	}
 
 	/**
-	 * Í¿¤¨¤é¤ì¤¿Ì¾Á°¤Î¥Õ¥¡¥¤¥ë¤¿¤Á¤ò¤¯¤Ã¤Ä¤±¤¿¥½¡¼¥¹¤Ë¤Ä¤¤¤Æ¡¢°ìÏ¢¤Î¼Â¹Ô¤ò¹Ô¤¦¡£
-	 * @param files ¥½¡¼¥¹¥Õ¥¡¥¤¥ëÌ¾¤Î¥ê¥¹¥È
+	 * ä¸ãˆã‚‰ã‚ŒãŸåå‰ã®ãƒ•ã‚¡ã‚¤ãƒ«ãŸã¡ã‚’ãã£ã¤ã‘ãŸã‚½ãƒ¼ã‚¹ã«ã¤ã„ã¦ã€ä¸€é€£ã®å®Ÿè¡Œã‚’è¡Œã†ã€‚
+	 * @param files ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«åã®ãƒªã‚¹ãƒˆ
 	 */
 	public static void run(List<String> files)
 	{
@@ -393,16 +393,16 @@ public class FrontEnd
 			System.exit(-1);
 		}
 		
-		// Ê£¿ô¤Î¥Õ¥¡¥¤¥ë¤Î¤È¤­¤Ï¥Õ¥¡¥¤¥ëÌ¾¤¬£±¤Ä¤Ë·è¤á¤é¤ì¤Ê¤¤¡£
+		// è¤‡æ•°ã®ãƒ•ã‚¡ã‚¤ãƒ«ã®ã¨ãã¯ãƒ•ã‚¡ã‚¤ãƒ«åãŒï¼‘ã¤ã«æ±ºã‚ã‚‰ã‚Œãªã„ã€‚
 		String unitName = files.size() == 1 ? files.get(0) : InlineUnit.DEFAULT_UNITNAME;
 		run(new BufferedReader(new InputStreamReader(is)), unitName);
 	}
 
 	/**
-	 * Í¿¤¨¤é¤ì¤¿¥½¡¼¥¹¤Ë¤Ä¤¤¤Æ¡¢°ìÏ¢¤Î¼Â¹Ô¤ò¹Ô¤¦¡£
+	 * ä¸ãˆã‚‰ã‚ŒãŸã‚½ãƒ¼ã‚¹ã«ã¤ã„ã¦ã€ä¸€é€£ã®å®Ÿè¡Œã‚’è¡Œã†ã€‚
 	 * 
-	 * @param src Reader·¿¤ÇÉ½¤µ¤ì¤¿¥½¡¼¥¹
-	 * @param unitName ¥Õ¥¡¥¤¥ëÌ¾¡£¥¤¥ó¥é¥¤¥ó¥³¡¼¥É¤Î¥­¥ã¥Ã¥·¥å¤Ï¤³¤ÎÌ¾Á°¥Ù¡¼¥¹¤Ç´ÉÍı¤µ¤ì¤ë¡£
+	 * @param src Readerå‹ã§è¡¨ã•ã‚ŒãŸã‚½ãƒ¼ã‚¹
+	 * @param unitName ãƒ•ã‚¡ã‚¤ãƒ«åã€‚ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰ã®ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã¯ã“ã®åå‰ãƒ™ãƒ¼ã‚¹ã§ç®¡ç†ã•ã‚Œã‚‹ã€‚
 	 */
 	public static void run(Reader src, String unitName)
 	{
@@ -415,8 +415,8 @@ public class FrontEnd
 		{
 			Env.clearErrors();
 
-			// ¹½Ê¸²òÀÏ
-			// Ãê¾İ¹½Ê¸ÌÚ¤«¤é¥³¥ó¥Ñ¥¤¥ë»ş¥Ç¡¼¥¿¹½Â¤¤òÀ¸À®¤¹¤ë
+			// æ§‹æ–‡è§£æ
+			// æŠ½è±¡æ§‹æ–‡æœ¨ã‹ã‚‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ™‚ãƒ‡ãƒ¼ã‚¿æ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹
 			compile.structure.Membrane m;
 			try
 			{
@@ -447,8 +447,8 @@ public class FrontEnd
 				}
 			}
 
-			// ¥³¥ó¥Ñ¥¤¥ë¡¢¥³¡¼¥ÉÀ¸À®
-			// ¥³¥ó¥Ñ¥¤¥ë»ş¥Ç¡¼¥¿¹½Â¤¤«¤é¥ë¡¼¥ë¥»¥Ã¥È¤ÎÃæ´ÖÌ¿ÎáÎó¤òÀ¸À®¤¹¤ë
+			// ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã€ã‚³ãƒ¼ãƒ‰ç”Ÿæˆ
+			// ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ™‚ãƒ‡ãƒ¼ã‚¿æ§‹é€ ã‹ã‚‰ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ä¸­é–“å‘½ä»¤åˆ—ã‚’ç”Ÿæˆã™ã‚‹
 			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
 			if (Env.getErrorCount() > 0)
 			{
@@ -472,13 +472,13 @@ public class FrontEnd
 			}
 			else
 			{
-				// ÄÌ¾ï¤Ï¤³¤Ã¤Á¡©
+				// é€šå¸¸ã¯ã“ã£ã¡ï¼Ÿ
 				showIL((InterpretedRuleset)rs, m);
 			}
 
 			if (Env.compileonly)
 			{
-				// ¥½¡¼¥¹¤«¤éÆÉ¤ß¹ş¤ó¤À¥é¥¤¥Ö¥é¥ê¤Î¥ë¡¼¥ë¥»¥Ã¥È¤òÉ½¼¨¡Ê--use-source-library»ØÄê»ş¡Ë
+				// ã‚½ãƒ¼ã‚¹ã‹ã‚‰èª­ã¿è¾¼ã‚“ã ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’è¡¨ç¤ºï¼ˆ--use-source-libraryæŒ‡å®šæ™‚ï¼‰
 				for (String libName : Module.loaded)
 				{
 					compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
@@ -488,9 +488,9 @@ public class FrontEnd
 						((InterpretedRuleset)r).showDetail();
 					}
 				}
-				// ¥â¥¸¥å¡¼¥ë¤Î¥ë¡¼¥ë¥»¥Ã¥È°ìÍ÷¤òÉ½¼¨¡ÊÆ±°ì¥½¡¼¥¹Æâ¥â¥¸¥å¡¼¥ë¤È¡¢--use-source-library»ØÄê»ş¤Î¥é¥¤¥Ö¥é¥ê¡Ë
+				// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆä¸€è¦§ã‚’è¡¨ç¤ºï¼ˆåŒä¸€ã‚½ãƒ¼ã‚¹å†…ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã¨ã€--use-source-libraryæŒ‡å®šæ™‚ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒªï¼‰
 				Module.showModuleList();
-				// ¥¤¥ó¥é¥¤¥ó¥³¡¼¥É°ìÍ÷¤ò½ĞÎÏ
+				// ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰ä¸€è¦§ã‚’å‡ºåŠ›
 				Inline.initInline();
 				Inline.showInlineList();
 				return;
@@ -503,9 +503,9 @@ public class FrontEnd
 	}
 
 	/**
-	 * Ãæ´ÖÌ¿ÎáÎó¤ò½ĞÎÏ¤¹¤ë
-	 * @param rs ½é´ü²½¥ë¡¼¥ë¤Î¤ß¤ò´Ş¤à¥ë¡¼¥ë¥»¥Ã¥È
-	 * @param m ¥°¥í¡¼¥Ğ¥ëËì
+	 * ä¸­é–“å‘½ä»¤åˆ—ã‚’å‡ºåŠ›ã™ã‚‹
+	 * @param rs åˆæœŸåŒ–ãƒ«ãƒ¼ãƒ«ã®ã¿ã‚’å«ã‚€ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆ
+	 * @param m ã‚°ãƒ­ãƒ¼ãƒãƒ«è†œ
 	 */
 	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)
 	{
@@ -514,13 +514,13 @@ public class FrontEnd
 	}
 
 	/**
-	 * ¥×¥ê¥×¥í¥»¥Ã¥µ0
+	 * ãƒ—ãƒªãƒ—ãƒ­ã‚»ãƒƒã‚µ0
 	 * 
-	 * ¥ê¥ó¥¯<u> ... :- ... ==> ¥ê¥ó¥¯ ... :- unary(¥ê¥ó¥¯) | ...
+	 * ãƒªãƒ³ã‚¯<u> ... :- ... ==> ãƒªãƒ³ã‚¯ ... :- unary(ãƒªãƒ³ã‚¯) | ...
 	 * 
-	 * Æ±ÍÍ¤Ë¡¢ u -> unary g -> ground s -> string i -> int
+	 * åŒæ§˜ã«ã€ u -> unary g -> ground s -> string i -> int
 	 * 
-	 * Îã¡§ a(Hah<u>), b(A<g>):-rhs. ==> a(Hah), b(A):-ground(A), unary(Hah),
+	 * ä¾‹ï¼š a(Hah<u>), b(A<g>):-rhs. ==> a(Hah), b(A):-ground(A), unary(Hah),
 	 * |rhs.
 	 * 
 	 * @param r

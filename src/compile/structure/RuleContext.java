@@ -1,13 +1,13 @@
 package compile.structure;
 
 /**
- * ¥½¡¼¥¹¥³¡¼¥ÉÃæ¤Î¥ë¡¼¥ëÊ¸Ì®½Ğ¸½¤òÉ½¤¹¥¯¥é¥¹
+ * ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã®ãƒ«ãƒ¼ãƒ«æ–‡è„ˆå‡ºç¾ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  */
 public final class RuleContext extends Context
 {
 	/**
-	 * @param mem ¿ÆËì
-	 * @param qualifiedName ¸ÂÄêÌ¾
+	 * @param mem è¦ªè†œ
+	 * @param qualifiedName é™å®šå
 	 */
 	public RuleContext(Membrane mem, String qualifiedName)
 	{

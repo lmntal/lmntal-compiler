@@ -3,50 +3,50 @@ package compile.parser;
 import util.Util;
 
 /**
- * �������ե��������̾���ȡ�����ʥ��ȥ��̾���ε��Ҥ˻��Ѥ����ʸ����ˤ�ɽ�����饹
- * <p>���Υ��饹�ϸ��ߡ��ץ�����ʸ̮̾����ӥ롼��ʸ̮̾�Ǥϻ��Ѥ���ʤ���
+ * ソースファイル中の名前トークン（アトムの名前の記述に使用される文字列）を表すクラス
+ * <p>このクラスは現在、プロセス文脈名およびルール文脈名では使用されない。
  * <p>
- * '-1'(X)�Ƚ񤭤������Ȥ����뤿�ᡢ�����Ϥ����ˤȤ��ơ�
- * 12��'12'�϶��̤�����1�����ʤ�Фɤ���������Ȥߤʤ��褦�˲����ꤷ����
+ * '-1'(X)と書きたいことがあるため、処理系の方針として、
+ * 12と'12'は区別せず、1引数ならばどちらも整数とみなすように仮決定した。
  * <p>
- * 12 �Ȥ���̾����1�����Υ���ܥ�� [[12]] �ȵ��Ҥ��롣
- * 12]]33 �Ȥ���̾���Υ���ܥ�� '12]]33' �ȵ��Ҥ��롣
+ * 12 という名前の1引数のシンボルは [[12]] と記述する。
+ * 12]]33 という名前のシンボルは '12]]33' と記述する。
  * <p>
- * runtime.Functor���黲�Ȥ��뤿���public���饹���ѹ����Ƥߤ���
+ * runtime.Functorから参照するためにpublicクラスに変更してみた。
  */
 public class SrcName {
-	/** ̾���ȡ�����ɽ��ʸ���� */
+	/** 名前トークンが表す文字列 */
 	protected String name;	
-	/** ̾���ȡ�����μ��� */
+	/** 名前トークンの種類 */
 	protected int type;
 
-	// type����
-	public static final int PLAIN  = 0; // aaa 12 -12 3.14 -3.14e-1 �㥯�������ʤ���̾���ȡ������
+	// typeの値
+	public static final int PLAIN  = 0; // aaa 12 -12 3.14 -3.14e-1 ＜クオータなしの名前トークン＞
 	public static final int SYMBOL = 1; // 'aaa' 'AAA' '12' '-12' '3.14' '-3.14e-1'
 	public static final int STRING = 2; // "aaa" "AAA" "12" "-12" "3.14" "-3.14e-1"
 	public static final int QUOTED = 3; // [:aaa:] [:AAA:] [:12:] [:-12:] [:3.14:] [:-3.14e-1:]
 	public static final int PATHED = 4; // module.p module:p
 
-	/** ɸ���̾���ȡ������ɽ�����������롣
-	 * @param name ̾�� */
+	/** 標準の名前トークンの表現を生成する。
+	 * @param name 名前 */
 	public SrcName(String name) {
 		this.name = name;
 		this.type = PLAIN;
 	}
-	/** ���ꤵ�줿�����̾���ȡ������ɽ�����������롣*/
+	/** 指定された種類の名前トークンの表現を生成する。*/
 	public SrcName(String name, int type) {
 		this.name = name;
 		this.type = type;
 	}
-	/** ����̾���ȡ�����ɽ��ʸ������������ */
+	/** この名前トークンが表す文字列を取得する */
 	public String getName() {
 		return name;
 	}
-	/** �ȡ�����μ�����֤� */
+	/** トークンの種類を返す */
 	public int getType() {
 		return type;
 	}
-	/** ���������������ɽ����������롣*/
+	/** ソースコード中の表現を取得する。*/
 	public String getSourceName() {
 		switch (type) {
 		case SYMBOL:
@@ -56,7 +56,7 @@ public class SrcName {
 		case QUOTED:
 			return "[:" + name + ":]";
 		default:
-			//���ֵ�ˡ�Υ��ȥ���̾�ε�ˡ�ˤʤäƤ��ޤ��Τǡ��ü�̾�ϥ������Ȥ��Ƥ�����
+			//中置記法のアトムも通常の記法になってしまうので、特殊名はクォートしておく。
 			String path, n;
 			int pos = name.indexOf('.');
 			if (pos > 0) {

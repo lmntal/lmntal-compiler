@@ -13,63 +13,63 @@ public final class Env
 {
 	public static final String LMNTAL_VERSION = "1.21.20111226 dev";
 
-	/** -d¥ª¥×¥·¥ç¥ó»ØÄê»ş¤Î¥Ç¥Õ¥©¥ë¥È¤Î¥Ç¥Ğ¥Ã¥°¥ì¥Ù¥ë */
+	/** -dã‚ªãƒ—ã‚·ãƒ§ãƒ³æŒ‡å®šæ™‚ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ‡ãƒãƒƒã‚°ãƒ¬ãƒ™ãƒ« */
 	static final int DEBUG_DEFAULT = 1;
-	/** ÆâÉôÌ¿Îá¤Î¼Â¹Ô¤ò¥È¥ì¡¼¥¹¤¹¤ë¥Ç¥Ğ¥Ã¥°¥ì¥Ù¥ë */
+	/** å†…éƒ¨å‘½ä»¤ã®å®Ÿè¡Œã‚’ãƒˆãƒ¬ãƒ¼ã‚¹ã™ã‚‹ãƒ‡ãƒãƒƒã‚°ãƒ¬ãƒ™ãƒ« */
 	static final int DEBUG_TRACE = 2;
-	/** ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤ÎÌ¿ÎáÎó¼Â¹Ô¤òÉ½¼¨¤¹¤ë¥Ç¥Ğ¥Ã¥°¥ì¥Ù¥ë¡Ê²¾¡Ë */
+	/** ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®å‘½ä»¤åˆ—å®Ÿè¡Œã‚’è¡¨ç¤ºã™ã‚‹ãƒ‡ãƒãƒƒã‚°ãƒ¬ãƒ™ãƒ«ï¼ˆä»®ï¼‰ */
 	static final int DEBUG_SYSTEMRULESET = 7;
 	/** Debug level. */
 	public static int debug = 0;
 
 	////////////////////////////////////////////////////////////////
 
-	/** Ãæ´ÖÌ¿ÎáÎó¤ò½ĞÎÏ¤¹¤ë¥â¡¼¥É¡£Java ¤Ø¤ÎÊÑ´¹¤ä¼Â¹Ô¤Ï¹Ô¤ï¤Ê¤¤¡£ */
+	/** ä¸­é–“å‘½ä»¤åˆ—ã‚’å‡ºåŠ›ã™ã‚‹ãƒ¢ãƒ¼ãƒ‰ã€‚Java ã¸ã®å¤‰æ›ã‚„å®Ÿè¡Œã¯è¡Œã‚ãªã„ã€‚ */
 	public static boolean compileonly = true;
 
-	/** SLIMÍÑ¤ÎÃæ´ÖÌ¿ÎáÎó¤ò½ĞÎÏ¤¹¤ë¥â¡¼¥É¡£ */
+	/** SLIMç”¨ã®ä¸­é–“å‘½ä»¤åˆ—ã‚’å‡ºåŠ›ã™ã‚‹ãƒ¢ãƒ¼ãƒ‰ã€‚ */
 	public static boolean slimcode = false;
 	
-	/** ÍúÎò¤Ä¤­findatom¤ò´Ş¤àÃæ´ÖÌ¿ÎáÎó¤ò½ĞÎÏ¤¹¤ë¥â¡¼¥É¡£ */
+	/** å±¥æ­´ã¤ãfindatomã‚’å«ã‚€ä¸­é–“å‘½ä»¤åˆ—ã‚’å‡ºåŠ›ã™ã‚‹ãƒ¢ãƒ¼ãƒ‰ã€‚ */
 	public static boolean findatom2 = false;
 
-	/** Ëì¼çÆ³¥Æ¥¹¥È¥ª¥ó¥ê¡¼¤Î¥â¡¼¥É¡£ */
+	/** è†œä¸»å°ãƒ†ã‚¹ãƒˆã‚ªãƒ³ãƒªãƒ¼ã®ãƒ¢ãƒ¼ãƒ‰ã€‚ */
 	public static boolean memtestonly = false;
 
-	/** ¥á¥â¥ê»ÈÍÑÎÌ¤òºÇ¾®²½¤¹¤ë */
+	/** ãƒ¡ãƒ¢ãƒªä½¿ç”¨é‡ã‚’æœ€å°åŒ–ã™ã‚‹ */
 	public static boolean fMemory = true;
 
 	public static boolean oneLine = false;
 	public static String oneLineCode = "";
 
 	/**
-	 * <p>¥ê¥ó¥¯Áàºî¤Ë{@code swaplink}Ì¿Îá¤ò»ÈÍÑ¤¹¤ë¡£</p>
+	 * <p>ãƒªãƒ³ã‚¯æ“ä½œã«{@code swaplink}å‘½ä»¤ã‚’ä½¿ç”¨ã™ã‚‹ã€‚</p>
 	 */
 	public static boolean useSwapLink = false;
 
 	/**
-	 * <p>¥ê¥ó¥¯Áàºî¤Ë{@code cyclelinks}Ì¿Îá¤ò»ÈÍÑ¤¹¤ë¡£</p>
+	 * <p>ãƒªãƒ³ã‚¯æ“ä½œã«{@code cyclelinks}å‘½ä»¤ã‚’ä½¿ç”¨ã™ã‚‹ã€‚</p>
 	 */
 	public static boolean useCycleLinks = false;
 
 	////////////////////////////////////////////////////////////////
 
-	/** ¥ê¥ó¥¯¤ÎÉ½¼¨¤òL[¿ô»ú]¤ÇÉ½¼¨¤¹¤ë¾éÄ¹É½¼¨¥ì¥Ù¥ë¡¡<pre> a(_2) --> a(L2) </pre> */
+	/** ãƒªãƒ³ã‚¯ã®è¡¨ç¤ºã‚’L[æ•°å­—]ã§è¡¨ç¤ºã™ã‚‹å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ«ã€€<pre> a(_2) --> a(L2) </pre> */
 	public static final int VERBOSE_SIMPLELINK = 1;
-	/** ¥ë¡¼¥ë¥»¥Ã¥È¤ÎÆâÍÆ¤ò1²ó¤À¤±É½¼¨¤¹¤ë¾éÄ¹É½¼¨¥ì¥Ù¥ë¡¡*/
+	/** ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®å†…å®¹ã‚’1å›ã ã‘è¡¨ç¤ºã™ã‚‹å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ«ã€€*/
 	public static final int VERBOSE_SHOWRULES = 3;
-//	/** ¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥à¤òÉ½¼¨¤¹¤ë¾éÄ¹É½¼¨¥ì¥Ù¥ë¡ÊEXPANDATOMSÌ¤Ëş¤Ë¸Â¤ë¡Ë*/
+//	/** è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ ã‚’è¡¨ç¤ºã™ã‚‹å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ«ï¼ˆEXPANDATOMSæœªæº€ã«é™ã‚‹ï¼‰*/
 //	public static final int VERBOSE_EXPANDPROXIES = 3;
-	/** ±é»»»Ò¤òÅ¸³«¤¹¤ë¾éÄ¹É½¼¨¥ì¥Ù¥ë¡ÊEXPANDATOMSÌ¤Ëş¤Ë¸Â¤ë¡Ë <pre> X+Y --> '+'(X,Y) </pre> */
+	/** æ¼”ç®—å­ã‚’å±•é–‹ã™ã‚‹å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ«ï¼ˆEXPANDATOMSæœªæº€ã«é™ã‚‹ï¼‰ <pre> X+Y --> '+'(X,Y) </pre> */
 	public static final int VERBOSE_EXPANDOPS = 4;
-	/** ¥¢¥È¥à°ú¿ô¤òÅ¸³«¤¹¤ë¾éÄ¹É½¼¨¥ì¥Ù¥ë <pre> a(b) --> a(_2),b(_2) </pre> */
+	/** ã‚¢ãƒˆãƒ å¼•æ•°ã‚’å±•é–‹ã™ã‚‹å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ« <pre> a(b) --> a(_2),b(_2) </pre> */
 	public static final int VERBOSE_EXPANDATOMS = 5;
-	/** ¥ë¡¼¥ë¥»¥Ã¥È¤ÎÆâÍÆ¤òÅ¸³«¤¹¤ë¾éÄ¹É½¼¨¥ì¥Ù¥ë */
+	/** ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®å†…å®¹ã‚’å±•é–‹ã™ã‚‹å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ« */
 	public static final int VERBOSE_EXPANDRULES = 6;
 
-	/** -v¥ª¥×¥·¥ç¥óÌµ»ØÄê»ş¤Î¾éÄ¹É½¼¨¥ì¥Ù¥ë */
+	/** -vã‚ªãƒ—ã‚·ãƒ§ãƒ³ç„¡æŒ‡å®šæ™‚ã®å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ« */
 	public static final int VERBOSE_INIT = 1;
-	/** -v¥ª¥×¥·¥ç¥ó»ØÄê»ş¤Î¥Ç¥Õ¥©¥ë¥È¤Î¾éÄ¹É½¼¨¥ì¥Ù¥ë */
+	/** -vã‚ªãƒ—ã‚·ãƒ§ãƒ³æŒ‡å®šæ™‚ã®ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å†—é•·è¡¨ç¤ºãƒ¬ãƒ™ãƒ« */
 	public static final int VERBOSE_DEFAULT = 5;
 	/** verbose level. */
 	public static int verbose = VERBOSE_INIT;
@@ -77,46 +77,46 @@ public final class Env
 	public static boolean showlongrulename = false;
 
 	/**
-	 * ¥×¥í¥°¥é¥à¤ËÍ¿¤¨¤ë°ú¿ô
+	 * ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã«ä¸ãˆã‚‹å¼•æ•°
 	 */
 	public static List<String> argv = new ArrayList<String>();
 
 	/**
-	 * ¥½¡¼¥¹¥Õ¥¡¥¤¥ë
+	 * ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«
 	 */
 	public static List<String> srcs = new ArrayList<String>();
 
 	/**
-	 * Ì¤¥³¥ó¥Ñ¥¤¥ë¥é¥¤¥Ö¥é¥ê¤òÍøÍÑ¤¹¤ë
+	 * æœªã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’åˆ©ç”¨ã™ã‚‹
 	 */
 	public static boolean fUseSourceLibrary = false;
 
-	/** ¥Ç¥Ğ¥Ã¥°¼Â¹Ô¥ª¥×¥·¥ç¥ó¤ÎÍ­Ìµ by inui */
+	/** ãƒ‡ãƒãƒƒã‚°å®Ÿè¡Œã‚ªãƒ—ã‚·ãƒ§ãƒ³ã®æœ‰ç„¡ by inui */
 	public static boolean debugOption = false;
 
-	/** É¸½àÆşÎÏ¤«¤é LMNtal ¥×¥í¥°¥é¥à¤òÆÉ¤ß¹ş¤à¥ª¥×¥·¥ç¥ó 2006.07.11 inui */
+	/** æ¨™æº–å…¥åŠ›ã‹ã‚‰ LMNtal ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’èª­ã¿è¾¼ã‚€ã‚ªãƒ—ã‚·ãƒ§ãƒ³ 2006.07.11 inui */
 	public static boolean stdinLMN = false;
 
 	public static int majorVersion = 0;
 	public static int minorVersion = 0;
 
 	/**
-	 * ¥ë¡¼¥ëº¸ÊÕ¤Ë½Ğ¸½¤¹¤ë¡¢¥¹¥ì¥Ã¥É¿ô¤Î¾å¸Â¤òÀßÄê
+	 * ãƒ«ãƒ¼ãƒ«å·¦è¾ºã«å‡ºç¾ã™ã‚‹ã€ã‚¹ãƒ¬ãƒƒãƒ‰æ•°ã®ä¸Šé™ã‚’è¨­å®š
 	 */
 	public static int threadMax = 128;
 
 	/**
-	 * ¥¹¥ì¥Ã¥ÉÛ£Ëæ»ØÄê¤ò»ÈÍÑ¤·¤¿¤È¤­¤Î¡¢ÊÑ´¹¸å¤Î¥ë¡¼¥ë¤ò¥À¥ó¥×
+	 * ã‚¹ãƒ¬ãƒƒãƒ‰æ›–æ˜§æŒ‡å®šã‚’ä½¿ç”¨ã—ãŸã¨ãã®ã€å¤‰æ›å¾Œã®ãƒ«ãƒ¼ãƒ«ã‚’ãƒ€ãƒ³ãƒ—
 	 */
 	public static boolean dumpConvertedRules = false;
 
 	public static boolean preProcess0 = false;
 
-	/** ¥¢¥È¥àÌ¾¤ÎÉ½¼¨¤¹¤ëÄ¹¤µ */
+	/** ã‚¢ãƒˆãƒ åã®è¡¨ç¤ºã™ã‚‹é•·ã• */
 	public static int printLength = 14;
 
-	// °Ê²¼¤Ë½ĞÎÏ·Ï¤Î°ìÊ¸»ú¥á¥½¥Ã¥É¤¬ÊÂ¤ó¤Ç¤¤¤ë¤¬¡¢¤³¤ì¤Ï¥Ç¥Ğ¥Ã¥°ÍÑ¤È¹Í¤¨¤ë¤Ù¤­¤Ç¤Ï¤Ê¤¤¤«¡©
-	// ¥³¥ó¥Ñ¥¤¥é¤Î¥³¡¼¥ÉÀ¸À®½ĞÎÏÅù¤ÇÅÙ¡¹¤³¤ì¤é¤Î¥á¥½¥Ã¥É¤¬»È¤ï¤ì¤Æ¤¤¤ë¤¬¡¢¤½¤ì¤ÏËÜÍè¹¥¤Ş¤·¤¯¤Ê¤¤¡£
+	// ä»¥ä¸‹ã«å‡ºåŠ›ç³»ã®ä¸€æ–‡å­—ãƒ¡ã‚½ãƒƒãƒ‰ãŒä¸¦ã‚“ã§ã„ã‚‹ãŒã€ã“ã‚Œã¯ãƒ‡ãƒãƒƒã‚°ç”¨ã¨è€ƒãˆã‚‹ã¹ãã§ã¯ãªã„ã‹ï¼Ÿ
+	// ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ã®ã‚³ãƒ¼ãƒ‰ç”Ÿæˆå‡ºåŠ›ç­‰ã§åº¦ã€…ã“ã‚Œã‚‰ã®ãƒ¡ã‚½ãƒƒãƒ‰ãŒä½¿ã‚ã‚Œã¦ã„ã‚‹ãŒã€ãã‚Œã¯æœ¬æ¥å¥½ã¾ã—ããªã„ã€‚
 
 	/**
 	 * General error report
@@ -129,7 +129,7 @@ public final class Env
 	/**
 	 * General error report with indent
 	 * @param o
-	 * @param depth ¥¤¥ó¥Ç¥ó¥È¤Î¿¼¤µ
+	 * @param depth ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã®æ·±ã•
 	 */
 	public static void e(Object o, int depth) {
 		Util.errPrintln(getIndent(depth) + o);
@@ -157,7 +157,7 @@ public final class Env
 	/**
 	 * General dumper for debug with indent
 	 * @param o
-	 * @param depth ¥¤¥ó¥Ç¥ó¥È¤Î¿¼¤µ
+	 * @param depth ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã®æ·±ã•
 	 */
 	public static void d(Object o, int depth) {
 		if(debug > 0) Util.println(getIndent(depth) + o);
@@ -174,7 +174,7 @@ public final class Env
 	/**
 	 * General dumper with indent
 	 * @param o
-	 * @param depth ¥¤¥ó¥Ç¥ó¥È¤Î¿¼¤µ
+	 * @param depth ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã®æ·±ã•
 	 */
 	public static void p(Object o, int depth) {
 		Util.println(getIndent(depth) + o);
@@ -196,7 +196,7 @@ public final class Env
 	}
 
 	/**
-	 * Áöºº²ÄÇ½¤Ê¥³¥ì¥¯¥·¥ç¥ó¤Î³ÆÍ×ÁÇ¤ÎÊ¸»úÎóÉ½¸½¤ò¶èÀÚ¤êÊ¸»ú {@code delim} ¤ÇÏ¢·ë¤·¤¿Ê¸»úÎó¤òÊÖ¤·¤Ş¤¹¡£
+	 * èµ°æŸ»å¯èƒ½ãªã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³ã®å„è¦ç´ ã®æ–‡å­—åˆ—è¡¨ç¾ã‚’åŒºåˆ‡ã‚Šæ–‡å­— {@code delim} ã§é€£çµã—ãŸæ–‡å­—åˆ—ã‚’è¿”ã—ã¾ã™ã€‚
 	 */
 	public static <E> String parray(Iterable<E> l, String delim)
 	{
@@ -215,7 +215,7 @@ public final class Env
 	}
 
 	/**
-	 * Áöºº²ÄÇ½¤Ê¥³¥ì¥¯¥·¥ç¥ó¤Î³ÆÍ×ÁÇ¤ÎÊ¸»úÎóÉ½¸½¤òÈ¾³Ñ¶õÇò¤ÇÏ¢·ë¤·¤¿Ê¸»úÎó¤òÊÖ¤·¤Ş¤¹¡£
+	 * èµ°æŸ»å¯èƒ½ãªã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³ã®å„è¦ç´ ã®æ–‡å­—åˆ—è¡¨ç¾ã‚’åŠè§’ç©ºç™½ã§é€£çµã—ãŸæ–‡å­—åˆ—ã‚’è¿”ã—ã¾ã™ã€‚
 	 */
 	public static <E> String parray(Iterable<E> l)
 	{
@@ -223,7 +223,7 @@ public final class Env
 	}
 
 	/**
-	 * »ØÄê¤·¤¿¿ô¤Î¥¤¥ó¥Ç¥ó¥È¤òÊÖ¤¹
+	 * æŒ‡å®šã—ãŸæ•°ã®ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã‚’è¿”ã™
 	 * @param depth
 	 * @return
 	 */
@@ -236,7 +236,7 @@ public final class Env
 	}
 
 	/**
-	 * ³ÈÄ¥¥³¥Ş¥ó¥É¥é¥¤¥ó°ú¿ô¤ò¤³¤ì¤Ë³ÊÇ¼¤¹¤ë
+	 * æ‹¡å¼µã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³å¼•æ•°ã‚’ã“ã‚Œã«æ ¼ç´ã™ã‚‹
 	 */
 	public static Map<String, String> extendedOption = new HashMap<String, String>();
 	public static String getExtendedOption(String key) {
@@ -245,28 +245,28 @@ public final class Env
 	}
 
 	////////////////////////////////////////////////////////////////
-	/* type inference ´Ø·¸ by kudo */
-	/** ·¿¥·¥¹¥Æ¥à on/off */
+	/* type inference é–¢ä¿‚ by kudo */
+	/** å‹ã‚·ã‚¹ãƒ†ãƒ  on/off */
 	public static boolean fType = false;
 
-	/** ³Æ¿äÏÀ¤ÎÍ­¸ú¡¿Ìµ¸ú */
+	/** å„æ¨è«–ã®æœ‰åŠ¹ï¼ç„¡åŠ¹ */
 	public static boolean flgOccurrenceInference = false;
 	public static boolean flgQuantityInference = true;
 	public static boolean flgArgumentInference = true;
 
-	/** ³ÆÀ¸À®Ëì¤òº®¤¼¤Æ¸ú²Ì¤òÅ¬ÍÑ */
+	/** å„ç”Ÿæˆè†œã‚’æ··ãœã¦åŠ¹æœã‚’é©ç”¨ */
 	public static final int COUNT_MERGEANDAPPLY = 0;
-	/** ³ÆÀ¸À®Ëì¤´¤È¤Ë¸ú²Ì¤òÅ¬ÍÑ¤·¤Æ¤«¤éº®¤¼¤ë */
+	/** å„ç”Ÿæˆè†œã”ã¨ã«åŠ¹æœã‚’é©ç”¨ã—ã¦ã‹ã‚‰æ··ãœã‚‹ */
 	public static final int COUNT_APPLYANDMERGE = 1;
-	/** ³ÆÀ¸À®Ëì¤´¤È¤ËÅ¬ÍÑ²ó¿ô¤ò²òÀÏ */
+	/** å„ç”Ÿæˆè†œã”ã¨ã«é©ç”¨å›æ•°ã‚’è§£æ */
 	public static final int COUNT_APPLYANDMERGEDETAIL = 2;
 	/** default */
 	public static final int COUNT_DEFAULT = COUNT_APPLYANDMERGEDETAIL;
 
-	/** ¸Ä¿ô¤Î²òÀÏ¤Î¥ì¥Ù¥ë */
+	/** å€‹æ•°ã®è§£æã®ãƒ¬ãƒ™ãƒ« */
 	public static int quantityInferenceLevel = COUNT_DEFAULT;
 
-	/** ¿äÏÀ·ë²Ì¤òÉ½¼¨ */
+	/** æ¨è«–çµæœã‚’è¡¨ç¤º */
 	public static boolean flgShowConstraints = false;
 
 	////////////////////////////////////////////////////////////////
@@ -302,10 +302,10 @@ public final class Env
 		return nWarnings;
 	}
 
-	//ÊÔ¤ß¾å¤²
+	//ç·¨ã¿ä¸Šã’
 	public static boolean fMerging = false;
 
-	/** °ì¤Ä¤Î¥ë¡¼¥ë¤Î¥³¥ó¥Ñ¥¤¥ë¤ò¹Ô¤¦ (for SLIM model checking mode) */
+	/** ä¸€ã¤ã®ãƒ«ãƒ¼ãƒ«ã®ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚’è¡Œã† (for SLIM model checking mode) */
 	public static boolean compileRule = false;
 
 	/** hyperlink */

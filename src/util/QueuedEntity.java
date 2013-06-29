@@ -1,24 +1,24 @@
 package util;
 
 /**
- * Stack���Ѥޤ�����ǤΤ���οƥ��饹��
- * ���Υ��饹�Υ��󥹥��󥹤�head/tail���ü�����Ӥ����ǤΤ���ˤΤ߻��Ѥ���
- * �ºݤ����Ǥˤϻҥ��饹�Υ��󥹥��󥹤���Ѥ��롣
+ * Stackに積まれる要素のための親クラス。
+ * このクラスのインスタンスはhead/tail等特殊な用途の要素のためにのみ使用し、
+ * 実際の要素には子クラスのインスタンスを使用する。
  */
 public class QueuedEntity {
 	QueuedEntity next, prev;
-	/** ���� entity ���Ĥޤ�Ƥ��륹���å� */
+	/** この entity がつまれているスタック */
 	protected Stack stack;
 	
 	protected QueuedEntity() {
 		next = prev = null;
 	}
-	/** �����å����Ѥޤ�Ƥ������true���֤� */
+	/** スタックに積まれている場合はtrueを返す */
 	public boolean isQueued() {
 		return stack != null;
 	}
 	/**
-	 * �����å����Ѥޤ�Ƥ���н���롣
+	 * スタックに積まれていれば除去する。
 	 */
 	public void dequeue() {
 		if (!isQueued()) {
@@ -34,7 +34,7 @@ public class QueuedEntity {
 				stack = null;
 			}
 		} catch (NullPointerException e) {
-			//��Ʊ���˽����Ƥ����Τǡ����⤷�ʤ���
+			//非同期に除去されていたので、何もしない。
 		}
 	}
 }

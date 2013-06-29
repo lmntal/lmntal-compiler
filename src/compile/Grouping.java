@@ -12,15 +12,15 @@ import runtime.InstructionList;
 import util.Util;
 
 /**
- * Ì¿ÎáÎó¤Î¥°¥ë¡¼¥×²½¤ò¤ò¹Ô¤¦¥¯¥é¥¹¡£
+ * å‘½ä»¤åˆ—ã®ã‚°ãƒ«ãƒ¼ãƒ—åŒ–ã‚’ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹ã€‚
  * @author sakurai
  */
 public class Grouping {
-	/** ÊÑ¿ôÈÖ¹æ¢ÍÊÑ¿ôÈÖ¹æ¤òÄêµÁ¤·¤¿Ì¿Îá¤Î¥Ş¥Ã¥× */
+	/** å¤‰æ•°ç•ªå·â‡’å¤‰æ•°ç•ªå·ã‚’å®šç¾©ã—ãŸå‘½ä»¤ã®ãƒãƒƒãƒ— */
 	private HashMap var2DefInst;
-	/** Ì¿Îá¢Í¥°¥ë¡¼¥×¼±ÊÌÈÖ¹æ¤Î¥Ş¥Ã¥× */
+	/** å‘½ä»¤â‡’ã‚°ãƒ«ãƒ¼ãƒ—è­˜åˆ¥ç•ªå·ã®ãƒãƒƒãƒ— */
 	private HashMap Inst2GroupId;
-	/** ¥°¥ë¡¼¥×Ì¿ÎáÆâ¤Î·×»»¥³¥¹¥È*/
+	/** ã‚°ãƒ«ãƒ¼ãƒ—å‘½ä»¤å†…ã®è¨ˆç®—ã‚³ã‚¹ãƒˆ*/
 	private HashMap group2Cost;
 	
 	Instruction spec;
@@ -32,28 +32,28 @@ public class Grouping {
 	}
 	
 	/*
-	 * ¥Ş¥Ã¥×¤Î½é´ü²½
+	 * ãƒãƒƒãƒ—ã®åˆæœŸåŒ–
 	 */
 	private void initMap(){
 		var2DefInst.clear();
 		Inst2GroupId.clear();
 	}
 	
-	/** Ì¿ÎáÎó¤Î¥°¥ë¡¼¥×²½
-	 *  ¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô¤ÈËì¼çÆ³¥Æ¥¹¥ÈÉô¤ÇÁàºî¤òÊ¬¤±¤ë¡£
-	 *  @atom ¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô¤ÎÌ¿ÎáÎó
-	 *  @param Ëì¼çÆ³¥Æ¥¹¥ÈÉô¤ÎÌ¿ÎáÎó
+	/** å‘½ä»¤åˆ—ã®ã‚°ãƒ«ãƒ¼ãƒ—åŒ–
+	 *  ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã¨è†œä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã§æ“ä½œã‚’åˆ†ã‘ã‚‹ã€‚
+	 *  @atom ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã®å‘½ä»¤åˆ—
+	 *  @param è†œä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã®å‘½ä»¤åˆ—
 	 * */
 	public void grouping(List atom, List mem){
-		//¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô
+		//ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨
 		if(!Optimizer.fMerging) groupingInstsForAtomMatch(atom);
-		//Ëì¼çÆ³¥Æ¥¹¥ÈÉô
+		//è†œä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨
 		groupingInsts(mem, false);
 	}
 	
-	/** Ì¿ÎáÎó¤Î¥°¥ë¡¼¥×²½ 
-	 * @param insts ¥°¥ë¡¼¥×²½¤¹¤ëÌ¿ÎáÎó
-	 * @param isAtomMatch insts¤¬¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô¤«¤É¤¦¤«¤Î¥Õ¥é¥°
+	/** å‘½ä»¤åˆ—ã®ã‚°ãƒ«ãƒ¼ãƒ—åŒ– 
+	 * @param insts ã‚°ãƒ«ãƒ¼ãƒ—åŒ–ã™ã‚‹å‘½ä»¤åˆ—
+	 * @param isAtomMatch instsãŒã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 	 * */
 	public void groupingInsts(List<Instruction> insts, boolean isAtomMatch){
 		if(insts.get(0).getKind() != Instruction.SPEC) return;
@@ -61,14 +61,14 @@ public class Grouping {
 		int last = -1;
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
-			//ÈİÄê¾ò·ï¤¬¤¢¤ë¾ì¹ç¤Ï¥°¥ë¡¼¥×²½¤ÏÌµ¸ú »ÃÄêÅª½èÃÖ
+			//å¦å®šæ¡ä»¶ãŒã‚ã‚‹å ´åˆã¯ã‚°ãƒ«ãƒ¼ãƒ—åŒ–ã¯ç„¡åŠ¹ æš«å®šçš„å‡¦ç½®
 			if(inst.getKind() == Instruction.NOT) return;
 			//if (inst.getKind() == Instruction.COMMIT) break;
 			if(inst.getKind() == Instruction.COMMIT) continue;
 			if (inst.getKind() == Instruction.JUMP) continue;
-			//¥°¥ë¡¼¥×ÈÖ¹æ¤ò³ä¤ê¿¶¤ë	  
+			//ã‚°ãƒ«ãƒ¼ãƒ—ç•ªå·ã‚’å‰²ã‚ŠæŒ¯ã‚‹	  
 			Inst2GroupId.put(inst, new Integer(i));
-			//ÊÑ¿ôÈÖ¹æ¢ªÌ¿Îá¤Ë¥Ş¥Ã¥×¤òÄ¥¤ë
+			//å¤‰æ•°ç•ªå·â†’å‘½ä»¤ã«ãƒãƒƒãƒ—ã‚’å¼µã‚‹
 			//System.out.println("instruction = "+inst);
 			if(inst.getOutputType() != -1)
 				var2DefInst.put(inst.getArg1(), inst);
@@ -89,8 +89,8 @@ public class Grouping {
 		initMap();
 	}
 	
-	/** Ì¿ÎáÎó¤Î¥°¥ë¡¼¥×²½ ¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÍÑ 
-	 * @param insts ¥°¥ë¡¼¥×²½¤¹¤ë¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô¤ÎÌ¿ÎáÎó
+	/** å‘½ä»¤åˆ—ã®ã‚°ãƒ«ãƒ¼ãƒ—åŒ– ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆç”¨ 
+	 * @param insts ã‚°ãƒ«ãƒ¼ãƒ—åŒ–ã™ã‚‹ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã®å‘½ä»¤åˆ—
 	 * */
 	public void groupingInstsForAtomMatch(List<Instruction> insts){
 		if(insts.get(0).getKind() != Instruction.SPEC) return;
@@ -105,13 +105,13 @@ public class Grouping {
 	}	
 
 	/**
-	 * ¥Ş¥Ã¥×¤Ë´ğ¤Å¤¤¤Æ¥°¥ë¡¼¥×¤òÀ¸À®¤¹¤ë¡£
-	 * var2DefInst¤ò»²¾È¤·¡¢¥°¥ë¡¼¥×¼±ÊÌÈÖ¹æ¤¬Æ±¤¸Ì¿Îá¤òÆ±¤¸¥°¥ë¡¼¥×¤È¤¹¤ë¡£ 
-	 * @param insts Ì¿ÎáÎó
-	 * @param isAtomMatch insts¤¬¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô¤«¤É¤¦¤«¤Î¥Õ¥é¥°
+	 * ãƒãƒƒãƒ—ã«åŸºã¥ã„ã¦ã‚°ãƒ«ãƒ¼ãƒ—ã‚’ç”Ÿæˆã™ã‚‹ã€‚
+	 * var2DefInstã‚’å‚ç…§ã—ã€ã‚°ãƒ«ãƒ¼ãƒ—è­˜åˆ¥ç•ªå·ãŒåŒã˜å‘½ä»¤ã‚’åŒã˜ã‚°ãƒ«ãƒ¼ãƒ—ã¨ã™ã‚‹ã€‚ 
+	 * @param insts å‘½ä»¤åˆ—
+	 * @param isAtomMatch instsãŒã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 	 * */
 	private void createGroup(List<Instruction> insts, boolean isAtomMatch){
-		//¥Ş¥Ã¥×¤Î½ñ¤­´¹¤¨
+		//ãƒãƒƒãƒ—ã®æ›¸ãæ›ãˆ
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.COMMIT
@@ -140,13 +140,13 @@ public class Grouping {
 			int nmems = -1;
 			if(inst.getKind() == Instruction.ANYMEM
 					  || inst.getKind() == Instruction.LOCKMEM){
-						//Ëì¤ò¥°¥ë¡¼¥×Ê¬¤±
-						//¥ë¡¼¥ë¤ÎÍ­Ìµ¤Ë¤è¤ë¶èÊÌ {a, $p, @p} ¤È {a, $p}¤Ï°ã¤¦¥°¥ë¡¼¥×
-						//¥¢¥È¥à, »ÒËì¤Î¿ô¤Ë¤è¤ë¶èÊÌ {a, b} ¤È {a, a, b, b} ¤Ï°ã¤¦¥°¥ë¡¼¥×
-						//º£¤Î¤È¤³¤í¼¡¤Î¾ì¹ç¤Ï¶èÊÌ¤Ç¤­¤Ê¤¤¤Î¤ÇÆ±¤¸¥°¥ë¡¼¥×¤È¤¹¤ë
-						//{a(X), b(X)}, {a(Y)}, b(Y) ¥¥¥¤³¤ì¤é¤Ï°ã¤¦¥°¥ë¡¼¥×
-						//$in, $out ¤Î¿ô¤Ç¶èÊÌ²ÄÇ½?
-						//todo ¤É¤¦¶èÊÌ¤¹¤ë¤«¹Í¤¨¤ë
+						//è†œã‚’ã‚°ãƒ«ãƒ¼ãƒ—åˆ†ã‘
+						//ãƒ«ãƒ¼ãƒ«ã®æœ‰ç„¡ã«ã‚ˆã‚‹åŒºåˆ¥ {a, $p, @p} ã¨ {a, $p}ã¯é•ã†ã‚°ãƒ«ãƒ¼ãƒ—
+						//ã‚¢ãƒˆãƒ , å­è†œã®æ•°ã«ã‚ˆã‚‹åŒºåˆ¥ {a, b} ã¨ {a, a, b, b} ã¯é•ã†ã‚°ãƒ«ãƒ¼ãƒ—
+						//ä»Šã®ã¨ã“ã‚æ¬¡ã®å ´åˆã¯åŒºåˆ¥ã§ããªã„ã®ã§åŒã˜ã‚°ãƒ«ãƒ¼ãƒ—ã¨ã™ã‚‹
+						//{a(X), b(X)}, {a(Y)}, b(Y) ãƒ»ãƒ»ãƒ»ã“ã‚Œã‚‰ã¯é•ã†ã‚°ãƒ«ãƒ¼ãƒ—
+						//$in, $out ã®æ•°ã§åŒºåˆ¥å¯èƒ½?
+						//todo ã©ã†åŒºåˆ¥ã™ã‚‹ã‹è€ƒãˆã‚‹
 				if(inst.getKind() == Instruction.ANYMEM) meminsttype = true;
 				else meminsttype = false;
 						for(int i2 = i+1; i2 < insts.size(); i2++){
@@ -218,15 +218,15 @@ public class Grouping {
 					}
 		}
 		
-		//¥Ş¥Ã¥×½ñ¤­´¹¤¨½ªÎ»
-		//GROUPÀ¸À®
+		//ãƒãƒƒãƒ—æ›¸ãæ›ãˆçµ‚äº†
+		//GROUPç”Ÿæˆ
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.COMMIT
 				|| inst.getKind() == Instruction.JUMP) break;
 			Object group = Inst2GroupId.get(inst);
 			InstructionList subinsts = new InstructionList();
-			//SPEC¤ÏÉÔÍ×?
+			//SPECã¯ä¸è¦?
 			subinsts.add(spec);
 			for(int i2=i; i2<insts.size(); i2++){
 				Instruction inst2 = insts.get(i2);
@@ -243,7 +243,7 @@ public class Grouping {
 			insts.add(i, groupinst);
 			Cost cost = new Cost();
 			cost.evaluateCost(subinsts.insts);
-//          ¥Ç¥Ğ¥Ã¥°ÍÑ¥³¥¹¥ÈÉ½¼¨
+//          ãƒ‡ãƒãƒƒã‚°ç”¨ã‚³ã‚¹ãƒˆè¡¨ç¤º
 //			System.out.print(groupinst + "\n cost = ");
 //			for(int s = 0; s<cost.costvalueN.size(); s++){
 //				if(s>0){
@@ -265,8 +265,8 @@ public class Grouping {
 			
 			group2Cost.put(groupinst, cost);
 		}
-//		GroupÌ¿Îá¤ÎÊÂ¤ÓÂØ¤¨
-		//¥¢¥È¥à¼çÆ³¥Æ¥¹¥È¤Ç¤ÏºÇ½é¤ÎfuncÌ¿Îá¤ò´Ş¤à¥°¥ë¡¼¥×¤Î°ÌÃÖ¤ÏÀèÆ¬¤Î¤Ş¤Ş¤È¤¹¤ë
+//		Groupå‘½ä»¤ã®ä¸¦ã³æ›¿ãˆ
+		//ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆã§ã¯æœ€åˆã®funcå‘½ä»¤ã‚’å«ã‚€ã‚°ãƒ«ãƒ¼ãƒ—ã®ä½ç½®ã¯å…ˆé ­ã®ã¾ã¾ã¨ã™ã‚‹
 		int groupstart = 0;
 		if(isAtomMatch){
 			for(int i=0; i<insts.size(); i++){
@@ -303,12 +303,12 @@ public class Grouping {
 	}
 
 	/**
-	 * ¥Ş¥Ã¥×Inst2GroupId¤Î½ñ¤­´¹¤¨
-	 * ¥Ş¥Ã¥×¤ÎÆâ¡¢ÃÍ group1 ¤ò»ı¤ÄÁ´¤Æ¤ÎÍ×ÁÇ¤ò¡¢ÃÍ group2 ¤Ë½ñ¤­´¹¤¨¤ë
-	 * @param group1 ½ñ¤­´¹¤¨Á°¤ÎÃÍ
-	 * @param group2 ½ñ¤­´¹¤¨¸å¤ÎÃÍ
+	 * ãƒãƒƒãƒ—Inst2GroupIdã®æ›¸ãæ›ãˆ
+	 * ãƒãƒƒãƒ—ã®å†…ã€å€¤ group1 ã‚’æŒã¤å…¨ã¦ã®è¦ç´ ã‚’ã€å€¤ group2 ã«æ›¸ãæ›ãˆã‚‹
+	 * @param group1 æ›¸ãæ›ãˆå‰ã®å€¤
+	 * @param group2 æ›¸ãæ›ãˆå¾Œã®å€¤
 	 * */
-	//Inst2GroupId¤ÎÆâ, ÃÍgroup1¤ò¤â¤ÄÁ´¤Æ¤Î¥­¡¼¤ËÂĞ¤·, ÃÍgroup2¤Ø¥Ş¥Ã¥×¤òÄ¥¤êÂØ¤¨¤ë.
+	//Inst2GroupIdã®å†…, å€¤group1ã‚’ã‚‚ã¤å…¨ã¦ã®ã‚­ãƒ¼ã«å¯¾ã—, å€¤group2ã¸ãƒãƒƒãƒ—ã‚’å¼µã‚Šæ›¿ãˆã‚‹.
 	public void changeMap(Object group1, Object group2){
 		Iterator it = Inst2GroupId.keySet().iterator();
 		while (it.hasNext()) {
@@ -319,7 +319,7 @@ public class Grouping {
 		}
 	}
 		
-	//À¸À®¤µ¤ì¤¿¥Ş¥Ã¥×¤Î³ÎÇ§ ¥Ç¥Ğ¥Ã¥°ÍÑ
+	//ç”Ÿæˆã•ã‚ŒãŸãƒãƒƒãƒ—ã®ç¢ºèª ãƒ‡ãƒãƒƒã‚°ç”¨
 	public void viewMap(){
 		Set set1 = var2DefInst.entrySet();
 		Set set2 = Inst2GroupId.entrySet();

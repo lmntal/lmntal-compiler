@@ -1,5 +1,5 @@
 /*
- * ºîÀ®Æü: 2004/01/10
+ * ä½œæˆæ—¥: 2004/01/10
  *
  */
 package compile;
@@ -26,16 +26,16 @@ import compile.structure.Membrane;
 import compile.structure.RuleStructure;
 
 /**
- * ¥â¥¸¥å¡¼¥ë¥·¥¹¥Æ¥à¤ò¼Â¸½¤¹¤ë¥¯¥é¥¹¡£<br><br>
+ * ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚·ã‚¹ãƒ†ãƒ ã‚’å®Ÿç¾ã™ã‚‹ã‚¯ãƒ©ã‚¹ã€‚<br><br>
  * 
- * ³µÍ×
+ * æ¦‚è¦
  * 
  * <ul>
- * <li> ¥â¥¸¥å¡¼¥ë¤ÎÄêµÁÊıË¡   module_name : { ... }  (Ëì¤ËÌ¾Á°¤ò¤Ä¤±¤ë)
- * <li> ¥â¥¸¥å¡¼¥ë¤Î»È¤¤Êı     module_name.name
- * <li> ¥â¥¸¥å¡¼¥ë¤Î¼ÂÂÖ¤ÏÌ¾Á°¤Ä¤­¤ÎËì¤Ç¤¢¤ë¡£
- * <li> ¡Ö¥â¥¸¥å¡¼¥ë¤ò»È¤¦¡×¤È¤Ï¡¢¸½ºß¤ÎËìÆâ¤Ë¥â¥¸¥å¡¼¥ë¤Î¥ë¡¼¥ë¤òÆÉ¤ß¹ş¤ó¤Ç¡¢¾¡¼ê¤ËÈ¿±ş¤µ¤»¤ë¤³¤È¤Ç¤¢¤ë¡£
- * 		¤¿¤¤¤Æ¤¤¡¢¥â¥¸¥å¡¼¥ë¤Î¥ë¡¼¥ë¤Îº¸ÊÕ¤Ë´Ş¤Ş¤ì¤ë¥¢¥È¥à¤ò½ñ¤¯¤³¤È¤ÇÈ¿±ş¤µ¤»¤ë¤³¤È¤Ë¤Ê¤ë¡£
+ * <li> ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®å®šç¾©æ–¹æ³•   module_name : { ... }  (è†œã«åå‰ã‚’ã¤ã‘ã‚‹)
+ * <li> ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ä½¿ã„æ–¹     module_name.name
+ * <li> ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®å®Ÿæ…‹ã¯åå‰ã¤ãã®è†œã§ã‚ã‚‹ã€‚
+ * <li> ã€Œãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’ä½¿ã†ã€ã¨ã¯ã€ç¾åœ¨ã®è†œå†…ã«ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ãƒ«ãƒ¼ãƒ«ã‚’èª­ã¿è¾¼ã‚“ã§ã€å‹æ‰‹ã«åå¿œã•ã›ã‚‹ã“ã¨ã§ã‚ã‚‹ã€‚
+ * 		ãŸã„ã¦ã„ã€ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ãƒ«ãƒ¼ãƒ«ã®å·¦è¾ºã«å«ã¾ã‚Œã‚‹ã‚¢ãƒˆãƒ ã‚’æ›¸ãã“ã¨ã§åå¿œã•ã›ã‚‹ã“ã¨ã«ãªã‚‹ã€‚
  * </ul><br>
  * 
  * @author hara
@@ -62,7 +62,7 @@ public class Module {
 	}
 	
 	/**
-	 * Ëì¤òÌ¾É½¤ËÅĞÏ¿¤¹¤ë¡£
+	 * è†œã‚’åè¡¨ã«ç™»éŒ²ã™ã‚‹ã€‚
 	 * @param m
 	 */
 	public static void regMemName(String name, Membrane m) {
@@ -70,9 +70,9 @@ public class Module {
 	}
 	
 	/**
-	 * »ØÄê¤·¤¿¥â¥¸¥å¡¼¥ë¤ò»ØÄê¤·¤¿Ëì¤ËÆÉ¤ß¹ş¤à
-	 * @param m         ÆÉ¤ß¹ş¤Ş¤ì¤ëËì
-	 * @param mod_name  ¥â¥¸¥å¡¼¥ëÌ¾
+	 * æŒ‡å®šã—ãŸãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’æŒ‡å®šã—ãŸè†œã«èª­ã¿è¾¼ã‚€
+	 * @param m         èª­ã¿è¾¼ã¾ã‚Œã‚‹è†œ
+	 * @param mod_name  ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«å
 	 */
 	public static void loadModule(Membrane m, String mod_name) {
 		if(loaded.contains(mod_name)) return;
@@ -84,7 +84,7 @@ public class Module {
 				LMNParser lp = new LMNParser(new BufferedReader(new InputStreamReader(new FileInputStream(file))));
 				runtime.Ruleset rs = RulesetCompiler.compileMembrane(lp.parse(), file.toString());
 				//Env.p("MOD compiled "+rs);
-				//memNameTable ¤¬¥â¥¸¥å¡¼¥ëËì¤Ø¤Î»²¾È¤òÊİ»ı¤·¤Æ¤¤¤ë¤Î¤Ç¡¢GC¤µ¤ì¤Ê¤¤¡£
+				//memNameTable ãŒãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«è†œã¸ã®å‚ç…§ã‚’ä¿æŒã—ã¦ã„ã‚‹ã®ã§ã€GCã•ã‚Œãªã„ã€‚
 				m.rulesets.add(rs);
 				sb.append(" [ OK ] ");
 				Env.d(sb.toString());
@@ -99,7 +99,7 @@ public class Module {
 	}
 	
 	/**
-	 * »ØÄê¤·¤¿Ëì¤Ë¤Ä¤¤¤Æ¡¢Ì¤ÄêµÁ¥â¥¸¥å¡¼¥ë¤ò²ò·è¤¹¤ë¡£
+	 * æŒ‡å®šã—ãŸè†œã«ã¤ã„ã¦ã€æœªå®šç¾©ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’è§£æ±ºã™ã‚‹ã€‚
 	 * @param m
 	 */
 	public static void resolveModules(Membrane m) {
@@ -111,9 +111,9 @@ public class Module {
 	}
 	
 	/**
-	 * »ØÄê¤·¤¿Ëì¤Ë¤Ä¤¤¤Æ¡¢Ì¤²ò·è¥â¥¸¥å¡¼¥ë°ìÍ÷¤ò¤Ä¤¯¤ë¡£
+	 * æŒ‡å®šã—ãŸè†œã«ã¤ã„ã¦ã€æœªè§£æ±ºãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ä¸€è¦§ã‚’ã¤ãã‚‹ã€‚
 	 * @param m
-	 * @param need ½ĞÎÏ°ú¿ô¡£¥â¥¸¥å¡¼¥ë°ìÍ÷¤¬Æş¤ë¡£
+	 * @param need å‡ºåŠ›å¼•æ•°ã€‚ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ä¸€è¦§ãŒå…¥ã‚‹ã€‚
 	 */
 	static void getNeedModules(Membrane m, List<String> need) {
 		Iterator<Atom> i_a = m.atoms.listIterator();
@@ -138,7 +138,7 @@ public class Module {
 		}
 	}
 	
-	/** ¥â¥¸¥å¡¼¥ë¤¬»ı¤Ä¥ë¡¼¥ë¥»¥Ã¥È°ìÍ÷¤ò½ĞÎÏ¤¹¤ë¡£*/
+	/** ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ãŒæŒã¤ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆä¸€è¦§ã‚’å‡ºåŠ›ã™ã‚‹ã€‚*/
 	public static void showModuleList() {
 		if (memNameTable.size() == 0) return;
 		

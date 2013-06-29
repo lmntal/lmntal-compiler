@@ -4,17 +4,17 @@ import runtime.functor.Functor;
 import util.QueuedEntity;
 
 /**
- * ¥¢¥È¥à¥¯¥é¥¹¡£¥í¡¼¥«¥ë¡¦¥ê¥â¡¼¥È¤Ë´Ø¤ï¤é¤º¤³¤Î¥¯¥é¥¹¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤ò»ÈÍÑ¤¹¤ë¡£
+ * ã‚¢ãƒˆãƒ ã‚¯ãƒ©ã‚¹ã€‚ãƒ­ãƒ¼ã‚«ãƒ«ãƒ»ãƒªãƒ¢ãƒ¼ãƒˆã«é–¢ã‚ã‚‰ãšã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½¿ç”¨ã™ã‚‹ã€‚
  * @author Mizuno
  */
 public final class Atom extends QueuedEntity
 {
-	/** ½êÂ°Ëì¡£AbstractMembrane¤È¤½¤Î¥µ¥Ö¥¯¥é¥¹¤¬ÊÑ¹¹¤·¤Æ¤è¤¤¡£
-	 * ¤¿¤À¤·ÃÍ¤òÊÑ¹¹¤¹¤ë¤È¤­¤Ïindex¤âÆ±»ş¤Ë¹¹¿·¤¹¤ë¤³¤È¡£(mem,index)==(null, -1)¤Ï½êÂ°Ëì¤Ê¤·¤òÉ½¤¹¡£
+	/** æ‰€å±è†œã€‚AbstractMembraneã¨ãã®ã‚µãƒ–ã‚¯ãƒ©ã‚¹ãŒå¤‰æ›´ã—ã¦ã‚ˆã„ã€‚
+	 * ãŸã ã—å€¤ã‚’å¤‰æ›´ã™ã‚‹ã¨ãã¯indexã‚‚åŒæ™‚ã«æ›´æ–°ã™ã‚‹ã“ã¨ã€‚(mem,index)==(null, -1)ã¯æ‰€å±è†œãªã—ã‚’è¡¨ã™ã€‚
 	 */
 	Membrane mem;
 	
-	/** ½êÂ°Ëì¤ÎAtomSetÆâ¤Ç¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹ */
+	/** æ‰€å±è†œã®AtomSetå†…ã§ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ */
 	public int index = -1;
 
 	public int getid()
@@ -22,21 +22,21 @@ public final class Atom extends QueuedEntity
 		return id;
 	}
 
-	/** ¥Õ¥¡¥ó¥¯¥¿¡ÊÌ¾Á°¤È¥ê¥ó¥¯¿ô¡Ë */
+	/** ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ï¼ˆåå‰ã¨ãƒªãƒ³ã‚¯æ•°ï¼‰ */
 	private Functor functor;
 	
-	/** ¥ê¥ó¥¯ */
+	/** ãƒªãƒ³ã‚¯ */
 	Link[] args;
 	
 	private static int lastId = 0;
 	
-	/** ¤³¤Î¥¢¥È¥à¤Î¥í¡¼¥«¥ëID */
+	/** ã“ã®ã‚¢ãƒˆãƒ ã®ãƒ­ãƒ¼ã‚«ãƒ«ID */
 	int id;
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤È¥ê¥ó¥¯¿ô¤ò»ı¤Ä¥¢¥È¥à¤òºîÀ®¤¹¤ë¡£
-	 * AbstractMembrane¤ÎnewAtom¥á¥½¥Ã¥ÉÆâ¤Ç¸Æ¤Ğ¤ì¤ë¡£
-	 * @param mem ½êÂ°Ëì
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ã¨ãƒªãƒ³ã‚¯æ•°ã‚’æŒã¤ã‚¢ãƒˆãƒ ã‚’ä½œæˆã™ã‚‹ã€‚
+	 * AbstractMembraneã®newAtomãƒ¡ã‚½ãƒƒãƒ‰å†…ã§å‘¼ã°ã‚Œã‚‹ã€‚
+	 * @param mem æ‰€å±è†œ
 	 */
 	public Atom(Membrane mem, Functor functor)
 	{
@@ -65,14 +65,14 @@ public final class Atom extends QueuedEntity
 		functor = newFunctor;
 	}
 	
-	/** ¥Õ¥¡¥ó¥¯¥¿Ì¾¤òÀßÄê¤¹¤ë¡£ */
+	/** ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿åã‚’è¨­å®šã™ã‚‹ã€‚ */
 	public void setName(String name)
 	{
 		setFunctor(name, getFunctor().getArity());
 	}
 	
-	/** ¥Õ¥¡¥ó¥¯¥¿¤òÀßÄê¤¹¤ë¡£
-	 * AtomSet¤ò¹¹¿·¤¹¤ë¤¿¤á¡¢Ëì¤ÎalterAtomFunctor¥á¥½¥Ã¥É¤ò¸Æ¤Ö¡£*/
+	/** ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’è¨­å®šã™ã‚‹ã€‚
+	 * AtomSetã‚’æ›´æ–°ã™ã‚‹ãŸã‚ã€è†œã®alterAtomFunctorãƒ¡ã‚½ãƒƒãƒ‰ã‚’å‘¼ã¶ã€‚*/
 	public void setFunctor(String name, int arity)
 	{
 		//mem.alterAtomFunctor(this, new SymbolFunctor(name, arity));
@@ -82,60 +82,60 @@ public final class Atom extends QueuedEntity
 		return functor.getName();
 	}
 	/**
-	 * ¥Ç¥Õ¥©¥ë¥È¤Î¼ÂÁõ¤À¤È½èÍı·Ï¤ÎÆâÉô¾õÂÖ¤¬ÊÑ¤ï¤ë¤ÈÊÑ¤ï¤Ã¤Æ¤·¤Ş¤¦¤Î¤Ç¡¢
-	 * ¥¤¥ó¥¹¥¿¥ó¥¹¤´¤È¤Ë¥æ¥Ë¡¼¥¯¤Êid¤òÍÑ°Õ¤·¤Æ¥Ï¥Ã¥·¥å¥³¡¼¥É¤È¤·¤ÆÍøÍÑ¤¹¤ë¡£
+	 * ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å®Ÿè£…ã ã¨å‡¦ç†ç³»ã®å†…éƒ¨çŠ¶æ…‹ãŒå¤‰ã‚ã‚‹ã¨å¤‰ã‚ã£ã¦ã—ã¾ã†ã®ã§ã€
+	 * ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã”ã¨ã«ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªidã‚’ç”¨æ„ã—ã¦ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã¨ã—ã¦åˆ©ç”¨ã™ã‚‹ã€‚
 	 */
 	public int hashCode() {
 		return id;
 	}
-	/** ¤³¤Î¥¢¥È¥à¤Î¥í¡¼¥«¥ëID¤ò¼èÆÀ¤¹¤ë */
+	/** ã“ã®ã‚¢ãƒˆãƒ ã®ãƒ­ãƒ¼ã‚«ãƒ«IDã‚’å–å¾—ã™ã‚‹ */
 	String getLocalID() {
 		return Integer.toString(id);
 	}
 
-	/** ½êÂ°Ëì¤Î¼èÆÀ */
+	/** æ‰€å±è†œã®å–å¾— */
 	public Membrane getMem() {
 		return mem;
 	}
 
-	/** ¥Õ¥¡¥ó¥¯¥¿¤ò¼èÆÀ */
+	/** ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’å–å¾— */
 	public Functor getFunctor() {
 		return functor;
 	}
 
-	/** Ì¾Á°¤ò¼èÆÀ */
+	/** åå‰ã‚’å–å¾— */
 	public String getName() {
 		return functor.getName();
 	}
 
-	/** ¥ê¥ó¥¯¿ô¤ò¼èÆÀ */
+	/** ãƒªãƒ³ã‚¯æ•°ã‚’å–å¾— */
 	public int getArity() {
 		return functor.getArity();
 	}
 
-	/** ºÇ½ª°ú¿ô¤ò¼èÆÀ */
+	/** æœ€çµ‚å¼•æ•°ã‚’å–å¾— */
 	public Link getLastArg() {
 		return args[getArity() - 1];
 	}
 
-	/** Âèpos°ú¿ô¤Ë³ÊÇ¼¤µ¤ì¤¿¥ê¥ó¥¯¥ª¥Ö¥¸¥§¥¯¥È¤ò¼èÆÀ */
+	/** ç¬¬poså¼•æ•°ã«æ ¼ç´ã•ã‚ŒãŸãƒªãƒ³ã‚¯ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾— */
 	public Link getArg(int pos) {
 		return args[pos];
 	}
 
-	/** Âè n °ú¿ô¤Ë¤Ä¤Ê¤¬¤Ã¤Æ¤ë¥¢¥È¥à¤ÎÌ¾Á°¤ò¼èÆÀ¤¹¤ë */
+	/** ç¬¬ n å¼•æ•°ã«ã¤ãªãŒã£ã¦ã‚‹ã‚¢ãƒˆãƒ ã®åå‰ã‚’å–å¾—ã™ã‚‹ */
 	public String nth(int n) {
 		return nthAtom(n).getFunctor().getName();
 	}
 
-	/** Âè n °ú¿ô¤Ë¤Ä¤Ê¤¬¤Ã¤Æ¤ë¥¢¥È¥à¤ò¼èÆÀ¤¹¤ë */
+	/** ç¬¬ n å¼•æ•°ã«ã¤ãªãŒã£ã¦ã‚‹ã‚¢ãƒˆãƒ ã‚’å–å¾—ã™ã‚‹ */
 	public Atom nthAtom(int n) {
 		
 		return args[n].getAtom();
 	}
 
 	/**
-	 * ¥×¥í¥­¥·¤òÈô¤Ğ¤·¤¿¼Âºİ¤ÎÎÙ¤Î¥¢¥È¥à¤ò¼èÆÀ¤¹¤ë
+	 * ãƒ—ãƒ­ã‚­ã‚·ã‚’é£›ã°ã—ãŸå®Ÿéš›ã®éš£ã®ã‚¢ãƒˆãƒ ã‚’å–å¾—ã™ã‚‹
 	 * @param index
 	 * @return
 	 */

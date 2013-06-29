@@ -20,7 +20,7 @@ import type.quantity.NumCount;
 import type.quantity.QuantityInferer;
 
 /**
- * ·¿²òÀÏ¡¦¿äÏÀ·ë²Ì¤ò½ĞÎÏ¤¹¤ë
+ * å‹è§£æãƒ»æ¨è«–çµæœã‚’å‡ºåŠ›ã™ã‚‹
  * 
  * @author kudo
  * 
@@ -29,10 +29,10 @@ class TypePrinter {
 
 	private final Map<String, Map<Functor, TypeVarConstraint[]>> memnameToFunctorTypes;
 	private final TreeSet<String> sortedMemNames;
-	/** Ç°¤Î¤¿¤á¡¢¥Õ¥¡¥ó¥¯¥¿¤òÌ¾Á°½ç->°ú¿ô¿ô½ç¤Ç¥½¡¼¥È¤·¤Æ´ÉÍı¤¹¤ë(°ÕÌ£¤Ê¤¤¤«¤â) */
+	/** å¿µã®ãŸã‚ã€ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’åå‰é †->å¼•æ•°æ•°é †ã§ã‚½ãƒ¼ãƒˆã—ã¦ç®¡ç†ã™ã‚‹(æ„å‘³ãªã„ã‹ã‚‚) */
 	private final TreeSet<Functor> sortedFunctors;
 
-	/** ËìÌ¾ -> ¥¢¥È¥à¡¿»ÒËì¤Î»Ò¿ô¤Î¥»¥Ã¥È */
+	/** è†œå -> ã‚¢ãƒˆãƒ ï¼å­è†œã®å­æ•°ã®ã‚»ãƒƒãƒˆ */
 	private final Map<String, FixedCounts> memnameToCounts;
 	
 	private ConnectInferer ci;
@@ -45,12 +45,12 @@ class TypePrinter {
 		memnameToFunctorTypes = new HashMap<String, Map<Functor, TypeVarConstraint[]>>();
 		if (ai != null) {
 
-			// ¤Ş¤º°ú¿ô¤Î·¿¾ğÊó¤ò½¸Ìó¤¹¤ë
+			// ã¾ãšå¼•æ•°ã®å‹æƒ…å ±ã‚’é›†ç´„ã™ã‚‹
 			ConstraintSet cs = ai.getConstraints();
 			Set<TypeVarConstraint> tvcs = cs.getTypeVarConstraints();
 			for (TypeVarConstraint tvc : tvcs) {
 				Path p = tvc.getPath();
-				// TODO TracingPath¤Ë¤Ä¤¤¤Æ¤Ï¤È¤ê¤¢¤¨¤ºÌµ»ë
+				// TODO TracingPathã«ã¤ã„ã¦ã¯ã¨ã‚Šã‚ãˆãšç„¡è¦–
 				if (!(p instanceof ActiveAtomPath))
 					continue;
 				ActiveAtomPath aap = (ActiveAtomPath) p;
@@ -73,7 +73,7 @@ class TypePrinter {
 
 		if (qi != null) {
 
-			// ¼¡¤Ë¸Ä¿ô¾ğÊó¤òÆÀ¡¢¥Õ¥¡¥ó¥¯¥¿Ì¾¤ò½¸Ìó¤¹¤ë
+			// æ¬¡ã«å€‹æ•°æƒ…å ±ã‚’å¾—ã€ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿åã‚’é›†ç´„ã™ã‚‹
 			memnameToCounts = qi.getMemNameToFixedCountsSet();
 			for (String memname : memnameToCounts.keySet()) {
 				sortedMemNames.add(memname);
@@ -91,8 +91,8 @@ class TypePrinter {
 		}
 	}
 	/**
-	 * LMNtal syntax ¤Ç¤Î·¿¾ğÊó¤ÎÉ½¼¨
-	 * printAll ¥á¥½¥Ã¥É¤ò½¤Àµ¤·¤¿¤â¤Î
+	 * LMNtal syntax ã§ã®å‹æƒ…å ±ã®è¡¨ç¤º
+	 * printAll ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä¿®æ­£ã—ãŸã‚‚ã®
 	 */
 	void printAllLMNSyntax() {
 		Env.p("typeInformation{ ");
@@ -103,9 +103,9 @@ class TypePrinter {
 			FixedCounts fcs = memnameToCounts.get(memname);
 			String memNameLMN = memname.equals("??") ? "" : memname;
 			Env.p(" " + memNameLMN + "{");
-			// ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î¾ğÊó¤ò½ĞÎÏ
+			// ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®æƒ…å ±ã‚’å‡ºåŠ›
 			for (Functor f: sortedFunctors){
-				// ¥Ç¡¼¥¿¥¢¥È¥à¡¢¥³¥Í¥¯¥¿¤ÏÌµ»ë¤¹¤ë
+				// ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã€ã‚³ãƒã‚¯ã‚¿ã¯ç„¡è¦–ã™ã‚‹
 				if (TypeEnv.outOfPassiveFunctor(f) != TypeEnv.ACTIVE) continue;
 				
 				Map<Functor, TypeVarConstraint[]> functorToArgumentTypes = memnameToFunctorTypes.get(memname);
@@ -134,7 +134,7 @@ class TypePrinter {
 
 					if (functorToArgumentTypes != null
 							&& functorToArgumentTypes.containsKey(f)) {
-						// °ú¿ô¤Î·¿¤òÉ½¼¨
+						// å¼•æ•°ã®å‹ã‚’è¡¨ç¤º
 						TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
 						for (int i = 0; i < argtypes.length; i++) {
 							if (i != 0) texp.append(", ");
@@ -164,7 +164,7 @@ class TypePrinter {
 				// }
 			}
 
-			// »ÒËì¤Î¾ğÊó¤ò½ĞÎÏ
+			// å­è†œã®æƒ…å ±ã‚’å‡ºåŠ›
 			if (fcs != null) {
 				for (String childname : sortedMemNames) {
 					if (fcs.memnameToCount.containsKey(childname)) {
@@ -183,9 +183,9 @@ class TypePrinter {
 	}
 
 	/**
-	 * ·¿¾ğÊó¤ÎÉ½¼¨
-	 * ¸µ¡¹¤³¤Á¤é¤¬»È¤ï¤ì¤Æ¤¤¤¿¤¬¾å¤Î¥á¥½¥Ã¥É¤ò»È¤¦¤è¤¦¤Ë½¤Àµ
-	 * ¸½ºß¤Ï¤É¤³¤«¤é¤â»È¤ï¤ì¤Æ¤¤¤Ê¤¤¤¬»Ä¤·¤Æ¤ª¤¯
+	 * å‹æƒ…å ±ã®è¡¨ç¤º
+	 * å…ƒã€…ã“ã¡ã‚‰ãŒä½¿ã‚ã‚Œã¦ã„ãŸãŒä¸Šã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ã†ã‚ˆã†ã«ä¿®æ­£
+	 * ç¾åœ¨ã¯ã©ã“ã‹ã‚‰ã‚‚ä½¿ã‚ã‚Œã¦ã„ãªã„ãŒæ®‹ã—ã¦ãŠã
 	 */
 	void printAll() {
 		Env.p("Type Information : ");
@@ -193,10 +193,10 @@ class TypePrinter {
 			FixedCounts fcs = memnameToCounts.get(memname);
 			// if(fcs==null)continue;
 			Env.p(memname + "{");
-			// ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î¾ğÊó¤ò½ĞÎÏ
+			// ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®æƒ…å ±ã‚’å‡ºåŠ›
 			for (Functor f : sortedFunctors) {
 
-				// ¥Ç¡¼¥¿¥¢¥È¥à¡¢¥³¥Í¥¯¥¿¤ÏÌµ»ë¤¹¤ë
+				// ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã€ã‚³ãƒã‚¯ã‚¿ã¯ç„¡è¦–ã™ã‚‹
 				if (TypeEnv.outOfPassiveFunctor(f) != TypeEnv.ACTIVE) continue;
 
 				Map<Functor, TypeVarConstraint[]> functorToArgumentTypes = memnameToFunctorTypes.get(memname);
@@ -221,7 +221,7 @@ class TypePrinter {
 
 					if (functorToArgumentTypes != null
 							&& functorToArgumentTypes.containsKey(f)) {
-						// °ú¿ô¤Î·¿¤òÉ½¼¨
+						// å¼•æ•°ã®å‹ã‚’è¡¨ç¤º
 						TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
 						for (int i = 0; i < argtypes.length; i++) {
 							if (i != 0) texp.append(", ");
@@ -250,7 +250,7 @@ class TypePrinter {
 				// }
 			}
 
-			// »ÒËì¤Î¾ğÊó¤ò½ĞÎÏ
+			// å­è†œã®æƒ…å ±ã‚’å‡ºåŠ›
 			if (fcs != null) {
 				for (String childname : sortedMemNames) {
 					if (fcs.memnameToCount.containsKey(childname)) {
@@ -266,7 +266,7 @@ class TypePrinter {
 	}
 
 	/**
-	 * ¥Õ¥¡¥ó¥¯¥¿¤òÌ¾Á°½ç(¼­½ñ¼°)->°ú¿ô¿ô½ç¤Ç¥½¡¼¥È¤¹¤ë
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’åå‰é †(è¾æ›¸å¼)->å¼•æ•°æ•°é †ã§ã‚½ãƒ¼ãƒˆã™ã‚‹
 	 */
 	class FunctorComparator implements Comparator<Functor> {
 		public int compare(Functor f1, Functor f2) {

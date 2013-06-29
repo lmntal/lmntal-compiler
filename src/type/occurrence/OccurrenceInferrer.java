@@ -22,7 +22,7 @@ public class OccurrenceInferrer {
 	private Map<String, Set<MembraneOccurrence>> membraneOccurrenceConstraintsMap = new HashMap<String, Set<MembraneOccurrence>>();
 
 	/**
-	 * ¥ë¡¼¥ÈËì¤ò»ØÄê¤·¡¢½Ğ¸½À©Ìó¤ò¿äÏÀ
+	 * ãƒ«ãƒ¼ãƒˆè†œã‚’æŒ‡å®šã—ã€å‡ºç¾åˆ¶ç´„ã‚’æ¨è«–
 	 * @param root
 	 */
 	public OccurrenceInferrer(Membrane root){
@@ -55,27 +55,27 @@ public class OccurrenceInferrer {
 		
 	}
 	
-	/** ½Ğ¸½À©Ìó¤ò¿äÏÀ¤¹¤ë */
+	/** å‡ºç¾åˆ¶ç´„ã‚’æ¨è«–ã™ã‚‹ */
 	public void inferOccurrenceMembrane(Membrane mem){
-		/** ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Ë¤Ä¤¤¤Æ½Ğ¸½À©Ìó¤ò²İ¤¹ */
+		/** ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã«ã¤ã„ã¦å‡ºç¾åˆ¶ç´„ã‚’èª²ã™ */
 		Iterator<Atom> ita = mem.atoms.iterator();
 		while(ita.hasNext()){
 			Atom atom = ita.next();
 			if(TypeEnv.outOfPassiveAtom(atom) == TypeEnv.ACTIVE)
 				addAtomOccurrence(new AtomOccurrence(TypeEnv.getMemName(mem),atom.functor));
 		}
-		/** »ÒËì¤Ë¤Ä¤¤¤Æ½Ğ¸½À©Ìó¤ò²İ¤·¡¢Áöºº */
+		/** å­è†œã«ã¤ã„ã¦å‡ºç¾åˆ¶ç´„ã‚’èª²ã—ã€èµ°æŸ» */
 		Iterator<Membrane> itm = mem.mems.iterator();
 		while(itm.hasNext()){
 			Membrane child = itm.next();
 			addMembraneOccurrence(new MembraneOccurrence(TypeEnv.getMemName(mem),TypeEnv.getMemName(child)));
 			inferOccurrenceMembrane(child);
 		}
-		/** ¥ë¡¼¥ë¤Îº¸ÊÕ¡¿±¦ÊÕ¤òÁöºº */
+		/** ãƒ«ãƒ¼ãƒ«ã®å·¦è¾ºï¼å³è¾ºã‚’èµ°æŸ» */
 		Iterator<RuleStructure> itr = mem.rules.iterator();
 		while(itr.hasNext()){
 			RuleStructure rule = itr.next();
-			// TODO º¸ÊÕ¤òÁöºº¤¹¤ëÉ¬Í×¤¬¤¢¤ë¤«¤É¤¦¤«¤ÏÈùÌ¯
+			// TODO å·¦è¾ºã‚’èµ°æŸ»ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ã‹ã©ã†ã‹ã¯å¾®å¦™
 			inferOccurrenceMembrane(rule.leftMem);
 			inferOccurrenceMembrane(rule.rightMem);
 		}

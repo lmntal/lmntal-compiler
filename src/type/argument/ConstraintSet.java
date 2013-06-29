@@ -174,7 +174,7 @@ public class ConstraintSet /* implements Set */{
 		return typeVarConstraints;
 	}
 	
-	/** À©Ìó¤ò½ĞÎÏ¤¹¤ë */
+	/** åˆ¶ç´„ã‚’å‡ºåŠ›ã™ã‚‹ */
 	public void printAllConstraints() {
 		if (!Env.flgShowConstraints)
 			return;

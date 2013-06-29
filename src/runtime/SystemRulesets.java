@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤ò´ÉÍı¤¹¤ë static ¥¯¥é¥¹
+ * ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’ç®¡ç†ã™ã‚‹ static ã‚¯ãƒ©ã‚¹
  * @author Mizuno
  */
 public final class SystemRulesets {
@@ -13,31 +13,31 @@ public final class SystemRulesets {
 	static {
 		clear();
 	}
-	/** ½é´ü²½¡£ÅĞÏ¿¤µ¤ì¤¿¥æ¡¼¥¶¡¼ÄêµÁ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤ò½üµî¤¹¤ë¡£ */
+	/** åˆæœŸåŒ–ã€‚ç™»éŒ²ã•ã‚ŒãŸãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’é™¤å»ã™ã‚‹ã€‚ */
 	public static void clear() {
 		all.clear();
 		userDefined.clear();
 		//all.add(GlobalSystemRuleset.getInstance());
 	}
 	/**
-	 * ¥æ¡¼¥¶¡¼ÄêµÁ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤òÅĞÏ¿¤¹¤ë¡£
-	 * @param rs ÅĞÏ¿¤¹¤ë¥ë¡¼¥ë¥»¥Ã¥È
+	 * ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’ç™»éŒ²ã™ã‚‹ã€‚
+	 * @param rs ç™»éŒ²ã™ã‚‹ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆ
 	 */
 	public static void addUserDefinedSystemRuleset(Ruleset rs) {
 		userDefined.add(rs);
 		all.add(rs);
 	}
 	/**
-	 * ¥æ¡¼¥¶¡¼ÄêµÁ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Î¥¤¥Æ¥ì¡¼¥¿¤ò¼èÆÀ¤¹¤ë
-	 * @return ¥æ¡¼¥¶¡¼ÄêµÁ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Î¥¤¥Æ¥ì¡¼¥¿
+	 * ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ã‚¤ãƒ†ãƒ¬ãƒ¼ã‚¿ã‚’å–å¾—ã™ã‚‹
+	 * @return ãƒ¦ãƒ¼ã‚¶ãƒ¼å®šç¾©ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ã‚¤ãƒ†ãƒ¬ãƒ¼ã‚¿
 	 */
 	public static Iterator<Ruleset> userDefinedSystemRulesetIterator() {
 		return userDefined.iterator();
 	}
 	
 	/**
-	 * ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Î¥¤¥Æ¥ì¡¼¥¿¤ò¼èÆÀ¤¹¤ë
-	 * @return ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Î¥¤¥Æ¥ì¡¼¥¿
+	 * ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ã‚¤ãƒ†ãƒ¬ãƒ¼ã‚¿ã‚’å–å¾—ã™ã‚‹
+	 * @return ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ã‚¤ãƒ†ãƒ¬ãƒ¼ã‚¿
 	 */
 	public static Iterator<Ruleset> iterator() {
 		return all.iterator();

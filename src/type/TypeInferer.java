@@ -25,31 +25,31 @@ public class TypeInferer {
 	 * @param root
 	 */
 	public TypeInferer(Membrane root) {
-		// À¤³¦Åª¥ë¡¼¥ÈËì¤Ë¤Ïroot¤È¤¤¤¦Ì¾Á°¤ò¤Ä¤±¤ë
+		// ä¸–ç•Œçš„ãƒ«ãƒ¼ãƒˆè†œã«ã¯rootã¨ã„ã†åå‰ã‚’ã¤ã‘ã‚‹
 		root.name = "root";
 		this.root = root;
 	}
 
 	public void infer() throws TypeException {
-		// ½é´ü²½½èÍı(º¸ÊÕ½Ğ¸½¤ò¼ı½¸¤·¤¿¤ê)
+		// åˆæœŸåŒ–å‡¦ç†(å·¦è¾ºå‡ºç¾ã‚’åé›†ã—ãŸã‚Š)
 		TypeEnv.initialize(root);
 		
-		// ¥æ¡¼¥¶ÄêµÁ¾ğÊó¤ò¼èÆÀ¤¹¤ë
+		// ãƒ¦ãƒ¼ã‚¶å®šç¾©æƒ…å ±ã‚’å–å¾—ã™ã‚‹
 		boolean typeDefined = false;
 		List<Membrane> typedefmems = new ArrayList<Membrane>();
 		for(Membrane topmem : root.mems)
 			if(TypeEnv.getMemName(topmem).equals("typedef")){
 				typedefmems.add(topmem);
-				break; // TODO ·¿ÄêµÁËì¤¬2¤Ä¤¢¤Ã¤¿¤é¤É¤¦¤¹¤ë => ¥Ş¡¼¥¸
+				break; // TODO å‹å®šç¾©è†œãŒ2ã¤ã‚ã£ãŸã‚‰ã©ã†ã™ã‚‹ => ãƒãƒ¼ã‚¸
 			}
 		
 		TypeChecker tc = new TypeChecker();
 		if(typedefmems.size() > 0){
 			typeDefined = tc.parseTypeDefinition(typedefmems);
-			root.mems.removeAll(typedefmems); // ·¿ÄêµÁËì¤Ï¸¡ºº¡¢¥³¥ó¥Ñ¥¤¥ë¤«¤é³°¤¹
+			root.mems.removeAll(typedefmems); // å‹å®šç¾©è†œã¯æ¤œæŸ»ã€ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‹ã‚‰å¤–ã™
 		}
 		
-		// ½Ğ¸½À©Ìó¤ò¿äÏÀ¤¹¤ë
+		// å‡ºç¾åˆ¶ç´„ã‚’æ¨è«–ã™ã‚‹
 //		if(Env.flgOccurrenceInference){
 //			OccurrenceInferrer oi = new OccurrenceInferrer(root);
 //			oi.infer();
@@ -63,7 +63,7 @@ public class TypeInferer {
 		}
 
 		QuantityInferer qi = new QuantityInferer(root);
-		// ¸Ä¿ôÀ©Ìó¤ò¿äÏÀ¤¹¤ë
+		// å€‹æ•°åˆ¶ç´„ã‚’æ¨è«–ã™ã‚‹
 		if(Env.flgQuantityInference){
 			qi.infer();
 //			if(Env.flgShowConstraints)
@@ -71,24 +71,24 @@ public class TypeInferer {
 		}
 
 		ArgumentInferer ai = new ArgumentInferer(root);
-		// °ú¿ôÀ©Ìó¤ò¿äÏÀ¤¹¤ë
+		// å¼•æ•°åˆ¶ç´„ã‚’æ¨è«–ã™ã‚‹
 		if(Env.flgArgumentInference){
 			ai.infer();
 			if(false)
 				ai.printAll();
 		}
 		
-		// ·¿ÄêµÁ¤¬Í¿¤¨¤é¤ì¤Æ¤¤¤¿¤éÀ°¹çÀ­¤ò¥Á¥§¥Ã¥¯¤¹¤ë
+		// å‹å®šç¾©ãŒä¸ãˆã‚‰ã‚Œã¦ã„ãŸã‚‰æ•´åˆæ€§ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 		if(typeDefined){
 			tc.check(ai, qi);
 		}
 
-		//¿äÏÀ·ë²Ì¤ò½ĞÎÏ¤¹¤ë
+		//æ¨è«–çµæœã‚’å‡ºåŠ›ã™ã‚‹
 		if(Env.flgShowConstraints){
 			TypePrinter tp;
 //			if(Env.flgArgumentInference && Env.flgQuantityInference){
 				tp = new TypePrinter(ai, qi, ci);
-				// printAll ¤¬»È¤ï¤ì¤Æ¤¤¤¿¤¬ LMNtal Syntax ¤ÇÉ½¼¨¤¹¤ë printAllLMNSyntax ¥á¥½¥Ã¥É¤ËÀÚ¤êÂØ¤¨
+				// printAll ãŒä½¿ã‚ã‚Œã¦ã„ãŸãŒ LMNtal Syntax ã§è¡¨ç¤ºã™ã‚‹ printAllLMNSyntax ãƒ¡ã‚½ãƒƒãƒ‰ã«åˆ‡ã‚Šæ›¿ãˆ
 				//tp.printAll();
 				tp.printAllLMNSyntax();
 //			}

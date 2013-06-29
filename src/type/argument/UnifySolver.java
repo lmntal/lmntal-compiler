@@ -16,12 +16,12 @@ import type.TypeException;
  */
 public class UnifySolver {
 	/**
-	 * ¥Ñ¥¹¤«¤é·¿ÊÑ¿ô¤Ø¤Î¥Ş¥Ã¥×
+	 * ãƒ‘ã‚¹ã‹ã‚‰å‹å¤‰æ•°ã¸ã®ãƒãƒƒãƒ—
 	 */
 	private final Map<Path,TypeVar> pathToTV;
 
 	/**
-	 * ¥â¡¼¥ÉÊÑ¿ô¤Î´ÉÍı
+	 * ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ã®ç®¡ç†
 	 */
 	private final ModeVarSet modeVarSet;
 
@@ -44,7 +44,7 @@ public class UnifySolver {
 	}
 	
 	/**
-	 * ¥Ñ¥¹¤Î·¿ÊÑ¿ô¤òÊÖ¤¹¡£Ìµ¤±¤ì¤Ğ¿¶¤ë¡£
+	 * ãƒ‘ã‚¹ã®å‹å¤‰æ•°ã‚’è¿”ã™ã€‚ç„¡ã‘ã‚Œã°æŒ¯ã‚‹ã€‚
 	 * @param p
 	 * @return
 	 */
@@ -55,10 +55,10 @@ public class UnifySolver {
 	}
 	
 	/**
-	 * ReceiveConstraint ¤Î¾ğÊó¤«¤é¡¢·¿ÊÑ¿ô¡¢¥â¡¼¥ÉÊÑ¿ô¤ÎÃÍ¤ò·è¤á¤Æ¤¤¤¯¡£
-	 * TODO ·¿ÊÑ¿ô¤ÎÂ«Çû¤Ë¤Ä¤¤¤Æ¤Ï¡¢¥Ç¡¼¥¿·¿¤ò°Õ¼±¤·¤¿¤â¤Î¤Ë¤¹¤ë
+	 * ReceiveConstraint ã®æƒ…å ±ã‹ã‚‰ã€å‹å¤‰æ•°ã€ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ã®å€¤ã‚’æ±ºã‚ã¦ã„ãã€‚
+	 * TODO å‹å¤‰æ•°ã®æŸç¸›ã«ã¤ã„ã¦ã¯ã€ãƒ‡ãƒ¼ã‚¿å‹ã‚’æ„è­˜ã—ãŸã‚‚ã®ã«ã™ã‚‹
 	 * @param receiveConstraintsSet
-	 * @throws TypeException ¥â¡¼¥ÉÊÑ¿ô¤ÎÂ«Çû¤Îºİ¤ËÉÔÀ°¹ç¤¬µ¯¤­¤ë
+	 * @throws TypeException ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ã®æŸç¸›ã®éš›ã«ä¸æ•´åˆãŒèµ·ãã‚‹
 	 */
 	public void solveTypeAndMode(Collection<Set<ReceiveConstraint>> receiveConstraintsSet)throws TypeException{
 		for(Set<ReceiveConstraint> rcs : receiveConstraintsSet){

@@ -15,7 +15,7 @@
 	<property name="jpp" location="${lib}/jpplib-0.6.jar"/>
 
 	<!-- properties -->
-	<property name="encoding" value="euc-jp"/>
+	<property name="encoding" value="UTF-8"/>
 
 	<!-- flex compile -->
 	<target name="flex_lmntal">

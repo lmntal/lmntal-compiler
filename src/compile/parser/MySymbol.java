@@ -3,7 +3,7 @@ package compile.parser;
 import java_cup.runtime.Symbol;
 
 public class MySymbol extends Symbol {
-	/** ¥È¡¼¥¯¥ó¤Î¡¢¥½¡¼¥¹Ãæ¤ÎÉ½¸½ */
+	/** ãƒˆãƒ¼ã‚¯ãƒ³ã®ã€ã‚½ãƒ¼ã‚¹ä¸­ã®è¡¨ç¾ */
 	public String token;
 	public MySymbol(String token, int id, int line, int column, Object o) {
 		super(id, line, column, o);

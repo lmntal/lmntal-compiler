@@ -14,7 +14,7 @@ import runtime.functor.SymbolFunctor;
 
 /**
  * @author mizuno
- * ÈÆÍÑ¥æ¡¼¥Æ¥£¥ê¥Æ¥£¥á¥½¥Ã¥É¡¦Äê¿ô¤ò½¸¤á¤¿¥¯¥é¥¹
+ * æ±ç”¨ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£ãƒ¡ã‚½ãƒƒãƒ‰ãƒ»å®šæ•°ã‚’é›†ã‚ãŸã‚¯ãƒ©ã‚¹
  */
 abstract public class Util
 {
@@ -47,7 +47,7 @@ abstract public class Util
 	}
 	
 	/**
-	 * LMNtal ¥ê¥¹¥È¤ò¤¦¤±¤È¤ê¡¢ObjectÇÛÎó¤Ë¤·¤ÆÊÖ¤¹¡£¥ê¥¹¥È¤Ï¾Ã¤µ¤Ê¤¤¡£
+	 * LMNtal ãƒªã‚¹ãƒˆã‚’ã†ã‘ã¨ã‚Šã€Objecté…åˆ—ã«ã—ã¦è¿”ã™ã€‚ãƒªã‚¹ãƒˆã¯æ¶ˆã•ãªã„ã€‚
 	 * @param link
 	 * @return
 	 */
@@ -74,7 +74,7 @@ abstract public class Util
 	}
 	
 	/**
-	 * ¥ê¥¹¥È¤«¤É¤¦¤«¤òÊÖ¤¹
+	 * ãƒªã‚¹ãƒˆã‹ã©ã†ã‹ã‚’è¿”ã™
 	 * @param link
 	 * @return
 	 */
@@ -89,7 +89,7 @@ abstract public class Util
 	}
 	
 	/**
-	 * ¥ê¥¹¥ÈÃæ¤ÎºÇÂçÃÍ¤òµá¤á¡¢result ¤Ë IntegerFunctor ¤È¤·¤Æ¥»¥Ã¥È¤¹¤ë
+	 * ãƒªã‚¹ãƒˆä¸­ã®æœ€å¤§å€¤ã‚’æ±‚ã‚ã€result ã« IntegerFunctor ã¨ã—ã¦ã‚»ãƒƒãƒˆã™ã‚‹
 	 * @param link
 	 * @param result
 	 * @return
@@ -120,7 +120,7 @@ abstract public class Util
 	}
 	
 	/**
-	 * ¥ê¥¹¥ÈÃæ¤ÎºÇ¾®ÃÍ¤òµá¤á¡¢result ¤Ë IntegerFunctor ¤È¤·¤Æ¥»¥Ã¥È¤¹¤ë
+	 * ãƒªã‚¹ãƒˆä¸­ã®æœ€å°å€¤ã‚’æ±‚ã‚ã€result ã« IntegerFunctor ã¨ã—ã¦ã‚»ãƒƒãƒˆã™ã‚‹
 	 * @param link
 	 * @param result
 	 * @return
@@ -151,7 +151,7 @@ abstract public class Util
 	}
 	
 	/**
-	 * ¥¢¥È¥àbase ¤¬ link1 ¤Î¥ê¥¹¥ÈÃæ¤Ë´Ş¤Ş¤ì¤ë¤«¤É¤¦¤«¤òÊÖ¤¹ 
+	 * ã‚¢ãƒˆãƒ base ãŒ link1 ã®ãƒªã‚¹ãƒˆä¸­ã«å«ã¾ã‚Œã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™ 
 	 * @param link
 	 * @param result
 	 * @return
@@ -179,11 +179,11 @@ abstract public class Util
 	}
 	
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ê¸»úÎó¤òÉ½¤¹Ê¸»úÎó¥ê¥Æ¥é¥ë¤Î¥Æ¥­¥¹¥ÈÉ½¸½¤ò¼èÆÀ¤¹¤ë¡£
-	 * ÆÃ¼ìÊ¸»ú¤È quoter ¤ò¡¢¥Ğ¥Ã¥¯¥¹¥é¥Ã¥·¥å¤Ç¥¨¥¹¥±¡¼¥×¤¹¤ë¡£
-	 * @param text ÊÑ´¹¤¹¤ëÊ¸»úÎó
-	 * @param quoter ¥¯¥©¡¼¥ÈÊ¸»ú¡£ÉáÄÌ¤Ï " ¤ä ' ¤ò»È¤¦¡£
-	 * @return ÊÑ´¹¸å¤ÎÊ¸»úÎó
+	 * æŒ‡å®šã•ã‚ŒãŸæ–‡å­—åˆ—ã‚’è¡¨ã™æ–‡å­—åˆ—ãƒªãƒ†ãƒ©ãƒ«ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¾ã‚’å–å¾—ã™ã‚‹ã€‚
+	 * ç‰¹æ®Šæ–‡å­—ã¨ quoter ã‚’ã€ãƒãƒƒã‚¯ã‚¹ãƒ©ãƒƒã‚·ãƒ¥ã§ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã™ã‚‹ã€‚
+	 * @param text å¤‰æ›ã™ã‚‹æ–‡å­—åˆ—
+	 * @param quoter ã‚¯ã‚©ãƒ¼ãƒˆæ–‡å­—ã€‚æ™®é€šã¯ " ã‚„ ' ã‚’ä½¿ã†ã€‚
+	 * @return å¤‰æ›å¾Œã®æ–‡å­—åˆ—
 	 */ 
 	public static String quoteString(String text, char quoter) {
 		text = text.replaceAll("\\\\", "\\\\\\\\");

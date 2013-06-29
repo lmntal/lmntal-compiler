@@ -12,21 +12,21 @@ import type.TypeEnv;
 import compile.structure.Membrane;
 
 /**
- * ¥Ş¡¼¥¸¤¹¤ë°Ù¤Î¥ª¥Ö¥¸¥§¥¯¥È
+ * ãƒãƒ¼ã‚¸ã™ã‚‹ç‚ºã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
  * @author kudo
  *
  */
 public class FixedCounts {
 	
-	/** ¥Õ¥¡¥ó¥¯¥¿ -> ÎÌ */
+	/** ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ -> é‡ */
 	public final Map<Functor,IntervalCount> functorToCount;
-	/** ËìÌ¾ -> ÎÌ */
+	/** è†œå -> é‡ */
 	public final Map<String,IntervalCount> memnameToCount;
 	
 	final Membrane mem;
 
 	/**
-	 * ¼õ¤±¼è¤Ã¤¿²òÀÏ·ë²Ì¤ò²ò¤¯(¤³¤ÎÃÊ³¬¤Ç¥ë¡¼¥ëÅ¬ÍÑ²ó¿ôÊÑ¿ô¤¬Â«Çû¤µ¤ì¤Æ¤¤¤ë¤³¤È)
+	 * å—ã‘å–ã£ãŸè§£æçµæœã‚’è§£ã(ã“ã®æ®µéšã§ãƒ«ãƒ¼ãƒ«é©ç”¨å›æ•°å¤‰æ•°ãŒæŸç¸›ã•ã‚Œã¦ã„ã‚‹ã“ã¨)
 	 *
 	 */
 	public FixedCounts(StaticCounts com){
@@ -44,9 +44,9 @@ public class FixedCounts {
 	}
 	
 	/**
-	 * ¥Ş¡¼¥¸¤¹¤ë.
-	 * ¥Ş¡¼¥¸¤È¤Ï[0, 3] , [2, 5] => [0, 5]¤ß¤¿¤¤¤Ê¤³¤È
-	 * TODO ÇÜ¿ô¤Ë¤è¤êÊ¬¤±¤ë
+	 * ãƒãƒ¼ã‚¸ã™ã‚‹.
+	 * ãƒãƒ¼ã‚¸ã¨ã¯[0, 3] , [2, 5] => [0, 5]ã¿ãŸã„ãªã“ã¨
+	 * TODO å€æ•°ã«ã‚ˆã‚Šåˆ†ã‘ã‚‹
 	 * @param com
 	 */
 	public void merge(FixedCounts fcs){
@@ -56,9 +56,9 @@ public class FixedCounts {
 		for(Functor f : mergedFunctors){
 			IntervalCount fc1 = functorToCount.get(f);
 			IntervalCount fc2 = fcs.functorToCount.get(f);
-			if(fc1==null && fc2!=null)// ÊÒÊı¤Ë¤·¤«¤Ê¤¤¾ì¹ç
+			if(fc1==null && fc2!=null)// ç‰‡æ–¹ã«ã—ã‹ãªã„å ´åˆ
 				functorToCount.put(f,fc2.or0());
-			else if(fc1!=null && fc2==null)// ÊÒÊı¤Ë¤·¤«¤Ê¤¤¾ì¹ç
+			else if(fc1!=null && fc2==null)// ç‰‡æ–¹ã«ã—ã‹ãªã„å ´åˆ
 				functorToCount.put(f,fc1.or0());
 			else if(fc1!=null && fc2!=null)
 				functorToCount.put(f, fc1.or(fc2));

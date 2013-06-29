@@ -17,14 +17,14 @@ import compile.structure.ProcessContext;
 import compile.structure.RuleStructure;
 
 /**
- * ¥ë¡¼¥ë¤´¤È¤Ë¡¢¥¢¥È¥à°ú¿ô¤Î·¿¡¿¥â¡¼¥É¤ò¿äÏÀ¤¹¤ë¡£
+ * ãƒ«ãƒ¼ãƒ«ã”ã¨ã«ã€ã‚¢ãƒˆãƒ å¼•æ•°ã®å‹ï¼ãƒ¢ãƒ¼ãƒ‰ã‚’æ¨è«–ã™ã‚‹ã€‚
  * @author kudo
  *
  */
 public class ArgumentInferer {
 	private RuleStructure rule;
 	
-	/** ¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ¤Î½¸¹ç */
+	/** ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾©ã®é›†åˆ */
 	private Set<ContextDef> defs;
 	
 	private ConstraintSet constraints;
@@ -40,7 +40,7 @@ public class ArgumentInferer {
 	}
 
 	/**
-	 * ¥°¥í¡¼¥Ğ¥ë¥ë¡¼¥ÈËì¤ËÂĞ¤·¤Æ¤Î¤ß¸Æ¤Ğ¤ì¤ë
+	 * ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ«ãƒ¼ãƒˆè†œã«å¯¾ã—ã¦ã®ã¿å‘¼ã°ã‚Œã‚‹
 	 * @param top
 	 */
 	public ArgumentInferer(Membrane top){//, ConstraintSet constraints){
@@ -62,11 +62,11 @@ public class ArgumentInferer {
 	public void infer() throws TypeException{
 		defs = new HashSet<ContextDef>();
 
-		// TODO Active Head Condition ¤ò¥Á¥§¥Ã¥¯¤¹¤ë
-		// Á´¤Æ¤Î°ú¿ô¤Ë¤Ä¤¤¤Æ¥â¡¼¥ÉÊÑ¿ô¡¢·¿ÊÑ¿ô¤ò¿¶¤ë
+		// TODO Active Head Condition ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
+		// å…¨ã¦ã®å¼•æ•°ã«ã¤ã„ã¦ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ã€å‹å¤‰æ•°ã‚’æŒ¯ã‚‹
 		inferArgumentRule(rule);
 
-		//¥×¥í¥»¥¹Ê¸Ì®¤Ë¤Ä¤¤¤Æ½èÍı¤¹¤ë
+		//ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«ã¤ã„ã¦å‡¦ç†ã™ã‚‹
 		processLinksOfProcessContexts();
 		
 		solvePathes();
@@ -75,7 +75,7 @@ public class ArgumentInferer {
 	}
 	
 	/**
-	 * ¥×¥í¥»¥¹Ê¸Ì®¤Î°ú¿ô¤Ë¤Ä¤¤¤Æ½èÍı¤¹¤ë
+	 * ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®å¼•æ•°ã«ã¤ã„ã¦å‡¦ç†ã™ã‚‹
 	 */
 	private void processLinksOfProcessContexts()throws TypeException{
 		for(ContextDef def : defs)
@@ -92,35 +92,35 @@ public class ArgumentInferer {
 	 */
 	private Set<LinkOccurrence> inferArgumentMembrane(Membrane mem, Set<LinkOccurrence> freelinks) throws TypeException{
 
-		//¥ë¡¼¥ë¤Ë¤Ä¤¤¤ÆÁöºº¤¹¤ë
+		//ãƒ«ãƒ¼ãƒ«ã«ã¤ã„ã¦èµ°æŸ»ã™ã‚‹
 		for(RuleStructure rs : (List<RuleStructure>)mem.rules){
 //			new ArgumentInferer(rs,constraints).infer();
 			inferArgumentRule(rs);
 		}
 
-		// »ÒËì¤Ë¤Ä¤¤¤ÆÁöºº¤¹¤ë
+		// å­è†œã«ã¤ã„ã¦èµ°æŸ»ã™ã‚‹
 		for(Membrane child : (List<Membrane>)mem.mems){
 			freelinks = inferArgumentMembrane(child, freelinks);
 		}
 
-		// ¤³¤Î»şÅÀ¤Ç¡¢»ÒÂ¹Ëì¤Ë½Ğ¸½¤¹¤ëÁ´¤Æ¤Î¥¢¥È¥à¡¿¥×¥í¥»¥¹Ê¸Ì®¤Ë¤Ä¤¤¤Æ¡¢¶É½ê¥ê¥ó¥¯¤Î½èÍı¤Ï½ª¤ï¤Ã¤Æ¤¤¤ë
+		// ã“ã®æ™‚ç‚¹ã§ã€å­å­«è†œã«å‡ºç¾ã™ã‚‹å…¨ã¦ã®ã‚¢ãƒˆãƒ ï¼ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«ã¤ã„ã¦ã€å±€æ‰€ãƒªãƒ³ã‚¯ã®å‡¦ç†ã¯çµ‚ã‚ã£ã¦ã„ã‚‹
 		
 		for(Atom atom : (List<Atom>)mem.atoms){
-			if (TypeEnv.outOfPassiveAtom(atom) != TypeEnv.CONNECTOR) // '='/2¤À¤Ã¤¿¤éÌµ»ë¤¹¤ë
+			if (TypeEnv.outOfPassiveAtom(atom) != TypeEnv.CONNECTOR) // '='/2ã ã£ãŸã‚‰ç„¡è¦–ã™ã‚‹
 				freelinks = inferArgumentAtom(atom, freelinks);
 		}
 
-		// ¤³¤Î»şÅÀ¤Ç¡¢»ÒÂ¹Ëì¤Ë½Ğ¸½¤¹¤ëÁ´¤Æ¤Î¥¢¥È¥à¡¿¥×¥í¥»¥¹Ê¸Ì®¡¢¤ª¤è¤Ó¤³¤ÎËì¤Î¥¢¥È¥à¤Î°ú¿ô¤Î½èÍı¤Ï½ª¤ï¤Ã¤Æ¤¤¤ë
-		// ¤Ä¤Ş¤ê»Ä¤ë¤Ï¤³¤ÎËì¤Ë½Ğ¸½¤¹¤ë¥×¥í¥»¥¹Ê¸Ì®¤È¡¢¤³¤ÎËì¤Î¼«Í³¥ê¥ó¥¯¤Î¤ß
+		// ã“ã®æ™‚ç‚¹ã§ã€å­å­«è†œã«å‡ºç¾ã™ã‚‹å…¨ã¦ã®ã‚¢ãƒˆãƒ ï¼ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€ãŠã‚ˆã³ã“ã®è†œã®ã‚¢ãƒˆãƒ ã®å¼•æ•°ã®å‡¦ç†ã¯çµ‚ã‚ã£ã¦ã„ã‚‹
+		// ã¤ã¾ã‚Šæ®‹ã‚‹ã¯ã“ã®è†œã«å‡ºç¾ã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã¨ã€ã“ã®è†œã®è‡ªç”±ãƒªãƒ³ã‚¯ã®ã¿
 		
-		//Ê¸Ì®ÄêµÁ¤ò½¸¤á¤ë
+		//æ–‡è„ˆå®šç¾©ã‚’é›†ã‚ã‚‹
 		
-		// ¥×¥í¥»¥¹Ê¸Ì®
+		// ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆ
 		for(ProcessContext pc : (List<ProcessContext>)mem.processContexts){
 			ContextDef def = pc.def;
 			if(!defs.contains(def))defs.add(def);
 		}
-		//·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®
+		//å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆ
 		for(ProcessContext tpc : (List<ProcessContext>)mem.typedProcessContexts){
 			ContextDef def = tpc.def;
 			if(TypeEnv.dataTypeOfContextDef(def) == null){
@@ -158,12 +158,12 @@ public class ArgumentInferer {
 	 * @param rule
 	 */
 	private void inferArgumentRule(RuleStructure rule) throws TypeException{
-		// º¸ÊÕ¡¿±¦ÊÕ¤½¤ì¤¾¤ì¤Ë¤Ä¤¤¤Æ·¿¡¿¥â¡¼¥É¤ò²ò·è¤·¡¢1²ó½Ğ¸½¤¹¤ë¥ê¥ó¥¯¤ò½¸¤á¤ë
+		// å·¦è¾ºï¼å³è¾ºãã‚Œãã‚Œã«ã¤ã„ã¦å‹ï¼ãƒ¢ãƒ¼ãƒ‰ã‚’è§£æ±ºã—ã€1å›å‡ºç¾ã™ã‚‹ãƒªãƒ³ã‚¯ã‚’é›†ã‚ã‚‹
 		Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(rule.leftMem, new HashSet<LinkOccurrence>());
 		Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(rule.rightMem, new HashSet<LinkOccurrence>());
 		for(LinkOccurrence leftlink : freelinksLeft){
 			LinkOccurrence rightlink = TypeEnv.getRealBuddy(leftlink);
-			if (!freelinksRight.contains(rightlink)) // ¥ê¥ó¥¯¤¬º¸ÊÕ¡¿±¦ÊÕ½Ğ¸½¤Ç¤Ê¤¤¤Ê¤é
+			if (!freelinksRight.contains(rightlink)) // ãƒªãƒ³ã‚¯ãŒå·¦è¾ºï¼å³è¾ºå‡ºç¾ã§ãªã„ãªã‚‰
 				throw new TypeException("link occurs once in a rule.");
 			if(leftlink.atom instanceof Atom){
 				addConstraintAboutLinks(1, rightlink, leftlink);
@@ -175,9 +175,9 @@ public class ArgumentInferer {
 	}
 
 	/**
-	 * ¥¢¥È¥à¤Î°ú¿ô¤òÁöºº¤·¡¢1²óÌÜ¤Î½Ğ¸½¤Ïfreelinks¤ËÅĞÏ¿¤·¡¢
-	 * 2²óÌÜ¤Î½Ğ¸½¤Ç¤¢¤ì¤Ğ¶É½ê¥ê¥ó¥¯¤È¤·¤ÆÀ©Ìó¤ò²İ¤¹¡£
-	 * ¤¿¤À¤·¥×¥í¥»¥¹Ê¸Ì®¤ËÀÜÂ³¤·¤Æ¤¤¤ë¾ì¹ç¤ÏÌµ»ë¤¹¤ë¡£
+	 * ã‚¢ãƒˆãƒ ã®å¼•æ•°ã‚’èµ°æŸ»ã—ã€1å›ç›®ã®å‡ºç¾ã¯freelinksã«ç™»éŒ²ã—ã€
+	 * 2å›ç›®ã®å‡ºç¾ã§ã‚ã‚Œã°å±€æ‰€ãƒªãƒ³ã‚¯ã¨ã—ã¦åˆ¶ç´„ã‚’èª²ã™ã€‚
+	 * ãŸã ã—ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«æ¥ç¶šã—ã¦ã„ã‚‹å ´åˆã¯ç„¡è¦–ã™ã‚‹ã€‚
 	 * @param atom
 	 * @param freelinks
 	 * @return
@@ -186,9 +186,9 @@ public class ArgumentInferer {
 		for (int i = 0; i < atom.args.length; i++) {
 			LinkOccurrence lo = atom.args[i];
 			LinkOccurrence b = TypeEnv.getRealBuddy(lo);
-			if(b.atom instanceof ProcessContext){ // ¥×¥í¥»¥¹Ê¸Ì®¤ËÀÜÂ³¤·¤Æ¤¤¤ë
+			if(b.atom instanceof ProcessContext){ // ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«æ¥ç¶šã—ã¦ã„ã‚‹
 				ProcessContext pc = (ProcessContext)b.atom;
-				if(TypeEnv.dataTypeOfContextDef(pc.def) != null){ // ¥Ç¡¼¥¿·¿
+				if(TypeEnv.dataTypeOfContextDef(pc.def) != null){ // ãƒ‡ãƒ¼ã‚¿å‹
 					if(freelinks.contains(b)){
 						addConstraintAboutLinks(-1, b, lo);
 						freelinks.remove(b);
@@ -198,7 +198,7 @@ public class ArgumentInferer {
 				}
 				else continue;
 			}
-			if (freelinks.contains(b)) { // ¶É½ê¥ê¥ó¥¯
+			if (freelinks.contains(b)) { // å±€æ‰€ãƒªãƒ³ã‚¯
 				addConstraintAboutLinks(-1, lo, b);
 				freelinks.remove(b);
 			} else
@@ -207,7 +207,7 @@ public class ArgumentInferer {
 		return freelinks;
 	}
 	
-	/** ¥×¥í¥»¥¹Ê¸Ì®¤Îº¸ÊÕ¡¿±¦ÊÕ½Ğ¸½¤Î¤½¤ì¤¾¤ì¤Î°ú¿ô¤ËÂĞ¤·¤ÆÆ±¤¸¤Ç¤¢¤ë¤È¤¤¤¦À©Ìó¤ò¤«¤±¤ë */
+	/** ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®å·¦è¾ºï¼å³è¾ºå‡ºç¾ã®ãã‚Œãã‚Œã®å¼•æ•°ã«å¯¾ã—ã¦åŒã˜ã§ã‚ã‚‹ã¨ã„ã†åˆ¶ç´„ã‚’ã‹ã‘ã‚‹ */
 	private void processExplicitLinks(ProcessContext lhsOcc, ProcessContext rhsOcc)throws TypeException{
 		for(int i=0;i<lhsOcc.args.length;i++){
 			LinkOccurrence lhsPartner = TypeEnv.getRealBuddy(lhsOcc.args[i]);
@@ -220,11 +220,11 @@ public class ArgumentInferer {
 //					addUnifyConstraint(1,lhsPartner,rhsPartner);
 					addConstraintAboutLinks(1,lhsPartner,rhsPartner);
 			}
-			else{ // ±¦ÊÕ½Ğ¸½¤¬¥×¥í¥»¥¹Ê¸Ì®¤È·Ñ¤Ã¤Æ¤¤¤ë
+			else{ // å³è¾ºå‡ºç¾ãŒãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã¨ç¶™ã£ã¦ã„ã‚‹
 				ProcessContext pc = (ProcessContext)rhsPartner.atom;
 				Functor df = TypeEnv.dataTypeOfContextDef(pc.def);
-				if(df==null){// ·¿ÉÕ¤­¤Ç¤Ê¤¤
-					// ¤½¤¤¤Ä¤Îº¸ÊÕ½Ğ¸½¤ÎÁêÊı¤ò¤È¤Ã¤Æ¤¯¤ë
+				if(df==null){// å‹ä»˜ãã§ãªã„
+					// ãã„ã¤ã®å·¦è¾ºå‡ºç¾ã®ç›¸æ–¹ã‚’ã¨ã£ã¦ãã‚‹
 					LinkOccurrence partnerOfPartner =
 						TypeEnv.getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
 //					addUnifyConstraint(-1,lhsPartner, partnerOfPartner);
@@ -251,7 +251,7 @@ public class ArgumentInferer {
 	 * @param b
 	 */
 	private void addConstraintAboutLinks(int sign, LinkOccurrence lo, LinkOccurrence b) throws TypeException{
-		// ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Ç¡¢¥Ç¡¼¥¿·¿¤Î»ş¤Ë¤Ï¥Ç¡¼¥¿¥¢¥È¥à¤È¤·¤Æ°·¤¦
+		// å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã§ã€ãƒ‡ãƒ¼ã‚¿å‹ã®æ™‚ã«ã¯ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã¨ã—ã¦æ‰±ã†
 		if(lo.atom instanceof ProcessContext){
 			ProcessContext pc = (ProcessContext)lo.atom;
 			Functor df = TypeEnv.dataTypeOfContextDef(pc.def);
@@ -260,12 +260,12 @@ public class ArgumentInferer {
 		}
 		else{
 			int out = TypeEnv.outOfPassiveAtom((Atom)lo.atom);
-			if(out == lo.pos){ // ¥Ç¡¼¥¿¥¢¥È¥à¤Î½ĞÎÏ°ú¿ô
+			if(out == lo.pos){ // ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã®å‡ºåŠ›å¼•æ•°
 				if(TypeEnv.outOfPassiveAtom((Atom)b.atom) == b.pos)//!= TypeEnv.ACTIVE)
 					if(sign == -1)
 						throw new TypeException("output arguments connected each other. : " + lo.atom.getName() + " <=> " + b.atom.getName() + " in line " + lo.atom.line);
 					else{
-						// TODO ¥Ç¡¼¥¿¥¢¥È¥à¤Î°ú¿ôÆ±»Î¤¬¥ë¡¼¥ëº¸ÊÕ¡¦±¦ÊÕ¤Ç¼õ¤±·Ñ¤¬¤ì¤ë¾ì¹ç¤Ï¤É¤¦¤·¤¿¤é¤¤¤¤¤ó¤À¤í¤¦
+						// TODO ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã®å¼•æ•°åŒå£«ãŒãƒ«ãƒ¼ãƒ«å·¦è¾ºãƒ»å³è¾ºã§å—ã‘ç¶™ãŒã‚Œã‚‹å ´åˆã¯ã©ã†ã—ãŸã‚‰ã„ã„ã‚“ã ã‚ã†
 						addUnifyConstraint(sign, lo, b);
 					}
 				else addReceiveConstraint(-sign, b, ((Atom)lo.atom).functor);
@@ -333,7 +333,7 @@ public class ArgumentInferer {
 	 */
 	private PolarizedPath getPolarizedPath(Set<LinkOccurrence> traced, LinkOccurrence lo)throws TypeException{
 		if(traced.contains(lo)){
-			// TODO ¤³¤Î¾ì¹ç¤Ï1¤ÄÃ©¤ë¤È¤³¤Ş¤Ç¤ÎPath¤¬ÆÀ¤é¤ì¤ë¤è¤¦¤Ë¤¹¤ë
+			// TODO ã“ã®å ´åˆã¯1ã¤è¾¿ã‚‹ã¨ã“ã¾ã§ã®PathãŒå¾—ã‚‰ã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹
 			return null;
 		}
 		Atom atom = (Atom) lo.atom;

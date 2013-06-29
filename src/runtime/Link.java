@@ -1,17 +1,17 @@
 package runtime;
 
 /**
- * ��󥯤���³��򡢥��ȥ�Ȱ����ֹ���ȤȤ���ɽ����LMNtal�Υ�󥯤ˤ�������̵���Τǡ�
- * ���ĤΥ�󥯤��Ф��Ƥ��Υ��饹�Υ��󥹥��󥹤򣲤Ļ��Ѥ��롣
+ * リンクの接続先を、アトムと引数番号の組として表す。LMNtalのリンクには方向が無いので、
+ * １つのリンクに対してこのクラスのインスタンスを２つ使用する。
  */
 public final class Link implements Cloneable
 {
 	private static int lastId = 0;
 
-	/** �����Υ��ȥ� */
+	/** リンク先のアトム */
 	private Atom atom;
 
-	/** ����褬�貿������ */
+	/** リンク先が第何引数か */
 	private int pos;
 
 	private int id;
@@ -29,7 +29,7 @@ public final class Link implements Cloneable
 		return new Link(atom, pos);
 	}
 
-	/** �Фˤʤ룲�ĤΥ�󥯤�id�Τ������㤤�����󥯤��ֹ�Ȥ��ƻ��Ѥ��롣 */
+	/** 対になる２つのリンクのidのうち、若い方をリンクの番号として使用する。 */
 	public String toString() {
 		int i;
 		if (this.id < atom.args[pos].id) {
@@ -41,34 +41,34 @@ public final class Link implements Cloneable
 		return "L" + i;
 	}
 
-	/** �����Υ��ȥ��������� */
+	/** リンク先のアトムを取得する */
 	public Atom getAtom() {
 		return atom;
 	}
 
-	/** �����ΰ����ֹ��������� */
+	/** リンク先の引数番号を取得する */
 	public int getPos() {
 		return pos;
 	}
 
-	/** ���Υ�󥯤��Ф�ʤ��ո����Υ�󥯤�������� */
+	/** このリンクと対をなす逆向きのリンクを取得する */
 	public Link getBuddy() {
 		return atom.args[pos];
 	}
 
-	/** ����褬�ǽ���󥯤ξ���true���֤� */
+	/** リンク先が最終リンクの場合にtrueを返す */
 	boolean isFuncRef() {
 		return atom.getArity() - 1 == pos;
 	}
 
-	/** ��󥯤�id��������� */
+	/** リンクのidを取得する */
 	public int getID() {
 		return id;
 	}
 
 	/**
-	 * ��³������ꤹ�롣
-	 * �쥯�饹�Υ������ѥ᥽�å���ǤΤ߸ƤӽФ���롣
+	 * 接続先を設定する。
+	 * 膜クラスのリンク操作用メソッド内でのみ呼び出される。
 	 */
 	void set(Atom atom, int pos) {
 		this.atom = atom;
@@ -76,8 +76,8 @@ public final class Link implements Cloneable
 	}
 
 	/**
-	 * ���Υ�󥯤���³���Ϳ����줿��󥯤���³���Ʊ���ˤ��롣
-	 * �쥯�饹�Υ������ѥ᥽�å���ǤΤ߸ƤӽФ���롣
+	 * このリンクの接続先を、与えられたリンクの接続先と同じにする。
+	 * 膜クラスのリンク操作用メソッド内でのみ呼び出される。
 	 */
 	void set(Link link) {
 		this.atom = link.atom;

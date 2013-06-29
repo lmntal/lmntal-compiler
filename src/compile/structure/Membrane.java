@@ -14,75 +14,75 @@ import runtime.Ruleset;
 import runtime.functor.Functor;
 
 /** 
- * ¥½¡¼¥¹¥³¡¼¥ÉÃæ¤ÎËì¤Î¹½Â¤¤òÉ½¤¹¥¯¥é¥¹<br>
- * memo:Á´¤Æ1¤Ä¤ÎÇÛÎó¤ËÆş¤ì¤ëÊıË¡¤â¤¢¤ë¡£<br>
- * ³ÆÍ×ÁÇ¤ÏList¤È¤·¤ÆÊİ»ı¤µ¤ì¤ë¡£
+ * ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã®è†œã®æ§‹é€ ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹<br>
+ * memo:å…¨ã¦1ã¤ã®é…åˆ—ã«å…¥ã‚Œã‚‹æ–¹æ³•ã‚‚ã‚ã‚‹ã€‚<br>
+ * å„è¦ç´ ã¯Listã¨ã—ã¦ä¿æŒã•ã‚Œã‚‹ã€‚
  */
 public final class Membrane
 {
-	/** ¿ÆËì */
+	/** è¦ªè†œ */
 	public Membrane parent = null;
 
-	/** ½ªÎ»¥Õ¥é¥°¤¬¥»¥Ã¥È¤µ¤ì¤Æ¤¤¤ë¤«¤É¤¦¤«¤òÉ½¤¹ */
+	/** çµ‚äº†ãƒ•ãƒ©ã‚°ãŒã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’è¡¨ã™ */
 	public boolean stable = false;
 
-	/** Ëì¤Î¥¿¥¤¥× */
+	/** è†œã®ã‚¿ã‚¤ãƒ— */
 	public int kind = 0;
 
-	/** ¡÷»ØÄê¤Ş¤¿¤Ïnull
-	 * <p><b>²¾»ÅÍÍ</b>
-	 * ¥Û¥¹¥È»ØÄê¤òÉ½¤¹Ê¸»úÎó¤¬Æş¤ë·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®Ì¾¤ò»ı¤Ã¤¿
-	 * ½êÂ°Ëì¤ò»ı¤¿¤Ê¤¤¥×¥í¥»¥¹¥³¥ó¥Æ¥­¥¹¥È¤¬ÂåÆş¤µ¤ì¤ë¡£
-	 * <br>[Í×Ãí°Õ]Îã³°Åª¤Ë¡¢°ú¿ô¤ÎÄ¹¤µ¤ª¤è¤Óbundle¤Ï0¤Ë¥»¥Ã¥È¤µ¤ì¤ë¡£
+	/** ï¼ æŒ‡å®šã¾ãŸã¯null
+	 * <p><b>ä»®ä»•æ§˜</b>
+	 * ãƒ›ã‚¹ãƒˆæŒ‡å®šã‚’è¡¨ã™æ–‡å­—åˆ—ãŒå…¥ã‚‹å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆåã‚’æŒã£ãŸ
+	 * æ‰€å±è†œã‚’æŒãŸãªã„ãƒ—ãƒ­ã‚»ã‚¹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãŒä»£å…¥ã•ã‚Œã‚‹ã€‚
+	 * <br>[è¦æ³¨æ„]ä¾‹å¤–çš„ã«ã€å¼•æ•°ã®é•·ã•ãŠã‚ˆã³bundleã¯0ã«ã‚»ãƒƒãƒˆã•ã‚Œã‚‹ã€‚
 	 * @see ContextDef.lhsMem */
 	public ProcessContext pragmaAtHost = null;
-//	/** ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤È¤·¤Æ»È¤¦¤Ê¤é¿¿ */
+//	/** ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã¨ã—ã¦ä½¿ã†ãªã‚‰çœŸ */
 //	public boolean is_system_ruleset = false;
 
-	/** ËìÌ¾ */
+	/** è†œå */
 	public String name;
 
-	/** ¥¢¥È¥à(compile.structure.Atom)¤Î¥ê¥¹¥È */
+	/** ã‚¢ãƒˆãƒ (compile.structure.Atom)ã®ãƒªã‚¹ãƒˆ */
 	public List<Atom> atoms = new LinkedList<Atom>();
 
-	/** »ÒËì(compile.structure.Membrane)¤Î¥ê¥¹¥È */
+	/** å­è†œ(compile.structure.Membrane)ã®ãƒªã‚¹ãƒˆ */
 	public List<Membrane> mems = new LinkedList<Membrane>();
 
-	/** ¥ë¡¼¥ë(compile.structure.RuleStructure)¤Î¥ê¥¹¥È */
+	/** ãƒ«ãƒ¼ãƒ«(compile.structure.RuleStructure)ã®ãƒªã‚¹ãƒˆ */
 	public List<RuleStructure> rules = new LinkedList<RuleStructure>();
 
 	////////////////////////////////////////////////////////////////
 
-	/** ¥¢¥È¥à½¸ÃÄ(compile.structure.Atom)¤Î¥ê¥¹¥È */
+	/** ã‚¢ãƒˆãƒ é›†å›£(compile.structure.Atom)ã®ãƒªã‚¹ãƒˆ */
 	public List<Atom> aggregates = new LinkedList<Atom>();
 
-	/** ¥×¥í¥»¥¹Ê¸Ì®½Ğ¸½(compile.structure.ProcessContext)¤Î¥ê¥¹¥È */
+	/** ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå‡ºç¾(compile.structure.ProcessContext)ã®ãƒªã‚¹ãƒˆ */
 	public List<ProcessContext> processContexts = new LinkedList<ProcessContext>();
 
-	/** ¥ë¡¼¥ëÊ¸Ì®½Ğ¸½(compile.structure.RuleContext)¤Î¥ê¥¹¥È */
+	/** ãƒ«ãƒ¼ãƒ«æ–‡è„ˆå‡ºç¾(compile.structure.RuleContext)ã®ãƒªã‚¹ãƒˆ */
 	public List<RuleContext> ruleContexts = new LinkedList<RuleContext>();
 
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®½Ğ¸½(compile.structure.ProcessContext)¤Î¥ê¥¹¥È */
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå‡ºç¾(compile.structure.ProcessContext)ã®ãƒªã‚¹ãƒˆ */
 	public List<ProcessContext> typedProcessContexts = new LinkedList<ProcessContext>();
 
 	////////////////////////////////////////////////////////////////
 
-	/** Ëì¤Î¼«Í³¥ê¥ó¥¯Ì¾(String)¤«¤é¤½¤Î¥ê¥ó¥¯½Ğ¸½(compile.structure.LinkOccurrence)¤Ø¤Î¼ÌÁü */
+	/** è†œã®è‡ªç”±ãƒªãƒ³ã‚¯å(String)ã‹ã‚‰ãã®ãƒªãƒ³ã‚¯å‡ºç¾(compile.structure.LinkOccurrence)ã¸ã®å†™åƒ */
 	public HashMap<String, LinkOccurrence> freeLinks = new HashMap<String, LinkOccurrence>();
 
-	/** ¥ë¡¼¥ë¥»¥Ã¥È¡£À¸À®¤µ¤ì¤¿¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤ÏÃà¼¡¤³¤³¤ËÄÉ²Ã¤µ¤ì¤Æ¤¤¤¯¡£*/
+	/** ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã€‚ç”Ÿæˆã•ã‚ŒãŸãƒ«ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¯é€æ¬¡ã“ã“ã«è¿½åŠ ã•ã‚Œã¦ã„ãã€‚*/
 //	public runtime.Ruleset ruleset = new InterpretedRuleset();
 	public List<Ruleset> rulesets = new LinkedList<Ruleset>();
 
 	////////////////////////////////////////////////////////////////
 
-	/** ¥³¥ó¥Ñ¥¤¥éÍÑ¥Ç¡¼¥¿¹½Â¤¡£atom¤ämem¤òGROUP²½¤µ¤ì¤ë¤Ù¤­¤â¤Î¤Ë¤Ä¤¤¤Æ¶á¤¯¤ËÇÛÃÖ¤¹¤ë¡£ **/
+	/** ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ç”¨ãƒ‡ãƒ¼ã‚¿æ§‹é€ ã€‚atomã‚„memã‚’GROUPåŒ–ã•ã‚Œã‚‹ã¹ãã‚‚ã®ã«ã¤ã„ã¦è¿‘ãã«é…ç½®ã™ã‚‹ã€‚ **/
 	private RependenceGraph rg = new RependenceGraph();
 	////////////////////////////////////////////////////////////////
 
 	/**
-	 * ¥³¥ó¥¹¥È¥é¥¯¥¿
-	 * @param mem ¿ÆËì
+	 * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	 * @param mem è¦ªè†œ
 	 */
 	public Membrane(Membrane mem)
 	{
@@ -98,7 +98,7 @@ public final class Membrane
 		}
 		return c;
 	}
-	/** ¤³¤ÎËì¤Ë¤¢¤ëinside_proxy¥¢¥È¥à¤Î¸Ä¿ô¤ò¼èÆÀ¤¹¤ë */
+	/** ã“ã®è†œã«ã‚ã‚‹inside_proxyã‚¢ãƒˆãƒ ã®å€‹æ•°ã‚’å–å¾—ã™ã‚‹ */
 	public int getFreeLinkAtomCount()
 	{
 		int c = 0;
@@ -110,10 +110,10 @@ public final class Membrane
 	}
 
 	/**
-	 * {} ¤Ê¤·¤Ç½ĞÎÏ¤¹¤ë¡£
+	 * {} ãªã—ã§å‡ºåŠ›ã™ã‚‹ã€‚
 	 * 
-	 * ¥ë¡¼¥ë¤Î½ĞÎÏ¤Îºİ¡¢{} ¥¢¥ê¤À¤È
-	 * (a:-b) ¤¬ ({a}:-{b}) ¤Ë¤Ê¤Ã¤Á¤ã¤¦¤«¤é¡£
+	 * ãƒ«ãƒ¼ãƒ«ã®å‡ºåŠ›ã®éš›ã€{} ã‚¢ãƒªã ã¨
+	 * (a:-b) ãŒ ({a}:-{b}) ã«ãªã£ã¡ã‚ƒã†ã‹ã‚‰ã€‚
 	 *  
 	 * @return String 
 	 */
@@ -152,7 +152,7 @@ public final class Membrane
 	}
 
 	/**
-	 * ¤³¤ÎËì¤Ë´Ş¤Ş¤ì¤ëÁ´¤Æ¤Î¥ë¡¼¥ë¥»¥Ã¥È¤òÉ½¼¨¤¹¤ë¡£
+	 * ã“ã®è†œã«å«ã¾ã‚Œã‚‹å…¨ã¦ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’è¡¨ç¤ºã™ã‚‹ã€‚
 	 */
 	public void showAllRulesets()
 	{
@@ -161,14 +161,14 @@ public final class Membrane
 			Env.d(r);
 		}
 
-		// Ä¾Â°¤Î¥ë¡¼¥ë¤½¤ì¤¾¤ì¤Ë¤Ä¤¤¤Æ¡¢¤½¤Îº¸ÊÕËì¤È±¦ÊÕËì¤Î¥ë¡¼¥ë¥»¥Ã¥È¤òÉ½¼¨
+		// ç›´å±ã®ãƒ«ãƒ¼ãƒ«ãã‚Œãã‚Œã«ã¤ã„ã¦ã€ãã®å·¦è¾ºè†œã¨å³è¾ºè†œã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’è¡¨ç¤º
 		for (RuleStructure rs : rules)
 		{
 			rs.leftMem.showAllRulesets();
 			rs.rightMem.showAllRulesets();
 		}
 
-		// »ÒËì¤½¤ì¤¾¤ì
+		// å­è†œãã‚Œãã‚Œ
 		for (Membrane mem : mems)
 		{
 			mem.showAllRulesets();
@@ -176,13 +176,13 @@ public final class Membrane
 	}
 
 	/**
-	 * ¤³¤ÎËì¤ÎÃæ¤Ë¤¢¤ë¥ë¡¼¥ë¤òÁ´¤ÆÉ½¼¨¤¹¤ë¡£
+	 * ã“ã®è†œã®ä¸­ã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«ã‚’å…¨ã¦è¡¨ç¤ºã™ã‚‹ã€‚
 	 * 
 	 * <pre>
-	 * ¡Ö¤³¤ÎËì¤ÎÃæ¤Ë¤¢¤ë¥ë¡¼¥ë¡×¤È¤Ï¡¢°Ê²¼¤Î£³¼ïÎà¡£
-	 * ¡¡[1]¤³¤ÎËì¤Î¥ë¡¼¥ë¥»¥Ã¥È¤Ë´Ş¤Ş¤ì¤ëÁ´¤Æ¤Î¥ë¡¼¥ë
-	 * ¡¡[2] [1]¤Îº¸ÊÕËì¤ÎÃæ¤Ë¤¢¤ë¥ë¡¼¥ë
-	 * ¡¡[3] [1]¤Î±¦ÊÕËì¤ÎÃæ¤Ë¤¢¤ë¥ë¡¼¥ë
+	 * ã€Œã“ã®è†œã®ä¸­ã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«ã€ã¨ã¯ã€ä»¥ä¸‹ã®ï¼“ç¨®é¡ã€‚
+	 * ã€€[1]ã“ã®è†œã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«å«ã¾ã‚Œã‚‹å…¨ã¦ã®ãƒ«ãƒ¼ãƒ«
+	 * ã€€[2] [1]ã®å·¦è¾ºè†œã®ä¸­ã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«
+	 * ã€€[3] [1]ã®å³è¾ºè†œã®ä¸­ã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«
 	 * </pre>
 	 */
 	public void showAllRules()
@@ -193,7 +193,7 @@ public final class Membrane
 			((InterpretedRuleset)r).showDetail();
 		}
 
-		// Ä¾Â°¤Î¥ë¡¼¥ë¤½¤ì¤¾¤ì¤Ë¤Ä¤¤¤Æ¡¢¤½¤Îº¸ÊÕËì¤È±¦ÊÕËì¤Î¥ë¡¼¥ë¥»¥Ã¥È¤òÉ½¼¨
+		// ç›´å±ã®ãƒ«ãƒ¼ãƒ«ãã‚Œãã‚Œã«ã¤ã„ã¦ã€ãã®å·¦è¾ºè†œã¨å³è¾ºè†œã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’è¡¨ç¤º
 		for (RuleStructure rs : rules)
 		{
 			//Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
@@ -202,7 +202,7 @@ public final class Membrane
 			rs.rightMem.showAllRules();
 		}
 
-		// »ÒËì¤½¤ì¤¾¤ì
+		// å­è†œãã‚Œãã‚Œ
 		for (Membrane submem : mems)
 		{
 			submem.showAllRules();
@@ -211,9 +211,9 @@ public final class Membrane
 
 	/*
 	 * okabe
-	 * ¤³¤ÎËì¤Ë´Ş¤Ş¤ì¤ë¥¢¥È¥à¤Î¤¦¤Á°ìÈÖºÇ½é¤Î¥¢¥È¥à¤Î¥¢¥È¥àÌ¾¤òÊÖ¤¹
-	 * ¥ë¡¼¥ë¤Îº¸ÊÕ¤¬Ëì¤Î¾ì¹ç¤ÏºÆµ¢¸Æ¤Ó½Ğ¤·
-	 * ¥È¥ì¡¼¥¹¥â¡¼¥É¤Ç»ÈÍÑ
+	 * ã“ã®è†œã«å«ã¾ã‚Œã‚‹ã‚¢ãƒˆãƒ ã®ã†ã¡ä¸€ç•ªæœ€åˆã®ã‚¢ãƒˆãƒ ã®ã‚¢ãƒˆãƒ åã‚’è¿”ã™
+	 * ãƒ«ãƒ¼ãƒ«ã®å·¦è¾ºãŒè†œã®å ´åˆã¯å†å¸°å‘¼ã³å‡ºã—
+	 * ãƒˆãƒ¬ãƒ¼ã‚¹ãƒ¢ãƒ¼ãƒ‰ã§ä½¿ç”¨
 	 */
 	public String getFirstAtomName(){
 		Iterator<Atom> atomIt = atoms.iterator();
@@ -223,13 +223,13 @@ public final class Membrane
 		} else if (memIt.hasNext()) {
 			return memIt.next().getFirstAtomName();
 		} else {
-			// ¥×¥í¥­¥·¤È¤«¥×¥í¥»¥¹Ê¸Ì®¤Î¤È¤­¤Ï¤È¤ê¤¢¤¨¤ºÊüÃÖ
+			// ãƒ—ãƒ­ã‚­ã‚·ã¨ã‹ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®ã¨ãã¯ã¨ã‚Šã‚ãˆãšæ”¾ç½®
 			return "null";
 		}
 	}
 
 	/**
-	 * Í¿¤¨¤é¤ì¤¿Ëì¤ÎÃæ¿È¤ò¤³¤ÎËì¤ËÄÉ²Ã¤¹¤ë¡£
+	 * ä¸ãˆã‚‰ã‚ŒãŸè†œã®ä¸­èº«ã‚’ã“ã®è†œã«è¿½åŠ ã™ã‚‹ã€‚
 	 * @param m
 	 */
 	public void add(Membrane m) {
@@ -362,7 +362,7 @@ class RependenceGraph {
 
 		private Object find(Object x)
 		{
-			// ¤³¤³¤ÇPath°µ½Ì¤¹¤ë¤È·×»»ÎÌ¤¬ nlog(n) ¤«¤é n ack^-1(n) ¤Ë
+			// ã“ã“ã§Pathåœ§ç¸®ã™ã‚‹ã¨è¨ˆç®—é‡ãŒ nlog(n) ã‹ã‚‰ n ack^-1(n) ã«
 			while (lnk.containsKey(x))
 				x = lnk.get(x);
 			return x;
@@ -373,7 +373,7 @@ class RependenceGraph {
 			if (x == y)
 				return -1;
 
-			// ¥°¥ë¡¼¥×²½
+			// ã‚°ãƒ«ãƒ¼ãƒ—åŒ–
 			if (lnkSiz.get(x) < lnkSiz.get(y)){
 				lnk.put(x, y);
 				lnkSiz.put(y, lnkSiz.get(y)+lnkSiz.get(x));

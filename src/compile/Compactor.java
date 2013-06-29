@@ -1,5 +1,5 @@
 /*
- * ºîÀ®Æü: 2004/10/25
+ * ä½œæˆæ—¥: 2004/10/25
  */
 package compile;
 
@@ -16,14 +16,14 @@ import runtime.Env;
 import runtime.Rule;
 
 /**
- * Ì¿ÎáÎó¤ÎÄ¹¤µ¤Ë´Ø¤¹¤ëºÇÅ¬²½¤ò¹Ô¤¦¥¯¥é¥¹¥á¥½¥Ã¥É¤ò»ı¤Ä¥¯¥é¥¹¡£³«È¯»şÍÑ¡£
- * RISC²½¤µ¤ì¤¿Ì¿ÎáÎó¤Î²ÄÆÉÀ­¤ò¹â¤á¤ë¤¿¤á¤Ë»È¤¦¤«¤â¤·¤ì¤Ê¤¤¡£
- * RISC²½¥Æ¥¹¥ÈÍÑ¤Îexpand¥á¥½¥Ã¥É¤â»ı¤Ä¡£
- * Ì¿Îá¥»¥Ã¥È¤ÎRISC²½¤Ë°ìÌòÇã¤¦Í½Äê¡£
+ * å‘½ä»¤åˆ—ã®é•·ã•ã«é–¢ã™ã‚‹æœ€é©åŒ–ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’æŒã¤ã‚¯ãƒ©ã‚¹ã€‚é–‹ç™ºæ™‚ç”¨ã€‚
+ * RISCåŒ–ã•ã‚ŒãŸå‘½ä»¤åˆ—ã®å¯èª­æ€§ã‚’é«˜ã‚ã‚‹ãŸã‚ã«ä½¿ã†ã‹ã‚‚ã—ã‚Œãªã„ã€‚
+ * RISCåŒ–ãƒ†ã‚¹ãƒˆç”¨ã®expandãƒ¡ã‚½ãƒƒãƒ‰ã‚‚æŒã¤ã€‚
+ * å‘½ä»¤ã‚»ãƒƒãƒˆã®RISCåŒ–ã«ä¸€å½¹è²·ã†äºˆå®šã€‚
  * @author n-kato
  */
 public class Compactor {
-	/** ¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤òºÇÅ¬²½¤¹¤ë¡ÊÍ½Äê¡Ë */
+	/** ãƒ«ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æœ€é©åŒ–ã™ã‚‹ï¼ˆäºˆå®šï¼‰ */
 	public static void compactRule(Rule rule) {		
 		// todo compactInstructionList(rule.atomMatchLabel);
 		List<Instruction> atomMatch = rule.atomMatch;
@@ -52,14 +52,14 @@ public class Compactor {
 			else continue;
 		}
 	}
-	/** Ì¿ÎáÎó¤òºÇÅ¬²½¤¹¤ë¡ÊÍ½Äê¡Ë*/
+	/** å‘½ä»¤åˆ—ã‚’æœ€é©åŒ–ã™ã‚‹ï¼ˆäºˆå®šï¼‰*/
 	public static void compactInstructionList(List<Instruction> insts) {
 		//if (true) return;
 		//List insts = label.insts;
 		Instruction spec = (Instruction)insts.get(0);
 		int formals = spec.getIntArg1();
 		int varcount = spec.getIntArg2();
-		varcount = expandBody(insts, varcount);	// Å¸³«¡ÊRISC²½¡Ë
+		varcount = expandBody(insts, varcount);	// å±•é–‹ï¼ˆRISCåŒ–ï¼‰
 		boolean changed = true;
 		while (changed) {
 			changed = false;
@@ -68,8 +68,8 @@ public class Compactor {
 			if (eliminateRedundantInstructions(insts))  changed = true;
 		}
 		packUnifyLinks(insts);
-		varcount = compactBody(insts, varcount);	// °µ½Ì (CISC²½¡Ë
-		varcount = renumberLocals(insts, varcount);	// ¶É½êÊÑ¿ô¤ò¿¶¤ê¤Ê¤ª¤¹
+		varcount = compactBody(insts, varcount);	// åœ§ç¸® (CISCåŒ–ï¼‰
+		varcount = renumberLocals(insts, varcount);	// å±€æ‰€å¤‰æ•°ã‚’æŒ¯ã‚ŠãªãŠã™
 		spec.updateSpec(formals,varcount);
 	}
 
@@ -80,7 +80,7 @@ public class Compactor {
 //		int formals = spec.getIntArg1();
 //		int varcount = spec.getIntArg2();
 		int varcount = 0;
-		varcount = expandBody(insts, varcount);	// Å¸³«¡ÊRISC²½¡Ë
+		varcount = expandBody(insts, varcount);	// å±•é–‹ï¼ˆRISCåŒ–ï¼‰
 		boolean changed = true;
 		while (changed) {
 			changed = false;
@@ -89,12 +89,12 @@ public class Compactor {
 			if (eliminateRedundantInstructions(insts))  changed = true;
 		}
 		packUnifyLinks(insts);
-		varcount = compactBody(insts, varcount);	// °µ½Ì (CISC²½¡Ë
-//		varcount = renumberLocals(insts, varcount);	// ¶É½êÊÑ¿ô¤ò¿¶¤ê¤Ê¤ª¤¹
+		varcount = compactBody(insts, varcount);	// åœ§ç¸® (CISCåŒ–ï¼‰
+//		varcount = renumberLocals(insts, varcount);	// å±€æ‰€å¤‰æ•°ã‚’æŒ¯ã‚ŠãªãŠã™
 //		spec.updateSpec(formals,varcount);
 	}
 
-	//¡Ê¥Æ¥¹¥ÈÌ¿ÎáÎóÀ¸À®ÍÑ¡Ë for f(X,Y):-X=Y
+	//ï¼ˆãƒ†ã‚¹ãƒˆå‘½ä»¤åˆ—ç”Ÿæˆç”¨ï¼‰ for f(X,Y):-X=Y
 	static void genTest(Rule rule) {		
 		if (rule.body.size() > 6) {
 			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
@@ -109,7 +109,7 @@ public class Compactor {
 		}
 	}
 
-	/** Ì¿ÎáÎó¤òRISC²½¤¹¤ë */
+	/** å‘½ä»¤åˆ—ã‚’RISCåŒ–ã™ã‚‹ */
 	public static int expandBody(List<Instruction> insts, int varcount) {
 		int size = insts.size();
 		for (int i = 0; i < size; i++) {
@@ -193,7 +193,7 @@ public class Compactor {
 		}
 		return varcount;
 	}
-	/** Ì¿ÎáÎó¤òCISC²½¤¹¤ë */
+	/** å‘½ä»¤åˆ—ã‚’CISCåŒ–ã™ã‚‹ */
 	public static int compactBody(List<Instruction> insts, int varcount) {
 		int size = insts.size() - 2;
 		for (int i = 0; i < size; i++) {
@@ -288,11 +288,11 @@ public class Compactor {
 		}
 		return varcount;
 	}
-	/** Ì¿ÎáÎó¤ÎÊÑ¿ôÈÖ¹æ¤ò¿¶¤ê¤Ê¤ª¤¹ */
+	/** å‘½ä»¤åˆ—ã®å¤‰æ•°ç•ªå·ã‚’æŒ¯ã‚ŠãªãŠã™ */
 	public static int renumberLocals(List<Instruction> insts, int varcount) {
 		int size = insts.size();
 		Instruction spec = insts.get(0);
-		int locals = spec.getIntArg1();	// ºÇ½é¤Î¶É½êÊÑ¿ô¤ÎÈÖ¹æ¤Ï¡¢²¾°ú¿ô¤Î¸Ä¿ô¤Ë¤¹¤ë
+		int locals = spec.getIntArg1();	// æœ€åˆã®å±€æ‰€å¤‰æ•°ã®ç•ªå·ã¯ã€ä»®å¼•æ•°ã®å€‹æ•°ã«ã™ã‚‹
 //		for (int i = 1; i < size; i++) {
 //		Instruction inst = (Instruction)insts.get(i);
 //		if (inst.getOutputType() == -1) continue;
@@ -326,11 +326,11 @@ public class Compactor {
 				if(sub > max)max = sub;
 			}
 			if(inst.getKind()==Instruction.GUARD_INLINE) {
-				// ¥¬¡¼¥É¥¤¥ó¥é¥¤¥ó¤Î¾ì¹ç¤Ï¡¢½ĞÎÏÊÑ¿ô¤¬Ê£¿ô¤¢¤ë¾ì¹ç¤¬¤¢¤ë¡£hara
+				// ã‚¬ãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã®å ´åˆã¯ã€å‡ºåŠ›å¤‰æ•°ãŒè¤‡æ•°ã‚ã‚‹å ´åˆãŒã‚ã‚‹ã€‚hara
 				ArrayList<Integer> out = (ArrayList<Integer>)inst.getArg3();
 				for(int j=0;j<out.size();j++) {
 					renumberLocalsSub2(out.get(j), locals, varcount, insts, i);
-					// ¥ë¡¼¥×¤ÎºÇ¸å¤À¤±¥¤¥ó¥¯¥ê¥á¥ó¥È¤·¤Ê¤¤(9¹Ô²¼¤Ç¤¹¤ë¤Î¤Ç)
+					// ãƒ«ãƒ¼ãƒ—ã®æœ€å¾Œã ã‘ã‚¤ãƒ³ã‚¯ãƒªãƒ¡ãƒ³ãƒˆã—ãªã„(9è¡Œä¸‹ã§ã™ã‚‹ã®ã§)
 					// 2006/09/22 kudo
 					if(j<out.size()-1)locals++;
 				}
@@ -347,7 +347,7 @@ public class Compactor {
 	}
 
 	/**
-	 * Ì¿ÎáÎó insts ¤Î begin ÈÖÃÏ°Ê¹ß¤Ë¤Ä¤¤¤Æ¡¢ÊÑ¿ôÈÖ¹æ isrc ¤È locals ¤Î½Ğ¸½¤ò¤¹¤Ù¤Æ¸ò´¹¤¹¤ë¡£
+	 * å‘½ä»¤åˆ— insts ã® begin ç•ªåœ°ä»¥é™ã«ã¤ã„ã¦ã€å¤‰æ•°ç•ªå· isrc ã¨ locals ã®å‡ºç¾ã‚’ã™ã¹ã¦äº¤æ›ã™ã‚‹ã€‚
 	 * @param isrc
 	 * @param locals
 	 * @param varcount
@@ -370,10 +370,10 @@ public class Compactor {
 	}
 
 	////////////////////////////////////////////////////////////////
-	// CISC²½ÍÑ
+	// CISCåŒ–ç”¨
 
-	/** UnifyLinksÌ¿Îá¤Î°ú¿ô¤ËÅÏ¤µ¤ì¤ë¥ê¥ó¥¯¤Î¼èÆÀ¤ò¤Ç¤­¤ë¤À¤±ÃÙ±ä¤¹¤ë¡Ê²¾¡Ë
-	 * <p>¤È¤ê¤¢¤¨¤º¼èÆÀÌ¿Îá¤¬ALLOCLINK¤Ş¤¿¤ÏLOOKUPLINK¤Î¤È¤­¤Î¤ßµ¡Ç½¤¹¤ë¡£*/
+	/** UnifyLinkså‘½ä»¤ã®å¼•æ•°ã«æ¸¡ã•ã‚Œã‚‹ãƒªãƒ³ã‚¯ã®å–å¾—ã‚’ã§ãã‚‹ã ã‘é…å»¶ã™ã‚‹ï¼ˆä»®ï¼‰
+	 * <p>ã¨ã‚Šã‚ãˆãšå–å¾—å‘½ä»¤ãŒALLOCLINKã¾ãŸã¯LOOKUPLINKã®ã¨ãã®ã¿æ©Ÿèƒ½ã™ã‚‹ã€‚*/
 	public static void packUnifyLinks(List<Instruction> insts) {
 		for (int i = insts.size(); --i >= 1; ) {
 			Instruction inst = insts.get(i);
@@ -387,8 +387,8 @@ public class Compactor {
 						if ( inst2.getIntArg1() == inst.getIntArg1()
 								|| inst2.getIntArg1() == inst.getIntArg2() ) {
 							delayAllocLinkInstruction(insts,k,stopper);
-							// 1²óÌÜ¤Îinst2¤¬inst¤ÎÂè2°ú¿ô¥ê¥ó¥¯À¸À®¤Ç¤¢¤ê¡¢instÄ¾Á°¤Ë°ÜÆ°¤Ç¤­¤¿¾ì¹ç¡¢
-							// 2²óÌÜ¤Îinst2¤Ï1²óÌÜ¤Îinst2¤òÄÉ¤¤±Û¤µ¤Ê¤¤¤è¤¦¤Ë¤¹¤ë
+							// 1å›ç›®ã®inst2ãŒinstã®ç¬¬2å¼•æ•°ãƒªãƒ³ã‚¯ç”Ÿæˆã§ã‚ã‚Šã€instç›´å‰ã«ç§»å‹•ã§ããŸå ´åˆã€
+							// 2å›ç›®ã®inst2ã¯1å›ç›®ã®inst2ã‚’è¿½ã„è¶Šã•ãªã„ã‚ˆã†ã«ã™ã‚‹
 							if (inst2.getIntArg1() == inst.getIntArg2() && insts.get(stopper - 1) == inst2)
 								stopper--;
 						}
@@ -397,11 +397,11 @@ public class Compactor {
 			}
 		}
 	}
-	/** insts[i]¤ÎALLOCLINK/LOOKUPLINKÌ¿Îá¤ò¤Ç¤­¤ë¤À¤±ÃÙ±ä¤¹¤ë¡£¤¿¤À¤·insts[stopper]¤ÏÄÉ¤¤±Û¤µ¤Ê¤¤¡£*/
+	/** insts[i]ã®ALLOCLINK/LOOKUPLINKå‘½ä»¤ã‚’ã§ãã‚‹ã ã‘é…å»¶ã™ã‚‹ã€‚ãŸã ã—insts[stopper]ã¯è¿½ã„è¶Šã•ãªã„ã€‚*/
 	public static void delayAllocLinkInstruction(List<Instruction> insts, int i, int stopper) {
 		Instruction inst = insts.get(i);
 		while (++i < stopper) {
-			// insts[i - 1]¤ÏALLOCLINK/LOOKUPLINKÌ¿Îá
+			// insts[i - 1]ã¯ALLOCLINK/LOOKUPLINKå‘½ä»¤
 			Instruction inst2 = insts.get(i);
 
 			//     ALLOCLINK[link0,...];alloclink[link1,atom1,pos1]
@@ -430,14 +430,14 @@ public class Compactor {
 
 	////////////////////////////////////////////////////////////////
 
-	/** ¶¦ÄÌÉôÊ¬¼°¤ò½üµî¤¹¤ë
+	/** å…±é€šéƒ¨åˆ†å¼ã‚’é™¤å»ã™ã‚‹
 	 * @return changed */
 	public static boolean eliminateCommonSubexpressions(List<Instruction> insts) {
 		boolean changed = false;
 		for (int i1 = insts.size() - 1; i1 >= 0; i1--) {
 			Instruction inst1 = insts.get(i1);
 			if (!inst1.hasSideEffect() && !inst1.hasControlEffect()) {
-				//¼èÆÀÌ¿Îá
+				//å–å¾—å‘½ä»¤
 				for (int i2 = i1 + 1; i2 < insts.size(); i2++) {
 					Instruction inst2 = insts.get(i2);
 					if (inst2.hasSideEffect()) {
@@ -454,7 +454,7 @@ public class Compactor {
 				}
 			} else {
 				switch (inst1.getKind()) {
-				//¸¡ººÌ¿Îá
+				//æ¤œæŸ»å‘½ä»¤
 				case Instruction.EQATOM:
 				case Instruction.EQMEM:
 				case Instruction.EQFUNC:
@@ -482,7 +482,7 @@ public class Compactor {
 		return changed;
 	}
 	/**
-	 * £²¤Ä¤ÎÌ¿Îá¤¬¡¢Æ±¤¸¼ïÎà¤Ç¡¢Æ±¤¸ÆşÎÏ°ú¿ô¤ò»ı¤Ä¤«¤É¤¦¤«¤ò¸¡ºº¤¹¤ë¡£
+	 * ï¼’ã¤ã®å‘½ä»¤ãŒã€åŒã˜ç¨®é¡ã§ã€åŒã˜å…¥åŠ›å¼•æ•°ã‚’æŒã¤ã‹ã©ã†ã‹ã‚’æ¤œæŸ»ã™ã‚‹ã€‚
 	 */
 	private static boolean sameTypeAndSameInputArgs(Instruction inst1, Instruction inst2, boolean hasOutputArg) {
 		if (inst1.getKind() != inst2.getKind()) {
@@ -496,13 +496,13 @@ public class Compactor {
 		return true;
 	}
 
-	/** ¾éÄ¹¤ÊÌ¿Îá¤ò½üµî¤¹¤ë
+	/** å†—é•·ãªå‘½ä»¤ã‚’é™¤å»ã™ã‚‹
 	 * @return changed */
 	public static boolean eliminateRedundantInstructions(List<Instruction> insts) {
 		boolean changed = false;
 		for (int i = insts.size(); --i >= 1; ) {
 			Instruction inst = insts.get(i);
-			// getlink[!link,atom,pos] ==> ; ¤Ê¤É
+			// getlink[!link,atom,pos] ==> ; ãªã©
 			if (!inst.hasSideEffect() && !inst.hasControlEffect()) {
 				if (Instruction.getVarUseCountFrom(insts, (Integer)inst.getArg1(), i + 1) == 0) {
 					insts.remove(i);
@@ -512,7 +512,7 @@ public class Compactor {
 				}
 			}
 			switch (inst.getKind()) {
-			// eqfunc[func,func] ==> ; ¤Ê¤É
+			// eqfunc[func,func] ==> ; ãªã©
 			case Instruction.EQATOM:
 			case Instruction.EQMEM:
 			case Instruction.EQFUNC:

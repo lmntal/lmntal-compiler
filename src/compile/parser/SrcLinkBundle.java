@@ -1,12 +1,12 @@
 package compile.parser;
 
-/** ¥½¡¼¥¹¥Õ¥¡¥¤¥ëÃæ¤Î¥ê¥ó¥¯Â«É½¸½ */
+/** ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ä¸­ã®ãƒªãƒ³ã‚¯æŸè¡¨ç¾ */
 
 class SrcLinkBundle extends SrcLink {
 	static final String PREFIX_TAG = "*";
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤Î¥ê¥ó¥¯Â«¤òºîÀ®¤·¤Ş¤¹
-	 * @param name ¥ê¥ó¥¯Â«¤ÎÌ¾Á°
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ã®ãƒªãƒ³ã‚¯æŸã‚’ä½œæˆã—ã¾ã™
+	 * @param name ãƒªãƒ³ã‚¯æŸã®åå‰
 	 */
 	public SrcLinkBundle(String name) {
 		super(name);

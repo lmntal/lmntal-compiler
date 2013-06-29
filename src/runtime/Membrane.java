@@ -14,46 +14,46 @@ import util.QueuedEntity;
 import util.Stack;
 
 /**
- * ¥í¡¼¥«¥ëËì¥¯¥é¥¹¡£¼Â¹Ô»ş¤Î¡¢¼«·×»»¥Î¡¼¥ÉÆâ¤Ë¤¢¤ëËì¤òÉ½¤¹¡£
- * todo ¡Ê¸úÎ¨²şÁ±¡Ë ºÇÅ¬²½ÍÑ¤Ë¡¢»ÒÂ¹¤Ë¥ë¡¼¥ÈËì¤ò»ı¤Ä¤³¤È¤¬¤Ç¤­¤Ê¤¤¡Ê¼Â¹Ô»ş¥¨¥é¡¼¤ò½Ğ¤¹¡Ë¡Ö¥Ç¡¼¥¿Ëì¡×¥¯¥é¥¹¤òºî¤ë¡£
- * <p><b>ÇÓÂ¾À©¸æ</b></p>
- * <p>lockThread ¥Õ¥£¡¼¥ë¥É¤Ø¤ÎÂåÆş¡Ê¤¹¤Ê¤ï¤Á¥í¥Ã¥¯¤Î¼èÆÀ¡¦²òÊü¡Ë¤È¡¢¥í¥Ã¥¯²òÊü¤ÎÂÔ¤Á¹ç¤ï¤»¤Î¤¿¤á¤Ë
- * ¤³¤Î¥¯¥é¥¹¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤Ë´Ø¤¹¤ë synchronized Àá¤òÍøÍÑ¤¹¤ë¡£
- * ¥Õ¥£¡¼¥ë¥É¤Ø¤ÎÂåÆş¤ò¤¹¤ë»ş¤Ï¡¢ÆÃ¤Ëµ­½Ò¤¬¤Ê¤¤¸Â¤ê¤³¤ÎËì¤Î¥í¥Ã¥¯¤ò¼èÆÀ¤·¤Æ¤¤¤ëÉ¬Í×¤¬¤¢¤ë¡£
+ * ãƒ­ãƒ¼ã‚«ãƒ«è†œã‚¯ãƒ©ã‚¹ã€‚å®Ÿè¡Œæ™‚ã®ã€è‡ªè¨ˆç®—ãƒãƒ¼ãƒ‰å†…ã«ã‚ã‚‹è†œã‚’è¡¨ã™ã€‚
+ * todo ï¼ˆåŠ¹ç‡æ”¹å–„ï¼‰ æœ€é©åŒ–ç”¨ã«ã€å­å­«ã«ãƒ«ãƒ¼ãƒˆè†œã‚’æŒã¤ã“ã¨ãŒã§ããªã„ï¼ˆå®Ÿè¡Œæ™‚ã‚¨ãƒ©ãƒ¼ã‚’å‡ºã™ï¼‰ã€Œãƒ‡ãƒ¼ã‚¿è†œã€ã‚¯ãƒ©ã‚¹ã‚’ä½œã‚‹ã€‚
+ * <p><b>æ’ä»–åˆ¶å¾¡</b></p>
+ * <p>lockThread ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®ä»£å…¥ï¼ˆã™ãªã‚ã¡ãƒ­ãƒƒã‚¯ã®å–å¾—ãƒ»è§£æ”¾ï¼‰ã¨ã€ãƒ­ãƒƒã‚¯è§£æ”¾ã®å¾…ã¡åˆã‚ã›ã®ãŸã‚ã«
+ * ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã«é–¢ã™ã‚‹ synchronized ç¯€ã‚’åˆ©ç”¨ã™ã‚‹ã€‚
+ * ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®ä»£å…¥ã‚’ã™ã‚‹æ™‚ã¯ã€ç‰¹ã«è¨˜è¿°ãŒãªã„é™ã‚Šã“ã®è†œã®ãƒ­ãƒƒã‚¯ã‚’å–å¾—ã—ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚
  * @author Mizuno, n-kato
  */
 public final class Membrane extends QueuedEntity
 {
-	/** ¿ÆËì¡£¥ê¥â¡¼¥È¤Ë¤¢¤ë¤Ê¤é¤ĞRemoteMembrane¥ª¥Ö¥¸¥§¥¯¥È¤ò»²¾È¤¹¤ë¡£GlobalRoot¤Ê¤é¤Ğnull¡£
-	 * ½¤Àµ¤¹¤ë¤È¤­¤Ï¡¢¿ÆËì¤Î¥í¥Ã¥¯¤ò¼èÆÀ¤·¤Æ¤¤¤ëÉ¬Í×¤¬¤¢¤ë¡£
-	 * null ¤òÂåÆş¤¹¤ë¡Ê=¤³¤ÎËì¤ò½üµî¤¹¤ë¡Ë»ş¤Ï¡¢¤³¤ÎËì¤È¿ÆËì¤ÎÎ¾Êı¤Î¥í¥Ã¥¯¤ò¼èÆÀ¤·¤Æ¤¤¤ëÉ¬Í×¤¬¤¢¤ë¡£ */
+	/** è¦ªè†œã€‚ãƒªãƒ¢ãƒ¼ãƒˆã«ã‚ã‚‹ãªã‚‰ã°RemoteMembraneã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å‚ç…§ã™ã‚‹ã€‚GlobalRootãªã‚‰ã°nullã€‚
+	 * ä¿®æ­£ã™ã‚‹ã¨ãã¯ã€è¦ªè†œã®ãƒ­ãƒƒã‚¯ã‚’å–å¾—ã—ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚
+	 * null ã‚’ä»£å…¥ã™ã‚‹ï¼ˆ=ã“ã®è†œã‚’é™¤å»ã™ã‚‹ï¼‰æ™‚ã¯ã€ã“ã®è†œã¨è¦ªè†œã®ä¸¡æ–¹ã®ãƒ­ãƒƒã‚¯ã‚’å–å¾—ã—ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚ */
 	protected Membrane parent;
-	/** ¥¢¥È¥à¤Î½¸¹ç */
+	/** ã‚¢ãƒˆãƒ ã®é›†åˆ */
 	protected AtomSet atoms = new AtomSet();
-	/** »ÒËì¤Î½¸¹ç */
+	/** å­è†œã®é›†åˆ */
 	protected Set<Membrane> mems = null;
-//	/** ¤³¤Î¥»¥ë¤Î¼«Í³¥ê¥ó¥¯¤Î¿ô */
+//	/** ã“ã®ã‚»ãƒ«ã®è‡ªç”±ãƒªãƒ³ã‚¯ã®æ•° */
 //	protected int freeLinkCount = 0;
-	/** ¥ë¡¼¥ë¥»¥Ã¥È¤Î½¸¹ç¡£ */
+	/** ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®é›†åˆã€‚ */
 	protected List<Ruleset> rulesets = new ArrayList<Ruleset>();
-	/** Ëì¤Î¥¿¥¤¥× */
+	/** è†œã®ã‚¿ã‚¤ãƒ— */
 	protected int kind = 0;
 	public static final int KIND_ND = 2;
-	/** true¤Ê¤é¤Ğ¤³¤ÎËì°Ê²¼¤ËÅ¬ÍÑ¤Ç¤­¤ë¥ë¡¼¥ë¤¬Ìµ¤¤ */
+	/** trueãªã‚‰ã°ã“ã®è†œä»¥ä¸‹ã«é©ç”¨ã§ãã‚‹ãƒ«ãƒ¼ãƒ«ãŒç„¡ã„ */
 	protected boolean stable = false;
-	/** ±ÊÂ³¥Õ¥é¥°¡Êtrue¤Ê¤é¤Ğ¥ë¡¼¥ëÅ¬ÍÑ¤Ç¤­¤Ê¤¯¤Æ¤âstable¤Ë¤Ê¤é¤Ê¤¤¡Ë*/
+	/** æ°¸ç¶šãƒ•ãƒ©ã‚°ï¼ˆtrueãªã‚‰ã°ãƒ«ãƒ¼ãƒ«é©ç”¨ã§ããªãã¦ã‚‚stableã«ãªã‚‰ãªã„ï¼‰*/
 	public boolean perpetual = false;
-	/** ¤³¤ÎËì¤ò¥í¥Ã¥¯¤·¤Æ¤¤¤ë¥¹¥ì¥Ã¥É¡£¥í¥Ã¥¯¤µ¤ì¤Æ¤¤¤Ê¤¤¤È¤­¤Ïnull¤¬Æş¤Ã¤Æ¤¤¤ë¡£*/
+	/** ã“ã®è†œã‚’ãƒ­ãƒƒã‚¯ã—ã¦ã„ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã€‚ãƒ­ãƒƒã‚¯ã•ã‚Œã¦ã„ãªã„ã¨ãã¯nullãŒå…¥ã£ã¦ã„ã‚‹ã€‚*/
 	protected Thread lockThread = null;
 
 	private static int nextId = 0;
 	private int id;
 
-	/** »ÒËì->(¥³¥Ô¡¼¸µ¤Î¥¢¥È¥àin»ÒËì->¥³¥Ô¡¼Àè¤Î¥¢¥È¥àin¥³¥Ô¡¼¤µ¤ì¤¿»ÒËì)
-	 * TODO Ëì¤Î¥á¥ó¥ĞÊÑ¿ô¤Ç¤¤¤¤¤Î¤«¤É¤¦¤« */
+	/** å­è†œ->(ã‚³ãƒ”ãƒ¼å…ƒã®ã‚¢ãƒˆãƒ inå­è†œ->ã‚³ãƒ”ãƒ¼å…ˆã®ã‚¢ãƒˆãƒ inã‚³ãƒ”ãƒ¼ã•ã‚ŒãŸå­è†œ)
+	 * TODO è†œã®ãƒ¡ãƒ³ãƒå¤‰æ•°ã§ã„ã„ã®ã‹ã©ã†ã‹ */
 	HashMap<Membrane, Map<Atom, Atom>> memToCopyMap = null; 
 
-	/** ¤³¤ÎËì¤ÎÌ¾Á°¡Êintern¤µ¤ì¤¿Ê¸»úÎó¤Ş¤¿¤Ïnull¡Ë */
+	/** ã“ã®è†œã®åå‰ï¼ˆinternã•ã‚ŒãŸæ–‡å­—åˆ—ã¾ãŸã¯nullï¼‰ */
 	String name = null;
 	public boolean equalName(String s){
 		if(name == null && s == null)return true;
@@ -62,118 +62,118 @@ public final class Membrane extends QueuedEntity
 		else return false;
 	}
 	public String getName() { return name; }
-	public void setName(String name) { this.name = name; } // »ÅÍÍ¤¬¸Ç¤Ş¤Ã¤¿¤é¥³¥ó¥¹¥È¥é¥¯¥¿¤ÇÅÏ¤¹¤è¤¦¤Ë¤¹¤Ù¤­¤«¤â
+	public void setName(String name) { this.name = name; } // ä»•æ§˜ãŒå›ºã¾ã£ãŸã‚‰ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§æ¸¡ã™ã‚ˆã†ã«ã™ã¹ãã‹ã‚‚
 
-	/** ¼Â¹Ô¥¢¥È¥à¥¹¥¿¥Ã¥¯¡£
-	 * Áàºî¤¹¤ëºİ¤Ë¤³¤ÎËì¤Î¥í¥Ã¥¯¤ò¼èÆÀ¤·¤Æ¤¤¤ëÉ¬Í×¤Ï¤Ê¤¤¡£
-	 * ÇÓÂ¾À©¸æ¤Ë¤Ï¡¢Stack ¥¤¥ó¥¹¥¿¥ó¥¹¤Ë´Ø¤¹¤ë synchronized Àá¤òÍøÍÑ¤·¤Æ¤¤¤ë¡£ */
+	/** å®Ÿè¡Œã‚¢ãƒˆãƒ ã‚¹ã‚¿ãƒƒã‚¯ã€‚
+	 * æ“ä½œã™ã‚‹éš›ã«ã“ã®è†œã®ãƒ­ãƒƒã‚¯ã‚’å–å¾—ã—ã¦ã„ã‚‹å¿…è¦ã¯ãªã„ã€‚
+	 * æ’ä»–åˆ¶å¾¡ã«ã¯ã€Stack ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã«é–¢ã™ã‚‹ synchronized ç¯€ã‚’åˆ©ç”¨ã—ã¦ã„ã‚‹ã€‚ */
 	private Stack ready = null;
 
-//	/** ¥ê¥â¡¼¥È¥Û¥¹¥È¤È¤ÎÄÌ¿®¤Ç¤³¤ÎËì¤Î¥¢¥È¥à¤òÆ±Äê¤¹¤ë¤È¤­¤Ë»ÈÍÑ¤µ¤ì¤ëatomid¤ÎÉ½¡£
+//	/** ãƒªãƒ¢ãƒ¼ãƒˆãƒ›ã‚¹ãƒˆã¨ã®é€šä¿¡ã§ã“ã®è†œã®ã‚¢ãƒˆãƒ ã‚’åŒå®šã™ã‚‹ã¨ãã«ä½¿ç”¨ã•ã‚Œã‚‹atomidã®è¡¨ã€‚
 //	* <p>atomid (String) -> Atom
-//	* <p>¤³¤ÎËì¤Î¥­¥ã¥Ã¥·¥åÁ÷¿®¸å¡¢¤³¤ÎËì¤ÎÏ¢Â³¤¹¤ë¥í¥Ã¥¯´ü´ÖÃæ¤Î¤ßÍ­¸ú¡£
-//	* ¥­¥ã¥Ã¥·¥åÁ÷¿®»ş¤Ë½é´ü²½¤µ¤ì¡¢°ú¤­Â³¤¯¥ê¥â¡¼¥È¥Û¥¹¥È¤«¤é¤ÎÍ×µá¤ò²ò¼á¤¹¤ë¤¿¤á¤Ë»ÈÍÑ¤µ¤ì¤ë¡£
-//	* ¥ê¥â¡¼¥È¥Û¥¹¥È¤«¤é¤ÎÍ×µá¤Ç¿·¤·¤¯¥¢¥È¥à¤¬ºîÀ®¤µ¤ì¤ë¤È¡¢¼õ¿®¤·¤¿NEW_¤ò¥­¡¼¤È¤¹¤ë¥¨¥ó¥È¥ê¤¬ÄÉ²Ã¤µ¤ì¤ë¡£
-//	* $inside_proxy¥¢¥È¥à¤Î¾ì¹ç¡¢Ì¿Îá¥Ö¥í¥Ã¥¯¤ÎÊÖÅú¤Î¥¿¥¤¥ß¥ó¥°¤Ç¥í¡¼¥«¥ëID¤Ç¾å½ñ¤­¤µ¤ì¤ë¡£
-//	* $inside_proxy°Ê³°¤Î¥¢¥È¥à¤Î¾ì¹ç¡¢¥í¥Ã¥¯²ò½ü¤Ş¤ÇNEW_¤Î¤Ş¤ŞÊüÃÖ¤µ¤ì¤ë¡£
+//	* <p>ã“ã®è†œã®ã‚­ãƒ£ãƒƒã‚·ãƒ¥é€ä¿¡å¾Œã€ã“ã®è†œã®é€£ç¶šã™ã‚‹ãƒ­ãƒƒã‚¯æœŸé–“ä¸­ã®ã¿æœ‰åŠ¹ã€‚
+//	* ã‚­ãƒ£ãƒƒã‚·ãƒ¥é€ä¿¡æ™‚ã«åˆæœŸåŒ–ã•ã‚Œã€å¼•ãç¶šããƒªãƒ¢ãƒ¼ãƒˆãƒ›ã‚¹ãƒˆã‹ã‚‰ã®è¦æ±‚ã‚’è§£é‡ˆã™ã‚‹ãŸã‚ã«ä½¿ç”¨ã•ã‚Œã‚‹ã€‚
+//	* ãƒªãƒ¢ãƒ¼ãƒˆãƒ›ã‚¹ãƒˆã‹ã‚‰ã®è¦æ±‚ã§æ–°ã—ãã‚¢ãƒˆãƒ ãŒä½œæˆã•ã‚Œã‚‹ã¨ã€å—ä¿¡ã—ãŸNEW_ã‚’ã‚­ãƒ¼ã¨ã™ã‚‹ã‚¨ãƒ³ãƒˆãƒªãŒè¿½åŠ ã•ã‚Œã‚‹ã€‚
+//	* $inside_proxyã‚¢ãƒˆãƒ ã®å ´åˆã€å‘½ä»¤ãƒ–ãƒ­ãƒƒã‚¯ã®è¿”ç­”ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§ãƒ­ãƒ¼ã‚«ãƒ«IDã§ä¸Šæ›¸ãã•ã‚Œã‚‹ã€‚
+//	* $inside_proxyä»¥å¤–ã®ã‚¢ãƒˆãƒ ã®å ´åˆã€ãƒ­ãƒƒã‚¯è§£é™¤ã¾ã§NEW_ã®ã¾ã¾æ”¾ç½®ã•ã‚Œã‚‹ã€‚
 //	* @see Atom.remoteid */
 //	protected HashMap atomTable = null;
 
 	///////////////////////////////
-	// ¥³¥ó¥¹¥È¥é¥¯¥¿
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 
-	/** »ØÄê¤µ¤ì¤¿¥¿¥¹¥¯¤Ë½êÂ°¤¹¤ëËì¤òºîÀ®¤¹¤ë¡£newMem/newRoot ¤«¤é¸Æ¤Ğ¤ì¤ë¡£*/
+	/** æŒ‡å®šã•ã‚ŒãŸã‚¿ã‚¹ã‚¯ã«æ‰€å±ã™ã‚‹è†œã‚’ä½œæˆã™ã‚‹ã€‚newMem/newRoot ã‹ã‚‰å‘¼ã°ã‚Œã‚‹ã€‚*/
 	private Membrane(Membrane parent) {
 		mems = new HashSet<Membrane>();
 
 		this.parent = parent;
 		id = nextId++;
 	}
-	/** ¿ÆËì¤ò»ı¤¿¤Ê¤¤Ëì¤òºîÀ®¤¹¤ë¡£Task.createFreeMembrane ¤«¤é¸Æ¤Ğ¤ì¤ë¡£*/
+	/** è¦ªè†œã‚’æŒãŸãªã„è†œã‚’ä½œæˆã™ã‚‹ã€‚Task.createFreeMembrane ã‹ã‚‰å‘¼ã°ã‚Œã‚‹ã€‚*/
 	protected Membrane() {
 		this(null);
 	}
 
-	/** ¤³¤ÎËì¤Î¥°¥í¡¼¥Ğ¥ëID¤ò¼èÆÀ¤¹¤ë */
+	/** ã“ã®è†œã®ã‚°ãƒ­ãƒ¼ãƒãƒ«IDã‚’å–å¾—ã™ã‚‹ */
 	public String getMemID() { return Integer.toString(id); }
 	
 	
-//	/** ¤³¤ÎËì¤¬½êÂ°¤¹¤ë·×»»¥Î¡¼¥É¤Ë¤ª¤±¤ë¡¢¤³¤ÎËì¤Î»ØÄê¤µ¤ì¤¿¥¢¥È¥à¤ÎID¤ò¼èÆÀ¤¹¤ë */
+//	/** ã“ã®è†œãŒæ‰€å±ã™ã‚‹è¨ˆç®—ãƒãƒ¼ãƒ‰ã«ãŠã‘ã‚‹ã€ã“ã®è†œã®æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒˆãƒ ã®IDã‚’å–å¾—ã™ã‚‹ */
 //	public String getAtomID(Atom atom) { return atom.getLocalID(); }
 
 	///////////////////////////////
-	// ¾ğÊó¤Î¼èÆÀ
+	// æƒ…å ±ã®å–å¾—
 
 	/**
-	 * ¥Ç¥Õ¥©¥ë¥È¤Î¼ÂÁõ¤À¤È½èÍı·Ï¤ÎÆâÉô¾õÂÖ¤¬ÊÑ¤ï¤ë¤ÈÊÑ¤ï¤Ã¤Æ¤·¤Ş¤¦¤Î¤Ç¡¢
-	 * ¥¤¥ó¥¹¥¿¥ó¥¹¤´¤È¤Ë¥æ¥Ë¡¼¥¯¤Êid¤òÍÑ°Õ¤·¤Æ¥Ï¥Ã¥·¥å¥³¡¼¥É¤È¤·¤ÆÍøÍÑ¤¹¤ë¡£
+	 * ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å®Ÿè£…ã ã¨å‡¦ç†ç³»ã®å†…éƒ¨çŠ¶æ…‹ãŒå¤‰ã‚ã‚‹ã¨å¤‰ã‚ã£ã¦ã—ã¾ã†ã®ã§ã€
+	 * ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã”ã¨ã«ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªidã‚’ç”¨æ„ã—ã¦ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã¨ã—ã¦åˆ©ç”¨ã™ã‚‹ã€‚
 	 */
 	public int hashCode() {
 		return id;
 	}
-	// 061028 okabe ¥é¥ó¥¿¥¤¥à¤ÏÍ£°ì¤Ä¤Ê¤Î¤ÇGlobal/Local ¤Î¶èÊÌ¤ÏÉ¬Í×¤Ê¤¤
-//	/** ¤³¤ÎËì¤Î¥í¡¼¥«¥ëID¤ò¼èÆÀ¤¹¤ë */
-//	public String getLocalID() {  //public¤Ê¤Î¤ÏLMNtalDaemon¤«¤é¸Æ¤ó¤Ç¤¤¤ë¤«¤é¢ª¸Æ¤Ğ¤Ê¤¯¤Ê¤Ã¤¿¤Î¤Çprotected¤Ç¤è¤¤
+	// 061028 okabe ãƒ©ãƒ³ã‚¿ã‚¤ãƒ ã¯å”¯ä¸€ã¤ãªã®ã§Global/Local ã®åŒºåˆ¥ã¯å¿…è¦ãªã„
+//	/** ã“ã®è†œã®ãƒ­ãƒ¼ã‚«ãƒ«IDã‚’å–å¾—ã™ã‚‹ */
+//	public String getLocalID() {  //publicãªã®ã¯LMNtalDaemonã‹ã‚‰å‘¼ã‚“ã§ã„ã‚‹ã‹ã‚‰â†’å‘¼ã°ãªããªã£ãŸã®ã§protectedã§ã‚ˆã„
 //	return Integer.toString(id);
 //	}
 
-	/** ¿ÆËì¤Î¼èÆÀ */
+	/** è¦ªè†œã®å–å¾— */
 	public Membrane getParent() {
 		return parent;
 	}
 
-	/** AtomSet¤òÇÛÎó·Á¼°¤Ç¼èÆÀ */
-	// »È¤Ã¤Æ¤ë¾ì½ê¤¬¤Ê¤¤¤Î¤Ç¥³¥á¥ó¥È¥¢¥¦¥È
+	/** AtomSetã‚’é…åˆ—å½¢å¼ã§å–å¾— */
+	// ä½¿ã£ã¦ã‚‹å ´æ‰€ãŒãªã„ã®ã§ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆ
 //	public Atom[] getAtomSet() {
 //	return (Atom[])atoms.toArray();
 //	}
 	/** 060727 */
-	/** ¥ë¡¼¥ë¥»¥Ã¥È¿ô¤ò¼èÆÀ */
+	/** ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆæ•°ã‚’å–å¾— */
 	public int getRulesetCount() {
 		return rulesets.size();
 	}
 	public int getMemCount() {
 		return mems.size();
 	}
-	/** proxy°Ê³°¤Î¥¢¥È¥à¤Î¿ô¤ò¼èÆÀ
-	 * todo ¤³¤ÎÌ¾Á°¤Ç¤¤¤¤¤Î¤«¤É¤¦¤« */
+	/** proxyä»¥å¤–ã®ã‚¢ãƒˆãƒ ã®æ•°ã‚’å–å¾—
+	 * todo ã“ã®åå‰ã§ã„ã„ã®ã‹ã©ã†ã‹ */
 	public int getAtomCount() {
 		return atoms.getNormalAtomCount();
 	}
-	/** »ØÄê¤µ¤ì¤¿¥Õ¥¡¥ó¥¯¥¿¤ò¤â¤Ä¥¢¥È¥à¤Î¿ô¤ò¼èÆÀ*/
+	/** æŒ‡å®šã•ã‚ŒãŸãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’ã‚‚ã¤ã‚¢ãƒˆãƒ ã®æ•°ã‚’å–å¾—*/
 	public int getAtomCountOfFunctor(Functor functor) {
 		return atoms.getAtomCountOfFunctor(functor);
 	}
-	/** ¤³¤Î¥»¥ë¤Î¼«Í³¥ê¥ó¥¯¤Î¿ô¤ò¼èÆÀ */
+	/** ã“ã®ã‚»ãƒ«ã®è‡ªç”±ãƒªãƒ³ã‚¯ã®æ•°ã‚’å–å¾— */
 	public int getFreeLinkCount() {
 		return atoms.getAtomCountOfFunctor(Functor.INSIDE_PROXY);
 	}
-	/** Ëì¤Î¥¿¥¤¥×¤ò¼èÆÀ */
+	/** è†œã®ã‚¿ã‚¤ãƒ—ã‚’å–å¾— */
 	public int getKind() {
 		return kind;
 	}
-	/** Ëì¤Î¥¿¥¤¥×¤òÊÑ¹¹ */
+	/** è†œã®ã‚¿ã‚¤ãƒ—ã‚’å¤‰æ›´ */
 	public void changeKind(int k) {
 		kind = k;
 		if (kind == KIND_ND) {
-			//Èó·èÄêÅª¼Â¹ÔËì¤Ï¡¢ÉáÄÌ¤ÎÊıË¡¤Ç¤Ï¼Â¹Ô¤·¤Ê¤¤
+			//éæ±ºå®šçš„å®Ÿè¡Œè†œã¯ã€æ™®é€šã®æ–¹æ³•ã§ã¯å®Ÿè¡Œã—ãªã„
 			dequeue();
 			toStable();
 		}
 	}
-	/** ¤³¤ÎËì¤È¤½¤Î»ÒÂ¹¤ËÅ¬ÍÑ¤Ç¤­¤ë¥ë¡¼¥ë¤¬¤Ê¤¤¾ì¹ç¤Ëtrue */
+	/** ã“ã®è†œã¨ãã®å­å­«ã«é©ç”¨ã§ãã‚‹ãƒ«ãƒ¼ãƒ«ãŒãªã„å ´åˆã«true */
 	public boolean isStable() {
 		return stable;
 	}
-	/** stable¥Õ¥é¥°¤òON¤Ë¤¹¤ë 10/26ÌğÅç Task#exec()Æâ¤Ç»È¤¦*/
+	/** stableãƒ•ãƒ©ã‚°ã‚’ONã«ã™ã‚‹ 10/26çŸ¢å³¶ Task#exec()å†…ã§ä½¿ã†*/
 	void toStable(){
 		stable = true;
 	}
-	/** ±ÊÂ³¥Õ¥é¥°¤òON¤Ë¤¹¤ë */
+	/** æ°¸ç¶šãƒ•ãƒ©ã‚°ã‚’ONã«ã™ã‚‹ */
 	public void makePerpetual(boolean f) {
 		perpetual = f;
 	}
-//	/** ±ÊÂ³¥Õ¥é¥°¤òOFF¤Ë¤¹¤ë */
+//	/** æ°¸ç¶šãƒ•ãƒ©ã‚°ã‚’OFFã«ã™ã‚‹ */
 //	public void makeNotPerpetual() {
 //	AbstractLMNtalRuntime machine = getTask().getMachine();
 //	synchronized(machine) {
@@ -181,7 +181,7 @@ public final class Membrane extends QueuedEntity
 //	machine.notify();
 //	}
 //	}
-	/** ¤³¤ÎËì¤Ë¥ë¡¼¥ë¤¬¤¢¤ì¤Ğtrue */
+	/** ã“ã®è†œã«ãƒ«ãƒ¼ãƒ«ãŒã‚ã‚Œã°true */
 	public boolean hasRules() {
 		return !rulesets.isEmpty();
 	}
@@ -189,7 +189,7 @@ public final class Membrane extends QueuedEntity
 		return kind == KIND_ND;
 	}
 
-	// È¿Éü»Ò
+	// åå¾©å­
 
 	public Object[] getAtomArray() {
 		return atoms.toArray();
@@ -201,31 +201,31 @@ public final class Membrane extends QueuedEntity
 		return mems.toArray();
 	}
 	/** 06/07/27 */
-	/** ¥ë¡¼¥ë¥»¥Ã¥È¤Î¥³¥Ô¡¼¤ò¼èÆÀ */
+	/** ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ã‚³ãƒ”ãƒ¼ã‚’å–å¾— */
 	public ArrayList<Ruleset> getRuleset() {
 		ArrayList<Ruleset> al = new ArrayList<Ruleset>(rulesets);
 		return al;
 	}
-	/** »ÒËì¤Î¥³¥Ô¡¼¤ò¼èÆÀ */
+	/** å­è†œã®ã‚³ãƒ”ãƒ¼ã‚’å–å¾— */
 	public HashSet<Membrane> getMemCopy() {
 		return new HashSet<Membrane>(mems);
 		//RandomSet s = new RandomSet();
 		//s.addAll(mems);
 		//return s;
 	}
-	/** ¤³¤ÎËì¤Ë¤¢¤ë¥¢¥È¥à¤ÎÈ¿Éü»Ò¤ò¼èÆÀ¤¹¤ë */
+	/** ã“ã®è†œã«ã‚ã‚‹ã‚¢ãƒˆãƒ ã®åå¾©å­ã‚’å–å¾—ã™ã‚‹ */
 	public Iterator<Atom> atomIterator() {
 		return atoms.iterator();
 	}
-	/** ¤³¤ÎËì¤Ë¤¢¤ë»ÒËì¤ÎÈ¿Éü»Ò¤ò¼èÆÀ¤¹¤ë */
+	/** ã“ã®è†œã«ã‚ã‚‹å­è†œã®åå¾©å­ã‚’å–å¾—ã™ã‚‹ */
 	public Iterator<Membrane> memIterator() {
 		return mems.iterator();
 	}
-	/** Ì¾Á°func¤ò»ı¤Ä¥¢¥È¥à¤ÎÈ¿Éü»Ò¤ò¼èÆÀ¤¹¤ë */
+	/** åå‰funcã‚’æŒã¤ã‚¢ãƒˆãƒ ã®åå¾©å­ã‚’å–å¾—ã™ã‚‹ */
 	public Iterator<Atom> atomIteratorOfFunctor(Functor functor) {
 		return atoms.iteratorOfFunctor(functor);
 	}
-	/** ¤³¤ÎËì¤Ë¤¢¤ë¥ë¡¼¥ë¥»¥Ã¥È¤ÎÈ¿Éü»Ò¤òÊÖ¤¹ */
+	/** ã“ã®è†œã«ã‚ã‚‹ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®åå¾©å­ã‚’è¿”ã™ */
 	public Iterator<Ruleset> rulesetIterator() {
 		return rulesets.iterator();
 	}
@@ -234,7 +234,7 @@ public final class Membrane extends QueuedEntity
 		return atoms;
 	}
 
-	/** ¿·¤·¤¤¥¿¥¤¥×¤¬k¤Î»ÒËì¤òºîÀ®¤·¡¢³èÀ­²½¤¹¤ë */
+	/** æ–°ã—ã„ã‚¿ã‚¤ãƒ—ãŒkã®å­è†œã‚’ä½œæˆã—ã€æ´»æ€§åŒ–ã™ã‚‹ */
 	public Membrane newMem(int k){
 		//		if (remote != null) {
 		//		remote.send("NEWMEM",this);
@@ -243,20 +243,20 @@ public final class Membrane extends QueuedEntity
 		Membrane m = new Membrane(this);
 		m.changeKind(k);
 		mems.add(m);
-		// ¿ÆËì¤ÈÆ±¤¸¼Â¹ÔËì¥¹¥¿¥Ã¥¯¤ËÀÑ¤à
+		// è¦ªè†œã¨åŒã˜å®Ÿè¡Œè†œã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€
 		if (k != KIND_ND)
 			stack.push(m);
 		return m;
 	}
-	/** ¿·¤·¤¤¥Ç¥Õ¥©¥ë¥È¥¿¥¤¥×¤Î»ÒËì¤òºîÀ®¤·¡¢³èÀ­²½¤¹¤ë */
+	/** æ–°ã—ã„ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚¿ã‚¤ãƒ—ã®å­è†œã‚’ä½œæˆã—ã€æ´»æ€§åŒ–ã™ã‚‹ */
 	public Membrane newMem() {
 		return newMem(0);
 	}
 
-	/** ¥Ç¥Ğ¥Ã¥°ÍÑ */
+	/** ãƒ‡ãƒãƒƒã‚°ç”¨ */
 	String getReadyStackStatus() { return ready.toString(); }
 
-	/** ¼Â¹Ô¥¢¥È¥à¥¹¥¿¥Ã¥¯¤ÎÀèÆ¬¤Î¥¢¥È¥à¤ò¼èÆÀ¤·¡¢¼Â¹Ô¥¢¥È¥à¥¹¥¿¥Ã¥¯¤«¤é½üµî */
+	/** å®Ÿè¡Œã‚¢ãƒˆãƒ ã‚¹ã‚¿ãƒƒã‚¯ã®å…ˆé ­ã®ã‚¢ãƒˆãƒ ã‚’å–å¾—ã—ã€å®Ÿè¡Œã‚¢ãƒˆãƒ ã‚¹ã‚¿ãƒƒã‚¯ã‹ã‚‰é™¤å» */
 	Atom popReadyAtom() {
 		if(null == ready){ return null; }
 		Atom atom = (Atom)ready.pop();
@@ -264,37 +264,37 @@ public final class Membrane extends QueuedEntity
 		return atom;
 	}
 
-	// hash ¤³¤³¤«¤é
+	// hash ã“ã“ã‹ã‚‰
 
-	/* Ëì¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤òÊÖ¤¹ */
+	/* è†œã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã‚’è¿”ã™ */
 	static int calculate(Membrane m) {
 		return calculate(m, new HashMap<Membrane, Integer>());
 	}
 
 	/*
-	 * Ëì¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤òÊÖ¤¹
-	 * @param m ¥Ï¥Ã¥·¥å¥³¡¼¥É»»½ĞÂĞ¾İ¤ÎËì
-	 * @param m2hc m¤Î»ÒËì¤«¤é¥Ï¥Ã¥·¥å¥³¡¼¥É¤Ø¤Î¥Ş¥Ã¥×¡£»ÒËì¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É»»½Ğ¤ò·«¤êÊÖ¤µ¤Ê¤¤¤¿¤á¤Ë»È¤¦¡£
+	 * è†œã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã‚’è¿”ã™
+	 * @param m ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ç®—å‡ºå¯¾è±¡ã®è†œ
+	 * @param m2hc mã®å­è†œã‹ã‚‰ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã¸ã®ãƒãƒƒãƒ—ã€‚å­è†œã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ç®—å‡ºã‚’ç¹°ã‚Šè¿”ã•ãªã„ãŸã‚ã«ä½¿ã†ã€‚
 	 */
 	private static int calculate(Membrane m, Map<Membrane, Integer> m2hc) {
 		//System.out.println("membrane:" + m);
 		final long MAX_VALUE = Integer.MAX_VALUE;
 		/*
-		 * add: mÆâ¤ÎÊ¬»Ò¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤¬²Ã»»¤µ¤ì¤Æ¤¤¤¯ÊÑ¿ô
-		 * mult: mÆâ¤ÎÊ¬»Ò¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤¬¾è»»¤µ¤ì¤Æ¤¤¤¯ÊÑ¿ô
+		 * add: må†…ã®åˆ†å­ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ãŒåŠ ç®—ã•ã‚Œã¦ã„ãå¤‰æ•°
+		 * mult: må†…ã®åˆ†å­ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ãŒä¹—ç®—ã•ã‚Œã¦ã„ãå¤‰æ•°
 		 */
-		long add = 3412;        // 3412¤ÏÅ¬Åö¤Ê½é´üÃÍ
+		long add = 3412;        // 3412ã¯é©å½“ãªåˆæœŸå€¤
 		long mult = 3412;
 
-		/* °ì»şÊÑ¿ô */
+		/* ä¸€æ™‚å¤‰æ•° */
 		Atom a = null;
 		Membrane mm = null;
 		QueuedEntity q = null;
 
 		/*
-		 * contents:¤³¤ÎËìÆâ¤Î¥¢¥È¥à¤È»ÒËìÁ´ÂÎ¤Î½¸¹ç
-		 * toCalculate:¸½ºß·×»»Ãæ¤ÎÊ¬»ÒÆâ¤ÎÌ¤½èÍı¥¢¥È¥à¤Ş¤¿¤Ï»ÒËì¤Î½¸¹ç
-		 * calculated:¸½ºß·×»»Ãæ¤ÎÊ¬»ÒÆâ¤Î½èÍıºÑ¥¢¥È¥à¤Ş¤¿¤Ï»ÒËì¤Î½¸¹ç
+		 * contents:ã“ã®è†œå†…ã®ã‚¢ãƒˆãƒ ã¨å­è†œå…¨ä½“ã®é›†åˆ
+		 * toCalculate:ç¾åœ¨è¨ˆç®—ä¸­ã®åˆ†å­å†…ã®æœªå‡¦ç†ã‚¢ãƒˆãƒ ã¾ãŸã¯å­è†œã®é›†åˆ
+		 * calculated:ç¾åœ¨è¨ˆç®—ä¸­ã®åˆ†å­å†…ã®å‡¦ç†æ¸ˆã‚¢ãƒˆãƒ ã¾ãŸã¯å­è†œã®é›†åˆ
 		 */
 		Set<QueuedEntity> contents = new HashSet<QueuedEntity>(), 
 		toCalculate = new HashSet<QueuedEntity>(), 
@@ -320,10 +320,10 @@ public final class Membrane extends QueuedEntity
 			contents.remove(q);
 
 			/*
-			 * mol: ¤³¤ÎÊ¬»Ò¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤òÊİ»ı¤¹¤ë
-			 * mol_add: ´ğËÜ·×»»Ã±°Ì¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤¬²Ã»»¤µ¤ì¤Æ¤¤¤¯ÊÑ¿ô
-			 * mol_mult: ´ğËÜ·×»»Ã±°Ì¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤¬¾è»»¤µ¤ì¤Æ¤¤¤¯ÊÑ¿ô
-			 * temp: ´ğËÜ·×»»Ã±°Ì¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤òÊİ»ı¤¹¤ë
+			 * mol: ã“ã®åˆ†å­ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã‚’ä¿æŒã™ã‚‹
+			 * mol_add: åŸºæœ¬è¨ˆç®—å˜ä½ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ãŒåŠ ç®—ã•ã‚Œã¦ã„ãå¤‰æ•°
+			 * mol_mult: åŸºæœ¬è¨ˆç®—å˜ä½ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ãŒä¹—ç®—ã•ã‚Œã¦ã„ãå¤‰æ•°
+			 * temp: åŸºæœ¬è¨ˆç®—å˜ä½ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã‚’ä¿æŒã™ã‚‹
 			 */
 
 			long mol = -1, mol_add = 0, mol_mult = 41, temp = 0;
@@ -332,7 +332,7 @@ public final class Membrane extends QueuedEntity
 			calculated.clear();
 			toCalculate.add(q);
 
-			// Ê¬»Ò¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤Î·×»»
+			// åˆ†å­ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã®è¨ˆç®—
 			while (!toCalculate.isEmpty()) {
 				q = toCalculate.iterator().next();
 				calculated.add(q);
@@ -342,7 +342,7 @@ public final class Membrane extends QueuedEntity
 					a = (Atom) q;
 					temp = a.getFunctor().hashCode();
 
-					// ¤³¤Î¥¢¥È¥à¤Î¥ê¥ó¥¯¤ò½èÍı¤¹¤ë
+					// ã“ã®ã‚¢ãƒˆãƒ ã®ãƒªãƒ³ã‚¯ã‚’å‡¦ç†ã™ã‚‹
 					int arity = a.getFunctor().getArity();
 					for (int k = 0; k < arity; k++) {
 						temp *= 31;
@@ -351,12 +351,12 @@ public final class Membrane extends QueuedEntity
 							Atom inside = link.getAtom();
 							int pos = link.getPos() + 1;
 							temp += (inside.getFunctor().hashCode() * pos);	
-						} else if (link.getAtom().getFunctor().isOutsideProxy()) { // ¥ê¥ó¥¯Àè¤¬»ÒËì¤Î¾ì¹ç
+						} else if (link.getAtom().getFunctor().isOutsideProxy()) { // ãƒªãƒ³ã‚¯å…ˆãŒå­è†œã®å ´åˆ
 							/*
-							 * ¥ê¥ó¥¯Àè¥¢¥È¥à¤Ë»ê¤ë¤Ş¤Ç´Ó¤¤¤¿»ÒËì¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤È
-							 * ºÇ½ªÅª¤Ê¥ê¥ó¥¯Àè¥¢¥È¥à¤Î¥Ï¥Ã¥·¥å¥³¡¼¥É¤È
-							 * ¤½¤Î¥¢¥È¥à¤Î°ú¿ôÈÖ¹æ¤ÎÁÈ¤ò
-							 * ¤³¤Î¥¢¥È¥à¤«¤é»ÒËì¤Ø¤Î¥ê¥ó¥¯¤òÉ½¸½¤¹¤ë¹à¤È¤¹¤ë¡£
+							 * ãƒªãƒ³ã‚¯å…ˆã‚¢ãƒˆãƒ ã«è‡³ã‚‹ã¾ã§è²«ã„ãŸå­è†œã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã¨
+							 * æœ€çµ‚çš„ãªãƒªãƒ³ã‚¯å…ˆã‚¢ãƒˆãƒ ã®ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã¨
+							 * ãã®ã‚¢ãƒˆãƒ ã®å¼•æ•°ç•ªå·ã®çµ„ã‚’
+							 * ã“ã®ã‚¢ãƒˆãƒ ã‹ã‚‰å­è†œã¸ã®ãƒªãƒ³ã‚¯ã‚’è¡¨ç¾ã™ã‚‹é …ã¨ã™ã‚‹ã€‚
 							 */
 							int t = 0;
 							mm = link.getAtom().nthAtom(0).getMem();
@@ -373,13 +373,13 @@ public final class Membrane extends QueuedEntity
 							t *= link.getAtom().getFunctor().hashCode();
 							t *= link.getPos() + 1;
 							temp += t;
-						} else { // ¥ê¥ó¥¯Àè¤¬¥×¥í¥­¥·°Ê³°¤Î¥¢¥È¥à¤Î¾ì¹ç
+						} else { // ãƒªãƒ³ã‚¯å…ˆãŒãƒ—ãƒ­ã‚­ã‚·ä»¥å¤–ã®ã‚¢ãƒˆãƒ ã®å ´åˆ
 							Atom linked = link.getAtom();
 							if (!calculated.contains(linked)) {
 								toCalculate.add(linked);
 							}
 							int pos = link.getPos() + 1;
-							// ÀÜÂ³Àè¤Î°ú¿ôÈÖ¹æ¤ò¥Ï¥Ã¥·¥å¥³¡¼¥É¤Ë´ØÍ¿¤µ¤»¤ë
+							// æ¥ç¶šå…ˆã®å¼•æ•°ç•ªå·ã‚’ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã«é–¢ä¸ã•ã›ã‚‹
 							temp += (linked.getFunctor().hashCode() * pos);
 						}
 					}
@@ -388,20 +388,20 @@ public final class Membrane extends QueuedEntity
 					final int thisMembsHC = m2hc.get(mt);
 					temp = thisMembsHC;
 
-					// ¤³¤ÎËì¤«¤éËì¤Î³°Éô¤Ø¤Î¥ê¥ó¥¯¤ò½èÍı¤¹¤ë
+					// ã“ã®è†œã‹ã‚‰è†œã®å¤–éƒ¨ã¸ã®ãƒªãƒ³ã‚¯ã‚’å‡¦ç†ã™ã‚‹
 					Link link = null;
 					for (Iterator<Atom> i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY); i.hasNext(); ) {
 						Atom inside =  i.next();
-						// ¤³¤ÎËì³°Éô¤Î¡Ê¥×¥í¥­¥·¤Ç¤Ê¤¤¡Ë¥ê¥ó¥¯Àè¥¢¥È¥à¤Ş¤Ç¥È¥ì¡¼¥¹
+						// ã“ã®è†œå¤–éƒ¨ã®ï¼ˆãƒ—ãƒ­ã‚­ã‚·ã§ãªã„ï¼‰ãƒªãƒ³ã‚¯å…ˆã‚¢ãƒˆãƒ ã¾ã§ãƒˆãƒ¬ãƒ¼ã‚¹
 						int s = 0;
 						link = inside.nthAtom(0).getArg(1);
 
-						if (link.getAtom().getFunctor().isOutsideProxy()) { // ¤³¤ÎËì¤Î¥ê¥ó¥¯Àè¤¬Ëì¤Î¤È¤­
+						if (link.getAtom().getFunctor().isOutsideProxy()) { // ã“ã®è†œã®ãƒªãƒ³ã‚¯å…ˆãŒè†œã®ã¨ã
 							mm = link.getAtom().nthAtom(0).getMem();
 							if (!calculated.contains(mm)) {
 								toCalculate.add(mm);
 							}
-						} else { // ¤³¤ÎËì¤Î¥ê¥ó¥¯Àè¤¬¥¢¥È¥à¤Î¾ì¹ç
+						} else { // ã“ã®è†œã®ãƒªãƒ³ã‚¯å…ˆãŒã‚¢ãƒˆãƒ ã®å ´åˆ
 							a = link.getAtom();
 							if (!calculated.contains(a)) {
 								toCalculate.add(a);
@@ -416,7 +416,7 @@ public final class Membrane extends QueuedEntity
 						s += link.getAtom().getFunctor().hashCode();
 						s *= link.getPos() + 1;
 
-						// ¤³¤ÎËìÆâÉô¤Î¡Ê¥×¥í¥­¥·¤Ç¤Ê¤¤¡Ë¥ê¥ó¥¯¸µ¥¢¥È¥à¤Ş¤Ç¥È¥ì¡¼¥¹
+						// ã“ã®è†œå†…éƒ¨ã®ï¼ˆãƒ—ãƒ­ã‚­ã‚·ã§ãªã„ï¼‰ãƒªãƒ³ã‚¯å…ƒã‚¢ãƒˆãƒ ã¾ã§ãƒˆãƒ¬ãƒ¼ã‚¹
 						int t = 0;
 						link = inside.getArg(1);
 						while (link.getAtom().getFunctor().isOutsideProxy()) {
@@ -437,7 +437,7 @@ public final class Membrane extends QueuedEntity
 			}
 			mol = mol_add^mol_mult;
 			//System.out.println("molecule: " + calculated + " = " + mol);
-			/* ¥Ï¥Ã¥·¥å¥³¡¼¥É¤ò»»½Ğ¤·¤¿Ê¬»Ò¤ò·×»»ÂĞ¾İ¤«¤é¼è¤ê½ü¤¯ */
+			/* ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã‚’ç®—å‡ºã—ãŸåˆ†å­ã‚’è¨ˆç®—å¯¾è±¡ã‹ã‚‰å–ã‚Šé™¤ã */
 			contents.removeAll(calculated);
 
 			add += mol;

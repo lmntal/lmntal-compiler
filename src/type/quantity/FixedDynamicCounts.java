@@ -3,9 +3,9 @@ package type.quantity;
 public class FixedDynamicCounts {
 	public final int multiple;
 	
-	/** ºï½ü¤¹¤ë¥×¥í¥»¥¹ */
+	/** å‰Šé™¤ã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹ */
 	public final FixedCounts removeCounts;
-	/** À¸À®¤¹¤ë¥×¥í¥»¥¹ */
+	/** ç”Ÿæˆã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹ */
 	public final FixedCounts generateCounts;
 	public FixedDynamicCounts(DynamicCounts dom) {
 		removeCounts = dom.removeCounts.solve();

@@ -19,35 +19,35 @@ import util.NestedIterator;
 import util.Util;
 
 /**
- * ¥¢¥È¥à¤Î½¸¹ç¤ò´ÉÍı¤¹¤ë¤¿¤á¤Î¥¯¥é¥¹¡£
- * Í×ÁÇ¤ÏAtom¥¯¥é¥¹¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤Î¤ß¤È²¾Äê¤¹¤ë¡£
- * Functor¤ò¥­¡¼¤È¤·¡¢¤½¤ÎFunctor¤ò»ı¤Ä¥¢¥È¥à¤Î½¸¹ç¤òÃÍ¤È¤¹¤ëMap¤ò»È¤Ã¤Æ¡¢
- * FunctorËè¤Ë¥¢¥È¥à¤ò´ÉÍı¤·¤Æ¤¤¤ë¡£
+ * ã‚¢ãƒˆãƒ ã®é›†åˆã‚’ç®¡ç†ã™ã‚‹ãŸã‚ã®ã‚¯ãƒ©ã‚¹ã€‚
+ * è¦ç´ ã¯Atomã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ã¿ã¨ä»®å®šã™ã‚‹ã€‚
+ * Functorã‚’ã‚­ãƒ¼ã¨ã—ã€ãã®Functorã‚’æŒã¤ã‚¢ãƒˆãƒ ã®é›†åˆã‚’å€¤ã¨ã™ã‚‹Mapã‚’ä½¿ã£ã¦ã€
+ * Functoræ¯ã«ã‚¢ãƒˆãƒ ã‚’ç®¡ç†ã—ã¦ã„ã‚‹ã€‚
  * @author Mizuno
  */
 public final class AtomSet implements Iterable<Atom>
 {
-	/** atomsÆâ¤Î¥¢¥È¥à¤Î¿ô¡£À°¹çÀ­Í×Ãí°Õ */
+	/** atomså†…ã®ã‚¢ãƒˆãƒ ã®æ•°ã€‚æ•´åˆæ€§è¦æ³¨æ„ */
 	private int size = 0;
-	/** ¼Âºİ¤Ë¥¢¥È¥à¤Î½¸¹ç¤ò´ÉÍı¤·¤Æ¤¤¤ëÊÑ¿ô */
+	/** å®Ÿéš›ã«ã‚¢ãƒˆãƒ ã®é›†åˆã‚’ç®¡ç†ã—ã¦ã„ã‚‹å¤‰æ•° */
 	private Map<Functor, List<Atom>> atoms = null;
-	/** ¥á¥â¥êÍøÍÑÎÌºï¸º¤Î¤¿¤á¡¢¥Ç¡¼¥¿¥¢¥È¥à¤Ï¤Ş¤È¤á¤Æ´ÉÍı */
+	/** ãƒ¡ãƒ¢ãƒªåˆ©ç”¨é‡å‰Šæ¸›ã®ãŸã‚ã€ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã¯ã¾ã¨ã‚ã¦ç®¡ç† */
 	private List<Atom> dataAtoms = null;
-	/** OUTSIDE_PROXY¤Î½¸¹ç¤ò´ÉÍı¤·¤Æ¤¤¤ëÊÑ¿ô */
+	/** OUTSIDE_PROXYã®é›†åˆã‚’ç®¡ç†ã—ã¦ã„ã‚‹å¤‰æ•° */
 	private Map<Functor, List<Atom>> outs = null;
 	
 	private List<Atom> startAtoms = null; 
 
-	/** ¥¢¥È¥à¿ô¤Î¼èÆÀ */
+	/** ã‚¢ãƒˆãƒ æ•°ã®å–å¾— */
 	public int size() {
 		return size;
 	}
-	/** ¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥à°Ê³°¤Î¥¢¥È¥à¤Î¿ô¤Î¼èÆÀ */
+	/** è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ ä»¥å¤–ã®ã‚¢ãƒˆãƒ ã®æ•°ã®å–å¾— */
 	public int getNormalAtomCount() {
 		return size - getAtomCountOfFunctor(Functor.INSIDE_PROXY)
 					 - getOutCount();
 	}
-	/** »ØÄê¤µ¤ì¤¿Functor¤ò»ı¤Ä¥¢¥È¥à¤Î¿ô¤Î¼èÆÀ */
+	/** æŒ‡å®šã•ã‚ŒãŸFunctorã‚’æŒã¤ã‚¢ãƒˆãƒ ã®æ•°ã®å–å¾— */
 	public int getAtomCountOfFunctor(Functor f) {
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
 			List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
@@ -65,7 +65,7 @@ public final class AtomSet implements Iterable<Atom>
 			return size;
 		}
 	}
-	/** OUTSIDE_PROXY¤Î¿ô¤Î¼èÆÀ */
+	/** OUTSIDE_PROXYã®æ•°ã®å–å¾— */
 	public int getOutCount() {
 		Iterator<List<Atom>> i = getOuts().values().iterator();
 		int k=0;
@@ -74,11 +74,11 @@ public final class AtomSet implements Iterable<Atom>
 		}
 		return k;
 	}
-	/** ¶õ¤«¤É¤¦¤«¤òÊÖ¤¹ */
+	/** ç©ºã‹ã©ã†ã‹ã‚’è¿”ã™ */
 	public boolean isEmpty() {
 		return size == 0;
 	}
-	/** ¤³¤Î½¸¹çÆâ¤Ë¤¢¤ë¥¢	¥È¥à¤ÎÈ¿Éü»Ò¤òÊÖ¤¹ */
+	/** ã“ã®é›†åˆå†…ã«ã‚ã‚‹ã‚¢	ãƒˆãƒ ã®åå¾©å­ã‚’è¿”ã™ */
 
 	@SuppressWarnings("unchecked")
 	public Iterator<Atom> iterator() {
@@ -89,7 +89,7 @@ public final class AtomSet implements Iterable<Atom>
 	}
 	
 	
-	/** Í¿¤¨¤é¤ì¤¿Ì¾Á°¤ò»ı¤Ä¥¢¥È¥à¤ÎÈ¿Éü»Ò¤òÊÖ¤¹ */
+	/** ä¸ãˆã‚‰ã‚ŒãŸåå‰ã‚’æŒã¤ã‚¢ãƒˆãƒ ã®åå¾©å­ã‚’è¿”ã™ */
 	public Iterator<Atom> iteratorOfFunctor(Functor f) {
 		if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
 			List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
@@ -102,25 +102,25 @@ public final class AtomSet implements Iterable<Atom>
 			return new DataAtomIterator(f);
 		}
 	}
-	/** OUTSIDE_PROXY¤ÎÈ¿Éü»á¤òÊÖ¤¹ */
+	/** OUTSIDE_PROXYã®åå¾©æ°ã‚’è¿”ã™ */
 	public Iterator<Atom> iteratorOfOUTSIDE_PROXY() {
 		return new MultiMapIterator<Atom>(getOuts());
 	}
 	/** 
-	 * ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤ÎFunctor¤ÎÈ¿Éü»Ò¤òÊÖ¤¹¡£
-	 * ¤³¤Î½¸¹çÆâ¤Ë¤¢¤ë¥¢¥È¥à¤ÎFunctor¤ÏÁ´¤Æ¤³¤ÎÈ¿Éü»Ò¤ò»È¤Ã¤Æ¼èÆÀ¤Ç¤­¤ë¤¬¡¢
-	 * ¤³¤ÎÈ¿Éü»Ò¤Ç¼èÆÀ¤Ç¤­¤ëFunctor¤ò»ı¤Ä¥¢¥È¥à¤¬É¬¤º¤³¤Î½¸¹çÆâ¤Ë¤¢¤ë¤È¤Ï¸Â¤é¤Ê¤¤¡£
+	 * ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®Functorã®åå¾©å­ã‚’è¿”ã™ã€‚
+	 * ã“ã®é›†åˆå†…ã«ã‚ã‚‹ã‚¢ãƒˆãƒ ã®Functorã¯å…¨ã¦ã“ã®åå¾©å­ã‚’ä½¿ã£ã¦å–å¾—ã§ãã‚‹ãŒã€
+	 * ã“ã®åå¾©å­ã§å–å¾—ã§ãã‚‹Functorã‚’æŒã¤ã‚¢ãƒˆãƒ ãŒå¿…ãšã“ã®é›†åˆå†…ã«ã‚ã‚‹ã¨ã¯é™ã‚‰ãªã„ã€‚
 	 * 
-	 * todo remove¤µ¤ì¤¿»ş¤Ë¡¢¥¢¥È¥à¿ô¤¬0¤Ë¤Ê¤Ã¤¿Functor½üµî¤¹¤ë¤è¤¦¤Ë¤·¤¿Êı¤¬ÎÉ¤¤¤«¡©
-	 * (n-kato) Ëì¤Îgc¥á¥½¥Ã¥É¡Ê¥³¥Ô¡¼GC¤Ë¤è¤ë¥í¡¼¥«¥ëid¤Î¿¶¤êÄ¾¤·¤ò¹Ô¤¦Í½Äê¡Ë¤ËÇ¤¤»¤ÆÊüÃÖ¤·¤Æ¤¤¤¤¤È»×¤¤¤Ş¤¹¡£
-	 * ¤¿¤À¤·¡¢gc¥á¥½¥Ã¥É¤Ï¸½ºß¸Æ¤Ğ¤ì¤Ş¤»¤ó¤±¤É¡£
+	 * todo removeã•ã‚ŒãŸæ™‚ã«ã€ã‚¢ãƒˆãƒ æ•°ãŒ0ã«ãªã£ãŸFunctoré™¤å»ã™ã‚‹ã‚ˆã†ã«ã—ãŸæ–¹ãŒè‰¯ã„ã‹ï¼Ÿ
+	 * (n-kato) è†œã®gcãƒ¡ã‚½ãƒƒãƒ‰ï¼ˆã‚³ãƒ”ãƒ¼GCã«ã‚ˆã‚‹ãƒ­ãƒ¼ã‚«ãƒ«idã®æŒ¯ã‚Šç›´ã—ã‚’è¡Œã†äºˆå®šï¼‰ã«ä»»ã›ã¦æ”¾ç½®ã—ã¦ã„ã„ã¨æ€ã„ã¾ã™ã€‚
+	 * ãŸã ã—ã€gcãƒ¡ã‚½ãƒƒãƒ‰ã¯ç¾åœ¨å‘¼ã°ã‚Œã¾ã›ã‚“ã‘ã©ã€‚
 	 */
 	public Iterator<Functor> activeFunctorIterator() {
 		return getAtoms().keySet().iterator();
 	}
 	/**
-	 * ¤³¤Î½¸¹çÆâ¤ÎÁ´¤Æ¤Î¥¢¥È¥à¤«³ÊÇ¼¤µ¤ì¤Æ¤¤¤ëÇÛÎó¤òÊÖ¤¹¡£
-	 * ÊÖ¤µ¤ì¤ëÇÛÎó¤Î¼Â¹Ô»ş¤Î·¿¤ÏAtom[]¤Ç¤¹¡£
+	 * ã“ã®é›†åˆå†…ã®å…¨ã¦ã®ã‚¢ãƒˆãƒ ã‹æ ¼ç´ã•ã‚Œã¦ã„ã‚‹é…åˆ—ã‚’è¿”ã™ã€‚
+	 * è¿”ã•ã‚Œã‚‹é…åˆ—ã®å®Ÿè¡Œæ™‚ã®å‹ã¯Atom[]ã§ã™ã€‚
 	 */
 	public Object[] toArray() {
 		Object[] ret = new Atom[size];
@@ -135,8 +135,8 @@ public final class AtomSet implements Iterable<Atom>
 		return ret;
 	}
 	/**
-	 * ¤³¤Î½¸¹çÆâ¤ÎÁ´¤Æ¤Î¥¢¥È¥à¤«³ÊÇ¼¤µ¤ì¤Æ¤¤¤ëÇÛÎó¤òÊÖ¤¹¡£
-	 * ÊÖ¤µ¤ì¤ëÇÛÎó¤Î¼Â¹Ô»ş¤Î·¿¤Ï°ú¿ô¤ËÅÏ¤µ¤ì¤¿ÇÛÎó¤Î¼Â¹Ô»ş¤Î·¿¤ÈÆ±¤¸¤Ç¤¹¡£
+	 * ã“ã®é›†åˆå†…ã®å…¨ã¦ã®ã‚¢ãƒˆãƒ ã‹æ ¼ç´ã•ã‚Œã¦ã„ã‚‹é…åˆ—ã‚’è¿”ã™ã€‚
+	 * è¿”ã•ã‚Œã‚‹é…åˆ—ã®å®Ÿè¡Œæ™‚ã®å‹ã¯å¼•æ•°ã«æ¸¡ã•ã‚ŒãŸé…åˆ—ã®å®Ÿè¡Œæ™‚ã®å‹ã¨åŒã˜ã§ã™ã€‚
 	 */
 	public Object[] toArray(Object[] a) {
 		if (a.length < size) {
@@ -153,8 +153,8 @@ public final class AtomSet implements Iterable<Atom>
 		return a;
 	}
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥¢¥È¥à¤òÄÉ²Ã¤¹¤ë¡£
-	 * @return ¤³¤Î½¸¹ç¤¬ÊÑ¹¹¤µ¤ì¤¿¾ì¹ç¤Ïtrue
+	 * æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒˆãƒ ã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * @return ã“ã®é›†åˆãŒå¤‰æ›´ã•ã‚ŒãŸå ´åˆã¯true
 	 */
 	public boolean add(Atom atom) {
 		Functor f = atom.getFunctor();
@@ -175,8 +175,8 @@ public final class AtomSet implements Iterable<Atom>
 		return true;
 	}
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥¢¥È¥à¤¬¤¢¤ì¤Ğ½üµî¤¹¤ë¡£
-	 * @return ¤³¤Î½¸¹ç¤¬ÊÑ¹¹¤µ¤ì¤¿¾ì¹ç¤Ïtrue
+	 * æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒˆãƒ ãŒã‚ã‚Œã°é™¤å»ã™ã‚‹ã€‚
+	 * @return ã“ã®é›†åˆãŒå¤‰æ›´ã•ã‚ŒãŸå ´åˆã¯true
 	 */
 	public boolean remove(Atom atom) {
 		Atom a = atom;
@@ -202,9 +202,9 @@ public final class AtomSet implements Iterable<Atom>
 		return true;
 	}
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥³¥ì¥¯¥·¥ç¥óÆâ¤ÎÁ´¤Æ¤ÎÍ×ÁÇ¤ò¤³¤Î½¸¹ç¤ËÄÉ²Ã¤¹¤ë¡£
-	 * <p>¸½ºß¤Ï¸úÎ¨¤Î°­¤¤¼ÂÁõ¤ò¤·¤Æ¤¤¤ë¤Î¤Ç¡¢ÉÑÈË¤Ë»È¤¦¤Ê¤éÊÑ¹¹¤¹¤ëÉ¬Í×¤¬¤¢¤ë¡£ 
-	 * @return ¤³¤Î½¸¹ç¤¬ÊÑ¹¹¤µ¤ì¤¿¾ì¹ç¤Ïtrue
+	 * æŒ‡å®šã•ã‚ŒãŸã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³å†…ã®å…¨ã¦ã®è¦ç´ ã‚’ã“ã®é›†åˆã«è¿½åŠ ã™ã‚‹ã€‚
+	 * <p>ç¾åœ¨ã¯åŠ¹ç‡ã®æ‚ªã„å®Ÿè£…ã‚’ã—ã¦ã„ã‚‹ã®ã§ã€é »ç¹ã«ä½¿ã†ãªã‚‰å¤‰æ›´ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚ 
+	 * @return ã“ã®é›†åˆãŒå¤‰æ›´ã•ã‚ŒãŸå ´åˆã¯true
 	 */
 	public boolean addAll(Collection<Atom> c) {
 		boolean ret = false;
@@ -212,26 +212,26 @@ public final class AtomSet implements Iterable<Atom>
 		while (it.hasNext()) {
 			if (add(it.next())) {
 				ret = true;
-				//add¥á¥½¥Ã¥É¤ÎÃæ¤Çsize¤ÏÊÑ¹¹¤·¤Æ¤¤¤ë
+				//addãƒ¡ã‚½ãƒƒãƒ‰ã®ä¸­ã§sizeã¯å¤‰æ›´ã—ã¦ã„ã‚‹
 			}
 		}
 		return ret;
 	}
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥³¥ì¥¯¥·¥ç¥óÆâ¤ÎÁ´¤Æ¤ÎÍ×ÁÇ¤ò¤³¤Î½¸¹ç¤«¤é½üµî¤¹¤ë¡£
-	 * <p>¸½ºß¤Ï¸úÎ¨¤Î°­¤¤¼ÂÁõ¤ò¤·¤Æ¤¤¤ë¤Î¤Ç¡¢ÉÑÈË¤Ë»È¤¦¤Ê¤éÊÑ¹¹¤¹¤ëÉ¬Í×¤¬¤¢¤ë¡£ 
-	 * @return ¤³¤Î½¸¹ç¤¬ÊÑ¹¹¤µ¤ì¤¿¾ì¹ç¤Ïtrue
+	 * æŒ‡å®šã•ã‚ŒãŸã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³å†…ã®å…¨ã¦ã®è¦ç´ ã‚’ã“ã®é›†åˆã‹ã‚‰é™¤å»ã™ã‚‹ã€‚
+	 * <p>ç¾åœ¨ã¯åŠ¹ç‡ã®æ‚ªã„å®Ÿè£…ã‚’ã—ã¦ã„ã‚‹ã®ã§ã€é »ç¹ã«ä½¿ã†ãªã‚‰å¤‰æ›´ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚ 
+	 * @return ã“ã®é›†åˆãŒå¤‰æ›´ã•ã‚ŒãŸå ´åˆã¯true
 	 */
 	public boolean removeAll(Collection<Atom> c) {
 		boolean ret = false;
 		Iterator<Atom> it = c.iterator();
 		while (it.hasNext()) {
 			ret |= remove(it.next());
-			//remove¥á¥½¥Ã¥É¤ÎÃæ¤Çsize¤ÏÊÑ¹¹¤·¤Æ¤¤¤ë
+			//removeãƒ¡ã‚½ãƒƒãƒ‰ã®ä¸­ã§sizeã¯å¤‰æ›´ã—ã¦ã„ã‚‹
 		}
 		return ret;
 	}
-	/** Á´¤Æ¤ÎÍ×ÁÇ¤ò½üµî¤¹¤ë */
+	/** å…¨ã¦ã®è¦ç´ ã‚’é™¤å»ã™ã‚‹ */
 	protected void clear() {
 		atoms = null;
 		dataAtoms = null;
@@ -239,7 +239,7 @@ public final class AtomSet implements Iterable<Atom>
 		size = 0;
 	}
 	
-	/**¥Ç¥Ğ¥Ã¥°ÍÑ½ĞÎÏ*/
+	/**ãƒ‡ãƒãƒƒã‚°ç”¨å‡ºåŠ›*/
 	public void print() {
 		Util.println("AtomSet: ");
 		Iterator<Atom> it = iterator();
@@ -248,7 +248,7 @@ public final class AtomSet implements Iterable<Atom>
 		}
 	}
 	
-	/** dataAtoms Ãæ¤ÎÆÃÄê¤Î¥Õ¥¡¥ó¥¯¥¿¤À¤±¤òÊÖ¤¹È¿Éü»Ò */
+	/** dataAtoms ä¸­ã®ç‰¹å®šã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã ã‘ã‚’è¿”ã™åå¾©å­ */
 	private class DataAtomIterator implements Iterator<Atom> {
 		private Iterator<Atom> it;
 		private Atom next;
@@ -293,8 +293,8 @@ public final class AtomSet implements Iterable<Atom>
 	}
 	
 	/**
-	 * ¤³¤Î¥¢¥È¥à¥»¥Ã¥È¤¬¤â¤¦ÊÑ¹¹¤µ¤ì¤Ê¤¤»ö¤òÀë¸À¤¹¤ë¡£
-	 * ¥¢¥È¥à¥»¥Ã¥È´Ö¤ÎÈæ³Ó¤ò¹Ô¤¦ºİ¤ÎÁ°½àÈ÷¤È¡¢¥Ï¥Ã¥·¥å¥³¡¼¥É¤Î·×»»¤ò¹Ô¤¦¡£
+	 * ã“ã®ã‚¢ãƒˆãƒ ã‚»ãƒƒãƒˆãŒã‚‚ã†å¤‰æ›´ã•ã‚Œãªã„äº‹ã‚’å®£è¨€ã™ã‚‹ã€‚
+	 * ã‚¢ãƒˆãƒ ã‚»ãƒƒãƒˆé–“ã®æ¯”è¼ƒã‚’è¡Œã†éš›ã®å‰æº–å‚™ã¨ã€ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã®è¨ˆç®—ã‚’è¡Œã†ã€‚
 	 */
 	public void freeze() {
 		gc();
@@ -305,7 +305,7 @@ public final class AtomSet implements Iterable<Atom>
 				return getAtoms().get(f0).size() - atoms.get(f1).size();
 			}
 		};
-		//Èæ³Ó¤Î¤¿¤á¤Î½àÈ÷
+		//æ¯”è¼ƒã®ãŸã‚ã®æº–å‚™
 		List<Functor> funcs = new ArrayList<Functor>();
 		funcs.addAll(getAtoms().keySet());
 		Collections.sort(funcs, sizeComparator);
@@ -383,7 +383,7 @@ public final class AtomSet implements Iterable<Atom>
 		return true;
 	}
 
-	/*--------------------¥Ï¥Ã¥·¥å¥³¡¼¥É--------------*/
+	/*--------------------ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰--------------*/
 	private int hashCode;
 	private void calcHashCode() {
 		hashCode = 0;

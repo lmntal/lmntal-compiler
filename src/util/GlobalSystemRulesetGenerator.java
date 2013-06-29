@@ -13,11 +13,11 @@ import runtime.Rule;
 import runtime.functor.Functor;
 import runtime.functor.SymbolFunctor;
 
-/** ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È
- * <p>todo ¥¤¥ó¥¹¥¿¥ó¥¹¤òÃ¯¤¬À¸À®¤¹¤ë¤Î¤«·è¤á¤ë</p>
+/** ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆ
+ * <p>todo ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’èª°ãŒç”Ÿæˆã™ã‚‹ã®ã‹æ±ºã‚ã‚‹</p>
  * 
- * ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Î¥â¥¸¥å¡¼¥ë²½¡§
- * system_ruleset ¥¢¥È¥à¤¬¤¢¤ëËì¤ÎÄ¾Â°¤Î¥ë¡¼¥ë¥»¥Ã¥È¤Ï¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Ç¤¢¤ë¤³¤È¤Ë¤¹¤ë¡£
+ * ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åŒ–ï¼š
+ * system_ruleset ã‚¢ãƒˆãƒ ãŒã‚ã‚‹è†œã®ç›´å±ã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã¯ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã§ã‚ã‚‹ã“ã¨ã«ã™ã‚‹ã€‚
  * 
  * {system_ruleset, (a:-b)}, {{{{{{a}}}}}}    ==> {{{{{{b}}}}}} 
  * 
@@ -46,7 +46,7 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.UNIFY,       1,1,5,1,0)); //n-kato 2006-09-07
-		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // »ÒËì¤ò³èÀ­²½¤¹¤ëÉ¬Í×¤Ï¤Ê¤¤¡Êquiet¤Ç¤è¤¤¡Ë
+		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // å­è†œã‚’æ´»æ€§åŒ–ã™ã‚‹å¿…è¦ã¯ãªã„ï¼ˆquietã§ã‚ˆã„ï¼‰
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 		//
@@ -69,17 +69,17 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  2,0,Functor.OUTSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  3,4,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,4,Functor.INSIDE_PROXY));
-		insts.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4)); // memo: ËÜ¼ÁÅª¤Ë¥ê¥â¡¼¥È¤ÎUNIFY
-		insts.add(new Instruction(Instruction.ENQUEUEMEM,  4)); // ¤³¤³¤Ç¤Ï»ÒËì¤Î³èÀ­²½¤¬É¬Í×
+		insts.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4)); // memo: æœ¬è³ªçš„ã«ãƒªãƒ¢ãƒ¼ãƒˆã®UNIFY
+		insts.add(new Instruction(Instruction.ENQUEUEMEM,  4)); // ã“ã“ã§ã¯å­è†œã®æ´»æ€§åŒ–ãŒå¿…è¦
 		insts.add(new Instruction(Instruction.UNLOCKMEM,   4));
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 
 		////////////////////////////////////////////////////////////
 		//
-		// ÅöÊ¬¤Î´Ö¡¢¤³¤Î¥¿¥¤¥ß¥ó¥°¤ÇÁÈ¤ß¹ş¤ß¥â¥¸¥å¡¼¥ë¤ò¥í¡¼¥É¤µ¤»¤Æ¤â¤é¤¦¡£
+		// å½“åˆ†ã®é–“ã€ã“ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§çµ„ã¿è¾¼ã¿ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’ãƒ­ãƒ¼ãƒ‰ã•ã›ã¦ã‚‚ã‚‰ã†ã€‚
 		
-		if (true) { // ¥¬¡¼¥ÉºÇÅ¬²½´ï¤¬´°À®¤¹¤ë¤Ş¤Ç¤Ï¤³¤Á¤é¤ò»È¤¦
+		if (true) { // ã‚¬ãƒ¼ãƒ‰æœ€é©åŒ–å™¨ãŒå®Œæˆã™ã‚‹ã¾ã§ã¯ã“ã¡ã‚‰ã‚’ä½¿ã†
 			loadBuiltInRules(ruleset);
 		}
 		else {
@@ -120,9 +120,9 @@ public final class GlobalSystemRulesetGenerator {
 		return text;
 	}
 	/** 
-	 * LMNtal¥×¥í¥°¥é¥à¥Æ¥­¥¹¥È¤ò¥³¥ó¥Ñ¥¤¥ë¤·¡¢´Ş¤Ş¤ì¤ë¥ë¡¼¥ëÎó¤ò»ØÄê¤·¤¿¥ë¡¼¥ë¥»¥Ã¥È¤ËÄÉ²Ã¤¹¤ë¡£
-	 * @param ruleset ÄÉ²ÃÀè¤Î¥ë¡¼¥ë¥»¥Ã¥È
-	 * @param text ¡Ê¥È¥Ã¥×¥ì¥Ù¥ë¤Ë¥ë¡¼¥ëÎó¤ò´Ş¤à¡ËLMNtal¥×¥í¥°¥é¥à¥Æ¥­¥¹¥È */
+	 * LMNtalãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ†ã‚­ã‚¹ãƒˆã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã—ã€å«ã¾ã‚Œã‚‹ãƒ«ãƒ¼ãƒ«åˆ—ã‚’æŒ‡å®šã—ãŸãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã«è¿½åŠ ã™ã‚‹ã€‚
+	 * @param ruleset è¿½åŠ å…ˆã®ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆ
+	 * @param text ï¼ˆãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã«ãƒ«ãƒ¼ãƒ«åˆ—ã‚’å«ã‚€ï¼‰LMNtalãƒ—ãƒ­ã‚°ãƒ©ãƒ ãƒ†ã‚­ã‚¹ãƒˆ */
 	static void compileAndLoadRules(InterpretedRuleset ruleset, String text) {
 		Reader src = new StringReader(text);
 		compile.parser.LMNParser lp = new compile.parser.LMNParser(src);
@@ -130,8 +130,8 @@ public final class GlobalSystemRulesetGenerator {
 		try {
 			m = lp.parse();
 		} catch(Exception e){}
-		// todo ²¼µ­¥³¡¼¥É¤ÏÌÀ¤é¤«¤ËÉÔ¼«Á³¤Ê¤Î¤Ç¡¢InterpretedRuleset¡Ê¤Î¥ê¥¹¥È¤Ş¤¿¤Ï¤½¤ì¤ò»ı¤Ä
-		// ¥³¥ó¥Ñ¥¤¥ë»şËì¹½Â¤¡Ë¤òÀ¸À®¤¹¤ë¤À¤±¤Î¥á¥½¥Ã¥É¤òRulesetCompiler¤Ëºî¤ë¡£
+		// todo ä¸‹è¨˜ã‚³ãƒ¼ãƒ‰ã¯æ˜ã‚‰ã‹ã«ä¸è‡ªç„¶ãªã®ã§ã€InterpretedRulesetï¼ˆã®ãƒªã‚¹ãƒˆã¾ãŸã¯ãã‚Œã‚’æŒã¤
+		// ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ™‚è†œæ§‹é€ ï¼‰ã‚’ç”Ÿæˆã™ã‚‹ã ã‘ã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’RulesetCompilerã«ä½œã‚‹ã€‚
 		InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
 		for(Instruction loadruleset : ir.rules.get(0).body){
 			if (loadruleset.getKind() == Instruction.LOADRULESET) {
@@ -141,9 +141,9 @@ public final class GlobalSystemRulesetGenerator {
 		}
 	}
 	/**
-	 * ²¾¥á¥½¥Ã¥É¡£
-	 * »ØÄê¤µ¤ì¤¿InterpretedRuleset¤ËÂĞ¤·¤Æ¡¢integer¥â¥¸¥å¡¼¥ëÁêÅö¤ÎÆâÍÆ¤òÄÉ²Ã¤¹¤ë¤¿¤á¤Ë»ÈÍÑ¤µ¤ì¤ë¡£
-	 * ¡ÚÃí°Õ¡ÛÀ°¿ô±é»»¤òÌµ¸ú¤Ë¤¹¤ë¥ª¥×¥·¥ç¥ó¤¬¤¢¤Ã¤Æ¤â¤è¤¤¡£	
+	 * ä»®ãƒ¡ã‚½ãƒƒãƒ‰ã€‚
+	 * æŒ‡å®šã•ã‚ŒãŸInterpretedRulesetã«å¯¾ã—ã¦ã€integerãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ç›¸å½“ã®å†…å®¹ã‚’è¿½åŠ ã™ã‚‹ãŸã‚ã«ä½¿ç”¨ã•ã‚Œã‚‹ã€‚
+	 * ã€æ³¨æ„ã€‘æ•´æ•°æ¼”ç®—ã‚’ç„¡åŠ¹ã«ã™ã‚‹ã‚ªãƒ—ã‚·ãƒ§ãƒ³ãŒã‚ã£ã¦ã‚‚ã‚ˆã„ã€‚	
 	 */
 	static Rule buildBinOpRule(String name, int typechecker, int op) {
 		// 1:'+'(X,Y,Res), 2:$x[X], 3:$y[Y] :- int($x),int($y), (4:$z)=$x+$y | 5:$z[Res].
@@ -197,7 +197,7 @@ public final class GlobalSystemRulesetGenerator {
 	}
 	
 	/**
-	 * ²¾¥á¥½¥Ã¥É¡£	
+	 * ä»®ãƒ¡ã‚½ãƒƒãƒ‰ã€‚	
 	 */
 	static Rule buildUnaryPlusRule(String name, int typechecker) {
 		Rule rule = new Rule(name);
@@ -235,7 +235,7 @@ public final class GlobalSystemRulesetGenerator {
 	}
 
 	/**
-	 * ²¾¥á¥½¥Ã¥É¡£	
+	 * ä»®ãƒ¡ã‚½ãƒƒãƒ‰ã€‚	
 	 */
 	static Rule buildUnaryOpRule(String name, int typechecker, int op) {
 		// 1:float(X,Res), 2:$x[X] :- int($x), (3:$y)=float($x) | 4:$y[Res].

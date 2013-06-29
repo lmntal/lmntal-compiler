@@ -1,27 +1,27 @@
 package compile.structure;
 
 /** 
- * ��������������Υ��������������1�Ĥ���������: $p=(a(X),$pp) �ˤι�¤��ɽ�����饹<br>
- * 1�ĤΥ�����������ϡ�ProcessContextEquation��LinkedList�Ȥ���ɽ������롣
+ * ソースコード中のガード否定条件内の1つの等式（例: $p=(a(X),$pp) ）の構造を表すクラス<br>
+ * 1つのガード否定条件は、ProcessContextEquationのLinkedListとして表現される。
  * <p>
- * ��: [$p=(a(X),$pp),$q=(b(X),$qq)]
+ * 例: [$p=(a(X),$pp),$q=(b(X),$qq)]
  */
 public final class ProcessContextEquation
 {
 	/**
-	 * �������դΥץ�����ʸ̮�����
+	 * 等式左辺のプロセス文脈の定義
 	 */
 	public ContextDef def;
 
 	/**
-	 * �������դΥץ�����
+	 * 等式右辺のプロセス
 	 */
 	public Membrane mem = new Membrane(null);
 
 	/**
-	 * ���󥹥ȥ饯��
-	 * @param def �������դΥץ�����ʸ̮�����
-	 * @param mem �������դΥץ��������Ǽ���벾��Ū����
+	 * コンストラクタ
+	 * @param def 等式左辺のプロセス文脈の定義
+	 * @param mem 等式右辺のプロセスを格納する仮想的な膜
 	 */
 	public ProcessContextEquation(ContextDef def, Membrane mem)
 	{

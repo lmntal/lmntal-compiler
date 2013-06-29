@@ -1,7 +1,7 @@
 package runtime.functor;
 
 
-/** └░┐Їеве╚ер═╤д╬1░·┐Їе╒ебеєепе┐дЄ╔╜д╣епеще╣
+/** цХ┤цХ░уВвуГИуГачФиуБо1х╝ХцХ░уГХуВбуГ│уВпуВ┐уВТшбиуБЩуВпуГйуВ╣
  * @author n-kato */
 
 public class IntegerFunctor extends DataFunctor

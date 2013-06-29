@@ -4,44 +4,44 @@ import java.util.*;
 import java.io.*;
 
 /**
- * £±¤Ä¤Î¥¤¥ó¥é¥¤¥ó¥³¡¼¥É¤Î¤Ş¤È¤Ş¤ê¤ËÂĞ±ş¤¹¤ë¥¯¥é¥¹¡£
- * ¤Ş¤È¤Ş¤ê¤È¤Ï¡¢ÄÌ¾ï .lmn ¤Î¥é¥¤¥Ö¥é¥ê¥Õ¥¡¥¤¥ë¤Î¤³¤È¡£
+ * ï¼‘ã¤ã®ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰ã®ã¾ã¨ã¾ã‚Šã«å¯¾å¿œã™ã‚‹ã‚¯ãƒ©ã‚¹ã€‚
+ * ã¾ã¨ã¾ã‚Šã¨ã¯ã€é€šå¸¸ .lmn ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒªãƒ•ã‚¡ã‚¤ãƒ«ã®ã“ã¨ã€‚
  * 
  * @author hara
  *
  */
 public class InlineUnit {
-	/** ¼±ÊÌÌ¾¡Ê¥Õ¥¡¥¤¥ë¤Ê¤é¥Õ¥¡¥¤¥ëÌ¾¡¢½Ğ½êÉÔÌÀ¤Î»ş¤Ï "-"¡Ë */
+	/** è­˜åˆ¥åï¼ˆãƒ•ã‚¡ã‚¤ãƒ«ãªã‚‰ãƒ•ã‚¡ã‚¤ãƒ«åã€å‡ºæ‰€ä¸æ˜ã®æ™‚ã¯ "-"ï¼‰ */
 	String name;
 	public static final String DEFAULT_UNITNAME = "-";
 	
-	/** ¥¤¥ó¥é¥¤¥ó¥¯¥é¥¹¤¬»ÈÍÑ²ÄÇ½¤Î»ş¡¢¤½¤Î¥ª¥Ö¥¸¥§¥¯¥È¤¬Æş¤ë¡£*/
+	/** ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚¯ãƒ©ã‚¹ãŒä½¿ç”¨å¯èƒ½ã®æ™‚ã€ãã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒå…¥ã‚‹ã€‚*/
 	public InlineCode inlineCode;
 	
-	/** ¥«¥¹¥¿¥à¥¬¡¼¥É¥¯¥é¥¹¤¬»ÈÍÑ²ÄÇ½¤Î»ş¡¢¤½¤Î¥ª¥Ö¥¸¥§¥¯¥È¤¬Æş¤ë¡£*/
+	/** ã‚«ã‚¹ã‚¿ãƒ ã‚¬ãƒ¼ãƒ‰ã‚¯ãƒ©ã‚¹ãŒä½¿ç”¨å¯èƒ½ã®æ™‚ã€ãã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒå…¥ã‚‹ã€‚*/
 	public CustomGuard customGuard;
 	
-	/** Hash { ¥¤¥ó¥é¥¤¥ó¥³¡¼¥ÉÊ¸»úÎó => °ì°Õ¤ÊÏ¢ÈÖ } */
+	/** Hash { ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰æ–‡å­—åˆ— => ä¸€æ„ãªé€£ç•ª } */
 	public Map<String, Integer> codes = new HashMap<String, Integer>(); 
-	/** codes ¤ÎµÕ */
+	/** codes ã®é€† */
 	public List<String> code_of_id = new ArrayList<String>(); 
 	
-	/** List ¥¤¥ó¥é¥¤¥óÀë¸À¥³¡¼¥ÉÊ¸»úÎó */
+	/** List ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å®£è¨€ã‚³ãƒ¼ãƒ‰æ–‡å­—åˆ— */
 	public List<String> defs = new ArrayList<String>(); 
 	
-	/** °ì°Õ¤ÊÏ¢ÈÖ¡£¥¤¥ó¥é¥¤¥ó¥³¡¼¥ÉÊ¸»úÎó¤È1ÂĞ1 */
+	/** ä¸€æ„ãªé€£ç•ªã€‚ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰æ–‡å­—åˆ—ã¨1å¯¾1 */
 	int codeCount = 0;
 	
-	/** ¥¤¥ó¥é¥¤¥ó¼Â¹Ô¥¢¥È¥à */
+	/** ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å®Ÿè¡Œã‚¢ãƒˆãƒ  */
 	static final int EXEC   = 0;
 	
-	/** ¥¤¥ó¥é¥¤¥óÀë¸À¹Ô¥¢¥È¥à */
+	/** ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å®£è¨€è¡Œã‚¢ãƒˆãƒ  */
 	static final int DEFINE = 1;
 	
-	/****** ¥³¥ó¥Ñ¥¤¥ë»ş¤Ë»È¤¦ ******/
+	/****** ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ™‚ã«ä½¿ã† ******/
 	
 	/**
-	 * class ¥Õ¥¡¥¤¥ë¤¬ºÇ¿·¤«¤É¤¦¤«¤òÊÖ¤¹
+	 * class ãƒ•ã‚¡ã‚¤ãƒ«ãŒæœ€æ–°ã‹ã©ã†ã‹ã‚’è¿”ã™
 	 */
 	public boolean isCached() {
 		// ?.lmn
@@ -51,7 +51,7 @@ public class InlineUnit {
 //		System.out.println(src.lastModified()+" "+src);
 //		System.out.println(dst.lastModified()+" "+dst);
 		
-		// src ¤¬Ìµ¤¤¤Î¤Ï¡¢"-" ¤Î¤È¤­
+		// src ãŒç„¡ã„ã®ã¯ã€"-" ã®ã¨ã
 		if(!dst.exists() || !src.exists()) return false;
 		return src.lastModified() <= dst.lastModified();
 	}
@@ -61,7 +61,7 @@ public class InlineUnit {
 	}
 	
 	/**
-	 * ¥³¡¼¥É¤ËÂĞ±ş¤¹¤ë ID ¤òÊÖ¤¹¡£
+	 * ã‚³ãƒ¼ãƒ‰ã«å¯¾å¿œã™ã‚‹ ID ã‚’è¿”ã™ã€‚
 	 * @param codeStr
 	 * @return
 	 */
@@ -70,7 +70,7 @@ public class InlineUnit {
 	}
 	
 	/**
-	 * ID ¤ËÂĞ±ş¤¹¤ë¥³¡¼¥É¤òÊÖ¤¹¡£
+	 * ID ã«å¯¾å¿œã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’è¿”ã™ã€‚
 	 */
 	public String getCode(int id) {
 		if(id<0 || code_of_id.size() <= id) return null;
@@ -78,9 +78,9 @@ public class InlineUnit {
 	}
 	
 	/**
-	 * ¥¤¥ó¥é¥¤¥ó¥¢¥È¥à¤òÅĞÏ¿¤·¤ë¡£
-	 * @param code ¥¢¥È¥àÌ¾
-	 * @param type ¥¤¥ó¥é¥¤¥ó¼Â¹Ô¥¢¥È¥à => EXEC ,  ¥¤¥ó¥é¥¤¥óÀë¸À¥¢¥È¥à => DEFINE
+	 * ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚¢ãƒˆãƒ ã‚’ç™»éŒ²ã—ã‚‹ã€‚
+	 * @param code ã‚¢ãƒˆãƒ å
+	 * @param type ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å®Ÿè¡Œã‚¢ãƒˆãƒ  => EXEC ,  ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å®£è¨€ã‚¢ãƒˆãƒ  => DEFINE
 	 */
 	public void register(String code, int type) {
 		switch(type) {
@@ -98,7 +98,7 @@ public class InlineUnit {
 	}
 
 	/**
-	 * ¥³¡¼¥É¤òÀ¸À®¤¹¤ë¡£²ò¼á¼Â¹Ô»ş¤ËÍøÍÑ¤¹¤ë¡£
+	 * ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹ã€‚è§£é‡ˆå®Ÿè¡Œæ™‚ã«åˆ©ç”¨ã™ã‚‹ã€‚
 	 */
 	public void makeCode() {
 		if(isCached()) return;
@@ -117,7 +117,7 @@ public class InlineUnit {
 	}
 	
 	/**
-	 * ¥³¡¼¥É¤òÀ¸À®¤¹¤ë¡£
+	 * ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹ã€‚
 	 */
 	public void makeCode(String packageName, String className, File outputFile, boolean interpret) throws IOException {
 		if(codes.isEmpty() && defs.isEmpty()) return;
@@ -144,8 +144,8 @@ public class InlineUnit {
 			BufferedReader obr = new BufferedReader(new StringReader(s));
 			String ss;
 			while((ss=obr.readLine())!=null) {
-				// //# ¤Ç»Ï¤Ş¤ë¹Ô¤Ï¡¢¤½¤Î¹Ô¤Î¤½¤ì°Ê¹ß¤ÎÆâÍÆ¤ò¥Õ¥¡¥¤¥ëÌ¾¤È¤ß¤Ê¤·¡¢¤½¤Î¹Ô°Ê¹ß¤ò»ØÄê¤µ¤ì¤¿¥Õ¥¡¥¤¥ë¤Ë½ĞÎÏ¤µ¤ì¤ë¡£
-				// ¤½¤Îºİ¡¢__UNITNAME__, __PACKAGE__ ¤Ï¤½¤ì¤¾¤ì¤ÎÆâÍÆ¤ËÃÖ´¹¤µ¤ì¤ë¡£
+				// //# ã§å§‹ã¾ã‚‹è¡Œã¯ã€ãã®è¡Œã®ãã‚Œä»¥é™ã®å†…å®¹ã‚’ãƒ•ã‚¡ã‚¤ãƒ«åã¨ã¿ãªã—ã€ãã®è¡Œä»¥é™ã‚’æŒ‡å®šã•ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«ã«å‡ºåŠ›ã•ã‚Œã‚‹ã€‚
+				// ãã®éš›ã€__UNITNAME__, __PACKAGE__ ã¯ãã‚Œãã‚Œã®å†…å®¹ã«ç½®æ›ã•ã‚Œã‚‹ã€‚
 				if(ss.startsWith("//#")) {
 					if(p!=defaultPW) p.close();
 					String fname = ss.substring(3);
@@ -188,10 +188,10 @@ public class InlineUnit {
 		p.println("\t}");
 		
 		if (interpret) {
-			//InlineCode ¥¯¥é¥¹¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤È¤·¤Æ»È¤¦
+			//InlineCode ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã¨ã—ã¦ä½¿ã†
 			p.println("\tpublic void run(Atom me, int codeID) {");
 		} else {
-			//Ä¾ÀÜ¸Æ¤Ó½Ğ¤¹¤Î¤Ç¡¢static ¤Ç¤è¤¤
+			//ç›´æ¥å‘¼ã³å‡ºã™ã®ã§ã€static ã§ã‚ˆã„
 			p.println("\tpublic static void run(Atom me, int codeID) {");
 		}
 		p.println("\t\tMembrane mem = me.getMem();");
@@ -215,13 +215,13 @@ public class InlineUnit {
 		Env.d("Class "+className+" written to "+outputFile);
 	}
 	
-	/****** ¼Â¹Ô»ş¤Ë»È¤¦ ******/
+	/****** å®Ÿè¡Œæ™‚ã«ä½¿ã† ******/
 	
 	/**
-	 * ¼«Ê¬¤ËÂĞ±ş¤¹¤ë¥¤¥ó¥é¥¤¥ó¥³¡¼¥É¥¯¥é¥¹¤òÆÉ¤ß¹ş¤à¡£
+	 * è‡ªåˆ†ã«å¯¾å¿œã™ã‚‹ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰ã‚¯ãƒ©ã‚¹ã‚’èª­ã¿è¾¼ã‚€ã€‚
 	 */
 	public void attach() {
-		// jar ¤Ç½èÍı·Ï¤òµ¯Æ°¤¹¤ë¤È¡¢¾¡¼ê¤Ê¥Õ¥¡¥¤¥ë¤«¤é¥¯¥é¥¹¤ò¥í¡¼¥É¤¹¤ë¤³¤È¤¬¤Ç¤­¤Ê¤¤¤ß¤¿¤¤¡£
+		// jar ã§å‡¦ç†ç³»ã‚’èµ·å‹•ã™ã‚‹ã¨ã€å‹æ‰‹ãªãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ã‚¯ãƒ©ã‚¹ã‚’ãƒ­ãƒ¼ãƒ‰ã™ã‚‹ã“ã¨ãŒã§ããªã„ã¿ãŸã„ã€‚
 		String cname = className(name);
 		FileClassLoader.addPath(srcPath(name));
 		FileClassLoader cl = new FileClassLoader();
@@ -260,8 +260,8 @@ public class InlineUnit {
 	}
 	
 	/**
-	 * ¥¤¥ó¥é¥¤¥óÌ¿Îá¤ò¼Â¹Ô¤¹¤ë¡£
-	 * @param atom ¼Â¹Ô¤¹¤Ù¤­¥¢¥È¥àÌ¾¤ò»ı¤Ä¥¢¥È¥à
+	 * ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å‘½ä»¤ã‚’å®Ÿè¡Œã™ã‚‹ã€‚
+	 * @param atom å®Ÿè¡Œã™ã¹ãã‚¢ãƒˆãƒ åã‚’æŒã¤ã‚¢ãƒˆãƒ 
 	 */
 	public void callInline(Atom atom, int codeID) {
 		//Env.d(atom+" "+codeID);
@@ -271,7 +271,7 @@ public class InlineUnit {
 	}
 
 	/**
-	 * ¥¤¥ó¥é¥¤¥ó¥³¡¼¥É¤Î¥½¡¼¥¹¥Õ¥¡¥¤¥ë¤Î¥Ñ¥¹¤òÊÖ¤¹¡£ºÇ¸å¤Î / ¤Ï´Ş¤Ş¤Ê¤¤¡£
+	 * ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰ã®ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹ã‚’è¿”ã™ã€‚æœ€å¾Œã® / ã¯å«ã¾ãªã„ã€‚
 	 * @param unitName
 	 * @return PATH/
 	 */
@@ -288,16 +288,16 @@ public class InlineUnit {
 	}
 
 	/**
-	 * ¥¯¥é¥¹Ì¾¤òÊÖ¤¹
+	 * ã‚¯ãƒ©ã‚¹åã‚’è¿”ã™
 	 * @param unitName
 	 * @return SomeClass
 	 */
 	public static String className(String unitName) {
-		// ¤¢¤ä¤·¤¤
+		// ã‚ã‚„ã—ã„
 		String o = new File(unitName).getName();
 		if(unitName.endsWith(".lmn") || unitName.equals(InlineUnit.DEFAULT_UNITNAME)) {
 			o = o.replaceAll("\\.lmn$", "");
-			// ¥¯¥é¥¹Ì¾¤Ë»È¤¨¤Ê¤¤Ê¸»ú¤òºï½ü
+			// ã‚¯ãƒ©ã‚¹åã«ä½¿ãˆãªã„æ–‡å­—ã‚’å‰Šé™¤
 			o = o.replaceAll("\\-", "");
 			o = "SomeInlineCode"+o;
 		}
@@ -305,18 +305,18 @@ public class InlineUnit {
 	}
 	
 	public static String FileNameWithoutExt(String unitName) {
-		// ¤¢¤ä¤·¤¤
+		// ã‚ã‚„ã—ã„
 		String o = new File(unitName).getName();
 		if(unitName.endsWith(".lmn") || unitName.equals(InlineUnit.DEFAULT_UNITNAME)) {
 			o = o.replaceAll("\\.lmn$", "");
-			// ¥¯¥é¥¹Ì¾¤Ë»È¤¨¤Ê¤¤Ê¸»ú¤òºï½ü
+			// ã‚¯ãƒ©ã‚¹åã«ä½¿ãˆãªã„æ–‡å­—ã‚’å‰Šé™¤
 			o = o.replaceAll("\\-", "");
 		}
 		return o;
 	}
 	
 	/**
-	 * ¥¤¥ó¥é¥¤¥ó¥³¡¼¥É¤Î¥½¡¼¥¹¥Õ¥¡¥¤¥ëÌ¾¤òÊÖ¤¹¡£¥Ñ¥¹ÉÕ¡£
+	 * ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰ã®ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«åã‚’è¿”ã™ã€‚ãƒ‘ã‚¹ä»˜ã€‚
 	 * @param unitName
 	 * @return PATH/SomeClass.java
 	 */
@@ -325,7 +325,7 @@ public class InlineUnit {
 	}
 
 	/**
-	 * ¥¤¥ó¥é¥¤¥ó¥³¡¼¥É¤Î¥¯¥é¥¹¥Õ¥¡¥¤¥ëÌ¾¤òÊÖ¤¹¡£¥Ñ¥¹ÉÕ¡£
+	 * ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³ã‚³ãƒ¼ãƒ‰ã®ã‚¯ãƒ©ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«åã‚’è¿”ã™ã€‚ãƒ‘ã‚¹ä»˜ã€‚
 	 * @param unitName
 	 * @return
 	 */

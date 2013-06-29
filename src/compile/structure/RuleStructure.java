@@ -6,83 +6,83 @@ import java.util.List;
 import java.util.Map;
 
 /** 
- * ¥½¡¼¥¹¥³¡¼¥ÉÃæ¤Î¥ë¡¼¥ë¤Î¹½Â¤¤òÉ½¤¹¥¯¥é¥¹
+ * ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã®ãƒ«ãƒ¼ãƒ«ã®æ§‹é€ ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  */
 public final class RuleStructure
 {
 	/**
-	 * ½êÂ°Ëì¡£¥³¥ó¥Ñ¥¤¥ë»ş¤Ë¤Ä¤«¤¦
-	 * <p>todo parent¤Ï¤¤¤º¤ìmem¤ËÌ¾¾ÎÊÑ¹¹¤¹¤ë
+	 * æ‰€å±è†œã€‚ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«æ™‚ã«ã¤ã‹ã†
+	 * <p>todo parentã¯ã„ãšã‚Œmemã«åç§°å¤‰æ›´ã™ã‚‹
 	 */
 	public Membrane parent;
 
 	/**
-	 * ¥ë¡¼¥ëÌ¾
+	 * ãƒ«ãƒ¼ãƒ«å
 	 */
 	public String name;
 
 	/**
-	 * ¥Æ¥­¥¹¥ÈÉ½¸½
+	 * ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¾
 	 */
 	private  String text;
 
 	/**
-	 * º¸ÊÕ¤¬¶õ¤Î¤È¤­¤Î·Ù¹ğ¤òÍŞÀ©¤¹¤ë¤«¤É¤¦¤«
+	 * å·¦è¾ºãŒç©ºã®ã¨ãã®è­¦å‘Šã‚’æŠ‘åˆ¶ã™ã‚‹ã‹ã©ã†ã‹
 	 */
 	public boolean fSuppressEmptyHeadWarning = false;
 
 	/**
-	 * Head¤ò³ÊÇ¼¤¹¤ëËì
+	 * Headã‚’æ ¼ç´ã™ã‚‹è†œ
 	 */
 	public Membrane leftMem = new Membrane(null);
 
 	/**
-	 * Body¤ò³ÊÇ¼¤¹¤ëËì
+	 * Bodyã‚’æ ¼ç´ã™ã‚‹è†œ
 	 */
 	public Membrane rightMem = new Membrane(null);
 
 	/**
-	 * ¥¬¡¼¥É·¿À©Ìó¤ò³ÊÇ¼¤¹¤ëËì
+	 * ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ã‚’æ ¼ç´ã™ã‚‹è†œ
 	 */
 	public Membrane guardMem = new Membrane(null);
 
-//	/** ¥¬¡¼¥É¤Î·¿À©Ìó (TypeConstraint) ¤Î¥ê¥¹¥È */
+//	/** ã‚¬ãƒ¼ãƒ‰ã®å‹åˆ¶ç´„ (TypeConstraint) ã®ãƒªã‚¹ãƒˆ */
 //	public LinkedList typeConstraints = new LinkedList();
 	
 	/**
-	 * ¥¬¡¼¥ÉÈİÄê¾ò·ï¡ÊProcessContextEquation¤ÎLinkedList¡Ë¤Î¥ê¥¹¥È
+	 * ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ï¼ˆProcessContextEquationã®LinkedListï¼‰ã®ãƒªã‚¹ãƒˆ
 	 */
 	public List guardNegatives = new LinkedList();
 	
 	/**
-	 * ¥×¥í¥»¥¹Ê¸Ì®¤Î¸ÂÄêÌ¾ ("$p"¤Ê¤É¤ÎString) -> Ê¸Ì®¤ÎÄêµÁ (ContextDef)
+	 * ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®é™å®šå ("$p"ãªã©ã®String) -> æ–‡è„ˆã®å®šç¾© (ContextDef)
 	 */
 	public Map<String, ContextDef> processContexts = new HashMap<String, ContextDef>();
 
 	/**
-	 * ¥ë¡¼¥ëÊ¸Ì®¤Î¸ÂÄêÌ¾ ("@p"¤Ê¤É¤ÎString) -> Ê¸Ì®¤ÎÄêµÁ (ContextDef)
+	 * ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã®é™å®šå ("@p"ãªã©ã®String) -> æ–‡è„ˆã®å®šç¾© (ContextDef)
 	 */
 	public Map<String, ContextDef> ruleContexts = new HashMap<String, ContextDef>();
 
 	/**
-	 * ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Î¸ÂÄêÌ¾ ("$p"¤Ê¤É¤ÎString) -> Ê¸Ì®¤ÎÄêµÁ (ContextDef)
+	 * å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®é™å®šå ("$p"ãªã©ã®String) -> æ–‡è„ˆã®å®šç¾© (ContextDef)
 	 */
 	public Map<String, ContextDef> typedProcessContexts = new HashMap<String, ContextDef>();
 
 	/**
-	 * ¹ÔÈÖ¹æ 2006.1.22 by inui
+	 * è¡Œç•ªå· 2006.1.22 by inui
 	 */
 	public int lineno;
 
 	/**
-	 * ¥³¥ó¥¹¥È¥é¥¯¥¿
-	 * @param mem ½êÂ°Ëì
+	 * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	 * @param mem æ‰€å±è†œ
 	 */
 	public RuleStructure(Membrane mem, String text)
 	{
 		this.parent = mem;
-		// io:{(print:-inline)} ¤Î print ¤Ï io.print ¤Ë¤·¤¿¤¤¡£
-		// ¤¬¡¢print ¤Ï io ËìÄ¾Â°¤Ç¤Ï¤Ê¤¯¥ë¡¼¥ëº¸ÊÕ¤ÎËì¤Ë½êÂ°¤¹¤ë¤Î¤Ç¥ë¡¼¥ë¤ÎËì¤âÆ±¤¸Ì¾Á°¤ò¤Ä¤±¤Æ¤ª¤¯¡£
+		// io:{(print:-inline)} ã® print ã¯ io.print ã«ã—ãŸã„ã€‚
+		// ãŒã€print ã¯ io è†œç›´å±ã§ã¯ãªããƒ«ãƒ¼ãƒ«å·¦è¾ºã®è†œã«æ‰€å±ã™ã‚‹ã®ã§ãƒ«ãƒ¼ãƒ«ã®è†œã‚‚åŒã˜åå‰ã‚’ã¤ã‘ã¦ãŠãã€‚
 		leftMem.name = mem.name;
 		rightMem.name = mem.name;
 		this.text = text;
@@ -90,9 +90,9 @@ public final class RuleStructure
 
 	//2006.1.22 by inui
 	/**
-	 * ¥³¥ó¥¹¥È¥é¥¯¥¿
-	 * @param mem ½êÂ°Ëì
-	 * @param lineno ¹ÔÈÖ¹æ
+	 * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	 * @param mem æ‰€å±è†œ
+	 * @param lineno è¡Œç•ªå·
 	 */
 	public RuleStructure(Membrane mem, String text, int lineno)
 	{

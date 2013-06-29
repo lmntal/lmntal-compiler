@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * ¥Ş¥Ã¥×¤ÎÃÍ¤Ë³ÊÇ¼¤µ¤ì¤¿¥³¥ì¥¯¥·¥ç¥óÃæ¤Î¥Ç¡¼¥¿¤òÎóµó¤¹¤ëÈ¿Éü»Ò¡£
- * Ê£¿ôÍ×ÁÇ¤ò³ÊÇ¼¤¹¤ë¥Ş¥Ã¥×¤ò¼Â¸½¤¹¤ë¤¿¤á¤Ë¡¢ÃÍ¤Ë¥³¥ì¥¯¥·¥ç¥ó¤òÁŞÆş¤¹¤ë¥Ş¥Ã¥×¤ËÂĞ¤·¤ÆÍøÍÑ¤¹¤ë¡£
+ * ãƒãƒƒãƒ—ã®å€¤ã«æ ¼ç´ã•ã‚ŒãŸã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³ä¸­ã®ãƒ‡ãƒ¼ã‚¿ã‚’åˆ—æŒ™ã™ã‚‹åå¾©å­ã€‚
+ * è¤‡æ•°è¦ç´ ã‚’æ ¼ç´ã™ã‚‹ãƒãƒƒãƒ—ã‚’å®Ÿç¾ã™ã‚‹ãŸã‚ã«ã€å€¤ã«ã‚³ãƒ¬ã‚¯ã‚·ãƒ§ãƒ³ã‚’æŒ¿å…¥ã™ã‚‹ãƒãƒƒãƒ—ã«å¯¾ã—ã¦åˆ©ç”¨ã™ã‚‹ã€‚
  * @author Mizuno
  */
 public class MultiMapIterator<E> implements Iterator<E>{
@@ -25,7 +25,7 @@ public class MultiMapIterator<E> implements Iterator<E>{
 		next = dataIterator.next();
 	}
 
-	/** »ØÄê¤µ¤ì¤¿MapÆâ¤Ë¤¢¤ë¥Ç¡¼¥¿¤òÎóµó¤¹¤ëÈ¿Éü»Ò¤òÀ¸À®¤¹¤ë */
+	/** æŒ‡å®šã•ã‚ŒãŸMapå†…ã«ã‚ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’åˆ—æŒ™ã™ã‚‹åå¾©å­ã‚’ç”Ÿæˆã™ã‚‹ */
 	public <K> MultiMapIterator(Map<K, List<E>> map) {
 		setIterator = map.values().iterator();
 		dataIterator = Util.NULL_ITERATOR;
@@ -41,7 +41,7 @@ public class MultiMapIterator<E> implements Iterator<E>{
 		setNext();
 		return ret;
 	}
-	/** ¥µ¥İ¡¼¥È¤·¤Ê¤¤¤Î¤Ç¡¢UnsupportedOperationException¤òÅê¤²¤ë */
+	/** ã‚µãƒãƒ¼ãƒˆã—ãªã„ã®ã§ã€UnsupportedOperationExceptionã‚’æŠ•ã’ã‚‹ */
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}

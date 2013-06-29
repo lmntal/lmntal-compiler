@@ -1,5 +1,5 @@
 /*
- * ºîÀ®Æü: 2003/12/22
+ * ä½œæˆæ—¥: 2003/12/22
  *
  */
 package runtime;
@@ -11,19 +11,19 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * ´Ê°×ÈÇ¥¯¥é¥¹¥í¡¼¥À¡£¥Õ¥¡¥¤¥ë¤«¤éÆÉ¤ß¹ş¤à¡£¤Ê¤ó¤À¤«¤Ê¤¡
+ * ç°¡æ˜“ç‰ˆã‚¯ãƒ©ã‚¹ãƒ­ãƒ¼ãƒ€ã€‚ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã‚€ã€‚ãªã‚“ã ã‹ãªã
  * 
  * @author hara
  */
 public class FileClassLoader extends ClassLoader {
-	// ÆÉ¤ß¹ş¤à¥Ñ¥¹ : File -> null   ½ÅÊ£¤ò¤Ê¤¯¤·¤¿¤¤¤Î¤Ç¤³¤¦¤·¤¿¡£
+	// èª­ã¿è¾¼ã‚€ãƒ‘ã‚¹ : File -> null   é‡è¤‡ã‚’ãªãã—ãŸã„ã®ã§ã“ã†ã—ãŸã€‚
 	static Map<File, Object> path = new HashMap<File, Object>();
 	static {
 		path.put(new File("."), null);
 	}
 	
 	/**
-	 * ¥¯¥é¥¹¥Ñ¥¹¤òÄÉ²Ã¤¹¤ë
+	 * ã‚¯ãƒ©ã‚¹ãƒ‘ã‚¹ã‚’è¿½åŠ ã™ã‚‹
 	 * @param thePath
 	 */
 	public static void addPath(File thePath) {
@@ -31,8 +31,8 @@ public class FileClassLoader extends ClassLoader {
 	}
 	
 	/**
-	 * ¥¯¥é¥¹¤òÆÉ¤ß¹ş¤ó¤ÇÊÖ¤¹
-	 * @param className ¥¯¥é¥¹Ì¾
+	 * ã‚¯ãƒ©ã‚¹ã‚’èª­ã¿è¾¼ã‚“ã§è¿”ã™
+	 * @param className ã‚¯ãƒ©ã‚¹å
 	 */
 	public Class<?> findClass(String className) {
 //		System.out.println("TRY   to load " + className);

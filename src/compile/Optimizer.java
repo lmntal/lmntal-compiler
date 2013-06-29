@@ -1,5 +1,5 @@
 /*
- * ºîÀ®Æü: 2003/11/30
+ * ä½œæˆæ—¥: 2003/11/30
  */
 package compile;
 
@@ -19,40 +19,40 @@ import runtime.functor.Functor;
 import runtime.functor.SpecialFunctor;
 
 /**
- * ºÇÅ¬²½¤ò¹Ô¤¦¥¯¥é¥¹¥á¥½¥Ã¥É¤ò»ı¤Ä¥¯¥é¥¹¡£
+ * æœ€é©åŒ–ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’æŒã¤ã‚¯ãƒ©ã‚¹ã€‚
  * @author Mizuno
  */
 public class Optimizer {
-	/** Ì¿ÎáÎó¤Î¥¤¥ó¥é¥¤¥Ë¥ó¥°¤ò¹Ô¤¦*/
+	/** å‘½ä»¤åˆ—ã®ã‚¤ãƒ³ãƒ©ã‚¤ãƒ‹ãƒ³ã‚°ã‚’è¡Œã†*/
 	public static boolean fInlining;
-	/** Ëì¤ÎºÆÍøÍÑ¤ò¹Ô¤¦ */
+	/** è†œã®å†åˆ©ç”¨ã‚’è¡Œã† */
 	public static boolean fReuseMem;
-	/** ¥¢¥È¥à¤ÎºÆÍøÍÑ¤ò¹Ô¤¦ */
+	/** ã‚¢ãƒˆãƒ ã®å†åˆ©ç”¨ã‚’è¡Œã† */
 	public static boolean fReuseAtom;
-	/** Ì¿ÎáÎó¤Î¥ë¡¼¥×²½¤ò¹Ô¤¦ */
+	/** å‘½ä»¤åˆ—ã®ãƒ«ãƒ¼ãƒ—åŒ–ã‚’è¡Œã† */
 	public static boolean fLoop;
-	/** Ì¿ÎáÎó¤ÎÊÂ¤ÓÂØ¤¨¤ò¹Ô¤¦ */
+	/** å‘½ä»¤åˆ—ã®ä¸¦ã³æ›¿ãˆã‚’è¡Œã† */
 	public static boolean fGuardMove;
-	/** Ì¿ÎáÎó¤Î¥°¥ë¡¼¥×²½¤ò¹Ô¤¦ */
+	/** å‘½ä»¤åˆ—ã®ã‚°ãƒ«ãƒ¼ãƒ—åŒ–ã‚’è¡Œã† */
 	public static boolean fGrouping;
-	/** Ì¿ÎáÎó¤ÎÊÔ¤ß¾å¤²¤ò¹Ô¤¦ */
+	/** å‘½ä»¤åˆ—ã®ç·¨ã¿ä¸Šã’ã‚’è¡Œã† */
 	public static boolean fMerging;
-	/** ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Î¥¤¥ó¥é¥¤¥óÅ¸³« */
+	/** ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å±•é–‹ */
 	public static boolean fSystemRulesetsInlining;
 
 	/**
-	 * Á´¤Æ¤ÎºÇÅ¬²½¥Õ¥é¥°¤ò¥ª¥Õ¤Ë¤¹¤ë
+	 * å…¨ã¦ã®æœ€é©åŒ–ãƒ•ãƒ©ã‚°ã‚’ã‚ªãƒ•ã«ã™ã‚‹
 	 */
 	public static void clearFlag() {
 		fInlining = fReuseMem = fReuseAtom = fLoop = false;
 		fGuardMove = fGrouping = fMerging = fSystemRulesetsInlining = false;
 	}
 	/**
-	 * ºÇÅ¬²½¥ì¥Ù¥ë¤òÀßÄê¤¹¤ë¡£
-	 * ¥ì¥Ù¥ë¤Ë±ş¤¸¤ÆºÇÅ¬²½¥Õ¥é¥°¤ò¥ª¥ó¤Ë¤¹¤ë¡£
-	 * Äã¤¤¥ì¥Ù¥ë¤ò»ØÄê¤·¤Æ¤â¡¢¤¹¤Ç¤Ë¥ª¥ó¤Ë¤·¤Æ¤¢¤ë¥Õ¥é¥°¤ò¥ª¥Õ¤Ë¤¹¤ë¤³¤È¤Ï¤Ê¤¤¡£
-	 * ¿·¤·¤¤ºÇÅ¬²½¤ò¼ÂÁõ¤¹¤ëºİ¤Ë¤Ï¡¢¥Õ¥é¥°¤ò¥Õ¥£¡¼¥ë¥É¤ËÄêµÁ¤·¤Æ¡¢¤³¤³¤Ç¥ª¥ó¡¦¥ª¥Õ¤ò¹Ô¤¦¡£
-	 * @param level ºÇÅ¬²½¥ì¥Ù¥ë
+	 * æœ€é©åŒ–ãƒ¬ãƒ™ãƒ«ã‚’è¨­å®šã™ã‚‹ã€‚
+	 * ãƒ¬ãƒ™ãƒ«ã«å¿œã˜ã¦æœ€é©åŒ–ãƒ•ãƒ©ã‚°ã‚’ã‚ªãƒ³ã«ã™ã‚‹ã€‚
+	 * ä½ã„ãƒ¬ãƒ™ãƒ«ã‚’æŒ‡å®šã—ã¦ã‚‚ã€ã™ã§ã«ã‚ªãƒ³ã«ã—ã¦ã‚ã‚‹ãƒ•ãƒ©ã‚°ã‚’ã‚ªãƒ•ã«ã™ã‚‹ã“ã¨ã¯ãªã„ã€‚
+	 * æ–°ã—ã„æœ€é©åŒ–ã‚’å®Ÿè£…ã™ã‚‹éš›ã«ã¯ã€ãƒ•ãƒ©ã‚°ã‚’ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã«å®šç¾©ã—ã¦ã€ã“ã“ã§ã‚ªãƒ³ãƒ»ã‚ªãƒ•ã‚’è¡Œã†ã€‚
+	 * @param level æœ€é©åŒ–ãƒ¬ãƒ™ãƒ«
 	 */
 	public static void setLevel(int level) {
 		if (level >= 1) {
@@ -60,30 +60,30 @@ public class Optimizer {
 			fGuardMove = true;
 		}
 		if (level >= 2) {
-//			¥ë¡¼¥×²½¤Ï¤Ş¤À¥Ğ¥°¤¬¤¤¤ë¤Î¤Ç¡¢¸ÄÊÌ¤Ë»ØÄê¤·¤Ê¤¤¸Â¤ê¼Â¹Ô¤·¤Ê¤¤
+//			ãƒ«ãƒ¼ãƒ—åŒ–ã¯ã¾ã ãƒã‚°ãŒã„ã‚‹ã®ã§ã€å€‹åˆ¥ã«æŒ‡å®šã—ãªã„é™ã‚Šå®Ÿè¡Œã—ãªã„
 //			fLoop = true;
 //			fGrouping = true;
 		}
 		if (level >= 3) {
-			//ÌÀ¼¨Åª¤Ë»ØÄê¤¹¤ë¤È¡¢¥Ü¥Ç¥£¤â¤¯¤Ã¤Ä¤±¤ë
-			//¤ä¤ë¤Ù¤­¤¸¤ã¤Ê¤¤¤«¤â
+			//æ˜ç¤ºçš„ã«æŒ‡å®šã™ã‚‹ã¨ã€ãƒœãƒ‡ã‚£ã‚‚ãã£ã¤ã‘ã‚‹
+			//ã‚„ã‚‹ã¹ãã˜ã‚ƒãªã„ã‹ã‚‚
 			fInlining = true;
 		}
 	}
 
-	/** ¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È¤òºÇÅ¬²½¤¹¤ë
-	 * Ì¿ÎáÎó¤ËÂĞ¤¹¤ëºÇÅ¬²½µ¡Ç½¤òÄÉ²Ã¤¹¤ë»ş¤Ï¡¢¤³¤³¤òºÇÅ¬²½¥á¥½¥Ã¥É¤Î¸Æ¤Ó½Ğ¤·¸µ¤Ë¤¹¤ë¤È¤¤¤¤¡£
+	/** ãƒ«ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æœ€é©åŒ–ã™ã‚‹
+	 * å‘½ä»¤åˆ—ã«å¯¾ã™ã‚‹æœ€é©åŒ–æ©Ÿèƒ½ã‚’è¿½åŠ ã™ã‚‹æ™‚ã¯ã€ã“ã“ã‚’æœ€é©åŒ–ãƒ¡ã‚½ãƒƒãƒ‰ã®å‘¼ã³å‡ºã—å…ƒã«ã™ã‚‹ã¨ã„ã„ã€‚
 	 * 
-	 *  @param rule ¥ë¡¼¥ë¥ª¥Ö¥¸¥§¥¯¥È 
+	 *  @param rule ãƒ«ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ 
 	 */
 	public static void optimizeRule(Rule rule) {
-		// TODO ºÇÅ¬²½´ï¤òÅı¹ç¤¹¤ë
+		// TODO æœ€é©åŒ–å™¨ã‚’çµ±åˆã™ã‚‹
 		Compactor.compactRule(rule);
-		// TODO ËÜ¼ÁÅª¤Ë¥¤¥ó¥é¥¤¥óÅ¸³«¤¬É¬Í×¤Ê¤¤¤â¤Î¤Ï¡¢Å¸³«¤·¤Ê¤¯¤Æ¤â¤Ç¤­¤ë¤è¤¦¤Ë¤¹¤ë
+		// TODO æœ¬è³ªçš„ã«ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å±•é–‹ãŒå¿…è¦ãªã„ã‚‚ã®ã¯ã€å±•é–‹ã—ãªãã¦ã‚‚ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹
 		if (fInlining || fGuardMove || fGrouping || fReuseMem || fReuseAtom || fLoop) {
-			//head ¤È guard ¤ò¤¯¤Ã¤Ä¤±¤ë
+			//head ã¨ guard ã‚’ãã£ã¤ã‘ã‚‹
 			inlineExpandTailJump(rule.memMatch);
-			//¸½¾õ¤Ç¤Ï¥¢¥È¥à¼çÆ³¥Æ¥¹¥È¤Î¥¤¥ó¥é¥¤¥óÅ¸³«¤Ë¤ÏÂĞ±ş¤·¤Æ¤¤¤Ê¤¤ -> °ì±şÂĞ±ş(sakurai)
+			//ç¾çŠ¶ã§ã¯ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆã®ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å±•é–‹ã«ã¯å¯¾å¿œã—ã¦ã„ãªã„ -> ä¸€å¿œå¯¾å¿œ(sakurai)
 			inlineExpandTailJump(rule.atomMatch);
 			rule.guardLabel = null;
 			rule.guard = null;
@@ -106,7 +106,7 @@ public class Optimizer {
 		if (Env.hyperLinkOpt) findproccxtMove(rule.memMatch);//seiji
 		if(fSystemRulesetsInlining) inlineExpandSystemRuleSets(rule.body);
 		if (fInlining) {
-			// head(+guard) ¤È body ¤ò¤¯¤Ã¤Ä¤±¤ë
+			// head(+guard) ã¨ body ã‚’ãã£ã¤ã‘ã‚‹
 			inlineExpandTailJump(rule.memMatch);
 			inlineExpandTailJump(rule.atomMatch);
 
@@ -115,11 +115,11 @@ public class Optimizer {
 		}
 	}
 	/**	
-	 * ÅÏ¤µ¤ì¤¿Ì¿ÎáÎó¤ò¡¢¸½ºß¤ÎºÇÅ¬²½¥ì¥Ù¥ë¤Ë±ş¤¸¤ÆºÇÅ¬²½¤¹¤ë¡£<br>
-	 * Ì¿ÎáÎóÃæ¤Ë¤Ï¡¢1°ú¿ô¤Îremoveatom/removememÌ¿Îá¤¬¸½¤ì¤Æ¤¤¤Æ¤Ï¤¤¤±¤Ê¤¤¡£
-	 * ¸½ºß¤Î°ú¿ô»ÅÍÍ¤Ï»ÃÄêÅª¤Ê¤â¤Î¤Ç¡¢¾­ÍèÊÑ¹¹¤µ¤ì¤ëÍ½Äê¡£
-	 * @param head Ëì¼çÆ³¥Ş¥Ã¥Á¥ó¥°Ì¿ÎáÎó
-	 * @param body ¥Ü¥Ç¥£Ì¿ÎáÎó
+	 * æ¸¡ã•ã‚ŒãŸå‘½ä»¤åˆ—ã‚’ã€ç¾åœ¨ã®æœ€é©åŒ–ãƒ¬ãƒ™ãƒ«ã«å¿œã˜ã¦æœ€é©åŒ–ã™ã‚‹ã€‚<br>
+	 * å‘½ä»¤åˆ—ä¸­ã«ã¯ã€1å¼•æ•°ã®removeatom/removememå‘½ä»¤ãŒç¾ã‚Œã¦ã„ã¦ã¯ã„ã‘ãªã„ã€‚
+	 * ç¾åœ¨ã®å¼•æ•°ä»•æ§˜ã¯æš«å®šçš„ãªã‚‚ã®ã§ã€å°†æ¥å¤‰æ›´ã•ã‚Œã‚‹äºˆå®šã€‚
+	 * @param head è†œä¸»å°ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤åˆ—
+	 * @param body ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—
 	 */
 	public static void optimize(List<Instruction> head, List<Instruction> body) {
 		if (fReuseMem) {
@@ -137,10 +137,10 @@ public class Optimizer {
 	}
 	///////////////////////////////////////////////////////
 	// @author n-kato
-	// TODO specÌ¿Îá¤Î¿ÈÊ¬¤ò¹Í¤¨¤ë
+	// TODO specå‘½ä»¤ã®èº«åˆ†ã‚’è€ƒãˆã‚‹
 
-	/** Ì¿ÎáÎó¤ÎËöÈø¤ÎjumpÌ¿Îá¤ò¥¤¥ó¥é¥¤¥óÅ¸³«¤¹¤ë¡£
-	 * @param insts Ì¿ÎáÎó
+	/** å‘½ä»¤åˆ—ã®æœ«å°¾ã®jumpå‘½ä»¤ã‚’ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å±•é–‹ã™ã‚‹ã€‚
+	 * @param insts å‘½ä»¤åˆ—
 	 * <pre>
 	 *     [ spec[X,Y];  C;jump[L,A1..Am] ] where L:[spec[m,m+n];D]
 	 * ==> [ spec[X,Y+n];C; D{ 1..m->A1..Am, m+1..m+n->Y+1..Y+n } ]
@@ -149,7 +149,7 @@ public class Optimizer {
 		if (insts.isEmpty()) return;
 		Instruction spec = insts.get(0);
 		if (spec.getKind() != Instruction.SPEC) return;
-		//¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÍÑ
+		//ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆç”¨
 		for(int i = 1; i<insts.size(); i++){
 			Instruction branch = insts.get(i);
 			if (branch.getKind() != Instruction.BRANCH) break;
@@ -162,10 +162,10 @@ public class Optimizer {
 		locals = inlineExpandTailJump(insts, locals);
 		spec.updateSpec(formals, locals);
 	}
-	/** Ì¿ÎáÎó¤ÎËöÈø¤ÎjumpÌ¿Îá¤ò¥¤¥ó¥é¥¤¥óÅ¸³«¤¹¤ë¡£spec¤Ï¤Ş¤À¹¹¿·¤µ¤ì¤Ê¤¤¡£
-	 *  @param insts Ì¿ÎáÎó
-	 *  @param varcount Å¸³«Á°¤Î¼Â°ú¿ô
-	 *  @return Å¸³«¸å¤Î¼Â°ú¿ô
+	/** å‘½ä»¤åˆ—ã®æœ«å°¾ã®jumpå‘½ä»¤ã‚’ã‚¤ãƒ³ãƒ©ã‚¤ãƒ³å±•é–‹ã™ã‚‹ã€‚specã¯ã¾ã æ›´æ–°ã•ã‚Œãªã„ã€‚
+	 *  @param insts å‘½ä»¤åˆ—
+	 *  @param varcount å±•é–‹å‰ã®å®Ÿå¼•æ•°
+	 *  @return å±•é–‹å¾Œã®å®Ÿå¼•æ•°
 	 *  */
 	public static int inlineExpandTailJump(List<Instruction> insts, int varcount) {
 		if (insts.isEmpty()) return varcount;
@@ -178,7 +178,7 @@ public class Optimizer {
 		Instruction subspec = subinsts.get(0);
 
 		HashMap map = new HashMap();
-		// ²¾°ú¿ô¤Ï¡¢¼Â°ú¿ôÈÖ¹æ¤ÇÃÖ´¹¤¹¤ë¡£
+		// ä»®å¼•æ•°ã¯ã€å®Ÿå¼•æ•°ç•ªå·ã§ç½®æ›ã™ã‚‹ã€‚
 		List memargs   = (List)jump.getArg2();
 		List atomargs  = (List)jump.getArg3();
 		List otherargs = (List)jump.getArg4();
@@ -188,7 +188,7 @@ public class Optimizer {
 			map.put( new Integer(memargs.size() + i), atomargs.get(i) );
 		for (int i = 0; i < otherargs.size(); i++)
 			map.put( new Integer(memargs.size() + atomargs.size() + i), otherargs.get(i) );
-		// ¶É½êÊÑ¿ô¤Ï¡¢¿·Á¯¤ÊÊÑ¿ôÈÖ¹æ¤ÇÃÖ´¹¤¹¤ë¡£
+		// å±€æ‰€å¤‰æ•°ã¯ã€æ–°é®®ãªå¤‰æ•°ç•ªå·ã§ç½®æ›ã™ã‚‹ã€‚
 		int subformals = subspec.getIntArg1();
 		int sublocals  = subspec.getIntArg2();
 		for (int i = subformals; i < sublocals; i++) {
@@ -196,32 +196,32 @@ public class Optimizer {
 		}
 		//
 		Instruction.applyVarRewriteMap(subinsts,map);
-		subinsts.remove(0);		// spec¤ò½üµî
-		insts.remove(size - 1);	// jumpÌ¿Îá¤ò½üµî
+		subinsts.remove(0);		// specã‚’é™¤å»
+		insts.remove(size - 1);	// jumpå‘½ä»¤ã‚’é™¤å»
 		insts.addAll(subinsts);
 		return varcount;
 	}
-	// n-kato ½ª
+	// n-kato çµ‚
 
 	//sakurai
 	/** 
-	 * ¥¬¡¼¥ÉÌ¿Îá¤ò²ÄÇ½¤Ê¸Â¤êÁ°¤Ë°ÜÆ°¤µ¤»¤ë.
-	 * ¥Ü¥Ç¥£Ì¿Îá¤ÏÊÂ¤ÓÂØ¤¨¤Ê¤¤
-	 * @param insts Ì¿ÎáÎó(head¤Èguard¤ò¤¯¤Ã¤Ä¤±¤¿¤â¤Î)
+	 * ã‚¬ãƒ¼ãƒ‰å‘½ä»¤ã‚’å¯èƒ½ãªé™ã‚Šå‰ã«ç§»å‹•ã•ã›ã‚‹.
+	 * ãƒœãƒ‡ã‚£å‘½ä»¤ã¯ä¸¦ã³æ›¿ãˆãªã„
+	 * @param insts å‘½ä»¤åˆ—(headã¨guardã‚’ãã£ã¤ã‘ãŸã‚‚ã®)
 	 */
 	public static void guardMove(List<Instruction> insts){
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
 
 			switch(inst.getKind()){
-			//¥Ü¥Ç¥£Ì¿ÎáÎó¤ÏÊÂ¤ÓÂØ¤¨¤Ê¤¤ -> ¥Ü¥Ç¥£¤ÎÀèÆ¬¤Ïcommit
+			//ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ã¯ä¸¦ã³æ›¿ãˆãªã„ -> ãƒœãƒ‡ã‚£ã®å…ˆé ­ã¯commit
 			case Instruction.COMMIT:
 				return;
-				//ÈİÄê¾ò·ï¤ÏÊüÃÖ(°ÌÃÖ¤òÊÑ¤¨¤Ê¤¤)
-				//todo ¤É¤¦¤¹¤ë¤«¹Í¤¨¤ë
+				//å¦å®šæ¡ä»¶ã¯æ”¾ç½®(ä½ç½®ã‚’å¤‰ãˆãªã„)
+				//todo ã©ã†ã™ã‚‹ã‹è€ƒãˆã‚‹
 			case Instruction.NOT:
 				continue;
-				//°ÌÃÖ¤òÊÑ¤¨¤¿¤¯¤Ê¤¤Ì¿Îá¡£Â¾¤Ë¤¢¤ì¤Ğ¤³¤³¤ËÄÉ²Ã¤¹¤ë¡£
+				//ä½ç½®ã‚’å¤‰ãˆãŸããªã„å‘½ä»¤ã€‚ä»–ã«ã‚ã‚Œã°ã“ã“ã«è¿½åŠ ã™ã‚‹ã€‚
 			case Instruction.FINDATOM:
 			case Instruction.ANYMEM:
 			case Instruction.NEWLIST:
@@ -233,14 +233,14 @@ public class Optimizer {
 			case Instruction.GUARD_INLINE:
 			case Instruction.ADDTOLIST:
 				continue;
-				//°ú¿ô¤ËÌ¿ÎáÎó¤ò»ı¤ÄÌ¿Îá
+				//å¼•æ•°ã«å‘½ä»¤åˆ—ã‚’æŒã¤å‘½ä»¤
 			case Instruction.GROUP:
 			case Instruction.BRANCH:
 				InstructionList subinsts = (InstructionList)inst.getArg1();
 				guardMove(subinsts.insts);
 				break;
-				//¾å¤Ë³ºÅö¤·¤Ê¤¤Ì¿Îá¤Ï¡¢¤½¤Î°ú¿ô¤ÎÊÑ¿ôÈÖ¹æ¤¬ÄêµÁ¤µ¤ì¤¿Ì¿Îá¤è¤êÁ°¤Ë¤Ê¤é¤Ê¤¤¸Â¤ê¡¢
-				//Á°¤ËÆ°¤«¤»¤ë¡£
+				//ä¸Šã«è©²å½“ã—ãªã„å‘½ä»¤ã¯ã€ãã®å¼•æ•°ã®å¤‰æ•°ç•ªå·ãŒå®šç¾©ã•ã‚ŒãŸå‘½ä»¤ã‚ˆã‚Šå‰ã«ãªã‚‰ãªã„é™ã‚Šã€
+				//å‰ã«å‹•ã‹ã›ã‚‹ã€‚
 			default:
 				int judge = guardMove(insts, inst, i-1);
 			if(judge == 2){
@@ -254,7 +254,7 @@ public class Optimizer {
 			}
 		}
 	}
-	/* Ãæ´ÖÌ¿Îáfindproccxt¤òfindatom¤è¤ê¤âÁ°¤Ë°ÜÆ°¤µ¤»¤ë */
+	/* ä¸­é–“å‘½ä»¤findproccxtã‚’findatomã‚ˆã‚Šã‚‚å‰ã«ç§»å‹•ã•ã›ã‚‹ */
 	private static void findproccxtMove(List<Instruction> insts) {//seiji
 		int insert = 0, max = insts.size();
 		for (int i = 0; i < max; i++) {
@@ -279,7 +279,7 @@ public class Optimizer {
 			return n;
 	}
 	private static int guardMove(List<Instruction> insts, Instruction inst, int locate){
-		int moveok = 0; //°ÜÆ°²ÄÇ½È½Äê¥Õ¥é¥°
+		int moveok = 0; //ç§»å‹•å¯èƒ½åˆ¤å®šãƒ•ãƒ©ã‚°
 		ArrayList list;
 		HashMap listn = new HashMap();
 		int i=locate;
@@ -320,7 +320,7 @@ public class Optimizer {
 					for(int j=0; j<list.size(); j++){
 						int num =((Integer)list.get(j)).intValue();
 //						System.out.println("j=" + j +", atoms = "+atoms + ", num = "+num+ " ,memnum = " + memnum);
-						//getVarArgs¤Î¤¦¤Á¡¢jÈÖÌÜ¤ËÀßÄê¤¹¤Ù¤­
+						//getVarArgsã®ã†ã¡ã€jç•ªç›®ã«è¨­å®šã™ã¹ã
 						if(num<memnum){
 							inst.data.set(((Integer)listn.get(j)).intValue(),  new Integer(((Integer)mems.get(num)).intValue()));
 						} else if((num-memnum)>=atoms.size() || num-memnum<0) {
@@ -338,7 +338,7 @@ public class Optimizer {
 					continue;
 				}
 
-				//¡¡inst¤òinst2¤Î²¼¤ËÇÛÃÖ¤¹¤ë¤Ù¤­¤«È½Äê
+				//ã€€instã‚’inst2ã®ä¸‹ã«é…ç½®ã™ã‚‹ã¹ãã‹åˆ¤å®š
 				ArrayList list2 = inst2.getVarArgs(listn);
 				if(inst.getKind() == Instruction.ALLOCATOM || inst.getKind() == Instruction.NEWLIST){
 //					System.out.println("check " + inst + "\t to" + inst2);
@@ -387,9 +387,9 @@ public class Optimizer {
 	}
 
 	/** 
-	 * ¥¬¡¼¥ÉÌ¿Îá¤ò²ÄÇ½¤Ê¸Â¤êÁ°¤Ë°ÜÆ°¤µ¤»¤ë.
-	 * ¥Ü¥Ç¥£Ì¿Îá¤ÏÊÂ¤ÓÂØ¤¨¤Ê¤¤
-	 * @param insts Ì¿ÎáÎó(head¤Èguard¤ò¤¯¤Ã¤Ä¤±¤¿¤â¤Î)
+	 * ã‚¬ãƒ¼ãƒ‰å‘½ä»¤ã‚’å¯èƒ½ãªé™ã‚Šå‰ã«ç§»å‹•ã•ã›ã‚‹.
+	 * ãƒœãƒ‡ã‚£å‘½ä»¤ã¯ä¸¦ã³æ›¿ãˆãªã„
+	 * @param insts å‘½ä»¤åˆ—(headã¨guardã‚’ãã£ã¤ã‘ãŸã‚‚ã®)
 	 */
 	public static void allocMove(List<Instruction> insts){
 		for(int i=1; i<insts.size(); i++){
@@ -420,8 +420,8 @@ public class Optimizer {
 	}
 
 	/**
-	 * ¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤ò¥Ü¥Ç¥£Ì¿ÎáÎóÃæ¤ËÅ¸³«¤¹¤ë
-	 * @param body ¥Ü¥Ç¥£Ì¿ÎáÎó
+	 * ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã‚’ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ä¸­ã«å±•é–‹ã™ã‚‹
+	 * @param body ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—
 	 */
 	private static void inlineExpandSystemRuleSets(List<Instruction> body){
 		Instruction spec = body.get(0);
@@ -606,7 +606,7 @@ public class Optimizer {
 						}
 
 						if(arg1 !=-1 && arg2 != -1 && result != -1 && resultlink != -1) {
-							//¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥ÈÀ®¸ù»ş¤ÎÌ¿ÎáÎó inline1
+							//ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆæˆåŠŸæ™‚ã®å‘½ä»¤åˆ— inline1
 							if(old2new.containsKey(arg1)) arg1 = old2new.get(arg1);
 							if(old2new.containsKey(arg1)) arg2 = old2new.get(arg2);
 
@@ -634,7 +634,7 @@ public class Optimizer {
 										&& (inst3.getIntArg1() == newatomvar))
 									body.remove(k--);
 							}
-							//¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¼ºÇÔ»ş¤ÎÌ¿ÎáÎó inline2
+							//ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆå¤±æ•—æ™‚ã®å‘½ä»¤åˆ— inline2
 							Iterator<Instruction> it = newlinks2.iterator();
 							while(it.hasNext())
 								inline2.add(it.next());
@@ -643,7 +643,7 @@ public class Optimizer {
 								inline2.add(it.next());							
 							inline2.add(new Instruction(Instruction.PROCEED));
 							//System.out.println(inline2.insts);
-							//¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥ÈÌ¿Îá¤ÎÄÉ²Ã
+							//ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆå‘½ä»¤ã®è¿½åŠ 
 							for(int i2=body.size()-1; i2>0; i2--){
 								inst2 = body.get(i2);
 								if(!(inst2.getKind() == Instruction.PROCEED)
@@ -668,7 +668,7 @@ public class Optimizer {
 
 		body.remove(0);
 		body.add(0, new Instruction(Instruction.SPEC, spec.getIntArg1(), locals));
-//		ÉÔÍ×¤Ênewlink¤Î½üµî
+//		ä¸è¦ãªnewlinkã®é™¤å»
 		for(int i2=0; i2<body.size(); i2++){
 			Instruction inst2 = (Instruction)body.get(i2);
 			if(removelinks.contains(inst2)) body.remove(i2--);
@@ -676,14 +676,14 @@ public class Optimizer {
 	}
 
 	///////////////////////////////////////////////////////
-	// ËìºÇÅ¬²½´ØÏ¢
+	// è†œæœ€é©åŒ–é–¢é€£
 
 	/**
-	 * Ëì¤ÎºÆÍøÍÑ¤ò¹Ô¤¦¥³¡¼¥É¤òÀ¸À®¤¹¤ë¡£<br>
-	 * Ì¿ÎáÎóÃæ¤Ë¤Ï¡¢1°ú¿ô¤ÎremovememÌ¿Îá¤¬¸½¤ì¤Æ¤¤¤Æ¤Ï¤¤¤±¤Ê¤¤¡£
-	 * Ì¿ÎáÎó¤ÎºÇ¸å¤ÏproceedÌ¿Îá¤Ç¤Ê¤±¤ì¤Ğ¤Ê¤é¤Ê¤¤¡£
-	 * @param head ¥Ø¥Ã¥ÉÌ¿ÎáÎó
-	 * @param body ¥Ü¥Ç¥£Ì¿ÎáÎó
+	 * è†œã®å†åˆ©ç”¨ã‚’è¡Œã†ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹ã€‚<br>
+	 * å‘½ä»¤åˆ—ä¸­ã«ã¯ã€1å¼•æ•°ã®removememå‘½ä»¤ãŒç¾ã‚Œã¦ã„ã¦ã¯ã„ã‘ãªã„ã€‚
+	 * å‘½ä»¤åˆ—ã®æœ€å¾Œã¯proceedå‘½ä»¤ã§ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚
+	 * @param head ãƒ˜ãƒƒãƒ‰å‘½ä»¤åˆ—
+	 * @param body ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—
 	 */
 	private static void reuseMem(List<Instruction> head, List<Instruction> body) {
 		Instruction spec = body.get(0);
@@ -694,7 +694,7 @@ public class Optimizer {
 		if (last.getKind() != Instruction.PROCEED) {
 			return;
 		}
-		//¥Ğ¥°²óÈò
+		//ãƒã‚°å›é¿
 		for(Iterator<Instruction> itb = body.iterator(); itb.hasNext();) {
 			int itbKind = itb.next().getKind();
 			if (itbKind == Instruction.COPYCELLS || itbKind == Instruction.DROPMEM)
@@ -702,18 +702,18 @@ public class Optimizer {
 		}
 
 		HashMap<Integer, Integer> reuseMap = new HashMap<Integer, Integer>();
-		HashSet<Integer> reuseMems = new HashSet<Integer>(); // ºÆÍøÍÑ¤µ¤ì¤ëËì¤ÎID¤Î½¸¹ç
+		HashSet<Integer> reuseMems = new HashSet<Integer>(); // å†åˆ©ç”¨ã•ã‚Œã‚‹è†œã®IDã®é›†åˆ
 		HashMap parent = new HashMap();
 		HashMap<Integer, List<Integer>> removedChildren = new HashMap<Integer, List<Integer>>(); // map -> list of children
 		HashMap<Integer, List<Integer>> createdChildren = new HashMap<Integer, List<Integer>>(); // map -> list of children
 		HashMap<Integer, List<Integer>> pourMap = new HashMap<Integer, List<Integer>>();
-		HashSet pourMems = new HashSet(); // pourÌ¿Îá¤ÎÂè£²°ú¿ô¤Ë´Ş¤Ş¤ì¤ëËì
+		HashSet pourMems = new HashSet(); // pourå‘½ä»¤ã®ç¬¬ï¼’å¼•æ•°ã«å«ã¾ã‚Œã‚‹è†œ
 		HashMap<Integer, List<Integer>> copyRulesMap = new HashMap<Integer, List<Integer>>();
 		
-		HashMap<Integer, String> headMemName = new HashMap<Integer, String>(); // head ¤Ë´Ø¤¹¤ëËì¤«¤éËìÌ¾¤Ø¤Î map
-		HashMap<Integer, String> bodyMemName = new HashMap<Integer, String>(); // body ¤Ë´Ø¤¹¤ëËì¤«¤éËìÌ¾¤Ø¤Î map
+		HashMap<Integer, String> headMemName = new HashMap<Integer, String>(); // head ã«é–¢ã™ã‚‹è†œã‹ã‚‰è†œåã¸ã® map
+		HashMap<Integer, String> bodyMemName = new HashMap<Integer, String>(); // body ã«é–¢ã™ã‚‹è†œã‹ã‚‰è†œåã¸ã® map
 
-		//ºÆÍøÍÑ¤¹¤ëËì¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê¤¹¤ë
+		//å†åˆ©ç”¨ã™ã‚‹è†œã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®šã™ã‚‹
 		for(Instruction inst : body){
 			switch (inst.getKind()) {
 			case Instruction.REMOVEMEM:
@@ -734,7 +734,7 @@ public class Optimizer {
 			}
 		}
 		
-		// ËìÌ¾¤òµ­²±¤¹¤ë
+		// è†œåã‚’è¨˜æ†¶ã™ã‚‹
 		for(Instruction inst: head){
 			switch(inst.getKind()){
 			case Instruction.LOCKMEM:
@@ -764,9 +764,9 @@ public class Optimizer {
 				pourMap, pourMems, new Integer(0));
 
 
-		//Ì¿ÎáÎó¤ò½ñ¤­´¹¤¨¤ë
-		//¤½¤Îºİ¡¢¾éÄ¹¤Êremovemem/addmemÌ¿Îá¤ò½üµî¤¹¤ë
-		HashSet<Integer> set = new HashSet<Integer>(); //removemem/addmemÌ¿Îá¤ÎÉÔÍ×¤ÊËìºÆÍøÍÑ¤Ë´Ø¤ï¤ëËì
+		//å‘½ä»¤åˆ—ã‚’æ›¸ãæ›ãˆã‚‹
+		//ãã®éš›ã€å†—é•·ãªremovemem/addmemå‘½ä»¤ã‚’é™¤å»ã™ã‚‹
+		HashSet<Integer> set = new HashSet<Integer>(); //removemem/addmemå‘½ä»¤ã®ä¸è¦ãªè†œå†åˆ©ç”¨ã«é–¢ã‚ã‚‹è†œ
 		for(Iterator<Integer> it = reuseMap.keySet().iterator(); it.hasNext();){
 			Integer i1 = it.next();
 			Integer i2 = reuseMap.get(i1);
@@ -775,15 +775,15 @@ public class Optimizer {
 			if (reuseMap.containsKey(p1)) {
 				p1 = reuseMap.get(p1);
 			}
-			if (p1.equals(p2)) { //¿Æ¤¬Æ±¤¸¤À¤Ã¤¿¤é
+			if (p1.equals(p2)) { //è¦ªãŒåŒã˜ã ã£ãŸã‚‰
 				set.add(i1);
 				set.add(i2);
 			}
 		}
 
-		//¥ë¡¼¥ë¤ÎÂàÈò
-		HashMap<Integer, Integer> ruleMem = new HashMap<Integer, Integer>(); //¥ë¡¼¥ë¤òÂàÈò¤·¤¿Ëì
-		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ¥Ø¥Ã¥É¤Ç¤ÎÊÑ¿ôÌ¾¢ª¥Ü¥Ç¥£¤Ç¤ÎÊÑ¿ôÌ¾
+		//ãƒ«ãƒ¼ãƒ«ã®é€€é¿
+		HashMap<Integer, Integer> ruleMem = new HashMap<Integer, Integer>(); //ãƒ«ãƒ¼ãƒ«ã‚’é€€é¿ã—ãŸè†œ
+		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ãƒ˜ãƒƒãƒ‰ã§ã®å¤‰æ•°åâ†’ãƒœãƒ‡ã‚£ã§ã®å¤‰æ•°å
 
 		Instruction react = head.get(head.size() - 1);
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
@@ -798,31 +798,31 @@ public class Optimizer {
 		for(Iterator<Instruction> it = head.iterator(); it.hasNext();){
 			Instruction inst = it.next();
 			if (inst.getKind() == Instruction.NORULES) {
-				//¥ë¡¼¥ëÂàÈò¤ÎÂĞ¾İ¤«¤é³°¤¹
+				//ãƒ«ãƒ¼ãƒ«é€€é¿ã®å¯¾è±¡ã‹ã‚‰å¤–ã™
 				varInBody.remove(inst.getArg1());
 			}
 		}
-		//ÂàÈò¤¹¤ëÌ¿Îá¤ÎÀ¸À®
+		//é€€é¿ã™ã‚‹å‘½ä»¤ã®ç”Ÿæˆ
 		ArrayList<Instruction> tmpInsts = new ArrayList<Instruction>();
 		int nextArg = spec.getIntArg2();
 		for(Iterator<Integer> it = varInBody.keySet().iterator(); it.hasNext();){
 			Integer memInHead = it.next();
 			Integer mem = varInBody.get(memInHead);
-			if (reuseMems.contains(mem)) {//ºÆÍøÍÑ¸µ¤ÎËì¤Î¾ì¹ç
+			if (reuseMems.contains(mem)) {//å†åˆ©ç”¨å…ƒã®è†œã®å ´åˆ
 				List<Integer> copyRulesTo = copyRulesMap.get(mem);
 				boolean flg = false;
 				if (copyRulesTo == null) {
-					//±¦ÊÕ¤Ë¥ë¡¼¥ëÊ¸Ì®¤¬½Ğ¸½¤·¤Ê¤¤¤Î¤ÇÂàÈòÉÔÍ×¡¢ºï½ü¤Î¤ß
+					//å³è¾ºã«ãƒ«ãƒ¼ãƒ«æ–‡è„ˆãŒå‡ºç¾ã—ãªã„ã®ã§é€€é¿ä¸è¦ã€å‰Šé™¤ã®ã¿
 					tmpInsts.add(new Instruction(Instruction.CLEARRULES, mem)); 
 				} else {
 					for(Integer dstmem : copyRulesTo){
 						if (mem.equals(reuseMap.get(dstmem))) {
-							flg = true; //¼«Ê¬¤Ë¥³¥Ô¡¼¤·¤Æ¤¤¤ë¤Î¤ÇÂàÈòÉÔÍ×
+							flg = true; //è‡ªåˆ†ã«ã‚³ãƒ”ãƒ¼ã—ã¦ã„ã‚‹ã®ã§é€€é¿ä¸è¦
 							break;
 						}
 					}
 					if (!flg) {
-						//ÂàÈò½èÍı
+						//é€€é¿å‡¦ç†
 						ruleMem.put(mem, new Integer(nextArg));
 						tmpInsts.add(new Instruction(Instruction.ALLOCMEM, nextArg));
 						tmpInsts.add(new Instruction(Instruction.COPYRULES, nextArg, mem));
@@ -834,7 +834,7 @@ public class Optimizer {
 		}
 		body.addAll(1, tmpInsts);
 
-		//TODO removeproxies/insertproxiesÌ¿Îá¤òÅ¬ÀÚ¤ËÊÑ¹¹¤¹¤ë
+		//TODO removeproxies/insertproxieså‘½ä»¤ã‚’é©åˆ‡ã«å¤‰æ›´ã™ã‚‹
 //		tmpInsts = new ArrayList();
 		ListIterator<Instruction> lit = body.listIterator();
 		while (lit.hasNext()) {
@@ -849,14 +849,14 @@ public class Optimizer {
 				Integer arg1 = (Integer)inst.getArg1();
 				if (reuseMap.containsKey(arg1)) {
 					lit.remove();
-					//addmem¡¦enqueuememÌ¿Îá¤ËÊÑ¹¹
+					//addmemãƒ»enqueuememå‘½ä»¤ã«å¤‰æ›´
 					int m = ((Integer)reuseMap.get(arg1)).intValue();
 					if (!set.contains(arg1)) {
 						lit.add(new Instruction(Instruction.ADDMEM, inst.getIntArg2(), m)); 
 					}
 					lit.add(new Instruction(Instruction.ENQUEUEMEM, m));
 					
-					// null ¤Ç¤Ê¤¤ËìÌ¾¤«¤é null ¤ÊËìÌ¾¤ØºÆÍøÍÑ¤¹¤ë¤È¤­¤Ë¤Ï setmemname ¤¬É¬Í× (¥Ğ¥°/090207_-O2Ëì¤ÎÊ£À½¥Ğ¥°)
+					// null ã§ãªã„è†œåã‹ã‚‰ null ãªè†œåã¸å†åˆ©ç”¨ã™ã‚‹ã¨ãã«ã¯ setmemname ãŒå¿…è¦ (ãƒã‚°/090207_-O2è†œã®è¤‡è£½ãƒã‚°)
 					if(bodyMemName.get(arg1) == null && headMemName.get(args.get(m)) != null){
 						lit.add(new Instruction(Instruction.SETMEMNAME, m, null));
 					}
@@ -864,13 +864,13 @@ public class Optimizer {
 				break;
 			case Instruction.MOVECELLS:
 				if (reuseMems.contains(inst.getArg2())) {
-					//addmemÌ¿Îá¤Ç°ÜÆ°¤¬´°Î»¤·¤Æ¤¤¤ë¤¿¤á½üµî
-					//¢¨¤¢¤ëËì¤¬¡¢2¤Ä°Ê¾å¤ÎËì¤ÎºÆÍøÍÑ¤Îº¬µò¤È¤Ê¤ë¤³¤È¤Ï¤Ê¤¤
+					//addmemå‘½ä»¤ã§ç§»å‹•ãŒå®Œäº†ã—ã¦ã„ã‚‹ãŸã‚é™¤å»
+					//â€»ã‚ã‚‹è†œãŒã€2ã¤ä»¥ä¸Šã®è†œã®å†åˆ©ç”¨ã®æ ¹æ‹ ã¨ãªã‚‹ã“ã¨ã¯ãªã„
 					lit.remove();
 				}
 				break;
 //				case Instruction.LOADRULESET:
-//				//¥ë¡¼¥ë¤òÂàÈò¤·¤Ê¤¤¾ì¹ç¤ËÈ÷¤¨¤ÆºÇ¸å¤Ë°ÜÆ°
+//				//ãƒ«ãƒ¼ãƒ«ã‚’é€€é¿ã—ãªã„å ´åˆã«å‚™ãˆã¦æœ€å¾Œã«ç§»å‹•
 //				tmpInsts.add(inst);
 //				lit.remove();
 //				break;
@@ -878,13 +878,13 @@ public class Optimizer {
 				Integer srcmem = (Integer)inst.getArg2();
 				Integer dstmem = (Integer)inst.getArg1();
 				if (ruleMem.containsKey(srcmem)) {
-					if (!ruleMem.get(srcmem).equals(dstmem)) { //ÂàÈò¤Î¤¿¤á¤ÎÌ¿Îá¤Ç¤Ê¤±¤ì¤Ğ
-						//ÂàÈò¤·¤¿Ëì¤«¤é¤Î¥³¥Ô¡¼¤ËÊÑ¹¹
+					if (!ruleMem.get(srcmem).equals(dstmem)) { //é€€é¿ã®ãŸã‚ã®å‘½ä»¤ã§ãªã‘ã‚Œã°
+						//é€€é¿ã—ãŸè†œã‹ã‚‰ã®ã‚³ãƒ”ãƒ¼ã«å¤‰æ›´
 						lit.remove();
 						lit.add(new Instruction(Instruction.COPYRULES, dstmem.intValue(), ((Integer)ruleMem.get(srcmem)).intValue())); 
 					}
 				} else if (srcmem.equals(reuseMap.get(dstmem))) {
-					//¼«Ê¬¤Ø¤Î¥³¥Ô¡¼¤Ê¤Î¤Çºï½ü
+					//è‡ªåˆ†ã¸ã®ã‚³ãƒ”ãƒ¼ãªã®ã§å‰Šé™¤
 					lit.remove();
 				}
 				break;
@@ -895,20 +895,20 @@ public class Optimizer {
 				break;
 			}
 		}
-		lit.previous(); //ºÇ¸å¤ÎproceedÌ¿Îá¤Î¼êÁ°¤ËÄÉ²Ã
-//		//loadrulesetÌ¿Îá¤Î°ÜÆ°
+		lit.previous(); //æœ€å¾Œã®proceedå‘½ä»¤ã®æ‰‹å‰ã«è¿½åŠ 
+//		//loadrulesetå‘½ä»¤ã®ç§»å‹•
 //		it = tmpInsts.iterator();
 //		while (it.hasNext()) {
 //		lit.add(it.next());
 //		}
-		//ºÆÍøÍÑ¤·¤¿Ëì¤ÎunlockmemÌ¿Îá¤ÎÄÉ²Ã
+		//å†åˆ©ç”¨ã—ãŸè†œã®unlockmemå‘½ä»¤ã®è¿½åŠ 
 		addUnlockInst(lit, reuseMap, new Integer(0), createdChildren);
-		//ÂàÈò¤Ë»ÈÍÑ¤·¤¿Ëì¤Î²òÊü
+		//é€€é¿ã«ä½¿ç”¨ã—ãŸè†œã®è§£æ”¾
 		for(Iterator<Integer> it = ruleMem.values().iterator(); it.hasNext();){
 			lit.add(new Instruction(Instruction.FREEMEM, it.next()));
 		}
 
-		//spec¤ÎÊÑ¹¹
+		//specã®å¤‰æ›´
 //		body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
 		spec.updateSpec(spec.getIntArg1(), nextArg);
 
@@ -916,7 +916,7 @@ public class Optimizer {
 	}
 	private static void addUnlockInst(ListIterator<Instruction> lit, HashMap<Integer, Integer> reuseMap,
 			Integer mem, HashMap<Integer, List<Integer>> children) {
-		//»ÒËì¤òÀè¤Ë½èÍı
+		//å­è†œã‚’å…ˆã«å‡¦ç†
 		List<Integer> c = children.get(mem);
 		if (c != null) {
 			Iterator<Integer> it = c.iterator();
@@ -931,12 +931,12 @@ public class Optimizer {
 	}
 
 	/**
-	 * List¤òÃÍ¤È¤¹¤ë¤è¤¦¤Ê¥Ş¥Ã¥×¤ËÃÍ¤òÄÉ²Ã¤¹¤ë¡£
-	 * »ØÅ¦¤µ¤ì¤¿¥­¡¼¤¬¤¹¤Ç¤ËÂ¸ºß¤¹¤ë¾ì¹ç¤ÏÃÍ¤Î¥ê¥¹¥È¤Ëvalue¤òÄÉ²Ã¤¹¤ë¡£
-	 * Â¸ºß¤·¤Ê¤¤¾ì¹ç¤Ï¿·¤·¤¯¥ê¥¹¥È¤òÅĞÏ¿¤·¡¢¥Ş¥Ã¥×¤ËÄÉ²Ã¤¹¤ë¡£
-	 * @param map ¥Ş¥Ã¥×
-	 * @param key ¥­¡¼
-	 * @param value ÃÍ
+	 * Listã‚’å€¤ã¨ã™ã‚‹ã‚ˆã†ãªãƒãƒƒãƒ—ã«å€¤ã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * æŒ‡æ‘˜ã•ã‚ŒãŸã‚­ãƒ¼ãŒã™ã§ã«å­˜åœ¨ã™ã‚‹å ´åˆã¯å€¤ã®ãƒªã‚¹ãƒˆã«valueã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * å­˜åœ¨ã—ãªã„å ´åˆã¯æ–°ã—ããƒªã‚¹ãƒˆã‚’ç™»éŒ²ã—ã€ãƒãƒƒãƒ—ã«è¿½åŠ ã™ã‚‹ã€‚
+	 * @param map ãƒãƒƒãƒ—
+	 * @param key ã‚­ãƒ¼
+	 * @param value å€¤
 	 */
 	private static void addToMap(HashMap map, Object key, Object value) {
 		ArrayList list = (ArrayList)map.get(key);
@@ -948,15 +948,15 @@ public class Optimizer {
 	}
 
 	/**
-	 * ºÆÍøÍÑ¤¹¤ëËì¤ò·èÄê¤·¤Ş¤¹¡£
-	 * start¤Ç»ØÄê¤µ¤ì¤¿ËìÆâ¤Ë¤¢¤ëËì¤Ë¤Ä¤¤¤Æ¡¢ºÆµ¢¸Æ¤Ó½Ğ¤·¤ò¹Ô¤¤¤Ş¤¹¡£
-	 * @param reuseMap ºÆÍøÍÑÊıË¡¤òÆş¤ì¤ë¤¿¤á¤Î¥Ş¥Ã¥×
-	 * @param reuseMems ºÆÍøÍÑ¤µ¤ì¤ëËì¤Î½¸¹ç¤òÆş¤ì¤ë¤¿¤á¤Î¥»¥Ã¥È
-	 * @param parent ¿ÆËì¤Ø¤Î¥Ş¥Ã¥×
-	 * @param children »ÒËì½¸¹ç¤Ø¤Î¥Ş¥Ã¥×
-	 * @param pourMap pourÌ¿Îá¤ÎÂĞ±ş¤òÆş¤ì¤¿¥Ş¥Ã¥×
-	 * @param pourMems pourÌ¿Îá¤ÎÂè£²°ú¿ô¤Ë´Ş¤Ş¤ì¤ëËì¤Î¥»¥Ã¥È
-	 * @param start ¤³¤ÎËìÆâ¤ÎËì¤ÎºÆÍøÍÑ¤ò·èÄê¤¹¤ë¡£
+	 * å†åˆ©ç”¨ã™ã‚‹è†œã‚’æ±ºå®šã—ã¾ã™ã€‚
+	 * startã§æŒ‡å®šã•ã‚ŒãŸè†œå†…ã«ã‚ã‚‹è†œã«ã¤ã„ã¦ã€å†å¸°å‘¼ã³å‡ºã—ã‚’è¡Œã„ã¾ã™ã€‚
+	 * @param reuseMap å†åˆ©ç”¨æ–¹æ³•ã‚’å…¥ã‚Œã‚‹ãŸã‚ã®ãƒãƒƒãƒ—
+	 * @param reuseMems å†åˆ©ç”¨ã•ã‚Œã‚‹è†œã®é›†åˆã‚’å…¥ã‚Œã‚‹ãŸã‚ã®ã‚»ãƒƒãƒˆ
+	 * @param parent è¦ªè†œã¸ã®ãƒãƒƒãƒ—
+	 * @param children å­è†œé›†åˆã¸ã®ãƒãƒƒãƒ—
+	 * @param pourMap pourå‘½ä»¤ã®å¯¾å¿œã‚’å…¥ã‚ŒãŸãƒãƒƒãƒ—
+	 * @param pourMems pourå‘½ä»¤ã®ç¬¬ï¼’å¼•æ•°ã«å«ã¾ã‚Œã‚‹è†œã®ã‚»ãƒƒãƒˆ
+	 * @param start ã“ã®è†œå†…ã®è†œã®å†åˆ©ç”¨ã‚’æ±ºå®šã™ã‚‹ã€‚
 	 */
 	private static void createReuseMap(HashMap<Integer, Integer> reuseMap, 
 			HashSet<Integer> reuseMems, 
@@ -971,39 +971,39 @@ public class Optimizer {
 			return;
 		}
 
-		Integer start2; //start¤Î¡¢ºÆÍøÍÑ¸å¤ÎÊÑ¿ôÈÖ¹æ
+		Integer start2; //startã®ã€å†åˆ©ç”¨å¾Œã®å¤‰æ•°ç•ªå·
 		if (reuseMap.containsKey(start)) {
 			start2 = reuseMap.get(start);
 		} else {
 			start2 = start;
 		}
 		for(int mem : list){
-			//mem¤ÎºÆÍøÍÑ¸µ¤ò·è¤á¤ë
-			Integer candidate = null; //pourÌ¿Îá¤Ë¤è¤ëºÆÍøÍÑ¸õÊä¤ò£±¤ÄÊİ»ı¤·¤Æ¤ª¤¯
-			Integer result = null; //·èÄê¤·¤¿ºÆÍøÍÑÀè¤òÆş¤ì¤ë
+			//memã®å†åˆ©ç”¨å…ƒã‚’æ±ºã‚ã‚‹
+			Integer candidate = null; //pourå‘½ä»¤ã«ã‚ˆã‚‹å†åˆ©ç”¨å€™è£œã‚’ï¼‘ã¤ä¿æŒã—ã¦ãŠã
+			Integer result = null; //æ±ºå®šã—ãŸå†åˆ©ç”¨å…ˆã‚’å…¥ã‚Œã‚‹
 			List<Integer> list2 = pourMap.get(mem);
 			if (list2 != null) {
 				for(int mem2 : list2){
-					//¤¹¤Ç¤ËºÆÍøÍÑ¤¹¤ë¤³¤È¤¬·è¤Ş¤Ã¤Æ¤¤¤ë¾ì¹ç¤ÏÌµ»ë
+					//ã™ã§ã«å†åˆ©ç”¨ã™ã‚‹ã“ã¨ãŒæ±ºã¾ã£ã¦ã„ã‚‹å ´åˆã¯ç„¡è¦–
 					if (reuseMems.contains(mem2)) {
 						continue;
 					}
 
-					//¸õÊä¤ËÅĞÏ¿
+					//å€™è£œã«ç™»éŒ²
 					candidate = mem2;
 
 					if (parent.get(mem2).equals(start2)) {
-						//¿ÆËì¤¬Æ±¤¸Ëì¤«¤é¤ÎpourÌ¿Îá¤¬¤¢¤ë¾ì¹ç¤Ï¡¢¤½¤ì¤òÍ¥Àè
+						//è¦ªè†œãŒåŒã˜è†œã‹ã‚‰ã®pourå‘½ä»¤ãŒã‚ã‚‹å ´åˆã¯ã€ãã‚Œã‚’å„ªå…ˆ
 						result = mem2;
 						break;
 					}
 				}
 			}
 			if (result == null) {
-				//¾å¤ÎÊıË¡¤Ç·è¤Ş¤é¤Ê¤«¤Ã¤¿¾ì¹ç
+				//ä¸Šã®æ–¹æ³•ã§æ±ºã¾ã‚‰ãªã‹ã£ãŸå ´åˆ
 				if (candidate == null) {
-					//¶¦ÄÌ¤Î¿ÆËì¤ò»ı¤Ä¡¢¥×¥í¥»¥¹Ê¸Ì®¤Î¤Ê¤¤Ëì¤ÎÃæ¤«¤éÅ¬Åö¤Ë·èÄê¡£
-					//³ºÅö¤¹¤ëËì¤¬¤Ê¤±¤ì¤ĞºÆÍøÍÑ¤·¤Ê¤¤
+					//å…±é€šã®è¦ªè†œã‚’æŒã¤ã€ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®ãªã„è†œã®ä¸­ã‹ã‚‰é©å½“ã«æ±ºå®šã€‚
+					//è©²å½“ã™ã‚‹è†œãŒãªã‘ã‚Œã°å†åˆ©ç”¨ã—ãªã„
 					List<Integer> list3 = removedChildren.get(start2);
 					if (list3 != null) {
 						for(int m : list3){
@@ -1014,7 +1014,7 @@ public class Optimizer {
 						}
 					}
 				} else {
-					//pourÌ¿Îá¤¬¤¢¤ëÃæ¤«¤éÅ¬Åö¤Ë·èÄê
+					//pourå‘½ä»¤ãŒã‚ã‚‹ä¸­ã‹ã‚‰é©å½“ã«æ±ºå®š
 					result = candidate;
 				}
 			}
@@ -1022,21 +1022,21 @@ public class Optimizer {
 				reuseMap.put(mem, result);
 				reuseMems.add(result);
 			}
-			//ºÆµ¢¸Æ¤Ó½Ğ¤·
+			//å†å¸°å‘¼ã³å‡ºã—
 			createReuseMap(reuseMap, reuseMems, parent, removedChildren, createdChildren,
 					pourMap, pourMems, mem);
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////
-	// ¥¢¥È¥àºÆÍøÍÑ´ØÏ¢
+	// ã‚¢ãƒˆãƒ å†åˆ©ç”¨é–¢é€£
 
 	/**
-	 * relinkÌ¿Îá¤ògetlink/inheritlinkÌ¿Îá¤ËÊÑ´¹¤·¡¢
-	 * getlink/unifyÌ¿Îá¤ò¥Ü¥Ç¥£Ì¿ÎáÎó¤ÎÀèÆ¬¤Ë°ÜÆ°¤¹¤ë¡£
-	 * ÀèÆ¬¤ÎÌ¿Îá¤Ïspec¤Ç¤Ê¤±¤ì¤Ğ¤Ê¤é¤Ê¤¤¡£
-	 * @param list ÊÑ´¹¤¹¤ëÌ¿ÎáÎó
-	 * @return ÊÑ´¹¤ËÀ®¸ù¤·¤¿¾ì¹ç¤Ïtrue
+	 * relinkå‘½ä»¤ã‚’getlink/inheritlinkå‘½ä»¤ã«å¤‰æ›ã—ã€
+	 * getlink/unifyå‘½ä»¤ã‚’ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ã®å…ˆé ­ã«ç§»å‹•ã™ã‚‹ã€‚
+	 * å…ˆé ­ã®å‘½ä»¤ã¯specã§ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚
+	 * @param list å¤‰æ›ã™ã‚‹å‘½ä»¤åˆ—
+	 * @return å¤‰æ›ã«æˆåŠŸã—ãŸå ´åˆã¯true
 	 */
 	public static boolean changeOrder(List<Instruction> list) {
 		Instruction spec = list.get(0);
@@ -1063,26 +1063,26 @@ public class Optimizer {
 //		list.set(0, Instruction.spec(spec.getIntArg1(), nextId));
 		spec.updateSpec(spec.getIntArg1(), nextId);
 		if (list.size() >= 2 && ((Instruction)list.get(1)).getKind() == Instruction.COMMIT)
-			list.addAll(2, moveInsts); // (061128okabe) commit¤¬¤¢¤ë¾ì¹ç¤Ï£²ÈÖÌÜ¤Ç¤Ê¤±¤ì¤Ğ¤Ê¤é¤Ê¤¤¡¥
+			list.addAll(2, moveInsts); // (061128okabe) commitãŒã‚ã‚‹å ´åˆã¯ï¼’ç•ªç›®ã§ãªã‘ã‚Œã°ãªã‚‰ãªã„ï¼
 		else
 			list.addAll(1, moveInsts);
-//		spec.data.set(1, new Integer(nextId)); //¥í¡¼¥«¥ëÊÑ¿ô¤Î¿ô¤òÊÑ¹¹
+//		spec.data.set(1, new Integer(nextId)); //ãƒ­ãƒ¼ã‚«ãƒ«å¤‰æ•°ã®æ•°ã‚’å¤‰æ›´
 		return true;
 	}
 
 	/**
-	 * Ëì¡¦¥Õ¥¡¥ó¥¯¥¿Ëè¤Ë¥¢¥È¥à¤Î½¸¹ç¤ò´ÉÍı¤¹¤ë¤¿¤á¤Î¥¯¥é¥¹¡£
-	 * ¥¢¥È¥àºÆÍøÍÑ¥³¡¼¥É¤òÀ¸À®¤¹¤ëºİ¤Ë¥¢¥È¥à¤ò´ÉÍı¤¹¤ë¤¿¤á¤Ë»ÈÍÑ¤¹¤ë¡£
+	 * è†œãƒ»ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿æ¯ã«ã‚¢ãƒˆãƒ ã®é›†åˆã‚’ç®¡ç†ã™ã‚‹ãŸã‚ã®ã‚¯ãƒ©ã‚¹ã€‚
+	 * ã‚¢ãƒˆãƒ å†åˆ©ç”¨ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹éš›ã«ã‚¢ãƒˆãƒ ã‚’ç®¡ç†ã™ã‚‹ãŸã‚ã«ä½¿ç”¨ã™ã‚‹ã€‚
 	 * @author Ken
 	 */
 	private static class AtomSet {
 		HashMap<Integer, HashMap<Functor, HashSet<Integer>>> map 
 		= new HashMap<Integer, HashMap<Functor, HashSet<Integer>>>(); // mem -> (functor -> atoms)
 		/**
-		 * ¥¢¥È¥à¤òÄÉ²Ã¤¹¤ë
-		 * @param mem ¥¢¥È¥à¤¬½êÂ°¤¹¤ëËì
-		 * @param functor ¥¢¥È¥à¤Î¥Õ¥¡¥ó¥¯¥¿
-		 * @param atom ÄÉ²Ã¤¹¤ë¥¢¥È¥à
+		 * ã‚¢ãƒˆãƒ ã‚’è¿½åŠ ã™ã‚‹
+		 * @param mem ã‚¢ãƒˆãƒ ãŒæ‰€å±ã™ã‚‹è†œ
+		 * @param functor ã‚¢ãƒˆãƒ ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿
+		 * @param atom è¿½åŠ ã™ã‚‹ã‚¢ãƒˆãƒ 
 		 */
 		void add(Integer mem, Functor functor, Integer atom) {
 			HashMap<Functor, HashSet<Integer>> map2 = map.get(mem);
@@ -1098,10 +1098,10 @@ public class Optimizer {
 			atoms.add(atom);
 		}
 		/**
-		 * »ØÄê¤µ¤ì¤¿Ëì¤Ë½êÂ°¤¹¤ë¡¢»ØÄê¤µ¤ì¤¿¥Õ¥¡¥ó¥¯¥¿¤ò»ı¤Ä¥¢¥È¥à¤ÎÈ¿Éü»Ò¤òÊÖ¤¹
-		 * @param mem ¥¢¥È¥à¤¬½êÂ°¤¹¤ë¥¢¥È¥à
-		 * @param functor ¥¢¥È¥à¤Î¥Õ¥¡¥ó¥¯¥¿¡¼
-		 * @return È¿Éü»Ò
+		 * æŒ‡å®šã•ã‚ŒãŸè†œã«æ‰€å±ã™ã‚‹ã€æŒ‡å®šã•ã‚ŒãŸãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’æŒã¤ã‚¢ãƒˆãƒ ã®åå¾©å­ã‚’è¿”ã™
+		 * @param mem ã‚¢ãƒˆãƒ ãŒæ‰€å±ã™ã‚‹ã‚¢ãƒˆãƒ 
+		 * @param functor ã‚¢ãƒˆãƒ ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãƒ¼
+		 * @return åå¾©å­
 		 */
 		Iterator<Integer> iterator(Integer mem, Functor functor) {
 			HashMap<Functor, HashSet<Integer>> map2 = map.get(mem);
@@ -1115,16 +1115,16 @@ public class Optimizer {
 			return atoms.iterator();
 		}
 		/**
-		 * Ëì¤ÎÈ¿Éü»Ò¤òÊÖ¤¹
-		 * @return È¿Éü»Ò
+		 * è†œã®åå¾©å­ã‚’è¿”ã™
+		 * @return åå¾©å­
 		 */
 		Iterator<Integer> memIterator() {
 			return map.keySet().iterator();
 		}
 		/**
-		 * »ØÄê¤µ¤ì¤¿ËìÆâ¤Ë¤¢¤ë¡¢¤³¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤¬´ÉÍı¤¹¤ë¥¢¥È¥à¤Î¥Õ¥¡¥ó¥¯¥¿¤ÎÈ¿Éü»Ò¤òÊÖ¤¹
-		 * @param mem Ëì
-		 * @return È¿Éü»Ò
+		 * æŒ‡å®šã•ã‚ŒãŸè†œå†…ã«ã‚ã‚‹ã€ã“ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãŒç®¡ç†ã™ã‚‹ã‚¢ãƒˆãƒ ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®åå¾©å­ã‚’è¿”ã™
+		 * @param mem è†œ
+		 * @return åå¾©å­
 		 */
 		Iterator<Functor> functorIterator(Integer mem) {
 			HashMap<Functor, HashSet<Integer>> map2 = map.get(mem);
@@ -1135,21 +1135,21 @@ public class Optimizer {
 		}
 	}
 	/**	
-	 * ¥¢¥È¥àºÆÍøÍÑ¤ò¹Ô¤¦¥³¡¼¥É¤òÀ¸À®¤¹¤ë¡£<br>
-	 * °ú¿ô¤ËÅÏ¤µ¤ì¤ëÌ¿ÎáÎó¤Ï¡¢¼¡¤Î¾ò·ï¤òËş¤¿¤·¤Æ¤¤¤ëÉ¬Í×¤¬¤¢¤ë¡£
+	 * ã‚¢ãƒˆãƒ å†åˆ©ç”¨ã‚’è¡Œã†ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹ã€‚<br>
+	 * å¼•æ•°ã«æ¸¡ã•ã‚Œã‚‹å‘½ä»¤åˆ—ã¯ã€æ¬¡ã®æ¡ä»¶ã‚’æº€ãŸã—ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚
 	 * <ul>
-	 *  <li>1°ú¿ô¤ÎremoveatomÌ¿Îá¤ò»ÈÍÑ¤·¤Æ¤¤¤Ê¤¤
-	 *  <li>getlinkÌ¿Îá¤ò»ÈÍÑ¤·¤Æ¤¤¤Ê¤¤
+	 *  <li>1å¼•æ•°ã®removeatomå‘½ä»¤ã‚’ä½¿ç”¨ã—ã¦ã„ãªã„
+	 *  <li>getlinkå‘½ä»¤ã‚’ä½¿ç”¨ã—ã¦ã„ãªã„
 	 * </ul>
-	 * @param list ºÇÅ¬²½¤·¤¿¤¤Ì¿ÎáÎó¡£º£¤Î¤È¤³¤í¥Ü¥Ç¥£Ì¿ÎáÎó¤¬ÅÏ¤µ¤ì¤ë¤³¤È¤ò²¾Äê¤·¤Æ¤¤¤ë¡£
+	 * @param list æœ€é©åŒ–ã—ãŸã„å‘½ä»¤åˆ—ã€‚ä»Šã®ã¨ã“ã‚ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ãŒæ¸¡ã•ã‚Œã‚‹ã“ã¨ã‚’ä»®å®šã—ã¦ã„ã‚‹ã€‚
 	 */
 	private static void reuseAtom(List<Instruction> head, List<Instruction> body) {
 		/////////////////////////////////////////////////
 		//
-		// ºÆÍøÍÑ¤¹¤ë¥¢¥È¥à¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê¤¹¤ë
+		// å†åˆ©ç”¨ã™ã‚‹ã‚¢ãƒˆãƒ ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®šã™ã‚‹
 		//
 
-		// removeatom/newatom/getlinkÌ¿Îá¤Î¾ğÊó¤òÄ´¤Ù¤ë
+		// removeatom/newatom/getlinkå‘½ä»¤ã®æƒ…å ±ã‚’èª¿ã¹ã‚‹
 		AtomSet removedAtoms = new AtomSet();
 		AtomSet createdAtoms = new AtomSet();
 //		HashMap getlinkInsts = new HashMap(); // linkId -> getlink instruction
@@ -1172,19 +1172,19 @@ public class Optimizer {
 			}
 		}
 
-		//ºÆÍøÍÑ¤¹¤ë¥¢¥È¥à¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê
+		//å†åˆ©ç”¨ã™ã‚‹ã‚¢ãƒˆãƒ ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®š
 
-		//ºÆÍøÍÑÁ°¤Î¥¢¥È¥àID -> ºÆÍøÍÑ¸å¤Î¥¢¥È¥àID
+		//å†åˆ©ç”¨å‰ã®ã‚¢ãƒˆãƒ ID -> å†åˆ©ç”¨å¾Œã®ã‚¢ãƒˆãƒ ID
 		HashMap<Integer, Integer> reuseMap = new HashMap<Integer, Integer>();
-		//ºÆÍøÍÑ¤µ¤ì¤ë¥¢¥È¥à¤ÎID¡ÊreuseMap¤ÎÃÍ¤ËÀßÄê¤µ¤ì¤Æ¤¤¤ëID¤Î½¸¹ç¡Ë
+		//å†åˆ©ç”¨ã•ã‚Œã‚‹ã‚¢ãƒˆãƒ ã®IDï¼ˆreuseMapã®å€¤ã«è¨­å®šã•ã‚Œã¦ã„ã‚‹IDã®é›†åˆï¼‰
 		HashSet<Integer> reuseAtoms = new HashSet<Integer>(); 
 
-		//Æ±¤¸Ëì¤Ë¤¢¤ë¡¢Æ±¤¸Ì¾Á°¤Î¥¢¥È¥à¤òºÆÍøÍÑ¤¹¤ë
+		//åŒã˜è†œã«ã‚ã‚‹ã€åŒã˜åå‰ã®ã‚¢ãƒˆãƒ ã‚’å†åˆ©ç”¨ã™ã‚‹
 		for(Iterator<Integer> memIterator = removedAtoms.memIterator(); memIterator.hasNext();){
 			Integer mem = memIterator.next();
 			for(Iterator<Functor> functorIterator = removedAtoms.functorIterator(mem); functorIterator.hasNext();){
 				Functor functor = functorIterator.next();
-				//removeproxies¡¦insertproxies¤¬¤¢¤ë¤Î¤Ç¡¢ºÆÍøÍÑ¤Ç¤­¤Ê¤¤
+				//removeproxiesãƒ»insertproxiesãŒã‚ã‚‹ã®ã§ã€å†åˆ©ç”¨ã§ããªã„
 				if (functor instanceof SpecialFunctor) {
 					continue;
 				}
@@ -1194,24 +1194,24 @@ public class Optimizer {
 					Integer removeAtom = removedAtomIterator.next();
 					reuseMap.put(createdAtomIterator.next(), removeAtom);
 					reuseAtoms.add(removeAtom);
-					//ºÆÍøÍÑ¤ÎÁÈ¤ß¹ç¤ï¤»¤¬·è¤Ş¤Ã¤¿¤â¤Î¤Ïºï½ü¤¹¤ë
-					//¡Ê¤³¤Î¸å¤ËÂ³¤¯¡¢¥¢¥È¥àÌ¾¤¬°Û¤Ê¤ë¾ì¹ç¤Ê¤É¤ÎºÆÍøÍÑ¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê¤¹¤ë½èÍı¤Î¤¿¤á¡£¡Ë
+					//å†åˆ©ç”¨ã®çµ„ã¿åˆã‚ã›ãŒæ±ºã¾ã£ãŸã‚‚ã®ã¯å‰Šé™¤ã™ã‚‹
+					//ï¼ˆã“ã®å¾Œã«ç¶šãã€ã‚¢ãƒˆãƒ åãŒç•°ãªã‚‹å ´åˆãªã©ã®å†åˆ©ç”¨ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®šã™ã‚‹å‡¦ç†ã®ãŸã‚ã€‚ï¼‰
 					removedAtomIterator.remove();
 					createdAtomIterator.remove();
 				}
 			}
 		}
 
-		//TODO Ëì¡¦¥¢¥È¥àÌ¾¤¬°Û¤Ê¤ë¤â¤Î¤ÎºÆÍøÍÑ¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê¤¹¤ë¥³¡¼¥É¤ò¤³¤³¤Ë½ñ¤¯
+		//TODO è†œãƒ»ã‚¢ãƒˆãƒ åãŒç•°ãªã‚‹ã‚‚ã®ã®å†åˆ©ç”¨ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®šã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’ã“ã“ã«æ›¸ã
 
 
 		//////////////////////////////////////////////////
 		//
-		// ¥¢¥È¥à¤òºÆÍøÍÑ¤¹¤ë¤è¤¦¤ÊÌ¿ÎáÎó¤òÀ¸À®¤¹¤ë
+		// ã‚¢ãƒˆãƒ ã‚’å†åˆ©ç”¨ã™ã‚‹ã‚ˆã†ãªå‘½ä»¤åˆ—ã‚’ç”Ÿæˆã™ã‚‹
 		//
 
-		//¾ğÊó¼èÆÀ
-		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ¥Ø¥Ã¥É¤Ç¤ÎÊÑ¿ôÌ¾¢ª¥Ü¥Ç¥£¤Ç¤ÎÊÑ¿ôÌ¾
+		//æƒ…å ±å–å¾—
+		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ãƒ˜ãƒƒãƒ‰ã§ã®å¤‰æ•°åâ†’ãƒœãƒ‡ã‚£ã§ã®å¤‰æ•°å
 
 		Instruction react = head.get(head.size() - 1);
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
@@ -1227,10 +1227,10 @@ public class Optimizer {
 		for(Instruction inst : head){
 			if (inst.getKind() == Instruction.DEREF) {
 				if (!varInBody.containsKey(inst.getArg2()) || !varInBody.containsKey(inst.getArg1())) {
-					//¥Ü¥Ç¥£Ì¿ÎáÎó¤ËÅÏ¤µ¤ì¤Ê¤¤ÊÑ¿ô¤Ë´Ø¤¹¤ë¾ğÊó¡£
-					//¥ê¥ó¥¯¹½Â¤¤¬½Û´Ä¤·¤Æ¤¤¤ë¾ì¹ç¤Ë¸½¤ì¤ë¡£
-					//ÌµÂÌ¤¬È¯À¸¤¹¤ë¾ì¹ç¤¬¤¢¤ë¤¬¡¢¥Ğ¥°¤Ë¤Ï¤Ê¤é¤Ê¤¤¤Î¤Ç¤È¤ê¤¢¤¨¤ºÊüÃÖ¡£
-					//TODO Å¬ÀÚ¤Ë½èÍı¤¹¤ë
+					//ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ã«æ¸¡ã•ã‚Œãªã„å¤‰æ•°ã«é–¢ã™ã‚‹æƒ…å ±ã€‚
+					//ãƒªãƒ³ã‚¯æ§‹é€ ãŒå¾ªç’°ã—ã¦ã„ã‚‹å ´åˆã«ç¾ã‚Œã‚‹ã€‚
+					//ç„¡é§„ãŒç™ºç”Ÿã™ã‚‹å ´åˆãŒã‚ã‚‹ãŒã€ãƒã‚°ã«ã¯ãªã‚‰ãªã„ã®ã§ã¨ã‚Šã‚ãˆãšæ”¾ç½®ã€‚
+					//TODO é©åˆ‡ã«å‡¦ç†ã™ã‚‹
 					continue;
 				}
 				int atom1, atom2;
@@ -1243,7 +1243,7 @@ public class Optimizer {
 			}
 		}
 
-		//ÉÔÍ×¤Ë¤Ê¤Ã¤¿removeatom/freeatom/newatomÌ¿Îá¤ò½üµî
+		//ä¸è¦ã«ãªã£ãŸremoveatom/freeatom/newatomå‘½ä»¤ã‚’é™¤å»
 		for(ListIterator<Instruction> lit = body.listIterator(/*getlinkInsts.size() + */1); lit.hasNext();){
 			Instruction inst = lit.next();
 			switch (inst.getKind()) {
@@ -1273,14 +1273,14 @@ public class Optimizer {
 				break;
 			}
 		}
-		//TO DO enqueueatomÌ¿Îá¤òÀ¸À® ¢ª ¸µ¤ÎÌ¿ÎáÎó¤Ë¤¢¤ë¤â¤Î¤¬»È¤¨¤ë¤Î¤ÇÉÔÍ×
+		//TO DO enqueueatomå‘½ä»¤ã‚’ç”Ÿæˆ â†’ å…ƒã®å‘½ä»¤åˆ—ã«ã‚ã‚‹ã‚‚ã®ãŒä½¿ãˆã‚‹ã®ã§ä¸è¦
 
 		Instruction.changeAtomVar(body, reuseMap);
 
 	}
 
 	// ========================================================================
-	// ¥Æ¥¹¥È¼ÂÁõ
+	// ãƒ†ã‚¹ãƒˆå®Ÿè£…
 	// ========================================================================
 	private static void reuseAtom2(List<Instruction> head, List<Instruction> body)
 	{
@@ -1358,11 +1358,11 @@ public class Optimizer {
 		
 		/////////////////////////////////////////////////
 		//
-		// ºÆÍøÍÑ¤¹¤ë¥¢¥È¥à¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê¤¹¤ë
+		// å†åˆ©ç”¨ã™ã‚‹ã‚¢ãƒˆãƒ ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®šã™ã‚‹
 		//
 		
 
-		// removeatom/newatomÌ¿Îá¤Î¾ğÊó¤òÄ´¤Ù¤ë
+		// removeatom/newatomå‘½ä»¤ã®æƒ…å ±ã‚’èª¿ã¹ã‚‹
 		AtomSet removedAtoms = new AtomSet();
 		AtomSet createdAtoms = new AtomSet();
 		for(Instruction inst : body)
@@ -1393,14 +1393,14 @@ public class Optimizer {
 			}
 		}
 
-		//ºÆÍøÍÑ¤¹¤ë¥¢¥È¥à¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê
+		//å†åˆ©ç”¨ã™ã‚‹ã‚¢ãƒˆãƒ ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®š
 
-		//ºÆÍøÍÑÁ°¤Î¥¢¥È¥àID -> ºÆÍøÍÑ¸å¤Î¥¢¥È¥àID
+		//å†åˆ©ç”¨å‰ã®ã‚¢ãƒˆãƒ ID -> å†åˆ©ç”¨å¾Œã®ã‚¢ãƒˆãƒ ID
 		HashMap<Integer, Integer> reuseMap = new HashMap<Integer, Integer>();
-		//ºÆÍøÍÑ¤µ¤ì¤ë¥¢¥È¥à¤ÎID¡ÊreuseMap¤ÎÃÍ¤ËÀßÄê¤µ¤ì¤Æ¤¤¤ëID¤Î½¸¹ç¡Ë
+		//å†åˆ©ç”¨ã•ã‚Œã‚‹ã‚¢ãƒˆãƒ ã®IDï¼ˆreuseMapã®å€¤ã«è¨­å®šã•ã‚Œã¦ã„ã‚‹IDã®é›†åˆï¼‰
 		HashSet<Integer> reuseAtoms = new HashSet<Integer>(); 
 
-		//Æ±¤¸Ëì¤Ë¤¢¤ë¡¢Æ±¤¸Ì¾Á°¤Î¥¢¥È¥à¤òºÆÍøÍÑ¤¹¤ë
+		//åŒã˜è†œã«ã‚ã‚‹ã€åŒã˜åå‰ã®ã‚¢ãƒˆãƒ ã‚’å†åˆ©ç”¨ã™ã‚‹
 		for (Iterator<Integer> memIterator = removedAtoms.memIterator(); memIterator.hasNext(); )
 		{
 			int mem = memIterator.next();
@@ -1408,7 +1408,7 @@ public class Optimizer {
 			for(Iterator<Functor> functorIterator = removedAtoms.functorIterator(mem); functorIterator.hasNext(); )
 			{
 				Functor functor = functorIterator.next();
-				//removeproxies¡¦insertproxies¤¬¤¢¤ë¤Î¤Ç¡¢ºÆÍøÍÑ¤Ç¤­¤Ê¤¤
+				//removeproxiesãƒ»insertproxiesãŒã‚ã‚‹ã®ã§ã€å†åˆ©ç”¨ã§ããªã„
 				if (functor instanceof SpecialFunctor)
 				{
 					continue;
@@ -1421,8 +1421,8 @@ public class Optimizer {
 					int removeAtom = removedAtomIterator.next();
 					reuseMap.put(createAtom, removeAtom);
 					reuseAtoms.add(removeAtom);
-					//ºÆÍøÍÑ¤ÎÁÈ¤ß¹ç¤ï¤»¤¬·è¤Ş¤Ã¤¿¤â¤Î¤Ïºï½ü¤¹¤ë
-					//¡Ê¤³¤Î¸å¤ËÂ³¤¯¡¢¥¢¥È¥àÌ¾¤¬°Û¤Ê¤ë¾ì¹ç¤Ê¤É¤ÎºÆÍøÍÑ¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê¤¹¤ë½èÍı¤Î¤¿¤á¡£¡Ë
+					//å†åˆ©ç”¨ã®çµ„ã¿åˆã‚ã›ãŒæ±ºã¾ã£ãŸã‚‚ã®ã¯å‰Šé™¤ã™ã‚‹
+					//ï¼ˆã“ã®å¾Œã«ç¶šãã€ã‚¢ãƒˆãƒ åãŒç•°ãªã‚‹å ´åˆãªã©ã®å†åˆ©ç”¨ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®šã™ã‚‹å‡¦ç†ã®ãŸã‚ã€‚ï¼‰
 					removedAtomIterator.remove();
 					createdAtomIterator.remove();
 				}
@@ -1432,16 +1432,16 @@ public class Optimizer {
 		//System.out.println("remain: " + removedAtomSet);
 		//System.out.println("created: " + createdAtomSet);
 		
-		//TODO Ëì¡¦¥¢¥È¥àÌ¾¤¬°Û¤Ê¤ë¤â¤Î¤ÎºÆÍøÍÑ¤ÎÁÈ¤ß¹ç¤ï¤»¤ò·èÄê¤¹¤ë¥³¡¼¥É¤ò¤³¤³¤Ë½ñ¤¯
+		//TODO è†œãƒ»ã‚¢ãƒˆãƒ åãŒç•°ãªã‚‹ã‚‚ã®ã®å†åˆ©ç”¨ã®çµ„ã¿åˆã‚ã›ã‚’æ±ºå®šã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’ã“ã“ã«æ›¸ã
 
 
 		//////////////////////////////////////////////////
 		//
-		// ¥¢¥È¥à¤òºÆÍøÍÑ¤¹¤ë¤è¤¦¤ÊÌ¿ÎáÎó¤òÀ¸À®¤¹¤ë
+		// ã‚¢ãƒˆãƒ ã‚’å†åˆ©ç”¨ã™ã‚‹ã‚ˆã†ãªå‘½ä»¤åˆ—ã‚’ç”Ÿæˆã™ã‚‹
 		//
 
-		//¾ğÊó¼èÆÀ
-		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ¥Ø¥Ã¥É¤Ç¤ÎÊÑ¿ôÌ¾¢ª¥Ü¥Ç¥£¤Ç¤ÎÊÑ¿ôÌ¾
+		//æƒ…å ±å–å¾—
+		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ãƒ˜ãƒƒãƒ‰ã§ã®å¤‰æ•°åâ†’ãƒœãƒ‡ã‚£ã§ã®å¤‰æ•°å
 
 		Instruction react = head.get(head.size() - 1);
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP)
@@ -1462,10 +1462,10 @@ public class Optimizer {
 			{
 				if (!varInBody.containsKey(inst.getArg2()) || !varInBody.containsKey(inst.getArg1()))
 				{
-					//¥Ü¥Ç¥£Ì¿ÎáÎó¤ËÅÏ¤µ¤ì¤Ê¤¤ÊÑ¿ô¤Ë´Ø¤¹¤ë¾ğÊó¡£
-					//¥ê¥ó¥¯¹½Â¤¤¬½Û´Ä¤·¤Æ¤¤¤ë¾ì¹ç¤Ë¸½¤ì¤ë¡£
-					//ÌµÂÌ¤¬È¯À¸¤¹¤ë¾ì¹ç¤¬¤¢¤ë¤¬¡¢¥Ğ¥°¤Ë¤Ï¤Ê¤é¤Ê¤¤¤Î¤Ç¤È¤ê¤¢¤¨¤ºÊüÃÖ¡£
-					//TODO Å¬ÀÚ¤Ë½èÍı¤¹¤ë
+					//ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ã«æ¸¡ã•ã‚Œãªã„å¤‰æ•°ã«é–¢ã™ã‚‹æƒ…å ±ã€‚
+					//ãƒªãƒ³ã‚¯æ§‹é€ ãŒå¾ªç’°ã—ã¦ã„ã‚‹å ´åˆã«ç¾ã‚Œã‚‹ã€‚
+					//ç„¡é§„ãŒç™ºç”Ÿã™ã‚‹å ´åˆãŒã‚ã‚‹ãŒã€ãƒã‚°ã«ã¯ãªã‚‰ãªã„ã®ã§ã¨ã‚Šã‚ãˆãšæ”¾ç½®ã€‚
+					//TODO é©åˆ‡ã«å‡¦ç†ã™ã‚‹
 					continue;
 				}
 				int atom1, atom2;
@@ -1483,7 +1483,7 @@ public class Optimizer {
 		//for (Instruction inst : body) { System.out.println(inst); }
 		//System.out.println("=====");
 		
-		//ÉÔÍ×¤Ë¤Ê¤Ã¤¿removeatom/freeatom/newatomÌ¿Îá¤ò½üµî
+		//ä¸è¦ã«ãªã£ãŸremoveatom/freeatom/newatomå‘½ä»¤ã‚’é™¤å»
 		for (ListIterator<Instruction> lit = body.listIterator(1); lit.hasNext(); )
 		{
 			Instruction inst = lit.next();
@@ -1504,7 +1504,7 @@ public class Optimizer {
 				int arg1 = inst.getIntArg1(), arg3 = inst.getIntArg3();
 				if (reuseMap.containsKey(arg1) && reuseMap.containsKey(arg3))
 				{
-					// ºÆÍøÍÑ¤µ¤ì¤¿¥¢¥È¥à¤¬newlink¤Ç·Ò¤¬¤ì¤ë¤¬¡¢´û¤Ë¤Ä¤Ê¤¬¤Ã¤Æ¤¤¤ë¾ì¹ç
+					// å†åˆ©ç”¨ã•ã‚ŒãŸã‚¢ãƒˆãƒ ãŒnewlinkã§ç¹‹ãŒã‚Œã‚‹ãŒã€æ—¢ã«ã¤ãªãŒã£ã¦ã„ã‚‹å ´åˆ
 					int a1 = reuseMap.get(arg1);
 					int a2 = reuseMap.get(arg3);
 					Link l1 = new Link(a1, inst.getIntArg2());
@@ -1518,14 +1518,14 @@ public class Optimizer {
 				break;
 			}
 		}
-		//TO DO enqueueatomÌ¿Îá¤òÀ¸À® ¢ª ¸µ¤ÎÌ¿ÎáÎó¤Ë¤¢¤ë¤â¤Î¤¬»È¤¨¤ë¤Î¤ÇÉÔÍ×
+		//TO DO enqueueatomå‘½ä»¤ã‚’ç”Ÿæˆ â†’ å…ƒã®å‘½ä»¤åˆ—ã«ã‚ã‚‹ã‚‚ã®ãŒä½¿ãˆã‚‹ã®ã§ä¸è¦
 
 		Instruction.changeAtomVar(body, reuseMap);
 
 	}
 
 	/**
-	 * ¾éÄ¹¤Êrelink/inheritlinkÌ¿Îá¤ò½üµî¤·¤Ş¤¹¡£
+	 * å†—é•·ãªrelink/inheritlinkå‘½ä»¤ã‚’é™¤å»ã—ã¾ã™ã€‚
 	 * @param list
 	 */
 	private static void removeUnnecessaryRelink(List<Instruction> list) {
@@ -1540,7 +1540,7 @@ public class Optimizer {
 				Instruction getlink = (Instruction)getlinkInsts.get(inst.getArg3());
 				if (getlink.getArg2().equals(inst.getArg1()) &&  // <- atomID
 						getlink.getArg3().equals(inst.getArg2())) { // <- pos
-					//¾éÄ¹¤Ê¤Î¤Ç½üµî
+					//å†—é•·ãªã®ã§é™¤å»
 					remove.add(getlink);
 					remove.add(inst);
 				}
@@ -1551,10 +1551,10 @@ public class Optimizer {
 	}
 
 	//////////////////////////////////////////////////////////////
-	// ¥ë¡¼¥×²½´ØÏ¢
+	// ãƒ«ãƒ¼ãƒ—åŒ–é–¢é€£
 
 	/**
-	 * ¥¢¥È¥à¤È°ú¿ôÈÖ¹æ¤ÎÁÈ¤òÊİ»ı¤¹¤ë¥¯¥é¥¹¡£
+	 * ã‚¢ãƒˆãƒ ã¨å¼•æ•°ç•ªå·ã®çµ„ã‚’ä¿æŒã™ã‚‹ã‚¯ãƒ©ã‚¹ã€‚
 	 * @author Ken
 	 */	
 	private static class Link {
@@ -1579,17 +1579,17 @@ public class Optimizer {
 		}
 	}
 	/**
-	 * Æ±°ì¥ë¡¼¥ë¤ÎÊ£¿ô²óÆ±»şÅ¬ÍÑ<br>
-	 * ¤È¤ê¤¢¤¨¤º¡¢¼¡¤Î¾ò·ï¤òËş¤¿¤·¤Æ¤¤¤ë¾ì¹ç¤Ë¤Î¤ß½èÍı¤ò¹Ô¤¦¡£
+	 * åŒä¸€ãƒ«ãƒ¼ãƒ«ã®è¤‡æ•°å›åŒæ™‚é©ç”¨<br>
+	 * ã¨ã‚Šã‚ãˆãšã€æ¬¡ã®æ¡ä»¶ã‚’æº€ãŸã—ã¦ã„ã‚‹å ´åˆã«ã®ã¿å‡¦ç†ã‚’è¡Œã†ã€‚
 	 * <ul>
-	 *  <li>¥Ü¥Ç¥£¼Â¹Ô²¾°ú¿ô¤È¼Â°ú¿ô¤¬Æ±¤¸¤Ç¤¢¤ë¡£
-	 *  <li>specÌ¿Îá°Ê³°¤ÎºÇ½é¤ÎÌ¿Îá¤¬findatom¤Ç¡¢¤½¤ÎÂèÆó°ú¿ô¤Ï0¤Ç¤¢¤ë¡£
-	 *  <li>¤Ï¤¸¤á¤ÎfindatomÌ¿Îá¤Ë¤è¤Ã¤Æ¼èÆÀ¤µ¤ì¤¿¥¢¥È¥à¤¬ºÆÍøÍÑ¤µ¤ì¤Æ¤¤¤ë¡£
-	 *  <li>derefatom,dereffunc¤òÍøÍÑ¤·¤Æ¤¤¤Ê¤¤
+	 *  <li>ãƒœãƒ‡ã‚£å®Ÿè¡Œä»®å¼•æ•°ã¨å®Ÿå¼•æ•°ãŒåŒã˜ã§ã‚ã‚‹ã€‚
+	 *  <li>specå‘½ä»¤ä»¥å¤–ã®æœ€åˆã®å‘½ä»¤ãŒfindatomã§ã€ãã®ç¬¬äºŒå¼•æ•°ã¯0ã§ã‚ã‚‹ã€‚
+	 *  <li>ã¯ã˜ã‚ã®findatomå‘½ä»¤ã«ã‚ˆã£ã¦å–å¾—ã•ã‚ŒãŸã‚¢ãƒˆãƒ ãŒå†åˆ©ç”¨ã•ã‚Œã¦ã„ã‚‹ã€‚
+	 *  <li>derefatom,dereffuncã‚’åˆ©ç”¨ã—ã¦ã„ãªã„
 	 * </ul>
-	 * ¾ò·ï¤¬Ëş¤¿¤µ¤ì¤Ê¤¤¾ì¹ç¤Ï²¿¤â¤·¤Ê¤¤¡£
-	 * @param head Ëì¼çÆ³¥Ş¥Ã¥Á¥ó¥°Ì¿ÎáÎó
-	 * @param body ¥Ü¥Ç¥£Ì¿ÎáÎó
+	 * æ¡ä»¶ãŒæº€ãŸã•ã‚Œãªã„å ´åˆã¯ä½•ã‚‚ã—ãªã„ã€‚
+	 * @param head è†œä¸»å°ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤åˆ—
+	 * @param body ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—
 	 */	
 	private static void makeLoop(List<Instruction> head, List<Instruction> body) {
 		Instruction inst = head.get(0);
@@ -1597,7 +1597,7 @@ public class Optimizer {
 			return;
 		}
 //		if (!inst.getArg2().equals(new Integer(0))) {
-//		//¥Ş¥Ã¥Á¥ó¥°Ì¿ÎáÎó¤Ë¥í¡¼¥«¥ëÊÑ¿ô¤¬¤¢¤ë¾ì¹ç
+//		//ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤åˆ—ã«ãƒ­ãƒ¼ã‚«ãƒ«å¤‰æ•°ãŒã‚ã‚‹å ´åˆ
 //		return;
 //		}
 		inst = head.get(1);
@@ -1606,12 +1606,12 @@ public class Optimizer {
 		}
 		Integer firstAtom = (Integer)inst.getArg1();
 
-		//¾ò·ï¤Ë¹çÃ×¤¹¤ë¤«¸¡ºº¡Ü¾ğÊó¼ı½¸
-		HashMap<Link, Link> links = new HashMap<Link, Link>(); //newlinkÌ¿Îá¤ÇÀ¸À®¤·¤¿¥ê¥ó¥¯¤Î¾ğÊó
-		HashMap linkGetFrom = new HashMap(); //¥ê¥ó¥¯ -> getlink¤·¤¿(atom,pos)
+		//æ¡ä»¶ã«åˆè‡´ã™ã‚‹ã‹æ¤œæŸ»ï¼‹æƒ…å ±åé›†
+		HashMap<Link, Link> links = new HashMap<Link, Link>(); //newlinkå‘½ä»¤ã§ç”Ÿæˆã—ãŸãƒªãƒ³ã‚¯ã®æƒ…å ±
+		HashMap linkGetFrom = new HashMap(); //ãƒªãƒ³ã‚¯ -> getlinkã—ãŸ(atom,pos)
 		HashMap functor = new HashMap(); // atom -> functor
-		HashMap inherit = new HashMap(); // (atom,pos) -> inherit¤¹¤ë¥ê¥ó¥¯
-		//¼ïÎà¤´¤È¤ËÊÑ¿ô°ìÍ÷¤òºîÀ®
+		HashMap inherit = new HashMap(); // (atom,pos) -> inheritã™ã‚‹ãƒªãƒ³ã‚¯
+		//ç¨®é¡ã”ã¨ã«å¤‰æ•°ä¸€è¦§ã‚’ä½œæˆ
 		ArrayList memvars = new ArrayList();
 		ArrayList atomvars = new ArrayList();
 		ArrayList othervars = new ArrayList();
@@ -1710,44 +1710,44 @@ public class Optimizer {
 		}
 
 
-		//¥ë¡¼¥×ÆâÌ¿ÎáÎó¤ÎÀ¸À®
+		//ãƒ«ãƒ¼ãƒ—å†…å‘½ä»¤åˆ—ã®ç”Ÿæˆ
 
-		//¤Ş¤º¤Ï¥³¥Ô¡¼¤·¤ÆÊÑ¿ôÈÖ¹æÉÕ¤±ÂØ¤¨
+		//ã¾ãšã¯ã‚³ãƒ”ãƒ¼ã—ã¦å¤‰æ•°ç•ªå·ä»˜ã‘æ›¿ãˆ
 		Instruction spec = body.get(0);
 
-		List<Instruction> loop = new ArrayList<Instruction>(); //¥ë¡¼¥×Æâ¤ÎÌ¿ÎáÎó
-		//¥Ş¥Ã¥Á¥ó¥°Ì¿ÎáÎó
-		for(ListIterator<Instruction> lit = head.subList(2, head.size()-1).listIterator(); lit.hasNext();){ //spec,findatom,react/jump¤ò½üµî
+		List<Instruction> loop = new ArrayList<Instruction>(); //ãƒ«ãƒ¼ãƒ—å†…ã®å‘½ä»¤åˆ—
+		//ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤åˆ—
+		for(ListIterator<Instruction> lit = head.subList(2, head.size()-1).listIterator(); lit.hasNext();){ //spec,findatom,react/jumpã‚’é™¤å»
 			loop.add((Instruction)lit.next().clone());
 		}
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
 //			System.out.println(react);
 			return;
 		}
-		//¥Ü¥Ç¥£Ì¿ÎáÎó¤ËÊÑ¿ô¤ò¹ç¤ï¤»¤ë
+		//ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ã«å¤‰æ•°ã‚’åˆã‚ã›ã‚‹
 		Instruction.applyVarRewriteMap(loop, varInBody);
-		//¥Ü¥Ç¥£Ì¿ÎáÎó
-		for(ListIterator<Instruction> lit = body.listIterator(1); lit.hasNext();){ //spec¤ò½üµî
+		//ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—
+		for(ListIterator<Instruction> lit = body.listIterator(1); lit.hasNext();){ //specã‚’é™¤å»
 			loop.add((Instruction)lit.next().clone());
 		}
 
-		//¥ë¡¼¥×ÆâÊÑ¿ô¤ÎÉÕ¤±ÂØ¤¨
+		//ãƒ«ãƒ¼ãƒ—å†…å¤‰æ•°ã®ä»˜ã‘æ›¿ãˆ
 
-		//¤â¤È¤â¤È¤ÎÊÑ¿ô¢ª¥ë¡¼¥×Æâ¤Ç¡¢ºÆÄêµÁ¤¹¤ë¾ì¹ç¤ÎÊÑ¿ô
+		//ã‚‚ã¨ã‚‚ã¨ã®å¤‰æ•°â†’ãƒ«ãƒ¼ãƒ—å†…ã§ã€å†å®šç¾©ã™ã‚‹å ´åˆã®å¤‰æ•°
 		HashMap<Integer, Integer> memVarMap = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> atomVarMap = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> otherVarMap = new HashMap<Integer, Integer>();
-		//¥ë¡¼¥×Æâ¤ÇºÆÄêµÁ¤·¤Æ¤¤¤ëÊÑ¿ô¢ª¤â¤È¤â¤È¤ÎÊÑ¿ô
+		//ãƒ«ãƒ¼ãƒ—å†…ã§å†å®šç¾©ã—ã¦ã„ã‚‹å¤‰æ•°â†’ã‚‚ã¨ã‚‚ã¨ã®å¤‰æ•°
 		HashMap<Integer, Integer> reverseAtomVarMap = new HashMap<Integer, Integer>();
-		int base = atomvars.size() + memvars.size() + othervars.size(); //¥ë¡¼¥×ÆâÌ¿ÎáÎó¤Ç»ÈÍÑ¤¹¤ëÊÑ¿ô¤Î³«»ÏÃÍ 
+		int base = atomvars.size() + memvars.size() + othervars.size(); //ãƒ«ãƒ¼ãƒ—å†…å‘½ä»¤åˆ—ã§ä½¿ç”¨ã™ã‚‹å¤‰æ•°ã®é–‹å§‹å€¤ 
 		int nextArg = base;
-		//Ëì
-		Iterator<Integer> it = memvars.subList(1, memvars.size()).iterator(); //¤Ï¤¸¤á¤ÏËÜËì
+		//è†œ
+		Iterator<Integer> it = memvars.subList(1, memvars.size()).iterator(); //ã¯ã˜ã‚ã¯æœ¬è†œ
 		while (it.hasNext()) {
 			memVarMap.put(it.next(), new Integer(nextArg++));
 		}
 		memVarMap.put(new Integer(0), new Integer(0));
-		//¥¢¥È¥à
+		//ã‚¢ãƒˆãƒ 
 		it = atomvars.iterator();
 		while (it.hasNext()) {
 			Integer a = (Integer)it.next();
@@ -1761,7 +1761,7 @@ public class Optimizer {
 		atomVarMap.put(firstAtom, firstAtomInLoop);
 		reverseAtomVarMap.put(firstAtomInLoop, firstAtom);
 
-		//¤½¤ÎÂ¾
+		//ãã®ä»–
 		it = othervars.iterator();
 		while (it.hasNext()) {
 			otherVarMap.put(it.next(), new Integer(nextArg++));
@@ -1772,9 +1772,9 @@ public class Optimizer {
 
 		Instruction resetVars = Instruction.resetvars(memvars, atomvars, othervars);
 
-		//¥ë¡¼¥×Ãæ¤Î¡¢ÊÑ¿ô->Á°²ó»ş¥Ç¡¼¥¿¤ÎÆş¤Ã¤¿ÊÑ¿ô
+		//ãƒ«ãƒ¼ãƒ—ä¸­ã®ã€å¤‰æ•°->å‰å›æ™‚ãƒ‡ãƒ¼ã‚¿ã®å…¥ã£ãŸå¤‰æ•°
 		HashMap<Integer, Integer> beforeVar = new HashMap<Integer, Integer>();
-		//¥ë¡¼¥×³°¤ÎÊÑ¿ô->¥ë¡¼¥×Æâ¤Ç¤ÎÁ°²ó»ş¥Ç¡¼¥¿¤¬Æş¤Ã¤¿ÊÑ¿ô
+		//ãƒ«ãƒ¼ãƒ—å¤–ã®å¤‰æ•°->ãƒ«ãƒ¼ãƒ—å†…ã§ã®å‰å›æ™‚ãƒ‡ãƒ¼ã‚¿ãŒå…¥ã£ãŸå¤‰æ•°
 		HashMap outToBeforeVar = new HashMap();
 		for (int i = 0; i < memvars.size(); i++) {
 			beforeVar.put(memVarMap.get(memvars.get(i)), new Integer(i));
@@ -1789,27 +1789,27 @@ public class Optimizer {
 			outToBeforeVar.put(othervars.get(i), new Integer(memvars.size() + atomvars.size() + i));
 		}
 
-		//Ì¿ÎáÎó¤ÎÊÑ¹¹¤ò¹Ô¤¦
+		//å‘½ä»¤åˆ—ã®å¤‰æ›´ã‚’è¡Œã†
 
-		//¥ë¡¼¥×ÆâÍÑÊÑ¿ôÃÖ¤­´¹¤¨¥Ş¥Ã¥×
-		//¸¡ºº¤ò¾ÊÎ¬¤·¤Æ¡¢Á°²ó¥ë¡¼¥×¤ÎÊÑ¿ô¤ò»ÈÍÑ¤¹¤ë¾ì¹ç¤Î¡¢
-		// ¡ÖºÆÄêµÁ¤·¤¿¾ì¹ç¤ÎÊÑ¿ô->Á°²ó¥ë¡¼¥×»ş¤ÎÃÍ¤¬Æş¤Ã¤Æ¤¤¤ëÊÑ¿ô¡×
+		//ãƒ«ãƒ¼ãƒ—å†…ç”¨å¤‰æ•°ç½®ãæ›ãˆãƒãƒƒãƒ—
+		//æ¤œæŸ»ã‚’çœç•¥ã—ã¦ã€å‰å›ãƒ«ãƒ¼ãƒ—ã®å¤‰æ•°ã‚’ä½¿ç”¨ã™ã‚‹å ´åˆã®ã€
+		// ã€Œå†å®šç¾©ã—ãŸå ´åˆã®å¤‰æ•°->å‰å›ãƒ«ãƒ¼ãƒ—æ™‚ã®å€¤ãŒå…¥ã£ã¦ã„ã‚‹å¤‰æ•°ã€
 		HashMap atomVarMap2 = new HashMap();
-		//¾å¤ÎµÕ
+		//ä¸Šã®é€†
 //		HashMap reverseAtomVarMap2 = new HashMap();
 //		HashMap memVarMap2 = new HashMap();
 		HashMap otherVarMap2 = new HashMap();
-//		memVarMap2.put(new Integer(0), new Integer(0)); //ËÜËì
+//		memVarMap2.put(new Integer(0), new Integer(0)); //æœ¬è†œ
 //		atomVarMap.put(new Integer(firstAtom.intValue() + base), firstAtom);
 		atomVarMap2.put(firstAtomInLoop, firstAtomInLoop);
 //		reverseAtomVarMap2.put(firstAtom, firstAtom);
 
-		//dereflinkÌ¿Îá¤«¤é¡¢¤¹¤Ç¤Ë¥ê¥ó¥¯¤·¤Æ¤¤¤ë»ö¤¬¤ï¤«¤Ã¤Æ¤¤¤ë(atom,pos) -> (atom,pos) (°ìÊı¸ş)
+		//dereflinkå‘½ä»¤ã‹ã‚‰ã€ã™ã§ã«ãƒªãƒ³ã‚¯ã—ã¦ã„ã‚‹äº‹ãŒã‚ã‹ã£ã¦ã„ã‚‹(atom,pos) -> (atom,pos) (ä¸€æ–¹å‘)
 		HashMap<Link, Link> alreadyLinked = new HashMap<Link, Link>();
 
 		ArrayList<Instruction> moveInsts = new ArrayList<Instruction>();
-		ListIterator<Instruction> baseIterator = head.subList(2, head.size() - 1).listIterator(); //£±²óÌÜÍÑÌ¿ÎáÎó
-		ListIterator<Instruction> loopIterator = loop.listIterator(); //¥ë¡¼¥×ÆâÌ¿ÎáÎó
+		ListIterator<Instruction> baseIterator = head.subList(2, head.size() - 1).listIterator(); //ï¼‘å›ç›®ç”¨å‘½ä»¤åˆ—
+		ListIterator<Instruction> loopIterator = loop.listIterator(); //ãƒ«ãƒ¼ãƒ—å†…å‘½ä»¤åˆ—
 		while (baseIterator.hasNext()) {
 			baseIterator.next();
 			inst = loopIterator.next();
@@ -1827,9 +1827,9 @@ public class Optimizer {
 								atomVarMap2.put(inst.getArg1(), outToBeforeVar.get(new Integer(l.atom)));
 								//						reverseAtomVarMap2.put(new Integer(l.atom), inst.getArg1());
 								loopIterator.remove();
-								break; //ºï½ü¤·¤¿¤Î¤Ç¸å¤Î½èÍı¤Ï¤·¤Ê¤¤
+								break; //å‰Šé™¤ã—ãŸã®ã§å¾Œã®å‡¦ç†ã¯ã—ãªã„
 							} else {
-								//ÀäÂĞ¼ºÇÔ¤¹¤ë¤Î¤Ç¥ë¡¼¥×²½¤·¤Ê¤¤
+								//çµ¶å¯¾å¤±æ•—ã™ã‚‹ã®ã§ãƒ«ãƒ¼ãƒ—åŒ–ã—ãªã„
 //								System.out.println(inst);
 								return;
 							}
@@ -1851,7 +1851,7 @@ public class Optimizer {
 							Integer t2 = (Integer)outToBeforeVar.get(t1);
 							loopIterator.set(new Instruction(Instruction.DEREFLINK, inst.getIntArg1(), t2.intValue(), inst.getIntArg4()));
 
-							//¾éÄ¹¤Ênewlink½üµî¤Î¤¿¤á¤Î¥Ç¡¼¥¿
+							//å†—é•·ãªnewlinké™¤å»ã®ãŸã‚ã®ãƒ‡ãƒ¼ã‚¿
 							Link l1 = new Link(inst.getIntArg1(), inst.getIntArg4());
 							Link l2out = (Link)linkGetFrom.get(t1);
 							Link l2 = new Link(((Integer)outToBeforeVar.get(new Integer(l2out.atom))).intValue(), l2out.pos);
@@ -1870,11 +1870,11 @@ public class Optimizer {
 //						end
 						if (functor.containsKey(atom)) {
 							if (!functor.get(atom).equals(inst.getArg2())) {
-								//ÀäÂĞ¼ºÇÔ¤¹¤ë¤Î¤ÇÊ£¿ô²óÆ±»şÅ¬ÍÑ¤Ï¹Ô¤ï¤Ê¤¤
+								//çµ¶å¯¾å¤±æ•—ã™ã‚‹ã®ã§è¤‡æ•°å›åŒæ™‚é©ç”¨ã¯è¡Œã‚ãªã„
 //								System.out.println(inst);
 								return;
 							}
-							//ÀäÂĞÀ®¸ù¤¹¤ë¤Î¤Ç½üµî	
+							//çµ¶å¯¾æˆåŠŸã™ã‚‹ã®ã§é™¤å»	
 							loopIterator.remove();
 						}
 					}
@@ -1883,46 +1883,46 @@ public class Optimizer {
 			}
 		}
 
-		HashMap changeToNewlink = new HashMap(); //newlink¤ËÊÑ¹¹¤¹¤ë¥ê¥ó¥¯ -> ¥ê¥ó¥¯Àè
-//		HashMap changeLink = new HashMap(); //inheritlink¤Î°ÜÆ°¤ËÈ¼¤¤ºï½ü¤µ¤ì¤¿getlinkÌ¿Îá¤ÎÂè2°ú¿ô¤ÎÁ°²ó¥ë¡¼¥×»şÊÑ¿ô¢ªÂè1°ú¿ô
-		HashSet movableEnqueue = new HashSet(); //enqueueÌ¿Îá¤ò¥ë¡¼¥×¸å¤Ë°ÜÆ°¤Ç¤­¤ë¥¢¥È¥à
-		baseIterator = body.listIterator(1); //£±²óÌÜÍÑÌ¿ÎáÎó
-		//loopIterator¤Ï¤µ¤Ã¤­¤ÎÂ³¤­
+		HashMap changeToNewlink = new HashMap(); //newlinkã«å¤‰æ›´ã™ã‚‹ãƒªãƒ³ã‚¯ -> ãƒªãƒ³ã‚¯å…ˆ
+//		HashMap changeLink = new HashMap(); //inheritlinkã®ç§»å‹•ã«ä¼´ã„å‰Šé™¤ã•ã‚ŒãŸgetlinkå‘½ä»¤ã®ç¬¬2å¼•æ•°ã®å‰å›ãƒ«ãƒ¼ãƒ—æ™‚å¤‰æ•°â†’ç¬¬1å¼•æ•°
+		HashSet movableEnqueue = new HashSet(); //enqueueå‘½ä»¤ã‚’ãƒ«ãƒ¼ãƒ—å¾Œã«ç§»å‹•ã§ãã‚‹ã‚¢ãƒˆãƒ 
+		baseIterator = body.listIterator(1); //ï¼‘å›ç›®ç”¨å‘½ä»¤åˆ—
+		//loopIteratorã¯ã•ã£ãã®ç¶šã
 		while (baseIterator.hasNext()) {
 			Instruction baseInst = baseIterator.next();
 			inst = loopIterator.next();
 			switch (inst.getKind()) {
 			case Instruction.GETLINK:
-				//¥ê¥ó¥¯Àè¤¬¤ï¤«¤Ã¤Æ¤¤¤ëgetlink¤Î½üµî
+				//ãƒªãƒ³ã‚¯å…ˆãŒã‚ã‹ã£ã¦ã„ã‚‹getlinkã®é™¤å»
 				Integer atom = (Integer)inst.getArg2();
 //				Integer baseAtom;
 				if (atomVarMap2.containsKey(atom)) {
-					atom = (Integer)atomVarMap2.get(inst.getArg2()); //ÊÑ¿ôÃÖ¤­´¹¤¨¸å
-//					baseAtom = (Integer)reverseAtomVarMap2.get(atom); //Á°²ó¥ë¡¼¥×
+					atom = (Integer)atomVarMap2.get(inst.getArg2()); //å¤‰æ•°ç½®ãæ›ãˆå¾Œ
+//					baseAtom = (Integer)reverseAtomVarMap2.get(atom); //å‰å›ãƒ«ãƒ¼ãƒ—
 					if (atom.intValue() < memvars.size() + atomvars.size()) {
-						Integer baseAtom = (Integer)atomvars.get(atom.intValue() - memvars.size()); //¥ë¡¼¥×³°ÊÑ¿ô
+						Integer baseAtom = (Integer)atomvars.get(atom.intValue() - memvars.size()); //ãƒ«ãƒ¼ãƒ—å¤–å¤‰æ•°
 						//					} else {
 						//						baseAtom = null;//(Integer)atomVarMap.get(atom);
 						//					}
 						//					if (baseAtom != null) {
 						Link l = links.get(new Link(baseAtom.intValue(), inst.getIntArg3()));
-						if (l != null) { //Á°²ó¤Î¥ë¡¼¥×¤Înewlink¤Ë¤è¤Ã¤Æ¥ê¥ó¥¯Àè¤¬ÆÃÄê¤Ç¤­¤ë¾ì¹ç
+						if (l != null) { //å‰å›ã®ãƒ«ãƒ¼ãƒ—ã®newlinkã«ã‚ˆã£ã¦ãƒªãƒ³ã‚¯å…ˆãŒç‰¹å®šã§ãã‚‹å ´åˆ
 							//							Integer baseAtom2 = new Integer(l.atom);
 							Integer atom2 = atomVarMap.get(new Integer(l.atom));
 							//							if (baseAtom.equals(atomVarMap2.get(atom)) ||
-							//								baseAtom2.equals(atomVarMap2.get(atomVarMap.get(baseAtom2)))) { //Á°²ó¤Î¥ë¡¼¥×¤ÎnewlinkÌ¿Îá¤¬ºï½ü¤µ¤ì¤ë¤â¤Î¤Î¾ì¹ç
+							//								baseAtom2.equals(atomVarMap2.get(atomVarMap.get(baseAtom2)))) { //å‰å›ã®ãƒ«ãƒ¼ãƒ—ã®newlinkå‘½ä»¤ãŒå‰Šé™¤ã•ã‚Œã‚‹ã‚‚ã®ã®å ´åˆ
 							Integer baseAtomInLoop = atomVarMap.get(baseAtom);
 							if (beforeVar.get(baseAtomInLoop).equals(atomVarMap2.get(baseAtomInLoop)) ||
-									beforeVar.get(atom2).equals(atomVarMap2.get(atom2))) { //Á°²ó¤Î¥ë¡¼¥×¤ÎnewlinkÌ¿Îá¤¬ºï½ü¤µ¤ì¤ë¤â¤Î¤Î¾ì¹ç
-								//getlink¤òºï½ü¤·¡¢inheritlink¤ònewlink¤ËÊÑ¹¹
+									beforeVar.get(atom2).equals(atomVarMap2.get(atom2))) { //å‰å›ã®ãƒ«ãƒ¼ãƒ—ã®newlinkå‘½ä»¤ãŒå‰Šé™¤ã•ã‚Œã‚‹ã‚‚ã®ã®å ´åˆ
+								//getlinkã‚’å‰Šé™¤ã—ã€inheritlinkã‚’newlinkã«å¤‰æ›´
 								loopIterator.remove();
 								changeToNewlink.put(inst.getArg1(), l);
-								//ºï½ü¤·¤¿¤Î¤ÇÂ¾¤Î½èÍı¤Ï¹Ô¤ï¤Ê¤¤
+								//å‰Šé™¤ã—ãŸã®ã§ä»–ã®å‡¦ç†ã¯è¡Œã‚ãªã„
 								break;
 							}
 						}
 
-						//inheritlink¤òºÇ¸å¤Ë°ÜÆ°¤¹¤ë»ö¤ËÈ¼¤¦getlink¤Î½èÍı
+						//inheritlinkã‚’æœ€å¾Œã«ç§»å‹•ã™ã‚‹äº‹ã«ä¼´ã†getlinkã®å‡¦ç†
 						//						if (baseAtom.equals(atomVarMap2.get(reverseAtomVarMap.get(baseAtom)))) {
 						if (atom.intValue() < memvars.size() + atomvars.size()) {
 							Integer beforeOutVar = (Integer)atomvars.get(atom.intValue() - memvars.size());
@@ -1940,8 +1940,8 @@ public class Optimizer {
 				Integer atomVar = (Integer)inst.getArg1();
 //				Integer baseAtom = (Integer)reverseAtomVarMap.get(atomVar);
 				Integer beforeAtom = beforeVar.get(atomVar);
-				if (beforeAtom.equals(atomVarMap2.get(atomVar))) { //¤â¤È¤â¤È¤ÎÊÑ¿ôÈÖ¹æ¤ÈÆ±¤¸¤Ë¤Ê¤Ã¤Æ¤¤¤ë¾ì¹ç
-					//ºÇ¸å¤Ë°ÜÆ°
+				if (beforeAtom.equals(atomVarMap2.get(atomVar))) { //ã‚‚ã¨ã‚‚ã¨ã®å¤‰æ•°ç•ªå·ã¨åŒã˜ã«ãªã£ã¦ã„ã‚‹å ´åˆ
+					//æœ€å¾Œã«ç§»å‹•
 					moveInsts.add(baseInst);
 					baseIterator.remove();
 					loopIterator.remove();
@@ -1952,10 +1952,10 @@ public class Optimizer {
 					Integer linkVar = (Integer)inst.getArg3();
 					if (changeToNewlink.containsKey(linkVar)) {
 						Link l = (Link)changeToNewlink.get(linkVar);
-						//newlink¤ò¥ë¡¼¥×¸å¤Ë°ÜÆ°¤·¤¿¤Î¤ËÈ¼¤¤inheritlink¤ònewlink¤ËÊÑ¹¹
+						//newlinkã‚’ãƒ«ãƒ¼ãƒ—å¾Œã«ç§»å‹•ã—ãŸã®ã«ä¼´ã„inheritlinkã‚’newlinkã«å¤‰æ›´
 						Link l1 = new Link(inst.getIntArg1(), inst.getIntArg2());
 						Link l2 = new Link(((Integer)outToBeforeVar.get(new Integer(l.atom))).intValue(), l.pos);
-						//¾éÄ¹¤Ê¾ì¹ç¤Ï½üµî
+						//å†—é•·ãªå ´åˆã¯é™¤å»
 						if (l1.equals(alreadyLinked.get(l2)) || l2.equals(alreadyLinked.get(l1))) {
 							loopIterator.remove();
 						} else {
@@ -1970,15 +1970,15 @@ public class Optimizer {
 				beforeAtom = beforeVar.get(inst.getArg1());
 				Integer beforeAtom2 = beforeVar.get(inst.getArg3());
 				if (beforeAtom.equals(atomVarMap2.get(atomVar)) ||
-						beforeAtom2.equals(atomVarMap2.get(atomVar2))) { //¤â¤È¤â¤È¤ÎÊÑ¿ôÈÖ¹æ¤ÈÆ±¤¸¤Ë¤Ê¤Ã¤Æ¤¤¤ë¾ì¹ç
-					//ºÇ¸å¤Ë°ÜÆ°
+						beforeAtom2.equals(atomVarMap2.get(atomVar2))) { //ã‚‚ã¨ã‚‚ã¨ã®å¤‰æ•°ç•ªå·ã¨åŒã˜ã«ãªã£ã¦ã„ã‚‹å ´åˆ
+					//æœ€å¾Œã«ç§»å‹•
 					moveInsts.add(baseInst);
 					baseIterator.remove();
 					loopIterator.remove();
 					break;
 				}
 
-				//¾éÄ¹¤Ê¥ê¥ó¥¯À¸À®¤Î½üµî					
+				//å†—é•·ãªãƒªãƒ³ã‚¯ç”Ÿæˆã®é™¤å»					
 				Link l1 = new Link(inst.getIntArg1(), inst.getIntArg2());
 				Link l2 = new Link(inst.getIntArg3(), inst.getIntArg4());
 				if (l1.equals(alreadyLinked.get(l2)) || l2.equals(alreadyLinked.get(l1))) {
@@ -2003,7 +2003,7 @@ public class Optimizer {
 				break;
 			}
 		}
-		//¥ë¡¼¥×¤ÎºÇ¸å¤ËresetvarsÌ¿Îá¤òÁŞÆş
+		//ãƒ«ãƒ¼ãƒ—ã®æœ€å¾Œã«resetvarså‘½ä»¤ã‚’æŒ¿å…¥
 //		int memmax = ((List)react.getArg2()).size();
 //		int atommax = memmax + ((List)react.getArg3()).size();
 
@@ -2028,16 +2028,16 @@ public class Optimizer {
 
 		Instruction.changeAtomVar(loop, atomVarMap2);
 
-		//proceedÌ¿Îá¤ÎÁ°¤ËÁŞÆş
+		//proceedå‘½ä»¤ã®å‰ã«æŒ¿å…¥
 		body.add(body.size() - 1, resetVars);
 		ArrayList looparg = new ArrayList();
 		looparg.add(loop);
 		body.add(body.size() - 1, new Instruction(Instruction.LOOP, looparg));
-		//ºÇ¸å¤Ë1²ó¼Â¹Ô¤¹¤ëÌ¿Îá¤òÁŞÆş
+		//æœ€å¾Œã«1å›å®Ÿè¡Œã™ã‚‹å‘½ä»¤ã‚’æŒ¿å…¥
 		Instruction.applyVarRewriteMap(moveInsts, outToBeforeVar);
 		body.addAll(body.size() - 1, moveInsts);
 
-		//specÌ¿Îá¤ÎÊÑ¹¹
+		//specå‘½ä»¤ã®å¤‰æ›´
 		if (nextArg > spec.getIntArg1()) {
 //			body.set(0, Instruction.spec(spec.getIntArg1(), nextArg));
 			spec.updateSpec(spec.getIntArg1(), nextArg);

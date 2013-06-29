@@ -1,22 +1,22 @@
 package compile.parser;
 
-/** ¥½¡¼¥¹¥Õ¥¡¥¤¥ëÃæ¤Î¥ê¥ó¥¯É½¸½ */
+/** ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ä¸­ã®ãƒªãƒ³ã‚¯è¡¨ç¾ */
 
 class SrcHyperLink extends SrcLink {
 	int lineno;//2012.7.10 by meguro
 	
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤Î¥ê¥ó¥¯¤òºîÀ®¤·¤Ş¤¹
-	 * @param name ¥ê¥ó¥¯Ì¾
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ã®ãƒªãƒ³ã‚¯ã‚’ä½œæˆã—ã¾ã™
+	 * @param name ãƒªãƒ³ã‚¯å
 	 */
 	public SrcHyperLink(String name) {
 		super(name, -1);
 	}
 	
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤È¹ÔÈÖ¹æ¤Î¥ê¥ó¥¯¤òºîÀ®¤·¤Ş¤¹
-	 * @param name ¥ê¥ó¥¯Ì¾
-	 * @param lineno ¹ÔÈÖ¹æ
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ã¨è¡Œç•ªå·ã®ãƒªãƒ³ã‚¯ã‚’ä½œæˆã—ã¾ã™
+	 * @param name ãƒªãƒ³ã‚¯å
+	 * @param lineno è¡Œç•ªå·
 	 */
 	public SrcHyperLink(String name, int lineno) {
 	    super(name, lineno);

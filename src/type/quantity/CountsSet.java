@@ -12,36 +12,36 @@ import type.TypeEnv;
 import compile.structure.Membrane;
 
 /**
- * ËìÌ¾¤´¤È¤ËÎÌÅª²òÀÏ·ë²Ì¤òÊİ»ı¤¹¤ë
+ * è†œåã”ã¨ã«é‡çš„è§£æçµæœã‚’ä¿æŒã™ã‚‹
  * @author kudo
  *
  */
 public class CountsSet {
-	/** À¸À®Ëì -> ¸ÇÄêÂ¿½ÅÅÙ */
+	/** ç”Ÿæˆè†œ -> å›ºå®šå¤šé‡åº¦ */
 	private final Map<Membrane,StaticCounts> memToGenCounts = new HashMap<Membrane,StaticCounts>();
-	/** ·ÑÂ³Ëì¡¦º®ºßËì¡¦ºÇ³°Ëì -> ¤½¤ÎËì¤ÎÊÑÆ°Â¿½ÅÅÙ */
+	/** ç¶™ç¶šè†œãƒ»æ··åœ¨è†œãƒ»æœ€å¤–è†œ -> ãã®è†œã®å¤‰å‹•å¤šé‡åº¦ */
 	private final Map<Membrane,Set<DynamicCounts>> memToInhCountss = new HashMap<Membrane,Set<DynamicCounts>>();
-	/** ËìÌ¾ -> Á´¤Æ¤ÎÊÑÆ°Â¿½ÅÅÙ */
+	/** è†œå -> å…¨ã¦ã®å¤‰å‹•å¤šé‡åº¦ */
 	private final Map<String,Set<DynamicCounts>> memnameToAllInhCountss = new HashMap<String,Set<DynamicCounts>>();
-	/** ËìÌ¾ -> ¶¦ÄÌ¤ÎÊÑÆ°Â¿½ÅÅÙ */
+	/** è†œå -> å…±é€šã®å¤‰å‹•å¤šé‡åº¦ */
 	private final Map<String,Set<DynamicCounts>> memnameToCommonInhCountss = new HashMap<String, Set<DynamicCounts>>();
-	/** ¥½¡¼¥¹¾å¤ÎËì -> ÎÌ²òÀÏ·ë²Ì(À¸À®Ëì/É¾²ÁºÑ¤ß) */
+	/** ã‚½ãƒ¼ã‚¹ä¸Šã®è†œ -> é‡è§£æçµæœ(ç”Ÿæˆè†œ/è©•ä¾¡æ¸ˆã¿) */
 	private final Map<Membrane,FixedCounts> memToFixedCounts = new HashMap<Membrane, FixedCounts>();
-//	/** ¥½¡¼¥¹¾å¤ÎËì -> ÎÌ²òÀÏ·ë²Ì(·ÑÂ³Ëì/É¾²ÁºÑ¤ß) */
+//	/** ã‚½ãƒ¼ã‚¹ä¸Šã®è†œ -> é‡è§£æçµæœ(ç¶™ç¶šè†œ/è©•ä¾¡æ¸ˆã¿) */
 //	Map<Membrane,FixedCounts> memToInhFixedCounts;
 	private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<String, FixedCounts>();
-	/** ËìÌ¾ -> ÎÌ²òÀÏ·ë²Ì(·ÑÂ³Ëì) */
+	/** è†œå -> é‡è§£æçµæœ(ç¶™ç¶šè†œ) */
 	private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
 
 	public CountsSet(){
 	}
 	
-	/** ¸ú²ÌÂĞ¾İ (À¸À®Ëì : ¼«¿È, ·ÑÂ³Ëì/²á¾êËì/º®ºßËì : null, ºÇ³°Éô : ¥ë¡¼¥ë½êÂ°Ëì¤Î¸ú²ÌÂĞ¾İ*/
+	/** åŠ¹æœå¯¾è±¡ (ç”Ÿæˆè†œ : è‡ªèº«, ç¶™ç¶šè†œ/éå‰°è†œ/æ··åœ¨è†œ : null, æœ€å¤–éƒ¨ : ãƒ«ãƒ¼ãƒ«æ‰€å±è†œã®åŠ¹æœå¯¾è±¡*/
 	public final Map<Membrane, Membrane> effectTarget = new HashMap<Membrane, Membrane>();
 	
 	/**
-	 * Ëì¤Î²òÀÏ·ë²Ì¤ò²Ã¤¨¤Æ¤¤¤¯¡£
-	 * ¤³¤ÎÃÊ³¬¤Ç¤Ï¡¢Ëì¤ÏÆ±Ì¾¤Ç¤â¥½¡¼¥¹¾å¤ÎÊÌ¤ÎËì¤Ê¤é¶èÊÌ¤µ¤ì¤ë¡£
+	 * è†œã®è§£æçµæœã‚’åŠ ãˆã¦ã„ãã€‚
+	 * ã“ã®æ®µéšã§ã¯ã€è†œã¯åŒåã§ã‚‚ã‚½ãƒ¼ã‚¹ä¸Šã®åˆ¥ã®è†œãªã‚‰åŒºåˆ¥ã•ã‚Œã‚‹ã€‚
 	 * @param counts
 	 */
 	public void add(StaticCounts counts){
@@ -58,14 +58,14 @@ public class CountsSet {
 	 */
 	public void add(DynamicCounts counts, boolean common){
 		String memname = TypeEnv.getMemName(counts.mem);
-		if(common){// ¶¦ÄÌ
+		if(common){// å…±é€š
 			Set<DynamicCounts> doms = memnameToCommonInhCountss.get(memname);
 			if(doms == null){
 				doms = new HashSet<DynamicCounts>();
 				memnameToCommonInhCountss.put(memname, doms);
 			}
 			doms.add(counts);
-		}// À¸À®Ëì¥ë¡¼¥ë
+		}// ç”Ÿæˆè†œãƒ«ãƒ¼ãƒ«
 		else{
 			if(!memToInhCountss.containsKey(counts.mem)){
 				Set<DynamicCounts> doms = new HashSet<DynamicCounts>();
@@ -90,7 +90,7 @@ public class CountsSet {
 	
 	Map<String, Boolean> memnameToCRIFlg = new HashMap<String, Boolean>();
 	/**
-	 * »ØÄê¤·¤¿ËìÌ¾¤Ë¤Ä¤¤¤Æ¤Ï¡¢Á´¤Æ¤ÎËì¤Î¥ë¡¼¥ë¤ÏÁ´¤Æ¤ÎËì¤Ë±Æ¶Á¤¹¤ë
+	 * æŒ‡å®šã—ãŸè†œåã«ã¤ã„ã¦ã¯ã€å…¨ã¦ã®è†œã®ãƒ«ãƒ¼ãƒ«ã¯å…¨ã¦ã®è†œã«å½±éŸ¿ã™ã‚‹
 	 * @param memname
 	 */
 	public void collapseRulesIndependency(String memname){
@@ -98,7 +98,7 @@ public class CountsSet {
 	}
 	Map<Membrane, Boolean> memToCRIFlg = new HashMap<Membrane, Boolean>();
 	/**
-	 * »ØÄê¤·¤¿ËìÌ¾¤Ë¤Ä¤¤¤Æ¤Ï¡¢Á´¤Æ¤ÎËì¤Î¥ë¡¼¥ë¤ÏÁ´¤Æ¤ÎËì¤Ë±Æ¶Á¤¹¤ë
+	 * æŒ‡å®šã—ãŸè†œåã«ã¤ã„ã¦ã¯ã€å…¨ã¦ã®è†œã®ãƒ«ãƒ¼ãƒ«ã¯å…¨ã¦ã®è†œã«å½±éŸ¿ã™ã‚‹
 	 * @param memname
 	 */
 	public void collapseRuleIndependency(Membrane mem){
@@ -106,7 +106,7 @@ public class CountsSet {
 	}
 	Map<String, Boolean> memnameToCPUBFlg = new HashMap<String, Boolean>();
 	/**
-	 * »ØÄê¤·¤¿ËìÌ¾¤Ë¤Ä¤¤¤Æ¤Ï¡¢¥×¥í¥»¥¹¤Î²¼¸Â¤òÌµ¤¯¤¹
+	 * æŒ‡å®šã—ãŸè†œåã«ã¤ã„ã¦ã¯ã€ãƒ—ãƒ­ã‚»ã‚¹ã®ä¸‹é™ã‚’ç„¡ãã™
 	 * @param memname
 	 */
 	public void collapseProcessUnderBounds(String memname){
@@ -115,7 +115,7 @@ public class CountsSet {
 	}
 	Map<String, Boolean> memnameToCPIFlg = new HashMap<String, Boolean>();
 	/**
-	 * »ØÄê¤·¤¿ËìÌ¾¤Ë¤Ä¤¤¤Æ¤Ï¡¢¶ñÂÎËì¤ò¶èÊÌ¤·¤Ê¤¤
+	 * æŒ‡å®šã—ãŸè†œåã«ã¤ã„ã¦ã¯ã€å…·ä½“è†œã‚’åŒºåˆ¥ã—ãªã„
 	 * @param memname
 	 */
 	public void collapseProcessIndependency(String memname){
@@ -126,14 +126,14 @@ public class CountsSet {
 	
 //	Set<DynamicCounts> clonedDynamicCounts = new HashSet<DynamicCounts>();
 	
-	/** ¸Ä¡¹¤Î¶ñÂÎËì¤´¤È¤ËÊÑ¿ô¤ò¤Õ¤ê¡¢¸ú²Ì¤òÅ¬ÍÑ¤·¡¢À©Ìó¤ò²ò¤¯
-	 * ¥×¥í¥»¥¹¤ÎÆÈÎ©À­¤¬Êø¤ì¤Æ¤¤¤ëËì¤Ë¤Ä¤¤¤Æ¤Ï²¿¤â¤·¤Ê¤¤
+	/** å€‹ã€…ã®å…·ä½“è†œã”ã¨ã«å¤‰æ•°ã‚’ãµã‚Šã€åŠ¹æœã‚’é©ç”¨ã—ã€åˆ¶ç´„ã‚’è§£ã
+	 * ãƒ—ãƒ­ã‚»ã‚¹ã®ç‹¬ç«‹æ€§ãŒå´©ã‚Œã¦ã„ã‚‹è†œã«ã¤ã„ã¦ã¯ä½•ã‚‚ã—ãªã„
 	 *  */
-	// ¸Ä¡¹¤Ë²ò¤±¤ëÀ¸À®Ëì¤Ë¤Ä¤¤¤Æ¤Ï²ò¤¯
+	// å€‹ã€…ã«è§£ã‘ã‚‹ç”Ÿæˆè†œã«ã¤ã„ã¦ã¯è§£ã
 	public void solveIndividual(){
 		for(Membrane mem : memToGenCounts.keySet()){
 			String memname = TypeEnv.getMemName(mem);
-			/** ¥×¥í¥»¥¹¤ÎÆÈÎ©À­¤¬Êø¤ì¤Æ¤¤¤ë¾ì¹ç¡¢²¿¤â¤·¤Ê¤¤ */
+			/** ãƒ—ãƒ­ã‚»ã‚¹ã®ç‹¬ç«‹æ€§ãŒå´©ã‚Œã¦ã„ã‚‹å ´åˆã€ä½•ã‚‚ã—ãªã„ */
 			Boolean cpiflg = memnameToCPIFlg.get(memname);
 			if(cpiflg != null && cpiflg &&
 					Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE){
@@ -145,26 +145,26 @@ public class CountsSet {
 //				}
 			}
 			else{
-				/** ¥ë¡¼¥ë¤ÎÆÈÎ©À­¤¬Êø¤ì¤Æ¤¤¤ë¾ì¹ç, Â¾¤ÎËì¤Î¸ú²Ì¤òÅ¬ÍÑ */
+				/** ãƒ«ãƒ¼ãƒ«ã®ç‹¬ç«‹æ€§ãŒå´©ã‚Œã¦ã„ã‚‹å ´åˆ, ä»–ã®è†œã®åŠ¹æœã‚’é©ç”¨ */
 				Boolean criflg = memToCRIFlg.get(mem);
 				if(criflg == null || !criflg)criflg = memnameToCRIFlg.get(memname);
 				if(criflg != null && criflg
-						){ // ¥ë¡¼¥ë¥»¥Ã¥ÈÆÈÎ©À­¤¬Êø¤ì¤Æ¤¤¤ë
+						){ // ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆç‹¬ç«‹æ€§ãŒå´©ã‚Œã¦ã„ã‚‹
 					for(DynamicCounts dom : memnameToAllInhCountss.get(memname)){
-						// DynamicCounts¤ò¥³¥Ô¡¼¤·¤ÆÅ¬ÍÑ¤¹¤ë¡£(¤³¤Î»şÊÑ¿ô¤âÊ£À½¤µ¤ì¡¢ÊÌ¥ª¥Ö¥¸¥§¥¯¥È¤Ë¤Ê¤ë)
+						// DynamicCountsã‚’ã‚³ãƒ”ãƒ¼ã—ã¦é©ç”¨ã™ã‚‹ã€‚(ã“ã®æ™‚å¤‰æ•°ã‚‚è¤‡è£½ã•ã‚Œã€åˆ¥ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«ãªã‚‹)
 						DynamicCounts domclone = dom.clone();
 //						clonedDynamicCounts.add(domclone);
 						domclone.assignToVar(new IntervalCount(new NumCount(0),Count.INFINITY));
 						memToGenCounts.get(mem).apply(domclone);
 					}
-					// ²ò¤¯
+					// è§£ã
 					if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL)
 						memToGenCounts.get(mem).solveByCounts();
 					memToFixedCounts.put(mem, memToGenCounts.get(mem).solve());
 				}
-				else{// ¥ë¡¼¥ë¥»¥Ã¥ÈÆÈÎ©À­¤¬Êø¤ì¤Æ¤Ê¤¤
+				else{// ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆç‹¬ç«‹æ€§ãŒå´©ã‚Œã¦ãªã„
 					Set<DynamicCounts> doms = memToInhCountss.get(mem);
-					/** ¤½¤Î¶ñÂÎËì¤Ø¤Î¸ú²Ì¤òÅ¬ÍÑ */
+					/** ãã®å…·ä½“è†œã¸ã®åŠ¹æœã‚’é©ç”¨ */
 					if(doms != null){
 						for(DynamicCounts dom : doms){
 							DynamicCounts domclone = dom.clone();
@@ -172,7 +172,7 @@ public class CountsSet {
 							memToGenCounts.get(mem).apply(domclone);
 						}
 					}
-					/** ¤½¤ÎËìÌ¾¤Ø¤Î¶¦ÄÌ¸ú²Ì¤òÅ¬ÍÑ */
+					/** ãã®è†œåã¸ã®å…±é€šåŠ¹æœã‚’é©ç”¨ */
 					doms = memnameToCommonInhCountss.get(memname);
 					if(doms != null){
 						for(DynamicCounts dom : doms){
@@ -182,13 +182,13 @@ public class CountsSet {
 							memToGenCounts.get(mem).apply(domclone);
 						}
 					}
-					//²ò¤¯
+					//è§£ã
 					if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL)
 						memToGenCounts.get(mem).solveByCounts();
 					memToFixedCounts.put(mem, memToGenCounts.get(mem).solve());
 //					memToFixedCounts.put(mem, memToGenCounts.get(mem).solveByCounts());
 				}
-				// ËìÌ¾¤Ë¤Ä¤¤¤Æ¡¢Å¬ÍÑºÑ¤ß¤È¤¹¤ë
+				// è†œåã«ã¤ã„ã¦ã€é©ç”¨æ¸ˆã¿ã¨ã™ã‚‹
 				memnameToAlreadyApplyed.put(memname, true);
 			}
 		}
@@ -199,7 +199,7 @@ public class CountsSet {
 //		Map <String, StaticCounts> memnameToGenCount = new HashMap<String, StaticCounts>();
 		for(Membrane mem : memToGenCounts.keySet()){
 			String memname = TypeEnv.getMemName(mem);
-			/** ¥×¥í¥»¥¹¤ÎÆÈÎ©À­¤¬Êø¤ì¤Æ¤¤¤ë¾ì¹ç */
+			/** ãƒ—ãƒ­ã‚»ã‚¹ã®ç‹¬ç«‹æ€§ãŒå´©ã‚Œã¦ã„ã‚‹å ´åˆ */
 			Boolean cpiflg = memnameToCPIFlg.get(memname);
 			if(cpiflg != null && cpiflg &&
 					Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE){
@@ -247,7 +247,7 @@ public class CountsSet {
 //		}
 //	}
 //	
-//	// ¥Ş¡¼¥¸¤µ¤ì¤¿Ëì¤ËÂĞ¤·¡¢Å¬ÍÑºÑ¤ß¤Î¥Õ¥é¥°¤¬Î©¤Ã¤Æ¤¤¤Ê¤¤¾ì¹ç¤Ë¤Î¤ßÁ´¥ë¡¼¥ëÅ¬ÍÑ
+//	// ãƒãƒ¼ã‚¸ã•ã‚ŒãŸè†œã«å¯¾ã—ã€é©ç”¨æ¸ˆã¿ã®ãƒ•ãƒ©ã‚°ãŒç«‹ã£ã¦ã„ãªã„å ´åˆã«ã®ã¿å…¨ãƒ«ãƒ¼ãƒ«é©ç”¨
 //	public void applyCollapseds(){
 //		for(String memname : memnameToMergedFixedCounts.keySet()){
 //			Boolean already = memnameToAlreadyApplyed.get(memname);
@@ -275,7 +275,7 @@ public class CountsSet {
 	
 //	private boolean fixed = false;
 	/**
-	 * ¸ú²Ì¤Ë¤ª¤±¤ë¥ë¡¼¥ëÊÑ¿ô¤òÌµ¸Â¤ÈÂ«Çû¤·¡¢²ò¤¯
+	 * åŠ¹æœã«ãŠã‘ã‚‹ãƒ«ãƒ¼ãƒ«å¤‰æ•°ã‚’ç„¡é™ã¨æŸç¸›ã—ã€è§£ã
 	 *
 	 */
 //	public void assignInfinityToVar(){
@@ -289,7 +289,7 @@ public class CountsSet {
 //				if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new NumCount(0),Count.INFINITY));
 //	}
 	
-	/** ²¼¸Â¤¬0°Ê²¼¤Ê¤Î¤ò0¤ËÊäÀµ */
+	/** ä¸‹é™ãŒ0ä»¥ä¸‹ãªã®ã‚’0ã«è£œæ­£ */
 	public void assignZeroToMinimum(){
 		for(FixedCounts fc : memnameToMergedFixedCounts.values()){
 			for(Functor f : fc.functorToCount.keySet()){
@@ -308,11 +308,11 @@ public class CountsSet {
 	}
 	
 	/**
-	 * ¥¢¥È¥à¿ô¡¢»ÒËì¿ô¤Î²¼¸Â¤ò0¤È¤·¤ÆÀ©ÌóÌäÂê¤È¤·¤Æ¥ë¡¼¥ëÊÑ¿ô¤ò²ò¤¯
+	 * ã‚¢ãƒˆãƒ æ•°ã€å­è†œæ•°ã®ä¸‹é™ã‚’0ã¨ã—ã¦åˆ¶ç´„å•é¡Œã¨ã—ã¦ãƒ«ãƒ¼ãƒ«å¤‰æ•°ã‚’è§£ã
 	 */
 	public void solveByCounts(){
 		for(Membrane mem : memToGenCounts.keySet()){
-			// ¥×¥í¥»¥¹¤ÎÆÈÎ©À­¤¬Êİ¤¿¤ì¤Æ¤¤¤Ê¤±¤ì¤ĞÌµ»ë
+			// ãƒ—ãƒ­ã‚»ã‚¹ã®ç‹¬ç«‹æ€§ãŒä¿ãŸã‚Œã¦ã„ãªã‘ã‚Œã°ç„¡è¦–
 			Boolean cpiflg = memnameToCPIFlg.get(TypeEnv.getMemName(mem));
 			if(cpiflg != null && cpiflg)
 //			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))

@@ -1,39 +1,39 @@
 package compile.parser;
 import java.util.LinkedList;
 
-/** ¥½¡¼¥¹¥Õ¥¡¥¤¥ëÃæ¤ÎËìÉ½¸½ */
+/** ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ä¸­ã®è†œè¡¨ç¾ */
 
 class SrcMembrane {
-	/** Ëì¤ÎÆâÍÆ¥×¥í¥»¥¹¤ÎÉ½¸½ */
+	/** è†œã®å†…å®¹ãƒ—ãƒ­ã‚»ã‚¹ã®è¡¨ç¾ */
 	LinkedList process = null;
-	/** ½ªÎ»¥Õ¥é¥°¤ÎÍ­Ìµ */
+	/** çµ‚äº†ãƒ•ãƒ©ã‚°ã®æœ‰ç„¡ */
 	public boolean stable = false;
-	/** Ëì¤Î¥¿¥¤¥× */
+	/** è†œã®ã‚¿ã‚¤ãƒ— */
 	public int kind = 0;
-	/** ¡÷»ØÄê¤Ş¤¿¤Ïnull */
+	/** ï¼ æŒ‡å®šã¾ãŸã¯null */
 	Object pragma = null;
 	
-	/** ËìÌ¾ */
+	/** è†œå */
 	public String name;
 	
 	/**
-	 * ¶õ¤ÎËì¤òºîÀ®¤·¤Ş¤¹ 
+	 * ç©ºã®è†œã‚’ä½œæˆã—ã¾ã™ 
 	 */
 	public SrcMembrane() {
 		this(new LinkedList());
 	}
 	
 	/**
-	 * »ØÄê¤µ¤ì¤¿»Ò¥×¥í¥»¥¹¤ò»ı¤ÄËì¤òºîÀ®¤·¤Ş¤¹
-	 * @param process Ëì¤Ë´Ş¤Ş¤ì¤ë»Ò¥×¥í¥»¥¹
+	 * æŒ‡å®šã•ã‚ŒãŸå­ãƒ—ãƒ­ã‚»ã‚¹ã‚’æŒã¤è†œã‚’ä½œæˆã—ã¾ã™
+	 * @param process è†œã«å«ã¾ã‚Œã‚‹å­ãƒ—ãƒ­ã‚»ã‚¹
 	 */
 	public SrcMembrane(LinkedList process) {
 		this.process = process;
 	}
 	
 	/**
-	 * »Ò¥×¥í¥»¥¹¤ò¼èÆÀ¤·¤Ş¤¹
-	 * @return »Ò¥×¥í¥»¥¹¤Î¥ê¥¹¥È
+	 * å­ãƒ—ãƒ­ã‚»ã‚¹ã‚’å–å¾—ã—ã¾ã™
+	 * @return å­ãƒ—ãƒ­ã‚»ã‚¹ã®ãƒªã‚¹ãƒˆ
 	 */
 	public LinkedList getProcess() { return process; }
 	public String toString() { return SrcDumper.dumpMembrane(this); }

@@ -1,5 +1,5 @@
 /**
- * ¥½¡¼¥¹Ãæ¤Î¥ë¡¼¥ë¤òÉ½¤·¤Ş¤¹
+ * ã‚½ãƒ¼ã‚¹ä¸­ã®ãƒ«ãƒ¼ãƒ«ã‚’è¡¨ã—ã¾ã™
  */
 
 package compile.parser;
@@ -9,17 +9,17 @@ import java.util.List;
 
 class SrcRule {
 	
-	public String name; // ¥ë¡¼¥ëÌ¾
-	public int lineno;	//¹ÔÈÖ¹æ 2006.1.22 by inui
-	public LinkedList head;			// ¥Ø¥Ã¥É¥×¥í¥»¥¹
-	public LinkedList body;			// ¥Ü¥Ç¥£¥×¥í¥»¥¹
-	public LinkedList guard;			// ¥¬¡¼¥É¥×¥í¥»¥¹
-	public LinkedList guardNegatives;	// ¥¬¡¼¥ÉÈİÄê¾ò·ï¹½Ê¸¤Î¥ê¥¹¥È
-	private String text; //¥ë¡¼¥ë¤Î¥Æ¥­¥¹¥ÈÉ½¸½
+	public String name; // ãƒ«ãƒ¼ãƒ«å
+	public int lineno;	//è¡Œç•ªå· 2006.1.22 by inui
+	public LinkedList head;			// ãƒ˜ãƒƒãƒ‰ãƒ—ãƒ­ã‚»ã‚¹
+	public LinkedList body;			// ãƒœãƒ‡ã‚£ãƒ—ãƒ­ã‚»ã‚¹
+	public LinkedList guard;			// ã‚¬ãƒ¼ãƒ‰ãƒ—ãƒ­ã‚»ã‚¹
+	public LinkedList guardNegatives;	// ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶æ§‹æ–‡ã®ãƒªã‚¹ãƒˆ
+	private String text; //ãƒ«ãƒ¼ãƒ«ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¾
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥Ø¥Ã¥É¥ë¡¼¥ë¤È¥Ü¥Ç¥£¥ë¡¼¥ë¤È¶õ¤Î¥¬¡¼¥É¤Ç¥ë¡¼¥ë¤ò½é´ü²½¤·¤Ş¤¹
-	 * @param head ¥Ø¥Ã¥É¤Î¥ê¥¹¥È
-	 * @param body ¥Ü¥Ç¥£¤Î¥ê¥¹¥È
+	 * æŒ‡å®šã•ã‚ŒãŸãƒ˜ãƒƒãƒ‰ãƒ«ãƒ¼ãƒ«ã¨ãƒœãƒ‡ã‚£ãƒ«ãƒ¼ãƒ«ã¨ç©ºã®ã‚¬ãƒ¼ãƒ‰ã§ãƒ«ãƒ¼ãƒ«ã‚’åˆæœŸåŒ–ã—ã¾ã™
+	 * @param head ãƒ˜ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param body ãƒœãƒ‡ã‚£ã®ãƒªã‚¹ãƒˆ
 	 */
 	public SrcRule(String name, LinkedList head, LinkedList body) {
 		this(name, head, new LinkedList(), body);
@@ -27,10 +27,10 @@ class SrcRule {
 	
 	//2006.1.22 by inui
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥Ø¥Ã¥É¥ë¡¼¥ë¤È¥Ü¥Ç¥£¥ë¡¼¥ë¤È¶õ¤Î¥¬¡¼¥É¤Ç¥ë¡¼¥ë¤ò½é´ü²½¤·¤Ş¤¹
-	 * @param head ¥Ø¥Ã¥É¤Î¥ê¥¹¥È
-	 * @param body ¥Ü¥Ç¥£¤Î¥ê¥¹¥È
-	 * @param lineno ¹ÔÈÖ¹æ
+	 * æŒ‡å®šã•ã‚ŒãŸãƒ˜ãƒƒãƒ‰ãƒ«ãƒ¼ãƒ«ã¨ãƒœãƒ‡ã‚£ãƒ«ãƒ¼ãƒ«ã¨ç©ºã®ã‚¬ãƒ¼ãƒ‰ã§ãƒ«ãƒ¼ãƒ«ã‚’åˆæœŸåŒ–ã—ã¾ã™
+	 * @param head ãƒ˜ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param body ãƒœãƒ‡ã‚£ã®ãƒªã‚¹ãƒˆ
+	 * @param lineno è¡Œç•ªå·
 	 */
 	public SrcRule(String name, LinkedList head, LinkedList body, int lineno) {
 		this(name, head, new LinkedList(), body);
@@ -38,10 +38,10 @@ class SrcRule {
 	}
 	
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥Ø¥Ã¥É¥ë¡¼¥ë¤È¥Ü¥Ç¥£¥ë¡¼¥ë¤È¥¬¡¼¥É¤Ç¥ë¡¼¥ë¤ò½é´ü²½¤·¤Ş¤¹
-	 * @param head ¥Ø¥Ã¥É¤Î¥ê¥¹¥È
-	 * @param gurad ¥¬¡¼¥É¤Î¥ê¥¹¥È
-	 * @param body ¥Ü¥Ç¥£¤Î¥ê¥¹¥È
+	 * æŒ‡å®šã•ã‚ŒãŸãƒ˜ãƒƒãƒ‰ãƒ«ãƒ¼ãƒ«ã¨ãƒœãƒ‡ã‚£ãƒ«ãƒ¼ãƒ«ã¨ã‚¬ãƒ¼ãƒ‰ã§ãƒ«ãƒ¼ãƒ«ã‚’åˆæœŸåŒ–ã—ã¾ã™
+	 * @param head ãƒ˜ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param gurad ã‚¬ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param body ãƒœãƒ‡ã‚£ã®ãƒªã‚¹ãƒˆ
 	 */
 	public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body) {
 		
@@ -55,11 +55,11 @@ class SrcRule {
 	
 	//2006.1.22 by inui
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥Ø¥Ã¥É¥ë¡¼¥ë¤È¥Ü¥Ç¥£¥ë¡¼¥ë¤È¥¬¡¼¥É¤Ç¥ë¡¼¥ë¤ò½é´ü²½¤·¤Ş¤¹
-	 * @param head ¥Ø¥Ã¥É¤Î¥ê¥¹¥È
-	 * @param gurad ¥¬¡¼¥É¤Î¥ê¥¹¥È
-	 * @param body ¥Ü¥Ç¥£¤Î¥ê¥¹¥È
-	 * @param lineno ¹ÔÈÖ¹æ
+	 * æŒ‡å®šã•ã‚ŒãŸãƒ˜ãƒƒãƒ‰ãƒ«ãƒ¼ãƒ«ã¨ãƒœãƒ‡ã‚£ãƒ«ãƒ¼ãƒ«ã¨ã‚¬ãƒ¼ãƒ‰ã§ãƒ«ãƒ¼ãƒ«ã‚’åˆæœŸåŒ–ã—ã¾ã™
+	 * @param head ãƒ˜ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param gurad ã‚¬ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param body ãƒœãƒ‡ã‚£ã®ãƒªã‚¹ãƒˆ
+	 * @param lineno è¡Œç•ªå·
 	 */
 	public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body, int lineno) {
 		this(name, head, guard, body);
@@ -68,13 +68,13 @@ class SrcRule {
 	
 	//2006/07/07 by kudo
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥Ø¥Ã¥É¥ë¡¼¥ë¤È¥Ü¥Ç¥£¥ë¡¼¥ë¤È¥¬¡¼¥É¥ë¡¼¥ë¤Ç½é´ü²½¤¹¤ë¡£
-	 * simpagation rule¤Î¹½Ê¸¤ËÂĞ¤·¤Æ»È¤ï¤ì¤ë¥³¥ó¥¹¥È¥é¥¯¥¿¡£
-	 * @param head ¥Ø¥Ã¥É¤Î¥ê¥¹¥È
-	 * @param head2 ¥Ø¥Ã¥É¤Î¥ê¥¹¥È ( \ ¤Î¸å¤í )
-	 * @param guard ¥¬¡¼¥É¤Î¥ê¥¹¥È
-	 * @param body ¥Ü¥Ç¥£¤Î¥ê¥¹¥È
-	 * @param lineno ¹ÔÈÖ¹æ
+	 * æŒ‡å®šã•ã‚ŒãŸãƒ˜ãƒƒãƒ‰ãƒ«ãƒ¼ãƒ«ã¨ãƒœãƒ‡ã‚£ãƒ«ãƒ¼ãƒ«ã¨ã‚¬ãƒ¼ãƒ‰ãƒ«ãƒ¼ãƒ«ã§åˆæœŸåŒ–ã™ã‚‹ã€‚
+	 * simpagation ruleã®æ§‹æ–‡ã«å¯¾ã—ã¦ä½¿ã‚ã‚Œã‚‹ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€‚
+	 * @param head ãƒ˜ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param head2 ãƒ˜ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆ ( \ ã®å¾Œã‚ )
+	 * @param guard ã‚¬ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆ
+	 * @param body ãƒœãƒ‡ã‚£ã®ãƒªã‚¹ãƒˆ
+	 * @param lineno è¡Œç•ªå·
 	 */
 	public SrcRule(String name, LinkedList head, List head2, LinkedList guard, LinkedList body, int lineno){
 		this.name = name;
@@ -90,7 +90,7 @@ class SrcRule {
 	}
 
 	/**
-	 *	 HeadÉô, BodyÉô¤Ë!X¤¬½Ğ¸½¤·¤¿¾ì¹ç¡¤GuardÉô¤Ëhlink(X)¤â¤·¤¯¤Ïnew(X)¤òÄÉ²Ã¤¹¤ë.
+	 *	 Headéƒ¨, Bodyéƒ¨ã«!XãŒå‡ºç¾ã—ãŸå ´åˆï¼ŒGuardéƒ¨ã«hlink(X)ã‚‚ã—ãã¯new(X)ã‚’è¿½åŠ ã™ã‚‹.
 	 *	 meguro
 	 */	
 	public void addHyperLinkConstraint(LinkedList head, LinkedList body) {
@@ -150,7 +150,7 @@ class SrcRule {
 	}
 
 	/**
-	 * ¥ê¥ó¥¯Ì¾¤¬_IX¤Ê¤É¡¢Æ¬¤Ë_I¤¬¤Ä¤¯¤È¼«Æ°¤Ç¥¬¡¼¥É¤Ëint(_IX)¤ò²Ã¤¨¤ë.
+	 * ãƒªãƒ³ã‚¯åãŒ_IXãªã©ã€é ­ã«_IãŒã¤ãã¨è‡ªå‹•ã§ã‚¬ãƒ¼ãƒ‰ã«int(_IX)ã‚’åŠ ãˆã‚‹.
 	 * hara. nakano.
 	 * */
 	public void addTypeConstraint(LinkedList l){
@@ -160,28 +160,28 @@ class SrcRule {
 			if(o instanceof SrcLink){
 				SrcLink sl = (SrcLink)o;
 				if(sl.name.matches("^_I.*")){
-					/*intÈ¯¸«*/
+					/*intç™ºè¦‹*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("int",newl);
 					this.guard.add(newg);
 				}
 				else if(sl.name.matches("^_G.*")){
-					/*groundÈ¯¸«*/
+					/*groundç™ºè¦‹*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("ground",newl);
 					this.guard.add(newg);
 				}
 				else if(sl.name.matches("^_S.*")){
-					/*stringÈ¯¸«*/
+					/*stringç™ºè¦‹*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("string",newl);
 					this.guard.add(newg);
 				}
 				else if(sl.name.matches("^_U.*")){
-					/*unaryÈ¯¸«*/
+					/*unaryç™ºè¦‹*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("unary",newl);
@@ -200,23 +200,23 @@ class SrcRule {
 	
 	// by kudo (2006/07/07)
 	/**
-	 * simpagation rule ¤ò¡¢ÄÌ¾ï¤Î¥ë¡¼¥ë¤Î·Á¤ËÄ¾¤¹¡£¥³¥ó¥¹¥È¥é¥¯¥¿¤«¤é¸Æ¤Ğ¤ì¤ë¡£
-	 * @param head2 ¥Ø¥Ã¥É¤Î'\'¤Î¸å¤íÉôÊ¬¤Î¥ê¥¹¥È
+	 * simpagation rule ã‚’ã€é€šå¸¸ã®ãƒ«ãƒ¼ãƒ«ã®å½¢ã«ç›´ã™ã€‚ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã‹ã‚‰å‘¼ã°ã‚Œã‚‹ã€‚
+	 * @param head2 ãƒ˜ãƒƒãƒ‰ã®'\'ã®å¾Œã‚éƒ¨åˆ†ã®ãƒªã‚¹ãƒˆ
 	 */
 	private void unSimpagationize(List head2){
-		// head ¤òÁ´¤Æbody¤Ø¥³¥Ô¡¼ (Á°¤ËÄÉ²Ã¤Î¤Û¤¦¤¬ºÆÍøÍÑ¤Î¾å¤Ç¤âÅÔ¹ç¤¬¤¤¤¤¡©)
+		// head ã‚’å…¨ã¦bodyã¸ã‚³ãƒ”ãƒ¼ (å‰ã«è¿½åŠ ã®ã»ã†ãŒå†åˆ©ç”¨ã®ä¸Šã§ã‚‚éƒ½åˆãŒã„ã„ï¼Ÿ)
 		body.addAll(copySrcs(head));
-		// head2¤òhead¤Î¸å¤í¤ËÏ¢·ë
+		// head2ã‚’headã®å¾Œã‚ã«é€£çµ
 		head.addAll(head2);
 	}
 	
 	/**
-	 * ¥½¡¼¥¹¥ª¥Ö¥¸¥§¥¯¥È¤Î¥ê¥¹¥È¤ò¥³¥Ô¡¼¤¹¤ë¡£
+	 * ã‚½ãƒ¼ã‚¹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒªã‚¹ãƒˆã‚’ã‚³ãƒ”ãƒ¼ã™ã‚‹ã€‚
 	 * @param l
 	 * @return
 	 */
 	private LinkedList copySrcs(List l){
-		LinkedList ret = new LinkedList(); // List ·¿¤À¤È³Æ½ê¤Ç»È¤Ã¤Æ¤¤¤ëgetFirst¤¬Ìµ¤¤
+		LinkedList ret = new LinkedList(); // List å‹ã ã¨å„æ‰€ã§ä½¿ã£ã¦ã„ã‚‹getFirstãŒç„¡ã„
 		if(l == null)return null;
 		Iterator it = l.iterator();
 		while(it.hasNext()){
@@ -245,7 +245,7 @@ class SrcRule {
 				SrcLink sl = (SrcLink)o;
 				ret.add(new SrcLink(sl.getName()));
 			}
-			else if(o instanceof SrcRule){ // ¢¨º¸ÊÕ¤Ë¥ë¡¼¥ë¤Ï½Ğ¸½¤·¤Ê¤¤È¦
+			else if(o instanceof SrcRule){ // â€»å·¦è¾ºã«ãƒ«ãƒ¼ãƒ«ã¯å‡ºç¾ã—ãªã„ç­ˆ
 			}
 		}
 		return ret;
@@ -253,37 +253,37 @@ class SrcRule {
 	
 
 	/**
-	 * ¥Ø¥Ã¥É¤òÀßÄê¤¹¤ë
+	 * ãƒ˜ãƒƒãƒ‰ã‚’è¨­å®šã™ã‚‹
 	 */
 	public void setHead(LinkedList head) {
 		this.head = head;
 	}
 	
 	/**
-	 * ¥ë¡¼¥ë¤Î¥Ø¥Ã¥É¤ò¼èÆÀ¤·¤Ş¤¹
-	 * @return ¥Ø¥Ã¥É¤Î¥ê¥¹¥È
+	 * ãƒ«ãƒ¼ãƒ«ã®ãƒ˜ãƒƒãƒ‰ã‚’å–å¾—ã—ã¾ã™
+	 * @return ãƒ˜ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆ
 	 */
 	public LinkedList getHead() {
 		return this.head;
 	}
 	
 	/**
-	 * ¥ë¡¼¥ë¤Î¥¬¡¼¥É¤òÆÀ¤Ş¤¹
-	 * @return ¥¬¡¼¥É¤Î¥ê¥¹¥È
+	 * ãƒ«ãƒ¼ãƒ«ã®ã‚¬ãƒ¼ãƒ‰ã‚’å¾—ã¾ã™
+	 * @return ã‚¬ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆ
 	 */
 	public LinkedList getGuard() {
 		return this.guard;
 	}
 	/**
-	 * ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ò¼èÆÀ¤¹¤ë
+	 * ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã‚’å–å¾—ã™ã‚‹
 	 */
 	public LinkedList getGuardNegatives() {
 		return this.guardNegatives;
 	}
 	
 	/**
-	 * ¥ë¡¼¥ë¤Î¥Ü¥Ç¥£¤ò¼èÆÀ¤·¤Ş¤¹
-	 * @return ¥Ü¥Ç¥£¤Î¥ê¥¹¥È
+	 * ãƒ«ãƒ¼ãƒ«ã®ãƒœãƒ‡ã‚£ã‚’å–å¾—ã—ã¾ã™
+	 * @return ãƒœãƒ‡ã‚£ã®ãƒªã‚¹ãƒˆ
 	 */
 	public LinkedList getBody() {
 		return this.body;
@@ -293,7 +293,7 @@ class SrcRule {
 		return "(rule:"+name+")";
 	}
 	
-	/**LMNtal¥½¡¼¥¹·Á¼°¤Î¥Æ¥­¥¹¥ÈÉ½¸½¤ò¼èÆÀ¤¹¤ë¡£*/
+	/**LMNtalã‚½ãƒ¼ã‚¹å½¢å¼ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¾ã‚’å–å¾—ã™ã‚‹ã€‚*/
 	public String getText() {
 		return text;
 	}

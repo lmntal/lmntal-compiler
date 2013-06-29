@@ -6,14 +6,14 @@ import java.util.List;
 import runtime.functor.Functor;
 
 /**
- * �롼��ν��硣
- * ���ߤϥ롼�������Ȥ���ɽ�����Ƥ��뤬������Ū�ˤ�ʣ���Υ롼��Υޥå��󥰤�
- * ���ĤΥޥå��󥰥ƥ��ȤǹԤ��褦�ˤ��롣
+ * ルールの集合。
+ * 現在はルールの配列として表現しているが、将来的には複数のルールのマッチングを
+ * １つのマッチングテストで行うようにする。
  */
 public abstract class Ruleset
 {
 	/**
-	 * new«�����줿̾���ζ����ͤ��Ǽ��������
+	 * new束縛された名前の具体値を格納する配列
 	 */
 	protected Functor[] holes;
 
@@ -30,8 +30,8 @@ public abstract class Ruleset
 	}
 
 	/**
-	 * new«�����줿̾���ζ����ͤ���ꤷ�ƿ�����Ruleset��������롣
-	 * @return ������Ruleset
+	 * new束縛された名前の具体値を指定して新しいRulesetを作成する。
+	 * @return 新しいRuleset
 	 */
 	public Ruleset fillHoles(Functor[] holes)
 	{

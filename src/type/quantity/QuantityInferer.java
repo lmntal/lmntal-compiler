@@ -15,7 +15,7 @@ import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
 
 /**
- * ÎÌÅª²òÀÏ(?)
+ * é‡çš„è§£æ(?)
  * @author kudo
  *
  */
@@ -35,47 +35,47 @@ public class QuantityInferer {
 	}
 	
 	/**
-	 * ÎÌÅª²òÀÏ¤ò¹Ô¤¦
+	 * é‡çš„è§£æã‚’è¡Œã†
 	 * @param root
 	 */
 	public void infer(){
 		
-		// ¸Ä¡¹¤Î¶ñÂÎËì¤ËÂĞ¤·¤ÆStaticCounts¤ò¡¢
-		// ºÇ³°Ëì/·ÑÂ³Ëì¤ËÂĞ¤·¤ÆDynamicCounts¤òµá¤á¤ë
-		// Á´¤Æ¤Î±¦ÊÕËì¤Ë¸ú²ÌÈÏ°Ï¤ò·è¤á¤ë
-		// ¥×¥í¥»¥¹¤Îº®ºßËì¤¬¤¢¤ì¤Ğ¥×¥í¥»¥¹ÆÈÎ©À­¤ò¼º¤¦
-		// ¥ë¡¼¥ëÊ¸Ì®¤ÎÊ¬»¶¤¬¤¢¤ì¤Ğ¥ë¡¼¥ë¥»¥Ã¥ÈÆÈÎ©À­¤ò¼º¤¦
+		// å€‹ã€…ã®å…·ä½“è†œã«å¯¾ã—ã¦StaticCountsã‚’ã€
+		// æœ€å¤–è†œ/ç¶™ç¶šè†œã«å¯¾ã—ã¦DynamicCountsã‚’æ±‚ã‚ã‚‹
+		// å…¨ã¦ã®å³è¾ºè†œã«åŠ¹æœç¯„å›²ã‚’æ±ºã‚ã‚‹
+		// ãƒ—ãƒ­ã‚»ã‚¹ã®æ··åœ¨è†œãŒã‚ã‚Œã°ãƒ—ãƒ­ã‚»ã‚¹ç‹¬ç«‹æ€§ã‚’å¤±ã†
+		// ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã®åˆ†æ•£ãŒã‚ã‚Œã°ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆç‹¬ç«‹æ€§ã‚’å¤±ã†
 		inferRHSMembrane(root);
 		
-		// ¸Ä¡¹¤Ë²ò¤±¤ë¤â¤Î¤Ï²ò¤¯
+		// å€‹ã€…ã«è§£ã‘ã‚‹ã‚‚ã®ã¯è§£ã
 		countsset.solveIndividual();
-//		// ²ò¤¤¤¿¤â¤Î¤ò¥Ş¡¼¥¸¤¹¤ë
+//		// è§£ã„ãŸã‚‚ã®ã‚’ãƒãƒ¼ã‚¸ã™ã‚‹
 //		countsset.mergeFixeds();
 		
-		// ²ò¤±¤Ê¤¤¤â¤Î¤Ï¥Ş¡¼¥¸¤·¤Æ²ò¤¯
+		// è§£ã‘ãªã„ã‚‚ã®ã¯ãƒãƒ¼ã‚¸ã—ã¦è§£ã
 		countsset.solveAll();
 				
 //		if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE){
-//			// ¸Ä¡¹¤Î¶ñÂÎËì¤Ë¤Ä¤¤¤Æ¤½¤ì¤¾¤ì¤Ë¸ú²Ì¤òÅ¬ÍÑ¤¹¤ë
+//			// å€‹ã€…ã®å…·ä½“è†œã«ã¤ã„ã¦ãã‚Œãã‚Œã«åŠ¹æœã‚’é©ç”¨ã™ã‚‹
 //			countsset.applyIndividual();
 //		}
-//		// Å¬ÍÑ²ó¿ôÊÑ¿ô¤Ë[0,Ìµ¸Â]¤ò³ä¤êÅö¤Æ¤ë
+//		// é©ç”¨å›æ•°å¤‰æ•°ã«[0,ç„¡é™]ã‚’å‰²ã‚Šå½“ã¦ã‚‹
 //		countsset.assignInfinityToVar();
 //		if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE){
-//			// ¥¢¥È¥à¸Ä¿ô¤Î²¼¸Â¤ò0¤È¤·¤ÆÅ¬ÍÑ²ó¿ô¤ò²ò¤¯
+//			// ã‚¢ãƒˆãƒ å€‹æ•°ã®ä¸‹é™ã‚’0ã¨ã—ã¦é©ç”¨å›æ•°ã‚’è§£ã
 //			countsset.solveByCounts();
 //		}
-//		// ¶ñÂÎÃÍ¤ò·×»»¤µ¤»¤ë
+//		// å…·ä½“å€¤ã‚’è¨ˆç®—ã•ã›ã‚‹
 //		if(Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL){
 //			countsset.solveIndividuals();
 //		}
 ////		countsset.solveDynamics();
-//		// ¶ñÂÎËì¤ò¥Ş¡¼¥¸¤¹¤ë
+//		// å…·ä½“è†œã‚’ãƒãƒ¼ã‚¸ã™ã‚‹
 //		countsset.mergeFixeds();
-//		//¥×¥í¥»¥¹¤ÎÆÈÎ©À­¤ÎÊø¤ì¤¿Ëì¤Ë¸ú²Ì¤òÅ¬ÍÑ¤¹¤ë
+//		//ãƒ—ãƒ­ã‚»ã‚¹ã®ç‹¬ç«‹æ€§ã®å´©ã‚ŒãŸè†œã«åŠ¹æœã‚’é©ç”¨ã™ã‚‹
 //		countsset.applyCollapseds();
 		
-		// Á´²¼¸Â¤ò0¤ËÄ¾¤·¡¢[0,0]¤ò0¤Ë¤¹¤ë
+		// å…¨ä¸‹é™ã‚’0ã«ç›´ã—ã€[0,0]ã‚’0ã«ã™ã‚‹
 		countsset.assignZeroToMinimum();
 	}
 	
@@ -84,60 +84,60 @@ public class QuantityInferer {
 	}
 	
 	/**
-	 * ¥ë¡¼¥ë¤Ë¤Ä¤¤¤ÆÎÌÅª²òÀÏ¤ò¹Ô¤¦
+	 * ãƒ«ãƒ¼ãƒ«ã«ã¤ã„ã¦é‡çš„è§£æã‚’è¡Œã†
 	 * @param rule
 	 */
 	private void inferRule(RuleStructure rule){
-		// º¸ÊÕËì¤È±¦ÊÕËì¤ò¡¢Æ±¤¸Ëì¤È¤·¤Æ°·¤¦
+		// å·¦è¾ºè†œã¨å³è¾ºè†œã‚’ã€åŒã˜è†œã¨ã—ã¦æ‰±ã†
 		inferRuleRootMembrane(rule);
-		// ±¦ÊÕ»ÒËì¤ÎÁöºº
+		// å³è¾ºå­è†œã®èµ°æŸ»
 		for(Membrane rhsmem : ((List<Membrane>)rule.rightMem.mems))
 			inferRHSMembrane(rhsmem);
-		// ±¦ÊÕ½Ğ¸½¥ë¡¼¥ë¤Î¸¡ºº
+		// å³è¾ºå‡ºç¾ãƒ«ãƒ¼ãƒ«ã®æ¤œæŸ»
 		for(RuleStructure rhsrule : ((List<RuleStructure>)rule.rightMem.rules))
 			inferRule(rhsrule);
 	}
 
 	/**
-	 * ±¦ÊÕ¤ÎËì¤òºÆµ¢Åª¤ËÁöºº¤·¡¢
-	 * 1. ¥×¥í¥»¥¹Ê¸Ì®¤¬½Ğ¸½¤·¤Ê¤¤Ëì
-	 * 2. ¥×¥í¥»¥¹Ê¸Ì®¤¬1¸Ä½Ğ¸½¤¹¤ëËì
-	 * 3. ¥×¥í¥»¥¹Ê¸Ì®¤¬2¸Ä°Ê¾å½Ğ¸½¤¹¤ëËì
-	 * ¤Ë¤ï¤±¤ë
+	 * å³è¾ºã®è†œã‚’å†å¸°çš„ã«èµ°æŸ»ã—ã€
+	 * 1. ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒå‡ºç¾ã—ãªã„è†œ
+	 * 2. ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒ1å€‹å‡ºç¾ã™ã‚‹è†œ
+	 * 3. ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒ2å€‹ä»¥ä¸Šå‡ºç¾ã™ã‚‹è†œ
+	 * ã«ã‚ã‘ã‚‹
 	 * @param rhs
 	 */
 	private void inferRHSMembrane(Membrane rhs){
 		
 		Set<Membrane> lhss = new HashSet<Membrane>();
-		/* ¥×¥í¥»¥¹Ê¸Ì®¡¢·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Ë¤Ä¤¤¤Æº¸ÊÕ½Ğ¸½Ëì¤Î½¸¹ç¤òÆÀ¤ë */
+		/* ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«ã¤ã„ã¦å·¦è¾ºå‡ºç¾è†œã®é›†åˆã‚’å¾—ã‚‹ */
 		for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.processContexts)){
 			ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
 			if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
 		}
 		for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.typedProcessContexts)){
-			// ¥Ç¡¼¥¿·¿¤ÏÌµ»ë
+			// ãƒ‡ãƒ¼ã‚¿å‹ã¯ç„¡è¦–
 			if(TypeEnv.dataTypeOfContextDef(rhsOcc.def)!=null)continue;
 			ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
 			if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
 		}
 
-		// ¥×¥í¥»¥¹Ê¸Ì®¤¬Ê£¿ô¤ÎËì¤«¤éÍè¤Æ¤¤¤ë¾ì¹ç¡¢¥×¥í¥»¥¹¤ÎÆÈÎ©À­¤ÏÀä¤¿¤ì¤ë
+		// ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒè¤‡æ•°ã®è†œã‹ã‚‰æ¥ã¦ã„ã‚‹å ´åˆã€ãƒ—ãƒ­ã‚»ã‚¹ã®ç‹¬ç«‹æ€§ã¯çµ¶ãŸã‚Œã‚‹
 		if(lhss.size() > 1)
 			countsset.collapseProcessIndependency(TypeEnv.getMemName(rhs));
 
 		switch(lhss.size()){
-		case 0 : // ¥×¥í¥»¥¹Ê¸Ì®¤¬½Ğ¸½¤·¤Ê¤¤Ëì
+		case 0 : // ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒå‡ºç¾ã—ãªã„è†œ
 			countsset.effectTarget.put(rhs,rhs);
 			inferGeneratedMembrane(rhs);
-			// À¸À®Ëì¤Î¸ú²ÌÂĞ¾İ¤Ï¼«¿È
+			// ç”Ÿæˆè†œã®åŠ¹æœå¯¾è±¡ã¯è‡ªèº«
 			break;
-		default: // 1¸Ä¤â2¸Ä¤â´Ø·¸¤Ê¤¯²òÀÏ
+		default: // 1å€‹ã‚‚2å€‹ã‚‚é–¢ä¿‚ãªãè§£æ
 			countsset.effectTarget.put(rhs,countsset.effectTarget.get(rhs.parent));
 			inferMultiInheritedMembrane(lhss,rhs);
-//		case 1 : // ¥×¥í¥»¥¹Ê¸Ì®¤¬1¸Ä½Ğ¸½¤¹¤ëËì
+//		case 1 : // ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒ1å€‹å‡ºç¾ã™ã‚‹è†œ
 //			countsset.add(inferInheritedMembrane(((ProcessContext)rhs.processContexts.get(0)).def.lhsOcc.mem,rhs));
 //			break;
-//		default: // ¥×¥í¥»¥¹Ê¸Ì®¤¬2¸Ä°Ê¾å½Ğ¸½¤¹¤ëËì
+//		default: // ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒ2å€‹ä»¥ä¸Šå‡ºç¾ã™ã‚‹è†œ
 //			Set<Membrane> lhss = new HashSet<Membrane>();
 //			for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.processContexts)){
 //				ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
@@ -146,36 +146,36 @@ public class QuantityInferer {
 //			countsset.add(inferMultiInheritedMembrane(lhss,rhs));
 		}
 
-		/** ¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬»¶¤¬Ìµ¤¤¤³¤È¤ò³ÎÇ§¤·¡¢¤¢¤ì¤Ğ¥×¥í¥»¥¹ÆÈÎ©À­¤ò¼º¤¦ */
+		/** ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†æ•£ãŒç„¡ã„ã“ã¨ã‚’ç¢ºèªã—ã€ã‚ã‚Œã°ãƒ—ãƒ­ã‚»ã‚¹ç‹¬ç«‹æ€§ã‚’å¤±ã† */
 		if(!checkIndependency((List<ProcessContext>)rhs.processContexts, rhs) ||
 			!checkIndependency((List<ProcessContext>)rhs.typedProcessContexts, rhs) )
 			countsset.collapseProcessUnderBounds(TypeEnv.getMemName(rhs));
 		
-		/** ¥ë¡¼¥ëÊ¸Ì®¤ÎÊ¬»¶¤ÎÍ­Ìµ¤ò³ÎÇ§¤·¡¢¤¢¤ì¤Ğ¥ë¡¼¥ë¥»¥Ã¥ÈÆÈÎ©À­¤ò¼º¤¦ */
+		/** ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã®åˆ†æ•£ã®æœ‰ç„¡ã‚’ç¢ºèªã—ã€ã‚ã‚Œã°ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆç‹¬ç«‹æ€§ã‚’å¤±ã† */
 		for(RuleContext rc : ((List<RuleContext>)rhs.ruleContexts)){
 			if(lhss.contains(rc.mem))continue;
 			else{
-				if(lhss.size() == 0) // À¸À®Ëì¤Ç¤¢¤ì¤Ğ¤½¤ÎËì¤Î¤ß
+				if(lhss.size() == 0) // ç”Ÿæˆè†œã§ã‚ã‚Œã°ãã®è†œã®ã¿
 					countsset.collapseRuleIndependency(rhs);
-				else // ·ÑÂ³ËìÅù¤Ç¤¢¤ì¤Ğ¸ú²ÌÂĞ¾İ¤Ë¤ª¤¤¤Æ¡£
+				else // ç¶™ç¶šè†œç­‰ã§ã‚ã‚Œã°åŠ¹æœå¯¾è±¡ã«ãŠã„ã¦ã€‚
 					if(countsset.effectTarget.get(rhs) == null){
 						countsset.collapseRulesIndependency(TypeEnv.getMemName(rhs));
-					}// ¸ú²ÌÂĞ¾İ¤¬Á´¤Æ¤ÎËì¤Ç¤¢¤ì¤ĞËìÌ¾¤Ë¤Ä¤¤¤Æ¡£
+					}// åŠ¹æœå¯¾è±¡ãŒå…¨ã¦ã®è†œã§ã‚ã‚Œã°è†œåã«ã¤ã„ã¦ã€‚
 					else countsset.collapseRuleIndependency(countsset.effectTarget.get(rhs));
 			}
 		}
 		
-		// »ÒËì¤Î¸¡ºº
+		// å­è†œã®æ¤œæŸ»
 		for(Membrane child : ((List<Membrane>)rhs.mems))
 			inferRHSMembrane(child);
-		// ¥ë¡¼¥ë¤Î¸¡ºº
+		// ãƒ«ãƒ¼ãƒ«ã®æ¤œæŸ»
 		for(RuleStructure rule : ((List<RuleStructure>)rhs.rules))
 			inferRule(rule);
 	}
 
 	/**
-	 * ¤ï¤¿¤µ¤ì¤¿Ê¸Ì®Îó¤Î¤¤¤º¤ì¤«¤¬¤³¤ÎËì¤Ë½Ğ¸½¤¹¤ë¤³¤È¤ò³Î¤«¤á¤ë
-	 * ¤¤¤º¤ì¤â½Ğ¸½¤·¤Æ¤¤¤Ê¤¤¾ì¹ç¡¢false¤òÊÖ¤¹
+	 * ã‚ãŸã•ã‚ŒãŸæ–‡è„ˆåˆ—ã®ã„ãšã‚Œã‹ãŒã“ã®è†œã«å‡ºç¾ã™ã‚‹ã“ã¨ã‚’ç¢ºã‹ã‚ã‚‹
+	 * ã„ãšã‚Œã‚‚å‡ºç¾ã—ã¦ã„ãªã„å ´åˆã€falseã‚’è¿”ã™
 	 */
 	public boolean checkOccurrence(List<ProcessContext> rhsOccs, Membrane rhs){
 		boolean okflg = false;
@@ -187,12 +187,12 @@ public class QuantityInferer {
 		}
 		return okflg;
 	}
-	/**¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬»¶¤ò¥Á¥§¥Ã¥¯¤¹¤ë
-	 * ÅÏ¤µ¤ì¤¿Ê¸Ì®Îó¤Î¤½¤ì¤¾¤ì¤Îº¸ÊÕ½Ğ¸½Ëì¤Î¥×¥í¥»¥¹¤¬Á´¤ÆÍ¢Á÷¤µ¤ì¤Æ¤¤¤ë¤³¤È¤ò³ÎÇ§¤·¡¢
-	 * ³ÎÇ§¤Ç¤­¤¿¤étrue¤ò¡¢³ÎÇ§¤Ç¤­¤Ê¤±¤ì¤Ğfalse¤òÊÖ¤¹ */
+	/**ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†æ•£ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
+	 * æ¸¡ã•ã‚ŒãŸæ–‡è„ˆåˆ—ã®ãã‚Œãã‚Œã®å·¦è¾ºå‡ºç¾è†œã®ãƒ—ãƒ­ã‚»ã‚¹ãŒå…¨ã¦è¼¸é€ã•ã‚Œã¦ã„ã‚‹ã“ã¨ã‚’ç¢ºèªã—ã€
+	 * ç¢ºèªã§ããŸã‚‰trueã‚’ã€ç¢ºèªã§ããªã‘ã‚Œã°falseã‚’è¿”ã™ */
 	public boolean checkIndependency(List<ProcessContext> rhsOccs, Membrane rhs){
 		for(ProcessContext rhsOcc : rhsOccs){
-			// ¥Ç¡¼¥¿·¿¤Î¾ì¹çÌµ»ë¤¹¤ë
+			// ãƒ‡ãƒ¼ã‚¿å‹ã®å ´åˆç„¡è¦–ã™ã‚‹
 			if(TypeEnv.dataTypeOfContextDef(rhsOcc.def)!=null)continue;
 			Membrane lhsmem = ((ProcessContext)rhsOcc.def.lhsOcc).mem;
 			if(lhsmem.processContexts.size() > 0){
@@ -213,28 +213,28 @@ public class QuantityInferer {
 	}
 
 //	/**
-//	 * º¸ÊÕ¤«¤é±¦ÊÕ¤Ë¼õ¤±·Ñ¤¬¤ì¤¿¡ÖÆ±¤¸Ëì¡×¤Ç¤¢¤ë¡¢¤È¤·¤Æ²òÀÏ¤¹¤ë¡£
+//	 * å·¦è¾ºã‹ã‚‰å³è¾ºã«å—ã‘ç¶™ãŒã‚ŒãŸã€ŒåŒã˜è†œã€ã§ã‚ã‚‹ã€ã¨ã—ã¦è§£æã™ã‚‹ã€‚
 //	 * @param lhs
 //	 * @param rhs
 //	 */
 //	private DynamicCounts inferInheritedMembrane(Membrane lhs, Membrane rhs){
 //		VarCount vc = new VarCount();
 //		Count count = new Count(vc);
-//		//±¦ÊÕ¤«¤éº¸ÊÕ¤ò¸º»»(²òÀÏ·ë²Ì¤ò²Ã»»)
+//		//å³è¾ºã‹ã‚‰å·¦è¾ºã‚’æ¸›ç®—(è§£æçµæœã‚’åŠ ç®—)
 //		StaticCounts rhsCounts = getCountsOfMem(1,rhs,count);
 //		StaticCounts lhsCounts = getCountsOfMem(-1,lhs,count);
 //		return new DynamicCounts(lhsCounts, 1, rhsCounts,vc);
 //	}
 	
 	/**
-	 * ¥ë¡¼¥ë±¦ÊÕ¤Èº¸ÊÕ¤ÎËÜËì¤Ë¤Ä¤¤¤Æ¼õ¤±·Ñ¤¬¤ì¤¿¤â¤Î¤È¤·¤Æ²òÀÏ¤¹¤ë¡£
-	 * ¤³¤Î¸ú²Ì¤Ï¥ë¡¼¥ëËÜËì¤ËÂĞ¤·¤Æ¤Î¤ßÍ­¸ú(TODO ¥ë¡¼¥ëËÜËì¤Î¸ú²ÌÈÏ°Ï¤Ë¤¿¤¤¤·¤ÆÍ­¸ú)
+	 * ãƒ«ãƒ¼ãƒ«å³è¾ºã¨å·¦è¾ºã®æœ¬è†œã«ã¤ã„ã¦å—ã‘ç¶™ãŒã‚ŒãŸã‚‚ã®ã¨ã—ã¦è§£æã™ã‚‹ã€‚
+	 * ã“ã®åŠ¹æœã¯ãƒ«ãƒ¼ãƒ«æœ¬è†œã«å¯¾ã—ã¦ã®ã¿æœ‰åŠ¹(TODO ãƒ«ãƒ¼ãƒ«æœ¬è†œã®åŠ¹æœç¯„å›²ã«ãŸã„ã—ã¦æœ‰åŠ¹)
 	 * @param rule
 	 * @param count
 	 * @return
 	 */
 	private void inferRuleRootMembrane(RuleStructure rule){
-		//±¦ÊÕ¤«¤éº¸ÊÕ¤ò¸º»»(²òÀÏ·ë²Ì¤ò²Ã»»)
+		//å³è¾ºã‹ã‚‰å·¦è¾ºã‚’æ¸›ç®—(è§£æçµæœã‚’åŠ ç®—)
 		VarCount vc = new VarCount();
 		Count count = new Count(vc);
 		StaticCounts rhsCounts = getCountsOfMem(1,rule.rightMem,count);
@@ -247,8 +247,8 @@ public class QuantityInferer {
 	}
 
 	/**
-	 * º¸ÊÕÊ£¿ô¤ÎËì¤«¤é±¦ÊÕ¤Ë¼õ¤±·Ñ¤¬¤ì¤¿¡Ö¥Ş¡¼¥¸¤µ¤ì¤¿Ëì¡×¤È¤·¤Æ²òÀÏ¤¹¤ë¡£
-	 * ¤³¤Î¸ú²Ì¤Ï¡¢Æ±Ì¾¤ÎËìÁ´¤Æ¤Ë¶¦ÄÌ¡£
+	 * å·¦è¾ºè¤‡æ•°ã®è†œã‹ã‚‰å³è¾ºã«å—ã‘ç¶™ãŒã‚ŒãŸã€Œãƒãƒ¼ã‚¸ã•ã‚ŒãŸè†œã€ã¨ã—ã¦è§£æã™ã‚‹ã€‚
+	 * ã“ã®åŠ¹æœã¯ã€åŒåã®è†œå…¨ã¦ã«å…±é€šã€‚
 	 * @param lhss
 	 * @param rhs
 	 */
@@ -263,7 +263,7 @@ public class QuantityInferer {
 	}
 	
 	/**
-	 * Ã±ÆÈ¤ÇÀ¸À®¤µ¤ì¤¿Ëì¤È¤·¤Æ²òÀÏ¤¹¤ë¡£
+	 * å˜ç‹¬ã§ç”Ÿæˆã•ã‚ŒãŸè†œã¨ã—ã¦è§£æã™ã‚‹ã€‚
 	 * @param mem
 	 */
 	private void inferGeneratedMembrane(Membrane mem){
@@ -275,17 +275,17 @@ public class QuantityInferer {
 	
 	private StaticCounts getCountsOfMem(int sign, Membrane mem, Count count){
 		StaticCounts quantities = new StaticCounts(mem);
-		//¥¢¥È¥à¤Î²òÀÏ·ë²Ì
+		//ã‚¢ãƒˆãƒ ã®è§£æçµæœ
 		for(Atom atom : ((List<Atom>)mem.atoms))
 			quantities.addAtomCount(atom,(Count.mul(sign, count)));
-		//»ÒËì¤Î²òÀÏ·ë²Ì
+		//å­è†œã®è§£æçµæœ
 		for(Membrane child : ((List<Membrane>)mem.mems))
 			quantities.addMemCount(child,(Count.mul(sign,count)));
 		return quantities;
 	}
 	
 //	/**
-//	 * ¥ë¡¼¥ëÅ¬ÍÑ²ó¿ô¤òÁ´¤ÆÌµ¸Â¤È¤·¤Æ²òÀÏ·ë²Ì¤ò²ò¤¯
+//	 * ãƒ«ãƒ¼ãƒ«é©ç”¨å›æ•°ã‚’å…¨ã¦ç„¡é™ã¨ã—ã¦è§£æçµæœã‚’è§£ã
 //	 * 
 //	 */
 //	private boolean solveRVAsInfinity(){

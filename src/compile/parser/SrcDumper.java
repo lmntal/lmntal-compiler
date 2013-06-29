@@ -1,5 +1,5 @@
 /**
- * Src*.java¤ÎÆâÍÆ¤ò½ĞÎÏ¤¹¤ë
+ * Src*.javaã®å†…å®¹ã‚’å‡ºåŠ›ã™ã‚‹
  */
 
 package compile.parser;
@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 public class SrcDumper {
 	
-	protected SrcDumper() {} //¥¤¥ó¥¹¥¿¥ó¥¹¤Ï¤Ê¤¤
+	protected SrcDumper() {} //ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã¯ãªã„
 	
 	public static String dumpLink(SrcLink link) {
 		return link.getName();

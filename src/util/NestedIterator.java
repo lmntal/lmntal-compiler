@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * »ØÄê¤µ¤ì¤¿ÇÛÎóÃæ¤ÎÈ¿Éü»Ò¤¬ÊÖ¤¹ÃÍ¤ò½ç¤ËÊÖ¤¹È¿Éü»Ò
+ * æŒ‡å®šã•ã‚ŒãŸé…åˆ—ä¸­ã®åå¾©å­ãŒè¿”ã™å€¤ã‚’é †ã«è¿”ã™åå¾©å­
  * @author Mizuno
  */
 public class NestedIterator<T> implements Iterator<T> {
@@ -23,7 +23,7 @@ public class NestedIterator<T> implements Iterator<T> {
 		next = it.next();
 	}
 
-	/** »ØÄê¤µ¤ì¤¿MapÆâ¤Ë¤¢¤ë¥Ç¡¼¥¿¤òÎóµó¤¹¤ëÈ¿Éü»Ò¤òÀ¸À®¤¹¤ë */
+	/** æŒ‡å®šã•ã‚ŒãŸMapå†…ã«ã‚ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’åˆ—æŒ™ã™ã‚‹åå¾©å­ã‚’ç”Ÿæˆã™ã‚‹ */
 	public NestedIterator(Iterator<T>[] its) {
 		if (its.length == 0) {
 			next = null;
@@ -44,7 +44,7 @@ public class NestedIterator<T> implements Iterator<T> {
 		setNext();
 		return ret;
 	}
-	/** ¥µ¥İ¡¼¥È¤·¤Ê¤¤¤Î¤Ç¡¢UnsupportedOperationException¤òÅê¤²¤ë */
+	/** ã‚µãƒãƒ¼ãƒˆã—ãªã„ã®ã§ã€UnsupportedOperationExceptionã‚’æŠ•ã’ã‚‹ */
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}

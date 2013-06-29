@@ -5,7 +5,7 @@ import runtime.functor.Functor;
 public class ActiveAtomPath implements Path {
 
 	/**
-	 * ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î½êÂ°Ëì
+	 * ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®æ‰€å±è†œ
 	 */
 	private String memname;
 	public String getMemName(){
@@ -13,7 +13,7 @@ public class ActiveAtomPath implements Path {
 	}
 
 	/**
-	 * ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î¥Õ¥¡¥ó¥¯¥¿
+	 * ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿
 	 */
 	private Functor functor;
 	public Functor getFunctor(){
@@ -21,7 +21,7 @@ public class ActiveAtomPath implements Path {
 	}
 
 	/**
-	 * ¤³¤Î¥Ñ¥¹¤Î°ú¿ô°ÌÃÖ
+	 * ã“ã®ãƒ‘ã‚¹ã®å¼•æ•°ä½ç½®
 	 */
 	private int pos;
 	public int getPos(){
@@ -29,7 +29,7 @@ public class ActiveAtomPath implements Path {
 	}
 
 	/**
-	 * @param memname nullÊ¸»úÎó¤¬ÅÏ¤µ¤ì¤ë¤³¤È¤Ï¤Ê¤¤
+	 * @param memname nullæ–‡å­—åˆ—ãŒæ¸¡ã•ã‚Œã‚‹ã“ã¨ã¯ãªã„
 	 * @param functor
 	 * @param pos
 	 */

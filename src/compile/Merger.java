@@ -17,16 +17,16 @@ import runtime.functor.SymbolFunctor;
 import util.Util;
 
 /**
- * ÊÔ¤ß¾å¤²¤ò¹Ô¤¦¥¯¥é¥¹
+ * ç·¨ã¿ä¸Šã’ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹
  * @author sakurai
  */
 public class Merger {
-	//¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô¤ÎÌ¿ÎáÎó¤òÊÔ¤ß¾å¤²¤ëf
-	//todo?¡¡Ëì¼çÆ³¥Æ¥¹¥ÈÉô¤ÎÊÔ¤ß¾å¤²
-	/** ÊÔ¤ß¾å¤²¸å¤Î¥ë¡¼¥ë¤Î¼Â°ú¿ô */
-	/** ¥Õ¥¡¥ó¥¯¥¿¢ÍÌ¿ÎáÎó¤Î¥Ş¥Ã¥× */
+	//ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã®å‘½ä»¤åˆ—ã‚’ç·¨ã¿ä¸Šã’ã‚‹f
+	//todo?ã€€è†œä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã®ç·¨ã¿ä¸Šã’
+	/** ç·¨ã¿ä¸Šã’å¾Œã®ãƒ«ãƒ¼ãƒ«ã®å®Ÿå¼•æ•° */
+	/** ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿â‡’å‘½ä»¤åˆ—ã®ãƒãƒƒãƒ— */
 	HashMap<Functor, List<Instruction>> instsMap;
-	/** ÊÑ¿ôÈÖ¹æ¢Í¥Õ¥¡¥ó¥¯¥¿¤Î¥Ş¥Ã¥×*/
+	/** å¤‰æ•°ç•ªå·â‡’ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®ãƒãƒƒãƒ—*/
 	HashMap var2funcMap;
 	int maxLocals;
 	
@@ -42,10 +42,10 @@ public class Merger {
 		var2funcMap.clear();
 	}
 	/**
-	 * ³Æ¥ë¡¼¥ëÃæ¤Î¥¢¥È¥à¼çÆ³¥Æ¥¹¥ÈÉô¤Ë½Ğ¸½¤¹¤ëbranchÌ¿Îá¤òÊÔ¤ß¾å¤²¡¢
-	 * ¥Õ¥¡¥ó¥¯¥¿¢ÍÌ¿ÎáÎó¤Î¥Ş¥Ã¥×¤òÀ¸À®¤¹¤ë
-	 * @param rules ¥ë¡¼¥ë¥»¥Ã¥ÈÆâ¤Î¥ë¡¼¥ë·²
-	 * @return ¥Õ¥¡¥ó¥¯¥¿¢ÍÌ¿ÎáÎó¤Î¥Ş¥Ã¥×
+	 * å„ãƒ«ãƒ¼ãƒ«ä¸­ã®ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆéƒ¨ã«å‡ºç¾ã™ã‚‹branchå‘½ä»¤ã‚’ç·¨ã¿ä¸Šã’ã€
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿â‡’å‘½ä»¤åˆ—ã®ãƒãƒƒãƒ—ã‚’ç”Ÿæˆã™ã‚‹
+	 * @param rules ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆå†…ã®ãƒ«ãƒ¼ãƒ«ç¾¤
+	 * @return ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿â‡’å‘½ä»¤åˆ—ã®ãƒãƒƒãƒ—
 	 */
 	public MergedBranchMap Merging(List<Rule> rules, boolean system)
 	{
@@ -55,7 +55,7 @@ public class Merger {
 			List<Instruction> guard = rule.guard;
 			//if(Env.fTrace || Env.debugOption)(rule.body).add(1, new Instruction(Instruction.GETCURRENTRULE, rule));
 			if(guard != null){
-				//uniqÌ¿Îá¤¬¤¢¤ë¾ì¹ç¤ÏÊÔ¤ß¾å¤²Ãæ»ß¡£todo ¤Ê¤ó¤È¤«¤¹¤ë
+				//uniqå‘½ä»¤ãŒã‚ã‚‹å ´åˆã¯ç·¨ã¿ä¸Šã’ä¸­æ­¢ã€‚todo ãªã‚“ã¨ã‹ã™ã‚‹
 				for(int i=0; i<guard.size(); i++) {
 					Instruction inst = guard.get(i);
 					if(inst.getKind() == Instruction.UNIQ
@@ -72,7 +72,7 @@ public class Merger {
 					InstructionList label = (InstructionList)inst.getArg1();
 					List<Instruction> branchInsts = label.insts;
 					maxLocals = 0;
-					//uniq´Ø·¸¤Î±şµŞ½èÃÖ
+					//uniqé–¢ä¿‚ã®å¿œæ€¥å‡¦ç½®
 					for(int u=0; u<branchInsts.size(); u++) {
 						Instruction uniq = branchInsts.get(u);
 						if(uniq.getKind() == Instruction.UNIQ
@@ -86,7 +86,7 @@ public class Merger {
 							break;
 						}
 					}
-					if(instsMap.containsKey(func)){ //ÀèÆ¬¤ÎfuncÌ¿Îá¤¬Æ±¤¸branchÌ¿Îá¤òÃµ¤¹
+					if(instsMap.containsKey(func)){ //å…ˆé ­ã®funcå‘½ä»¤ãŒåŒã˜branchå‘½ä»¤ã‚’æ¢ã™
 						List<Instruction> existInsts = instsMap.get(func);
 						List<Instruction> mergedInsts = new ArrayList<Instruction>();
 						mergedInsts = mergeInsts(branchInsts, existInsts);
@@ -134,8 +134,8 @@ public class Merger {
 	}
 	
 	/**
-	 * À¸À®¤·¤¿¥Ş¥Ã¥×¤ÎÉ½¼¨¡¡¥Ç¥Ğ¥Ã¥°ÍÑ
-	 * param map ¥Ş¥Ã¥×
+	 * ç”Ÿæˆã—ãŸãƒãƒƒãƒ—ã®è¡¨ç¤ºã€€ãƒ‡ãƒãƒƒã‚°ç”¨
+	 * param map ãƒãƒƒãƒ—
 	 */
 	private static void viewMap(HashMap<Functor, List<Instruction>> map){
 		Set<Entry<Functor, List<Instruction>>> set = map.entrySet();
@@ -144,22 +144,22 @@ public class Merger {
 			Entry<Functor, List<Instruction>> mapentry = it1.next();
 			List<Instruction> branchinststest = mapentry.getValue();
 
-			Util.println(mapentry.getKey() + " ¢Í ");
+			Util.println(mapentry.getKey() + " â‡’ ");
 			viewInsts(branchinststest, 1);
 			Util.println("");
 		}
 	}
 	
 	/**
-	 * ¥Ş¥Ã¥×¤Îvalue¤Ç¤¢¤ëÌ¿ÎáÎó¤ÎÉ½¼¨ ¥Ç¥Ğ¥Ã¥°ÍÑ
-	 * @param insts Ì¿ÎáÎó
-	 * @param tabs É½¼¨¤¹¤ëºİ¤Î¥¿¥Ö
+	 * ãƒãƒƒãƒ—ã®valueã§ã‚ã‚‹å‘½ä»¤åˆ—ã®è¡¨ç¤º ãƒ‡ãƒãƒƒã‚°ç”¨
+	 * @param insts å‘½ä»¤åˆ—
+	 * @param tabs è¡¨ç¤ºã™ã‚‹éš›ã®ã‚¿ãƒ–
 	 */
 	private static void viewInsts(List<Instruction> insts, int tabs){
 		for(int i=0; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
 			for(int j=0; j<tabs; j++) System.out.print("    ");
-			//°ú¿ô¤ËÌ¿ÎáÎó¤ò»ı¤ÄÌ¿Îá
+			//å¼•æ•°ã«å‘½ä»¤åˆ—ã‚’æŒã¤å‘½ä»¤
 			if(inst.getKind() == Instruction.BRANCH){
 				Util.println("branch\t[");
 				InstructionList label = (InstructionList) inst.getArg1();
@@ -172,10 +172,10 @@ public class Merger {
 	}
 	
 	/**
-	 * 2¤Ä¤ÎÌ¿ÎáÎó¤òÈæ³Ó¤·¡¢¶¦ÄÌÉôÊ¬¤ò¥Ş¡¼¥¸¤¹¤ë
-	 * @param insts1 1¤ÄÌÜ¤ÎÌ¿ÎáÎó
-	 * @param insts2 2¤ÄÌÜ¤ÎÌ¿ÎáÎó
-	 * @return 2¤Ä¤ÎÌ¿ÎáÎó¤Î¶¦ÄÌÉôÊ¬
+	 * 2ã¤ã®å‘½ä»¤åˆ—ã‚’æ¯”è¼ƒã—ã€å…±é€šéƒ¨åˆ†ã‚’ãƒãƒ¼ã‚¸ã™ã‚‹
+	 * @param insts1 1ã¤ç›®ã®å‘½ä»¤åˆ—
+	 * @param insts2 2ã¤ç›®ã®å‘½ä»¤åˆ—
+	 * @return 2ã¤ã®å‘½ä»¤åˆ—ã®å…±é€šéƒ¨åˆ†
 	 */
 	private List<Instruction> mergeInsts(List<Instruction> insts1, List<Instruction> insts2){
 		List<Instruction> mergedInsts = new ArrayList<Instruction>();
@@ -208,7 +208,7 @@ public class Merger {
 			}
 			else {
 				if(inst2.getKind() == Instruction.BRANCH){
-					//insts2¤ÎjÈÖÌÜ°Ê¹ß¤ÏBRANNCHÌ¿Îá
+					//insts2ã®jç•ªç›®ä»¥é™ã¯BRANNCHå‘½ä»¤
 					for(int k=j; k<insts2.size(); k++){
 						Instruction instb = insts2.get(k);
 						InstructionList label = (InstructionList)instb.getArg1();
@@ -258,10 +258,10 @@ public class Merger {
 	}
 	
 	/**
-	 * BRANCHÌ¿ÎáÆâ¤ÎÌ¿ÎáÎó¤È¤Î¥Ş¡¼¥¸
-	 * @param insts1 1¤ÄÌÜ¤ÎÌ¿ÎáÎó
-	 * @param insts2 2¤ÄÌÜ¤ÎÌ¿ÎáÎó
-	 * @return 2¤Ä¤ÎÌ¿ÎáÎó¤Î¶¦ÄÌÉôÊ¬
+	 * BRANCHå‘½ä»¤å†…ã®å‘½ä»¤åˆ—ã¨ã®ãƒãƒ¼ã‚¸
+	 * @param insts1 1ã¤ç›®ã®å‘½ä»¤åˆ—
+	 * @param insts2 2ã¤ç›®ã®å‘½ä»¤åˆ—
+	 * @return 2ã¤ã®å‘½ä»¤åˆ—ã®å…±é€šéƒ¨åˆ†
 	 */
 	private List<Instruction> mergeInBranchInsts(List<Instruction> insts1, int index, List<Instruction> insts2){
 		List<Instruction> mergedInsts = new ArrayList<Instruction>();
@@ -290,7 +290,7 @@ public class Merger {
 			}
 			else {
 				if(inst2.getKind() == Instruction.BRANCH){
-					//insts2¤ÎjÈÖÌÜ°Ê¹ß¤ÏBRANNCHÌ¿Îá
+					//insts2ã®jç•ªç›®ä»¥é™ã¯BRANNCHå‘½ä»¤
 					for(int k=j; k<insts2.size(); k++){
 						Instruction instb = insts2.get(k);
 						InstructionList label = (InstructionList)instb.getArg1();
@@ -337,12 +337,12 @@ public class Merger {
 		return mergedInsts;
 	}
 	
-	//¥·¥¹¥Æ¥à¥ë¡¼¥ë¥»¥Ã¥È¤Î¥Ş¥Ã¥×¤òÀ¸À®¤¹¤ë
+	//ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ã‚»ãƒƒãƒˆã®ãƒãƒƒãƒ—ã‚’ç”Ÿæˆã™ã‚‹
 	public MergedBranchMap createSystemRulesetsMap(){
 		MergedBranchMap systemmbm;
 		ArrayList<Rule> systemrules = new ArrayList<Rule>();
 		
-//		¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥à´ØÏ¢¤Ï¤È¤ê¤¢¤¨¤ºÊİÎ±		
+//		è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ é–¢é€£ã¯ã¨ã‚Šã‚ãˆãšä¿ç•™		
 //		ArrayList insts = new ArrayList();
 //		Rule rule = new Rule("proxy");
 //		insts.add(new Instruction(Instruction.SPEC,        2,6));
@@ -412,7 +412,7 @@ public class Merger {
 		//return Merging(systemrules);
 	}
 	
-	//¥·¥¹¥Æ¥à¥ë¡¼¥ëÀ¸À®ÍÑ¥á¥½¥Ã¥É
+	//ã‚·ã‚¹ãƒ†ãƒ ãƒ«ãƒ¼ãƒ«ç”Ÿæˆç”¨ãƒ¡ã‚½ãƒƒãƒ‰
 	private Rule buildUnaryPlusOpRule(String name, int typechecker){
 		Rule rule = new Rule(name);
 		ArrayList<Instruction> insts =  new ArrayList<Instruction>();

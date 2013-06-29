@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-/** Â¿¹à¼°¤Î·Á¤Ç»ı¤Ã¤Æ¤¤¤ë */
+/** å¤šé …å¼ã®å½¢ã§æŒã£ã¦ã„ã‚‹ */
 public class Count {
 
 	public final static InfinityCount INFINITY = new InfinityCount(false);
@@ -90,23 +90,23 @@ public class Count {
 		return cloned;
 	}
 	
-	// ¹ç·×ÃÍ¤¬0°Ê¾å¤À¤È¤¤¤¦¤³¤È¤òÍøÍÑ¤·¤Æµá¤á¤ë
+	// åˆè¨ˆå€¤ãŒ0ä»¥ä¸Šã ã¨ã„ã†ã“ã¨ã‚’åˆ©ç”¨ã—ã¦æ±‚ã‚ã‚‹
 	public boolean constraintOverZero(){
-		int min = 0; // ºÇ¾®ÃÍ
+		int min = 0; // æœ€å°å€¤
 		Set<VarCount> vars = new HashSet<VarCount>();
 		for(VarCount vc : varToMultiple.keySet()){
 			int m = varToMultiple.get(vc);
 			if(m == 0) continue;
 			IntervalCount ic = vc.bound;
 			if(m > 0){
-				// Éä¹æ¤¬+¤Ç¾å³¦¤¬¤Ê¤±¤ì¤Ğ²ò¤±¤Ê¤¤
+				// ç¬¦å·ãŒ+ã§ä¸Šç•ŒãŒãªã‘ã‚Œã°è§£ã‘ãªã„
 				if(ic.max instanceof InfinityCount)return false;
 				if(ic.max instanceof NumCount){
 					min += ((NumCount)ic.max).value * m;
 				}
 			}
 			else if(m < 0){
-				// Éä¹æ¤¬-¤Ç²¼³¦¤¬¤Ê¤±¤ì¤Ğ²ò¤±¤Ê¤¤ ( ¤â¤Ã¤È¤â¤³¤ì¤Ï¤¢¤ê¤¨¤Ê¤¤¤¬ )
+				// ç¬¦å·ãŒ-ã§ä¸‹ç•ŒãŒãªã‘ã‚Œã°è§£ã‘ãªã„ ( ã‚‚ã£ã¨ã‚‚ã“ã‚Œã¯ã‚ã‚Šãˆãªã„ãŒ )
 				if(ic.min instanceof InfinityCount)return false;
 				if(ic.min instanceof NumCount){
 					min += ((NumCount)ic.min).value * m;

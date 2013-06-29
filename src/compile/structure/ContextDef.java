@@ -4,42 +4,42 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * �ץ�����ʸ̮̾�����դ��ץ�����ʸ̮̾���롼��ʸ̮̾�ȡ�����˴ؤ��������ݻ����륯�饹��
+ * プロセス文脈名・型付きプロセス文脈名・ルール文脈名と、それに関する情報を保持するクラス。
  */
 public class ContextDef
 {
 	/**
-	 * ����ƥ����Ȥ�̾��
+	 * コンテキストの名前
 	 */
 	protected String name;
 
 	/**
-	 * ���դ��ץ���������ƥ����Ȥ��ɤ������Ǽ����
+	 * 型付きプロセスコンテキストかどうかを格納する
 	 */
 	public boolean typed = false;
 
 	/**
-	 * �����ꤵ��뺸�դ���ޤ���null�ʲ���
+	 * ＠指定される左辺の膜またはnull（仮）
 	 * @see Membrane.pragma
-	 * todo HashMap ��Ȥ��褦�ˤ���lhsMem���ѻߤ���
+	 * todo HashMap を使うようにしてlhsMemは廃止する
 	 */
 	public Membrane lhsMem = null;
 
 	/**
-	 * ���դǤνи��ޤ���null��
-	 * <strike>���դǤ��������˻Ȥ����ꥸ�ʥ�ؤλ��ȡ�
-	 * null�ΤȤ����롼�륳��ѥ���ϥ����ɽи����������Ƥ褤��</strike>
+	 * 左辺での出現またはnull。
+	 * <strike>右辺での生成時に使うオリジナルへの参照。
+	 * nullのとき、ルールコンパイラはガード出現を代入してよい。</strike>
 	 */
 	public Context lhsOcc = null;
 
 	/**
-	 * ���դǤΥ���ƥ����Ƚи� (Context) �Υꥹ��
+	 * 右辺でのコンテキスト出現 (Context) のリスト
 	 */
 	public List rhsOccs = new ArrayList();
 
 	/**
-	 * ���󥹥ȥ饯��
-	 * @param name ����ƥ����Ȥθ���̾
+	 * コンストラクタ
+	 * @param name コンテキストの限定名
 	 */
 	public ContextDef(String name)
 	{
@@ -47,8 +47,8 @@ public class ContextDef
 	}
 
 	/**
-	 * ����ƥ����Ȥθ���̾���������
-	 * @return ����ƥ����Ȥθ���̾
+	 * コンテキストの限定名を取得する
+	 * @return コンテキストの限定名
 	 */
 	public String getName()
 	{

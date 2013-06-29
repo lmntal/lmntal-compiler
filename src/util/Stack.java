@@ -2,9 +2,9 @@ package util;
 import java.util.ArrayList;
 
 public final class Stack {
-	/** Äì */
+	/** åº• */
 	private QueuedEntity head;
-	/** ¥È¥Ã¥× */
+	/** ãƒˆãƒƒãƒ— */
 	private QueuedEntity tail;
 	
 	public Stack() {
@@ -15,11 +15,11 @@ public final class Stack {
 	}
 	synchronized public void push(QueuedEntity entity) {
 		if (entity.isQueued()) {
-			//¥¿¥¹¥¯¤¬¡¢¥¢¥È¥à¼çÆ³¥Æ¥¹¥È¤Ë¼ºÇÔ¤·¤¿¸å¤Ç¿ÆËì¤Î¥¢¥È¥à¥¹¥¿¥Ã¥¯¤ËÀÑ¤à¤È¤­¡¢
-			//Â¾¤Î¥¹¥ì¥Ã¥É¤¬¤¹¤Ç¤ËÂ¾¤Î¥¹¥¿¥Ã¥¯¤ËÀÑ¤ó¤Ç¤¤¤ë²ÄÇ½À­¤¬¤¢¤ë¡£
-			//¡Ä¤¬¡¢¥·¥¹¥Æ¥à¥³¡¼¥ë¥¢¥È¥à¤ò¼ÂÁõ¤·¤Ê¤¤¤È¤½¤¦¸À¤¦¾õ¶·¤ÏÈ¯À¸¤·¤Ê¤¤¡£
-			//¥¿¥¹¥¯¤¬°ÜÆ°¤¹¤ë¤Î¤Ï¡¢¼«Ê¬¤¬´ÉÍı¤¹¤ëËì¤Î¥¢¥È¥à¤Î¤ß¡£
-			//»Ò¥¿¥¹¥¯¤ÏÁàºî¤Ç¤­¤Ê¤¤¤·¡¢¿Æ¥¿¥¹¥¯¤â¡Ê¤³¤Î¥¿¥¹¥¯¤¬ËÜËì¤ò¥í¥Ã¥¯¤·¤Æ¤¤¤ë¤Î¤Ç¡ËÁàºî¤Ç¤­¤Ê¤¤¡£
+			//ã‚¿ã‚¹ã‚¯ãŒã€ã‚¢ãƒˆãƒ ä¸»å°ãƒ†ã‚¹ãƒˆã«å¤±æ•—ã—ãŸå¾Œã§è¦ªè†œã®ã‚¢ãƒˆãƒ ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€ã¨ãã€
+			//ä»–ã®ã‚¹ãƒ¬ãƒƒãƒ‰ãŒã™ã§ã«ä»–ã®ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚“ã§ã„ã‚‹å¯èƒ½æ€§ãŒã‚ã‚‹ã€‚
+			//â€¦ãŒã€ã‚·ã‚¹ãƒ†ãƒ ã‚³ãƒ¼ãƒ«ã‚¢ãƒˆãƒ ã‚’å®Ÿè£…ã—ãªã„ã¨ãã†è¨€ã†çŠ¶æ³ã¯ç™ºç”Ÿã—ãªã„ã€‚
+			//ã‚¿ã‚¹ã‚¯ãŒç§»å‹•ã™ã‚‹ã®ã¯ã€è‡ªåˆ†ãŒç®¡ç†ã™ã‚‹è†œã®ã‚¢ãƒˆãƒ ã®ã¿ã€‚
+			//å­ã‚¿ã‚¹ã‚¯ã¯æ“ä½œã§ããªã„ã—ã€è¦ªã‚¿ã‚¹ã‚¯ã‚‚ï¼ˆã“ã®ã‚¿ã‚¹ã‚¯ãŒæœ¬è†œã‚’ãƒ­ãƒƒã‚¯ã—ã¦ã„ã‚‹ã®ã§ï¼‰æ“ä½œã§ããªã„ã€‚
 			Util.errPrintln("SYSTEM ERROR: enqueued entity is already in a queue");
 			entity.dequeue();
 		}
@@ -29,26 +29,26 @@ public final class Stack {
 		entity.prev.next = entity;
 		tail.prev = entity;
 	}
-	/** ¥¹¥¿¥Ã¥¯stack¤ÎÆâÍÆ¤ò¤³¤Î¥¹¥¿¥Ã¥¯¤ÎÄì¤Ë°ÜÆ°¤¹¤ë */
+	/** ã‚¹ã‚¿ãƒƒã‚¯stackã®å†…å®¹ã‚’ã“ã®ã‚¹ã‚¿ãƒƒã‚¯ã®åº•ã«ç§»å‹•ã™ã‚‹ */
 	synchronized public void moveFrom(Stack stack) {
-		//stack ¤Ï²¾¥¹¥¿¥Ã¥¯¤Ç¤¢¤ê¡¢¥ë¡¼¥ÈËì¤ò¥í¥Ã¥¯¤·¤Æ¤¤¤ë¥¹¥ì¥Ã¥É°Ê³°Áàºî¤·¤¤¤Ê¤¤¤Î¤Ç
-		//ÇÓÂ¾À©¸æ¤ÎÉ¬Í×¤Ï¤Ê¤¤¡£
+		//stack ã¯ä»®ã‚¹ã‚¿ãƒƒã‚¯ã§ã‚ã‚Šã€ãƒ«ãƒ¼ãƒˆè†œã‚’ãƒ­ãƒƒã‚¯ã—ã¦ã„ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ä»¥å¤–æ“ä½œã—ã„ãªã„ã®ã§
+		//æ’ä»–åˆ¶å¾¡ã®å¿…è¦ã¯ãªã„ã€‚
 
 		if (stack.isEmpty()) return;
 		QueuedEntity oldFirst = head.next;
 		QueuedEntity addedLast = stack.tail.prev;
 
-		//ÀèÆ¬
+		//å…ˆé ­
 		head.next = stack.head.next;
 		stack.head.next.prev = head;
 		
-		//(°ú¿ô¤ËÅÏ¤µ¤ì¤¿stack¤Î)ºÇ¸å
+		//(å¼•æ•°ã«æ¸¡ã•ã‚ŒãŸstackã®)æœ€å¾Œ
 		addedLast.next = oldFirst;
 		oldFirst.prev = addedLast;
 		stack.head.next = stack.tail;
 		stack.tail.prev = stack.head;
 
-		//ÅÓÃæ
+		//é€”ä¸­
 		for (QueuedEntity t = head.next; t != oldFirst; t = t.next) {
 			t.stack = this;
 		}
@@ -68,7 +68,7 @@ public final class Stack {
 		if(isEmpty()) return null;
 		return tail.prev;
 	}
-	/** ¥¹¥¿¥Ã¥¯¤¬¶õ¤Ê¤étrue */
+	/** ã‚¹ã‚¿ãƒƒã‚¯ãŒç©ºãªã‚‰true */
 	public boolean isEmpty() {
 		return tail.prev == head;
 	}

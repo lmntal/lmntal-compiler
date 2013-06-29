@@ -10,7 +10,7 @@ import type.TypeEnv;
 
 
 /**
- * ·¿ÊÑ¿ô¤òÉ½¤¹
+ * å‹å¤‰æ•°ã‚’è¡¨ã™
  * @author kudo
  *
  */

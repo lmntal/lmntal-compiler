@@ -96,23 +96,23 @@ public final class TypeEnv {
 		else return null;
 	}
 
-	/** º¸ÊÕËì¤ª¤è¤Óº¸ÊÕ½Ğ¸½Ëì¤Î½¸¹ç */
+	/** å·¦è¾ºè†œãŠã‚ˆã³å·¦è¾ºå‡ºç¾è†œã®é›†åˆ */
 	private static final Set<Membrane> lhsmems = new HashSet<Membrane>();
 
 	private static final Map<Membrane, String> memToName = new HashMap<Membrane, String>();
 	
 	public static void initialize(Membrane root)throws TypeException{
-		// Á´¤Æ¤ÎËì¤Ë¤Ä¤¤¤Æ¡¢¥ë¡¼¥ë¤Îº¸ÊÕºÇ³°Éô½Ğ¸½¤«¤É¤¦¤«¤Î¾ğÊó¤òÆÀ¤ë
+		// å…¨ã¦ã®è†œã«ã¤ã„ã¦ã€ãƒ«ãƒ¼ãƒ«ã®å·¦è¾ºæœ€å¤–éƒ¨å‡ºç¾ã‹ã©ã†ã‹ã®æƒ…å ±ã‚’å¾—ã‚‹
 		TypeEnv.collectLHSMemsAndNames(root.rules);
 		
-		// Á´¤Æ¤Î·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Ë¤Ä¤¤¤Æ¡¢¥×¥í¥»¥¹·¿¤òÃÎ¤Ã¤Æ¤ª¤¯
-		// TODO ¤¤¤º¤ì¥¬¡¼¥É¥³¥ó¥Ñ¥¤¥é¤ËÌòÎ©¤Æ¤ë
+		// å…¨ã¦ã®å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«ã¤ã„ã¦ã€ãƒ—ãƒ­ã‚»ã‚¹å‹ã‚’çŸ¥ã£ã¦ãŠã
+		// TODO ã„ãšã‚Œã‚¬ãƒ¼ãƒ‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ã«å½¹ç«‹ã¦ã‚‹
 		knowTPCMem(root);
 		
-		// Á´¤Æ¤Î±¦ÊÕËì¤Ë¤Ä¤¤¤Æ¡¢
+		// å…¨ã¦ã®å³è¾ºè†œã«ã¤ã„ã¦ã€
 	}
 	
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®ÄêµÁ -> ¥Ç¡¼¥¿·¿*/
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå®šç¾© -> ãƒ‡ãƒ¼ã‚¿å‹*/
 	private static Map<ContextDef, Functor> def2type = new HashMap<ContextDef, Functor>();
 	
 	public static Functor dataTypeOfContextDef(ContextDef cd){
@@ -228,8 +228,8 @@ public final class TypeEnv {
 	
 	
 	/**
-	 * º¸ÊÕ½Ğ¸½Ëì¤ò$lhsmems¤ËÅĞÏ¿¤¹¤ë
-	 * ËÜËì¤ÎËìÌ¾¤ò½êÂ°Ëì¤ÎËìÌ¾¤È¤¹¤ë
+	 * å·¦è¾ºå‡ºç¾è†œã‚’$lhsmemsã«ç™»éŒ²ã™ã‚‹
+	 * æœ¬è†œã®è†œåã‚’æ‰€å±è†œã®è†œåã¨ã™ã‚‹
 	 * @param mem
 	 */
 	private static void collectLHSMemsAndNames(List<RuleStructure> rules){
@@ -237,20 +237,20 @@ public final class TypeEnv {
 			collectLHSMemsAndNames(rule);
 	}
 	/**
-	 * º¸ÊÕ½Ğ¸½Ëì¤ò$lhsmems¤ËÅĞÏ¿¤¹¤ë
+	 * å·¦è¾ºå‡ºç¾è†œã‚’$lhsmemsã«ç™»éŒ²ã™ã‚‹
 	 * @param rule
 	 */
 	private static void collectLHSMemsAndNames(RuleStructure rule){
 		collectLHSMem(rule.leftMem);
 		memToName.put(rule.leftMem, rule.parent.name);
 		memToName.put(rule.rightMem, rule.parent.name);
-//		 º¸ÊÕ¤Ë¥ë¡¼¥ë¤Ï½Ğ¸½¤·¤Ê¤¤
+//		 å·¦è¾ºã«ãƒ«ãƒ¼ãƒ«ã¯å‡ºç¾ã—ãªã„
 		for(RuleStructure rhsrule : ((List<RuleStructure>)rule.rightMem.rules))
 			collectLHSMemsAndNames(rhsrule);
 	}
 	/**
-	 * º¸ÊÕ½Ğ¸½Ëì¤ò$lhsmems¤ËÅĞÏ¿¤¹¤ë
-	 * @param mem º¸ÊÕ½Ğ¸½Ëì
+	 * å·¦è¾ºå‡ºç¾è†œã‚’$lhsmemsã«ç™»éŒ²ã™ã‚‹
+	 * @param mem å·¦è¾ºå‡ºç¾è†œ
 	 */
 	private static void collectLHSMem(Membrane mem){
 		lhsmems.add(mem);
@@ -258,12 +258,12 @@ public final class TypeEnv {
 			collectLHSMem(cmem);
 	}
 	
-	/** º¸ÊÕ¤Î¥¢¥È¥à¤«¤É¤¦¤«¤òÊÖ¤¹ */
+	/** å·¦è¾ºã®ã‚¢ãƒˆãƒ ã‹ã©ã†ã‹ã‚’è¿”ã™ */
 	public static boolean isLHSAtom(Atom atom) {
 		return isLHSMem(atom.mem);
 	}
 
-	/** º¸ÊÕ¤ÎËì¤«¤É¤¦¤«¤òÊÖ¤¹ */
+	/** å·¦è¾ºã®è†œã‹ã©ã†ã‹ã‚’è¿”ã™ */
 	public static boolean isLHSMem(Membrane mem) {
 		return lhsmems.contains(mem);
 	}
@@ -289,7 +289,7 @@ public final class TypeEnv {
 	
 	public static final String ANNONYMOUS = "??";
 	/**
-	 * ¥ë¡¼¥ë¤ÎËÜËì¤Ë¤Ä¤¤¤Æ¤Ï½êÂ°Ëì¤ÎÌ¾Á°¤òÊÖ¤¹
+	 * ãƒ«ãƒ¼ãƒ«ã®æœ¬è†œã«ã¤ã„ã¦ã¯æ‰€å±è†œã®åå‰ã‚’è¿”ã™
 	 */
 	public static String getMemName(Membrane mem){
 		String registered = memToName.get(mem);

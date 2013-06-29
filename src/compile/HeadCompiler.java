@@ -23,45 +23,45 @@ import compile.structure.ProcessContext;
 import compile.structure.ProcessContextEquation;
 
 /**
- * Ëì¤ËÂĞ¤¹¤ë¥Ş¥Ã¥Á¥ó¥°Ì¿ÎáÎó¤ò½ĞÎÏ¤¹¤ë
+ * è†œã«å¯¾ã™ã‚‹ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤åˆ—ã‚’å‡ºåŠ›ã™ã‚‹
  * @author n-kato, pa
  * 
- * ²¾°ú¿ôID¤ÏÇÑ»ß¤µ¤ì¤¿¡£
- * RubyÈÇ¤Ç¤Ï²¾°ú¿ôID¤¬¤½¤Î¤Ş¤Ş¥Ü¥Ç¥£Ì¿ÎáÎó¤Î²¾°ú¿ôÈÖ¹æ¤òÉ½¤·¤Æ¤¤¤¿¤¬¡¢º£¤Ï°ã¤¦¤Î¤Ç¡¢²¾°ú¿ôID¼«¿È¤Ë¤Ï°ÕÌ£¤¬Ìµ¤¯¤Ê¤Ã¤¿¤¿¤á¡£
- * ¤³¤ÎÇÑ»ß¤ËÈ¼¤Ã¤Æ¡¢²¾°ú¿ôID¤Ç¥ë¡¼¥×¤¹¤ëÉôÊ¬¤ÏÁ´¤Æatoms.iterator()¤ò»È¤¦¤è¤¦¤ËÊÑ¹¹¤¹¤ë¡£
+ * ä»®å¼•æ•°IDã¯å»ƒæ­¢ã•ã‚ŒãŸã€‚
+ * Rubyç‰ˆã§ã¯ä»®å¼•æ•°IDãŒãã®ã¾ã¾ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ã®ä»®å¼•æ•°ç•ªå·ã‚’è¡¨ã—ã¦ã„ãŸãŒã€ä»Šã¯é•ã†ã®ã§ã€ä»®å¼•æ•°IDè‡ªèº«ã«ã¯æ„å‘³ãŒç„¡ããªã£ãŸãŸã‚ã€‚
+ * ã“ã®å»ƒæ­¢ã«ä¼´ã£ã¦ã€ä»®å¼•æ•°IDã§ãƒ«ãƒ¼ãƒ—ã™ã‚‹éƒ¨åˆ†ã¯å…¨ã¦atoms.iterator()ã‚’ä½¿ã†ã‚ˆã†ã«å¤‰æ›´ã™ã‚‹ã€‚
  * 
- * todo path¤È¤¤¤¦Ì¿Ì¾¤¬¸½¾õ¤òÀµ¤·¤¯É½¤·¤Æ¤¤¤Ê¤¤¡£¼Âºİ¤Ïvarnum¤À¤¬¡¢Ä¹¤¤¤Î¤Çid¤Ë¤·¤è¤¦¤«¤È¤â»×¤Ã¤Æ¤¤¤ë
+ * todo pathã¨ã„ã†å‘½åãŒç¾çŠ¶ã‚’æ­£ã—ãè¡¨ã—ã¦ã„ãªã„ã€‚å®Ÿéš›ã¯varnumã ãŒã€é•·ã„ã®ã§idã«ã—ã‚ˆã†ã‹ã¨ã‚‚æ€ã£ã¦ã„ã‚‹
  * 
- * <p><b>¸½¾õ</b>¡¡
- * ¸½ºß¥Ş¥Ã¥Á¥ó¥°Ì¿ÎáÎó¤Ç¤Ï¡¢ËÜËì¤ÎÊÑ¿ôÈÖ¹æ¤ò0¡¢¼çÆ³¤¹¤ë¥¢¥È¥à¤ÎÊÑ¿ôÈÖ¹æ¤ò1¤Ë¤·¤Æ¤¤¤ë¡£¤³¤ì¤Ïº£¸å¤âÊÑ¤¨¤Ê¤¤¡£
- * ¥Ü¥Ç¥£Ì¿ÎáÎó¤Î²¾°ú¿ô¤Ç¤Ï¡¢Àè¤Ëmems¤òËçµó¤·¤Æ¤«¤é¡¢¤½¤ÎÂ³¤­¤ÎÊÑ¿ôÈÖ¹æ¤Ëatoms¤òËçµó¤·¤Æ¤¤¤ë¡£
+ * <p><b>ç¾çŠ¶</b>ã€€
+ * ç¾åœ¨ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤åˆ—ã§ã¯ã€æœ¬è†œã®å¤‰æ•°ç•ªå·ã‚’0ã€ä¸»å°ã™ã‚‹ã‚¢ãƒˆãƒ ã®å¤‰æ•°ç•ªå·ã‚’1ã«ã—ã¦ã„ã‚‹ã€‚ã“ã‚Œã¯ä»Šå¾Œã‚‚å¤‰ãˆãªã„ã€‚
+ * ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ã®ä»®å¼•æ•°ã§ã¯ã€å…ˆã«memsã‚’æšæŒ™ã—ã¦ã‹ã‚‰ã€ãã®ç¶šãã®å¤‰æ•°ç•ªå·ã«atomsã‚’æšæŒ™ã—ã¦ã„ã‚‹ã€‚
  */
 class HeadCompiler
 {
-	private boolean debug = false; //°ì»şÅª
+	private boolean debug = false; //ä¸€æ™‚çš„
 	private boolean debug2 = false;
 	boolean firsttime = true;
-//	/** º¸ÊÕËì */
+//	/** å·¦è¾ºè†œ */
 //	public Membrane lhsmem;//m;
-	/** ¥Ş¥Ã¥Á¥ó¥°Ì¿ÎáÎó¡Ê¤Î¥é¥Ù¥ë¡Ë*/
+	/** ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤åˆ—ï¼ˆã®ãƒ©ãƒ™ãƒ«ï¼‰*/
 	InstructionList matchLabel, tempLabel;
 	/** matchLabel.insts */
 	List<Instruction> match, tempMatch;
 
-	List<Membrane> mems	= new ArrayList<Membrane>();	// ½Ğ¸½¤¹¤ëËì¤Î¥ê¥¹¥È¡£[0]¤¬m
-	List<Atomic> atoms = new ArrayList<Atomic>();	// ½Ğ¸½¤¹¤ë¥¢¥È¥à¤Î¥ê¥¹¥È	
-	HashMap<Membrane, Integer> memPaths	= new HashMap<Membrane, Integer>();	// Membrane -> ÊÑ¿ôÈÖ¹æ
-	HashMap<Atomic, Integer>  atomPaths	= new HashMap<Atomic, Integer>();	// Atomic -> ÊÑ¿ôÈÖ¹æ
-	Map<Integer, int[]> linkPaths = new HashMap<Integer, int[]>();	// Atom¤ÎÊÑ¿ôÈÖ¹æ -> ¥ê¥ó¥¯¤ÎÊÑ¿ôÈÖ¹æ¤ÎÇÛÎó
+	List<Membrane> mems	= new ArrayList<Membrane>();	// å‡ºç¾ã™ã‚‹è†œã®ãƒªã‚¹ãƒˆã€‚[0]ãŒm
+	List<Atomic> atoms = new ArrayList<Atomic>();	// å‡ºç¾ã™ã‚‹ã‚¢ãƒˆãƒ ã®ãƒªã‚¹ãƒˆ	
+	HashMap<Membrane, Integer> memPaths	= new HashMap<Membrane, Integer>();	// Membrane -> å¤‰æ•°ç•ªå·
+	HashMap<Atomic, Integer>  atomPaths	= new HashMap<Atomic, Integer>();	// Atomic -> å¤‰æ•°ç•ªå·
+	Map<Integer, int[]> linkPaths = new HashMap<Integer, int[]>();	// Atomã®å¤‰æ•°ç•ªå· -> ãƒªãƒ³ã‚¯ã®å¤‰æ•°ç•ªå·ã®é…åˆ—
 
-	private Map<Atom, Integer> atomIds	= new HashMap<Atom, Integer>();	// Atom -> atomsÆâ¤Îindex¡ÊÇÑ»ß¤ÎÊı¸ş¤Ç¸¡Æ¤¤¹¤ë¡Ë
-	private HashSet<Atom> visited = new HashSet<Atom>();	// Atom -> boolean, ¥Ş¥Ã¥Á¥ó¥°Ì¿Îá¤òÀ¸À®¤·¤¿¤«¤É¤¦¤«
-	private HashSet<Membrane> memVisited = new HashSet<Membrane>();	// Membrane -> boolean, compileMembrane¤ò¸Æ¤ó¤À¤«¤É¤¦¤«
+	private Map<Atom, Integer> atomIds	= new HashMap<Atom, Integer>();	// Atom -> atomså†…ã®indexï¼ˆå»ƒæ­¢ã®æ–¹å‘ã§æ¤œè¨ã™ã‚‹ï¼‰
+	private HashSet<Atom> visited = new HashSet<Atom>();	// Atom -> boolean, ãƒãƒƒãƒãƒ³ã‚°å‘½ä»¤ã‚’ç”Ÿæˆã—ãŸã‹ã©ã†ã‹
+	private HashSet<Membrane> memVisited = new HashSet<Membrane>();	// Membrane -> boolean, compileMembraneã‚’å‘¼ã‚“ã ã‹ã©ã†ã‹
 
-	boolean fFindDataAtoms;						// ¥Ç¡¼¥¿¥¢¥È¥à¤òfindatom¤·¤Æ¤è¤¤¤«¤É¤¦¤«
-	private final boolean UNTYPED_COMPILE	= false;			// fFindDataAtoms¤Î½é´üÃÍ
+	boolean fFindDataAtoms;						// ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã‚’findatomã—ã¦ã‚ˆã„ã‹ã©ã†ã‹
+	private final boolean UNTYPED_COMPILE	= false;			// fFindDataAtomsã®åˆæœŸå€¤
 
-	int varCount;	// ¤¤¤º¤ì¥¢¥È¥à¤ÈËì¤ÇÊ¬¤±¤ë¤Ù¤­¤À¤È»×¤¦
+	int varCount;	// ã„ãšã‚Œã‚¢ãƒˆãƒ ã¨è†œã§åˆ†ã‘ã‚‹ã¹ãã ã¨æ€ã†
 	int maxVarCount;
 
 	private static int findAtomCount = 0;
@@ -80,7 +80,7 @@ class HeadCompiler
 		if (!isMemLoaded(mem)) return UNBOUND;
 		return memPaths.get(mem);
 	}
-	protected final int linkToPath(int atomid, int pos) { // todo HeadCompiler¤Î»ÅÍÍ¤Ë¹ç¤ï¤»¤ë¡©GuardCompiler¤â¡£
+	protected final int linkToPath(int atomid, int pos) { // todo HeadCompilerã®ä»•æ§˜ã«åˆã‚ã›ã‚‹ï¼ŸGuardCompilerã‚‚ã€‚
 		if (!linkPaths.containsKey(new Integer(atomid))) return UNBOUND;
 		return linkPaths.get(atomid)[pos];
 	}
@@ -91,10 +91,10 @@ class HeadCompiler
 	{
 	}
 
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ª¤è¤Ó¥Ü¥Ç¥£¤Î¥³¥ó¥Ñ¥¤¥ë¤Ç»È¤¦¤¿¤á¤Ë¡¢
-	 * this¤ò»ØÄê¤µ¤ì¤¿hc¤ËÂĞ¤¹¤ëÀµµ¬²½¤µ¤ì¤¿HeadCompiler¤È¤¹¤ë¡£
-	 * Àµµ¬²½¤È¤Ï¡¢º¸ÊÕ¤ÎÁ´¤Æ¤Î¥¢¥È¥à¤ª¤è¤ÓËì¤ËÂĞ¤·¤Æ¡¢¥¬¡¼¥É/¥Ü¥Ç¥£ÍÑ¤Î²¾°ú¿ôÈÖ¹æ¤ò
-	 * ÊÑ¿ôÈÖ¹æ¤È¤·¤Æº¸ÊÕ¤Î¥Ş¥Ã¥Á¥ó¥°¤ò¼è¤ê½ª¤ï¤Ã¤¿ÆâÉô¾õÂÖ¤ò»ı¤Ä¤è¤¦¤Ë¤¹¤ë¤³¤È¤ò°ÕÌ£¤¹¤ë¡£*/
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ãŠã‚ˆã³ãƒœãƒ‡ã‚£ã®ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã§ä½¿ã†ãŸã‚ã«ã€
+	 * thisã‚’æŒ‡å®šã•ã‚ŒãŸhcã«å¯¾ã™ã‚‹æ­£è¦åŒ–ã•ã‚ŒãŸHeadCompilerã¨ã™ã‚‹ã€‚
+	 * æ­£è¦åŒ–ã¨ã¯ã€å·¦è¾ºã®å…¨ã¦ã®ã‚¢ãƒˆãƒ ãŠã‚ˆã³è†œã«å¯¾ã—ã¦ã€ã‚¬ãƒ¼ãƒ‰/ãƒœãƒ‡ã‚£ç”¨ã®ä»®å¼•æ•°ç•ªå·ã‚’
+	 * å¤‰æ•°ç•ªå·ã¨ã—ã¦å·¦è¾ºã®ãƒãƒƒãƒãƒ³ã‚°ã‚’å–ã‚Šçµ‚ã‚ã£ãŸå†…éƒ¨çŠ¶æ…‹ã‚’æŒã¤ã‚ˆã†ã«ã™ã‚‹ã“ã¨ã‚’æ„å‘³ã™ã‚‹ã€‚*/
 	protected final void initNormalizedCompiler(HeadCompiler hc) {
 		matchLabel = new InstructionList();
 		match = matchLabel.insts;
@@ -113,27 +113,27 @@ class HeadCompiler
 		}
 	}
 
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤Î¥³¥ó¥Ñ¥¤¥ë¤Ç»È¤¦¤¿¤á¤Ëthis¤ËÂĞ¤¹¤ëÀµµ¬²½¤µ¤ì¤¿HeadCompiler¤òºîÀ®¤·¤ÆÊÖ¤¹¡£
-	 * Àµµ¬²½¤È¤Ï¡¢º¸ÊÕ¤ÎÁ´¤Æ¤Î¥¢¥È¥à¤ª¤è¤ÓËì¤ËÂĞ¤·¤Æ¡¢¥¬¡¼¥É/¥Ü¥Ç¥£ÍÑ¤Î²¾°ú¿ôÈÖ¹æ¤ò
-	 * ÊÑ¿ôÈÖ¹æ¤È¤·¤Æº¸ÊÕ¤Î¥Ş¥Ã¥Á¥ó¥°¤ò¼è¤ê½ª¤ï¤Ã¤¿ÆâÉô¾õÂÖ¤ò»ı¤Ä¤è¤¦¤Ë¤¹¤ë¤³¤È¤ò°ÕÌ£¤¹¤ë¡£*/
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã§ä½¿ã†ãŸã‚ã«thisã«å¯¾ã™ã‚‹æ­£è¦åŒ–ã•ã‚ŒãŸHeadCompilerã‚’ä½œæˆã—ã¦è¿”ã™ã€‚
+	 * æ­£è¦åŒ–ã¨ã¯ã€å·¦è¾ºã®å…¨ã¦ã®ã‚¢ãƒˆãƒ ãŠã‚ˆã³è†œã«å¯¾ã—ã¦ã€ã‚¬ãƒ¼ãƒ‰/ãƒœãƒ‡ã‚£ç”¨ã®ä»®å¼•æ•°ç•ªå·ã‚’
+	 * å¤‰æ•°ç•ªå·ã¨ã—ã¦å·¦è¾ºã®ãƒãƒƒãƒãƒ³ã‚°ã‚’å–ã‚Šçµ‚ã‚ã£ãŸå†…éƒ¨çŠ¶æ…‹ã‚’æŒã¤ã‚ˆã†ã«ã™ã‚‹ã“ã¨ã‚’æ„å‘³ã™ã‚‹ã€‚*/
 	final HeadCompiler getNormalizedHeadCompiler()
 	{
 		HeadCompiler hc = new HeadCompiler();
 		hc.initNormalizedCompiler(this);
 		return hc;
 	}
-	/** Ëìmem¤Î»ÒÂ¹¤ÎÁ´¤Æ¤Î¥¢¥È¥à¤ÈËì¤ò¡¢¤½¤ì¤¾¤ì¥ê¥¹¥Èatoms¤Èmems¤ËÄÉ²Ã¤¹¤ë¡£
-	 * ¥ê¥¹¥ÈÆâ¤ÎÄÉ²Ã¤µ¤ì¤¿°ÌÃÖ¤¬¤½¤Î¥¢¥È¥à¤ª¤è¤ÓËì¤Î²¾°ú¿ôID¤Ë¤Ê¤ë¡£*/
+	/** è†œmemã®å­å­«ã®å…¨ã¦ã®ã‚¢ãƒˆãƒ ã¨è†œã‚’ã€ãã‚Œãã‚Œãƒªã‚¹ãƒˆatomsã¨memsã«è¿½åŠ ã™ã‚‹ã€‚
+	 * ãƒªã‚¹ãƒˆå†…ã®è¿½åŠ ã•ã‚ŒãŸä½ç½®ãŒãã®ã‚¢ãƒˆãƒ ãŠã‚ˆã³è†œã®ä»®å¼•æ•°IDã«ãªã‚‹ã€‚*/
 	void enumFormals(Membrane mem)
 	{
 		Env.c("enumFormals");
 		for (Atom atom : mem.atoms)
 		{
-			// º¸ÊÕ¤Ë½Ğ¸½¤·¤¿¥¢¥È¥à¤òÅĞÏ¿¤¹¤ë
+			// å·¦è¾ºã«å‡ºç¾ã—ãŸã‚¢ãƒˆãƒ ã‚’ç™»éŒ²ã™ã‚‹
 			atomIds.put(atom, atoms.size());
 			atoms.add(atom);
 		}
-		mems.add(mem);	// ËÜËì¤Ïmems[0]
+		mems.add(mem);	// æœ¬è†œã¯mems[0]
 		for (Membrane m : mem.mems)
 		{
 			enumFormals(m);
@@ -150,14 +150,14 @@ class HeadCompiler
 		tempLabel = new InstructionList();
 		match = matchLabel.insts;
 		tempMatch = tempLabel.insts;
-		varCount = 1;	// [0]¤ÏËÜËì
-//		mempaths.put(mems.get(0), new Integer(0));	// ËÜËì¤ÎÊÑ¿ôÈÖ¹æ¤Ï 0
+		varCount = 1;	// [0]ã¯æœ¬è†œ
+//		mempaths.put(mems.get(0), new Integer(0));	// æœ¬è†œã®å¤‰æ•°ç•ªå·ã¯ 0
 		fFindDataAtoms = UNTYPED_COMPILE;
 	}
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥¢¥È¥à¤ËÂĞ¤·¤Ægetlink¤ò¹Ô¤¤¡¢ÊÑ¿ôÈÖ¹æ¤òlinkpaths¤ËÅĞÏ¿¤¹¤ë¡£
-	 * RISC²½¤ËÈ¼¤¤ÄÉ²Ã(mizuno)
+	 * æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒˆãƒ ã«å¯¾ã—ã¦getlinkã‚’è¡Œã„ã€å¤‰æ•°ç•ªå·ã‚’linkpathsã«ç™»éŒ²ã™ã‚‹ã€‚
+	 * RISCåŒ–ã«ä¼´ã„è¿½åŠ (mizuno)
 	 */
 	final void getLinks(int atompath, int arity, List<Instruction> insts) {
 		int[] paths = new int[arity];
@@ -186,50 +186,50 @@ class HeadCompiler
 						firstmem.connect(firstatom, atom);
 					}
 					continue;
-				} // ¥¬¡¼¥ÉÆ¿Ì¾¥ê¥ó¥¯¤ÏÌµ»ë
+				} // ã‚¬ãƒ¼ãƒ‰åŒ¿åãƒªãƒ³ã‚¯ã¯ç„¡è¦–
 				if (!atomIds.containsKey(buddylink.atom)) {
 					if(atom.mem==firstmem){
 						firstmem.connect(firstatom, atom);
 						qatoms.add(atom);
 					}
 					continue;
-				} // ±¦ÊÕ¤ä$p¡Ê¤ª¤è¤Ólhs->neg¡Ë¤Ø¤Î¥ê¥ó¥¯¤ÏÌµ»ë
+				} // å³è¾ºã‚„$pï¼ˆãŠã‚ˆã³lhs->negï¼‰ã¸ã®ãƒªãƒ³ã‚¯ã¯ç„¡è¦–
 				Atom buddyatom = (Atom)buddylink.atom;
 
 				if (atomToPath(buddyatom) != UNBOUND) {
-					// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¤¹¤Ç¤Ë¼èÆÀ¤·¤Æ¤¤¤ë¾ì¹ç¡£
-					// - ¥ê¥ó¥¯Àè¤Î¥¢¥È¥àbuddyatom¤È°ÊÁ°¤Ë¼èÆÀ¤·¤¿¥¢¥È¥à¤ÎÆ±°ìÀ­¤ò¸¡ºº¤¹¤ë¡£
-					//   ¤¿¤À¤·¸¡ºº¤ÏÊÑ¿ôÈÖ¹æ¤ª¤è¤Ó°ú¿ôÈÖ¹æ¤ÎÁÈ¤Ë´ğ¤Å¤¤¤¿ÊÒÊı¸ş¤Î¤ß¤Ç¤è¤¤¡£
-					// neg(Åù¼°±¦ÊÕ¥È¥Ã¥×¥ì¥Ù¥ë)->lhs(º¸ÊÕ¤ÎÈó¥È¥Ã¥×¥ì¥Ù¥ë)¤Î¤È¤­
+					// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’ã™ã§ã«å–å¾—ã—ã¦ã„ã‚‹å ´åˆã€‚
+					// - ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ buddyatomã¨ä»¥å‰ã«å–å¾—ã—ãŸã‚¢ãƒˆãƒ ã®åŒä¸€æ€§ã‚’æ¤œæŸ»ã™ã‚‹ã€‚
+					//   ãŸã ã—æ¤œæŸ»ã¯å¤‰æ•°ç•ªå·ãŠã‚ˆã³å¼•æ•°ç•ªå·ã®çµ„ã«åŸºã¥ã„ãŸç‰‡æ–¹å‘ã®ã¿ã§ã‚ˆã„ã€‚
+					// neg(ç­‰å¼å³è¾ºãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«)->lhs(å·¦è¾ºã®éãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«)ã®ã¨ã
 					if (proccxteqMap.containsKey(atom.mem)
 							&& !proccxteqMap.containsKey(buddyatom.mem)
 							&& buddyatom.mem.parent != null) {
 						// just skip
 					}
 					else {
-						// lhs(>)->lhs(<) ¤Ş¤¿¤Ï neg(>)->neg(<) ¤Ê¤é¤Ğ¡¢
-						// ¤¹¤Ç¤ËÆ±°ìÀ­¤ò³ÎÇ§¤¹¤ë¥³¡¼¥É¤ò½ĞÎÏ¤·¤Æ¤¤¤ë¤¿¤á¡¢²¿¤â¤·¤Ê¤¤
+						// lhs(>)->lhs(<) ã¾ãŸã¯ neg(>)->neg(<) ãªã‚‰ã°ã€
+						// ã™ã§ã«åŒä¸€æ€§ã‚’ç¢ºèªã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã—ã¦ã„ã‚‹ãŸã‚ã€ä½•ã‚‚ã—ãªã„
 						int b = atomToPath(buddyatom);
 						int t = atomToPath(atom);
 						if (b < t) continue;
 						if (b == t && buddylink.pos < pos) continue;
 					}
 				}
-				// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¿·¤·¤¤ÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë (*A)
+				// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’æ–°ã—ã„å¤‰æ•°ã«å–å¾—ã™ã‚‹ (*A)
 				int buddyatompath = varCount++;
 
-				// ¥ê¥ó¥¯Àè¤¬Â¾¤ÎÅù¼°±¦ÊÕ¤Î¥¢¥È¥à¤Î¾ì¹ç¡ÊÅù¼°´Ö¥ê¥ó¥¯¤Î¾ì¹ç¡Ë
-				// Ëì´Ö¤Î¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥àº¿¤Î¸¡ºº¤ò¤·¡¢Ëì³¬ÁØ¤¬¥Ş¥Ã¥Á¤¹¤ë¤«¸¡ºº¤ò¹Ô¤¦¡£
-				// ¤Ş¤¿*A¤ÎDEREF¤ÎÂè4°ú¿ô¤ª¤è¤Óbuddyatompath¤òÄûÀµ¤¹¤ë¡£
+				// ãƒªãƒ³ã‚¯å…ˆãŒä»–ã®ç­‰å¼å³è¾ºã®ã‚¢ãƒˆãƒ ã®å ´åˆï¼ˆç­‰å¼é–“ãƒªãƒ³ã‚¯ã®å ´åˆï¼‰
+				// è†œé–“ã®è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ é–ã®æ¤œæŸ»ã‚’ã—ã€è†œéšå±¤ãŒãƒãƒƒãƒã™ã‚‹ã‹æ¤œæŸ»ã‚’è¡Œã†ã€‚
+				// ã¾ãŸ*Aã®DEREFã®ç¬¬4å¼•æ•°ãŠã‚ˆã³buddyatompathã‚’è¨‚æ­£ã™ã‚‹ã€‚
 				if (proccxteqMap.containsKey(atom.mem)
 						&& proccxteqMap.containsKey(buddyatom.mem) && buddyatom.mem != atom.mem) {				
 					// ( 0: 1:{$p[|*X],2:{$q[|*Y]}} :- \+($p=(atom(L),$pp),$q=(buddy(L),$qq)) | ... )
-					// ¤³¤Î¥ë¡¼¥ë¤Î¥¬¡¼¥É¤Î°ÕÌ£:
-					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) ¤Ë¤Ï¥Ş¥Ã¥Á¤·¤Ê¤¤
+					// ã“ã®ãƒ«ãƒ¼ãƒ«ã®ã‚¬ãƒ¼ãƒ‰ã®æ„å‘³:
+					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) ã«ã¯ãƒãƒƒãƒã—ãªã„
 					//
-					LinkedList<Membrane> atomSupermems  = new LinkedList<Membrane>(); // atom¤Î¹­µÁÀèÁÄËìÎó¡Ê¿ÆËìÂ¦¤¬ÀèÆ¬¡Ë
-					LinkedList<Membrane> buddySupermems = new LinkedList<Membrane>(); // buddy¤Î¹­µÁÀèÁÄËìÎó¡Ê¿ÆËìÂ¦¤¬ÀèÆ¬¡Ë
-					// ¹­µÁÀèÁÄËìÎó¤Î·×»»
+					LinkedList<Membrane> atomSupermems  = new LinkedList<Membrane>(); // atomã®åºƒç¾©å…ˆç¥–è†œåˆ—ï¼ˆè¦ªè†œå´ãŒå…ˆé ­ï¼‰
+					LinkedList<Membrane> buddySupermems = new LinkedList<Membrane>(); // buddyã®åºƒç¾©å…ˆç¥–è†œåˆ—ï¼ˆè¦ªè†œå´ãŒå…ˆé ­ï¼‰
+					// åºƒç¾©å…ˆç¥–è†œåˆ—ã®è¨ˆç®—
 					// atomSupermems = {0,1}; buddySupermems = {0,1,2}
 					Membrane mem = proccxteqMap.get(buddyatom.mem).def.lhsOcc.mem;
 					while (mem != null) {
@@ -241,7 +241,7 @@ class HeadCompiler
 						atomSupermems.addFirst(mem);
 						mem = mem.parent;
 					}
-					// ¹­µÁÀèÁÄËìÎó¤Î¶¦ÄÌÉôÊ¬ºï½ü
+					// åºƒç¾©å…ˆç¥–è†œåˆ—ã®å…±é€šéƒ¨åˆ†å‰Šé™¤
 					// atomSupermems = {}; buddySupermems = {2}
 					Iterator<Membrane> ita = atomSupermems.iterator();
 					Iterator<Membrane> itb = buddySupermems.iterator();
@@ -253,12 +253,12 @@ class HeadCompiler
 				}
 
 				if (atomToPath(buddyatom) != UNBOUND) {
-					// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¤¹¤Ç¤Ë¼èÆÀ¤·¤Æ¤¤¤ë¾ì¹ç
-					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs ¤Ê¤Î¤Ç¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ÎÆ±°ìÀ­¤ò³ÎÇ§
+					// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’ã™ã§ã«å–å¾—ã—ã¦ã„ã‚‹å ´åˆ
+					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs ãªã®ã§ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã®åŒä¸€æ€§ã‚’ç¢ºèª
 					continue;
 				}
 
-				// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+				// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 
 				atomPaths.put(buddyatom, new Integer(buddyatompath));
 				if(buddyatom.mem == firstmem){
@@ -267,9 +267,9 @@ class HeadCompiler
 				}
 				atomqueue.addLast( buddyatom );
 
-				// ¥ê¥ó¥¯Àè¤ÎËì¤ÎÆÃÄê
+				// ãƒªãƒ³ã‚¯å…ˆã®è†œã®ç‰¹å®š
 				if (atom.functor.isOutsideProxy() && pos == 0) {
-					// »ÒËì¤Ø¤Î¥ê¥ó¥¯¤Î¾ì¹ç¡¢»ÒËì¤ÎÆ±°ìÀ­¤ò¸¡ºº¤·¤Ê¤±¤ì¤Ğ¤Ê¤é¤Ê¤¤
+					// å­è†œã¸ã®ãƒªãƒ³ã‚¯ã®å ´åˆã€å­è†œã®åŒä¸€æ€§ã‚’æ¤œæŸ»ã—ãªã‘ã‚Œã°ãªã‚‰ãªã„
 					Membrane buddymem = buddyatom.mem;				
 					int buddymempath = memToPath(buddyatom.mem);
 					if (buddymempath == UNBOUND) {
@@ -281,7 +281,7 @@ class HeadCompiler
 				}
 			}
 		}
-		// ¸«¤Ä¤«¤Ã¤¿¿·¤·¤¤»ÒËì¤Ë¤¢¤ë¥¢¥È¥à¤òÍ¥ÀèÅª¤Ë¸¡ºº¤¹¤ë¡£
+		// è¦‹ã¤ã‹ã£ãŸæ–°ã—ã„å­è†œã«ã‚ã‚‹ã‚¢ãƒˆãƒ ã‚’å„ªå…ˆçš„ã«æ¤œæŸ»ã™ã‚‹ã€‚
 		for(Membrane mem : newmemlist){
 			connectAtomMem(firstatom, mem);
 			for(Atom atom : mem.atoms){
@@ -300,13 +300,13 @@ class HeadCompiler
 		{
 			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 			if (atomToPath(atom) != UNBOUND) continue;
-			// ¸«¤Ä¤«¤Ã¤¿¥¢¥È¥à¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+			// è¦‹ã¤ã‹ã£ãŸã‚¢ãƒˆãƒ ã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 			int atompath = varCount++;
-			// ¤¹¤Ç¤Ë¼èÆÀ¤·¤Æ¤¤¤ëÆ±¤¸½êÂ°Ëì¤«¤ÄÆ±¤¸¥Õ¥¡¥ó¥¯¥¿¤ò»ı¤Ä¥¢¥È¥à¤È¤ÎÈóÆ±°ìÀ­¤ò¸¡ºº¤¹¤ë
+			// ã™ã§ã«å–å¾—ã—ã¦ã„ã‚‹åŒã˜æ‰€å±è†œã‹ã¤åŒã˜ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’æŒã¤ã‚¢ãƒˆãƒ ã¨ã®éåŒä¸€æ€§ã‚’æ¤œæŸ»ã™ã‚‹
 			Membrane[] testmems = { mem };
 			if (proccxteqMap.containsKey(mem))
 			{
-				// $pÅù¼°¥È¥Ã¥×¥ì¥Ù¥ë¤Î¥¢¥È¥à¤Î¤È¤­¤Ï¡¢$p¤¬¥Ø¥Ã¥É½Ğ¸½¤¹¤ëËì¤È¤âÈæ³Ó¤¹¤ë
+				// $pç­‰å¼ãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã®ã‚¢ãƒˆãƒ ã®ã¨ãã¯ã€$pãŒãƒ˜ãƒƒãƒ‰å‡ºç¾ã™ã‚‹è†œã¨ã‚‚æ¯”è¼ƒã™ã‚‹
 				testmems = new Membrane[]{ mem, proccxteqMap.get(mem).def.lhsOcc.mem };
 			}
 			atomPaths.put(atom, atompath);
@@ -317,17 +317,17 @@ class HeadCompiler
 			int submempath = memToPath(submem);
 			if (submempath == UNBOUND)
 			{
-				// »ÒËì¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+				// å­è†œã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 				submempath = varCount++;
 				memPaths.put(submem, submempath);
 			}
-			//¥×¥í¥»¥¹Ê¸Ì®¤¬¤Ê¤¤¾ì¹ç¤ästable¤Î¸¡ºº¤Ï¡¢¥¬¡¼¥É¥³¥ó¥Ñ¥¤¥é¤Ë°ÜÆ°¤·¤¿¡£by mizuno
+			//ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒãªã„å ´åˆã‚„stableã®æ¤œæŸ»ã¯ã€ã‚¬ãƒ¼ãƒ‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ã«ç§»å‹•ã—ãŸã€‚by mizuno
 			searchMembrane(submem, qatoms, firstatom, firstmem);
 		}
 	}
 
-	/** ¥ê¥ó¥¯¤Ç¤Ä¤Ê¤¬¤Ã¤¿¥¢¥È¥à¤ª¤è¤Ó¤½¤Î½êÂ°Ëì¤ËÂĞ¤·¤Æ¥Ş¥Ã¥Á¥ó¥°¤ò¹Ô¤¦¡£
-	 * ¤Ş¤¿¡¢ÅÓÃæ¤Ç¸«¤Ä¤«¤Ã¤¿¡Ö¿·¤·¤¤Ëì¡×¤Î¤½¤ì¤¾¤ì¤ËÂĞ¤·¤Æ¡¢compileMembrane¤ò¸Æ¤Ö¡£
+	/** ãƒªãƒ³ã‚¯ã§ã¤ãªãŒã£ãŸã‚¢ãƒˆãƒ ãŠã‚ˆã³ãã®æ‰€å±è†œã«å¯¾ã—ã¦ãƒãƒƒãƒãƒ³ã‚°ã‚’è¡Œã†ã€‚
+	 * ã¾ãŸã€é€”ä¸­ã§è¦‹ã¤ã‹ã£ãŸã€Œæ–°ã—ã„è†œã€ã®ãã‚Œãã‚Œã«å¯¾ã—ã¦ã€compileMembraneã‚’å‘¼ã¶ã€‚
 	 */
 	void compileLinkedGroup(Atom startatom, InstructionList list) {
 		Env.c("compileLinkedGroup");
@@ -346,17 +346,17 @@ class HeadCompiler
 
 			for (int pos = 0; pos < atom.functor.getArity(); pos++) {
 				LinkOccurrence buddylink = atom.args[pos].buddy;
-				if (buddylink == null) continue; // ¥¬¡¼¥ÉÆ¿Ì¾¥ê¥ó¥¯¤ÏÌµ»ë
-				if (!atomIds.containsKey(buddylink.atom)) continue; // ±¦ÊÕ¤ä$p¡Ê¤ª¤è¤Ólhs->neg¡Ë¤Ø¤Î¥ê¥ó¥¯¤ÏÌµ»ë
+				if (buddylink == null) continue; // ã‚¬ãƒ¼ãƒ‰åŒ¿åãƒªãƒ³ã‚¯ã¯ç„¡è¦–
+				if (!atomIds.containsKey(buddylink.atom)) continue; // å³è¾ºã‚„$pï¼ˆãŠã‚ˆã³lhs->negï¼‰ã¸ã®ãƒªãƒ³ã‚¯ã¯ç„¡è¦–
 				Atom buddyatom = (Atom)buddylink.atom;
 
 				if(debug)Util.println("proc1 " + atom);
 				if(debug)Util.println("proc1 " + buddyatom);
 				if (atomToPath(buddyatom) != UNBOUND) {
-					// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¤¹¤Ç¤Ë¼èÆÀ¤·¤Æ¤¤¤ë¾ì¹ç¡£
-					// - ¥ê¥ó¥¯Àè¤Î¥¢¥È¥àbuddyatom¤È°ÊÁ°¤Ë¼èÆÀ¤·¤¿¥¢¥È¥à¤ÎÆ±°ìÀ­¤ò¸¡ºº¤¹¤ë¡£
-					//   ¤¿¤À¤·¸¡ºº¤ÏÊÑ¿ôÈÖ¹æ¤ª¤è¤Ó°ú¿ôÈÖ¹æ¤ÎÁÈ¤Ë´ğ¤Å¤¤¤¿ÊÒÊı¸ş¤Î¤ß¤Ç¤è¤¤¡£
-					// neg(Åù¼°±¦ÊÕ¥È¥Ã¥×¥ì¥Ù¥ë)->lhs(º¸ÊÕ¤ÎÈó¥È¥Ã¥×¥ì¥Ù¥ë)¤Î¤È¤­
+					// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’ã™ã§ã«å–å¾—ã—ã¦ã„ã‚‹å ´åˆã€‚
+					// - ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ buddyatomã¨ä»¥å‰ã«å–å¾—ã—ãŸã‚¢ãƒˆãƒ ã®åŒä¸€æ€§ã‚’æ¤œæŸ»ã™ã‚‹ã€‚
+					//   ãŸã ã—æ¤œæŸ»ã¯å¤‰æ•°ç•ªå·ãŠã‚ˆã³å¼•æ•°ç•ªå·ã®çµ„ã«åŸºã¥ã„ãŸç‰‡æ–¹å‘ã®ã¿ã§ã‚ˆã„ã€‚
+					// neg(ç­‰å¼å³è¾ºãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«)->lhs(å·¦è¾ºã®éãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«)ã®ã¨ã
 					if (proccxteqMap.containsKey(atom.mem)
 							&& !proccxteqMap.containsKey(buddyatom.mem)
 							&& buddyatom.mem.parent != null) {
@@ -365,8 +365,8 @@ class HeadCompiler
 					}
 					else {
 						if(debug)Util.println("proc3 " + atom);
-						// lhs(>)->lhs(<) ¤Ş¤¿¤Ï neg(>)->neg(<) ¤Ê¤é¤Ğ¡¢
-						// ¤¹¤Ç¤ËÆ±°ìÀ­¤ò³ÎÇ§¤¹¤ë¥³¡¼¥É¤ò½ĞÎÏ¤·¤Æ¤¤¤ë¤¿¤á¡¢²¿¤â¤·¤Ê¤¤
+						// lhs(>)->lhs(<) ã¾ãŸã¯ neg(>)->neg(<) ãªã‚‰ã°ã€
+						// ã™ã§ã«åŒä¸€æ€§ã‚’ç¢ºèªã™ã‚‹ã‚³ãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã—ã¦ã„ã‚‹ãŸã‚ã€ä½•ã‚‚ã—ãªã„
 						int b = atomToPath(buddyatom);
 						int t = atomToPath(atom);
 						if (b < t) continue;
@@ -375,24 +375,24 @@ class HeadCompiler
 					if(debug)Util.println("proc4 " + atom);
 				}
 				if(debug)Util.println("proc5 " + atom);
-				// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¿·¤·¤¤ÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë (*A)
+				// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’æ–°ã—ã„å¤‰æ•°ã«å–å¾—ã™ã‚‹ (*A)
 				int buddyatompath = varCount++;
 				insts.add( new Instruction(Instruction.DEREF,
 						buddyatompath, atomToPath(atom), pos, buddylink.pos ));
 
-				// ¥ê¥ó¥¯Àè¤¬Â¾¤ÎÅù¼°±¦ÊÕ¤Î¥¢¥È¥à¤Î¾ì¹ç¡ÊÅù¼°´Ö¥ê¥ó¥¯¤Î¾ì¹ç¡Ë
-				// Ëì´Ö¤Î¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥àº¿¤Î¸¡ºº¤ò¤·¡¢Ëì³¬ÁØ¤¬¥Ş¥Ã¥Á¤¹¤ë¤«¸¡ºº¤ò¹Ô¤¦¡£
-				// ¤Ş¤¿*A¤ÎDEREF¤ÎÂè4°ú¿ô¤ª¤è¤Óbuddyatompath¤òÄûÀµ¤¹¤ë¡£
+				// ãƒªãƒ³ã‚¯å…ˆãŒä»–ã®ç­‰å¼å³è¾ºã®ã‚¢ãƒˆãƒ ã®å ´åˆï¼ˆç­‰å¼é–“ãƒªãƒ³ã‚¯ã®å ´åˆï¼‰
+				// è†œé–“ã®è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ é–ã®æ¤œæŸ»ã‚’ã—ã€è†œéšå±¤ãŒãƒãƒƒãƒã™ã‚‹ã‹æ¤œæŸ»ã‚’è¡Œã†ã€‚
+				// ã¾ãŸ*Aã®DEREFã®ç¬¬4å¼•æ•°ãŠã‚ˆã³buddyatompathã‚’è¨‚æ­£ã™ã‚‹ã€‚
 				if (proccxteqMap.containsKey(atom.mem)
 						&& proccxteqMap.containsKey(buddyatom.mem) && buddyatom.mem != atom.mem) {				
 					// ( 0: 1:{$p[|*X],2:{$q[|*Y]}} :- \+($p=(atom(L),$pp),$q=(buddy(L),$qq)) | ... )
-					// ¤³¤Î¥ë¡¼¥ë¤Î¥¬¡¼¥É¤Î°ÕÌ£:
-					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) ¤Ë¤Ï¥Ş¥Ã¥Á¤·¤Ê¤¤
-					int firstindex = insts.size() - 1; // atom¤«¤é¤ÎDEREFÌ¿Îá¤ò»Ø¤¹
+					// ã“ã®ãƒ«ãƒ¼ãƒ«ã®ã‚¬ãƒ¼ãƒ‰ã®æ„å‘³:
+					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) ã«ã¯ãƒãƒƒãƒã—ãªã„
+					int firstindex = insts.size() - 1; // atomã‹ã‚‰ã®DEREFå‘½ä»¤ã‚’æŒ‡ã™
 					//
-					LinkedList<Membrane> atomSupermems  = new LinkedList<Membrane>(); // atom¤Î¹­µÁÀèÁÄËìÎó¡Ê¿ÆËìÂ¦¤¬ÀèÆ¬¡Ë
-					LinkedList<Membrane> buddySupermems = new LinkedList<Membrane>(); // buddy¤Î¹­µÁÀèÁÄËìÎó¡Ê¿ÆËìÂ¦¤¬ÀèÆ¬¡Ë
-					// ¹­µÁÀèÁÄËìÎó¤Î·×»»
+					LinkedList<Membrane> atomSupermems  = new LinkedList<Membrane>(); // atomã®åºƒç¾©å…ˆç¥–è†œåˆ—ï¼ˆè¦ªè†œå´ãŒå…ˆé ­ï¼‰
+					LinkedList<Membrane> buddySupermems = new LinkedList<Membrane>(); // buddyã®åºƒç¾©å…ˆç¥–è†œåˆ—ï¼ˆè¦ªè†œå´ãŒå…ˆé ­ï¼‰
+					// åºƒç¾©å…ˆç¥–è†œåˆ—ã®è¨ˆç®—
 					// atomSupermems = {0,1}; buddySupermems = {0,1,2}
 					Membrane mem = proccxteqMap.get(buddyatom.mem).def.lhsOcc.mem;
 					while (mem != null) {
@@ -404,7 +404,7 @@ class HeadCompiler
 						atomSupermems.addFirst(mem);
 						mem = mem.parent;
 					}
-					// ¹­µÁÀèÁÄËìÎó¤Î¶¦ÄÌÉôÊ¬ºï½ü
+					// åºƒç¾©å…ˆç¥–è†œåˆ—ã®å…±é€šéƒ¨åˆ†å‰Šé™¤
 					// atomSupermems = {}; buddySupermems = {2}
 					{
 						Iterator<Membrane> ita = atomSupermems.iterator();
@@ -414,7 +414,7 @@ class HeadCompiler
 							itb.remove();
 						}
 					}
-					// ¹­µÁÀèÁÄËìÎó¤òÌ¿ÎáÎó¤ËÊÑ´¹¤·buddyatompath¤òÄûÀµ¤¹¤ë
+					// åºƒç¾©å…ˆç¥–è†œåˆ—ã‚’å‘½ä»¤åˆ—ã«å¤‰æ›ã—buddyatompathã‚’è¨‚æ­£ã™ã‚‹
 					while (!atomSupermems.isEmpty()) {
 						mem = atomSupermems.removeLast();
 						insts.add( new Instruction(Instruction.FUNC, buddyatompath, Functor.INSIDE_PROXY) );
@@ -431,9 +431,9 @@ class HeadCompiler
 						buddyatompath += 2;
 					}
 					varCount = buddyatompath + 1;
-					int lastindex = insts.size() - 1; // buddyatom¤ò¼èÆÀ¤¹¤ë¤¿¤á¤ÎDEREFÌ¿Îá¤ò»Ø¤¹
+					int lastindex = insts.size() - 1; // buddyatomã‚’å–å¾—ã™ã‚‹ãŸã‚ã®DEREFå‘½ä»¤ã‚’æŒ‡ã™
 
-					// derefÌ¿Îá¤ÎÂè4°ú¿ô¤ò½¤Àµ¤¹¤ë					
+					// derefå‘½ä»¤ã®ç¬¬4å¼•æ•°ã‚’ä¿®æ­£ã™ã‚‹					
 					// - deref [-tmp1atom,atom,atompos,buddypos] ==> deref [-tmp1atom,atom,atompos,1]
 //					((Instruction)insts.get(firstindex)).setArg4(new Integer(1));
 					Instruction oldfirst = insts.remove(firstindex);
@@ -449,21 +449,21 @@ class HeadCompiler
 				}
 
 				if (atomToPath(buddyatom) != UNBOUND) {
-					// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¤¹¤Ç¤Ë¼èÆÀ¤·¤Æ¤¤¤ë¾ì¹ç
-					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs ¤Ê¤Î¤Ç¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ÎÆ±°ìÀ­¤ò³ÎÇ§
+					// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’ã™ã§ã«å–å¾—ã—ã¦ã„ã‚‹å ´åˆ
+					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs ãªã®ã§ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã®åŒä¸€æ€§ã‚’ç¢ºèª
 					insts.add( new Instruction(Instruction.EQATOM,
 							buddyatompath, atomToPath(buddyatom) ));
 					continue;
 				}
 
-				// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤ò¤Ş¤À¼èÆÀ¤·¤Æ¤¤¤Ê¤¤¾ì¹ç
+				// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’ã¾ã å–å¾—ã—ã¦ã„ãªã„å ´åˆ
 
-				// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥àbuddyatom¤È¥Õ¥¡¥ó¥¯¥¿¤ª¤è¤Ó½êÂ°Ëì¤¬Æ±¤¸¥¢¥È¥à¤Î¤¦¤Á¡¢
-				// º£¤Ş¤Ç¼èÆÀ¤·¤¿¥¢¥È¥à¤Ç¤¢¤ê¡¢¤«¤Äº£²ó¤ÎÅşÃåÀè¤Î°ú¿ô°ÌÃÖ¤Î¥ê¥ó¥¯¤òµÕ¸ş¤­¤Ë¤¿¤É¤ë¤È
-				// ±¦ÊÕ¤Ş¤¿¤Ï$p¤Ë¤Ä¤Ê¤¬¤ë¤è¤¦¤Ê¤É¤Î¥¢¥È¥à¤È¤âbuddyatom¤¬°Û¤Ê¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë¡£(2004.6.4)
+				// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ buddyatomã¨ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŠã‚ˆã³æ‰€å±è†œãŒåŒã˜ã‚¢ãƒˆãƒ ã®ã†ã¡ã€
+				// ä»Šã¾ã§å–å¾—ã—ãŸã‚¢ãƒˆãƒ ã§ã‚ã‚Šã€ã‹ã¤ä»Šå›ã®åˆ°ç€å…ˆã®å¼•æ•°ä½ç½®ã®ãƒªãƒ³ã‚¯ã‚’é€†å‘ãã«ãŸã©ã‚‹ã¨
+				// å³è¾ºã¾ãŸã¯$pã«ã¤ãªãŒã‚‹ã‚ˆã†ãªã©ã®ã‚¢ãƒˆãƒ ã¨ã‚‚buddyatomãŒç•°ãªã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹ã€‚(2004.6.4)
 				Membrane[] testmems = { buddyatom.mem };
 				if (proccxteqMap.containsKey(buddyatom.mem)) {
-					// $pÅù¼°¥È¥Ã¥×¥ì¥Ù¥ë¤Ø¤Î¥ê¥ó¥¯¤Î¤È¤­¤Ï¡¢$p¤¬¥Ø¥Ã¥É½Ğ¸½¤¹¤ëËì¤È¤âÈæ³Ó¤¹¤ë
+					// $pç­‰å¼ãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã¸ã®ãƒªãƒ³ã‚¯ã®ã¨ãã¯ã€$pãŒãƒ˜ãƒƒãƒ‰å‡ºç¾ã™ã‚‹è†œã¨ã‚‚æ¯”è¼ƒã™ã‚‹
 					testmems = new Membrane[]{ buddyatom.mem, proccxteqMap.get(buddyatom.mem).def.lhsOcc.mem };
 				}
 				for (int i = 0; i < testmems.length; i++) {
@@ -476,7 +476,7 @@ class HeadCompiler
 					}
 				}	
 
-				// ¥ê¥ó¥¯Àè¤Î¥¢¥È¥à¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+				// ãƒªãƒ³ã‚¯å…ˆã®ã‚¢ãƒˆãƒ ã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 
 				atomPaths.put(buddyatom, new Integer(buddyatompath));
 				//qatoms.add(buddyatom);
@@ -484,9 +484,9 @@ class HeadCompiler
 				atomqueue.addLast( buddyatom );
 				insts.add(new Instruction(Instruction.FUNC, buddyatompath, buddyatom.functor));
 
-				// ¥ê¥ó¥¯Àè¤ÎËì¤ÎÆÃÄê
+				// ãƒªãƒ³ã‚¯å…ˆã®è†œã®ç‰¹å®š
 				if (atom.functor.isOutsideProxy() && pos == 0) {
-					// »ÒËì¤Ø¤Î¥ê¥ó¥¯¤Î¾ì¹ç¡¢»ÒËì¤ÎÆ±°ìÀ­¤ò¸¡ºº¤·¤Ê¤±¤ì¤Ğ¤Ê¤é¤Ê¤¤
+					// å­è†œã¸ã®ãƒªãƒ³ã‚¯ã®å ´åˆã€å­è†œã®åŒä¸€æ€§ã‚’æ¤œæŸ»ã—ãªã‘ã‚Œã°ãªã‚‰ãªã„
 					Membrane buddymem = buddyatom.mem;								
 					int buddymempath = memToPath(buddyatom.mem);
 					if (buddymempath != UNBOUND) {
@@ -498,7 +498,7 @@ class HeadCompiler
 						insts.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath, buddyatom.mem.name ));
 						newmemlist.add(buddymem);
 						if(Env.slimcode){
-							// GETMEM»şÂå¤Î¥³¡¼¥É
+							// GETMEMæ™‚ä»£ã®ã‚³ãƒ¼ãƒ‰
 							for(Membrane othermem : buddymem.parent.mems){
 								if (othermem != buddymem && memToPath(othermem) != UNBOUND) {
 									insts.add(new Instruction( Instruction.NEQMEM,	buddymempath, memToPath(othermem) ));
@@ -508,12 +508,12 @@ class HeadCompiler
 						}
 					}
 				}
-				//¥ê¥ó¥¯¤Î°ì³ç¼èÆÀ(RISC²½) by mizuno
+				//ãƒªãƒ³ã‚¯ã®ä¸€æ‹¬å–å¾—(RISCåŒ–) by mizuno
 				getLinks(buddyatompath, buddyatom.functor.getArity(), insts);
 			}
 		}
-		// ¸«¤Ä¤«¤Ã¤¿¿·¤·¤¤»ÒËì¤Ë¤¢¤ë¥¢¥È¥à¤òÍ¥ÀèÅª¤Ë¸¡ºº¤¹¤ë¡£
-		// ¤¿¤À¤·¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤¬¤¢¤ëËì¤òÍ¥Àè¤¹¤ë¡£
+		// è¦‹ã¤ã‹ã£ãŸæ–°ã—ã„å­è†œã«ã‚ã‚‹ã‚¢ãƒˆãƒ ã‚’å„ªå…ˆçš„ã«æ¤œæŸ»ã™ã‚‹ã€‚
+		// ãŸã ã—ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ãŒã‚ã‚‹è†œã‚’å„ªå…ˆã™ã‚‹ã€‚
 		nextmem:
 		for (Iterator<Membrane> it = newmemlist.iterator(); it.hasNext();)
 		{
@@ -536,14 +536,14 @@ class HeadCompiler
 			else compileMembrane(mem, list);
 		}
 	}
-	/** °ú¤­Â³¤­¤³¤Î¥Ø¥Ã¥É¤ò·¿¤Ê¤·¤Ç¥³¥ó¥Ñ¥¤¥ë¤¹¤ë¤¿¤á¤Î½àÈ÷¤ò¤¹¤ë¡£*/
+	/** å¼•ãç¶šãã“ã®ãƒ˜ãƒƒãƒ‰ã‚’å‹ãªã—ã§ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹ãŸã‚ã®æº–å‚™ã‚’ã™ã‚‹ã€‚*/
 	void switchToUntypedCompilation()
 	{
 		fFindDataAtoms = true;
 		memVisited.clear();
 	}
 
-	/** Ëì¤ª¤è¤Ó»ÒÂ¹¤ÎËì¤ËÂĞ¤·¤Æ¥Ş¥Ã¥Á¥ó¥°¤ò¹Ô¤¦ */
+	/** è†œãŠã‚ˆã³å­å­«ã®è†œã«å¯¾ã—ã¦ãƒãƒƒãƒãƒ³ã‚°ã‚’è¡Œã† */
 	void compileMembrane(Membrane mem, InstructionList list)
 	{
 		if (memVisited.contains(mem)) return;
@@ -559,16 +559,16 @@ class HeadCompiler
 		{
 			if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 			if (atomToPath(atom) != UNBOUND) continue;
-			// ¸«¤Ä¤«¤Ã¤¿¥¢¥È¥à¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+			// è¦‹ã¤ã‹ã£ãŸã‚¢ãƒˆãƒ ã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 			int atompath = varCount++;
 			insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
 //			insts.add(Instruction.findatom2(atompath, thismempath, findatomcount, atom.functor));
 
 //				
-			// ¤¹¤Ç¤Ë¼èÆÀ¤·¤Æ¤¤¤ëÆ±¤¸½êÂ°Ëì¤«¤ÄÆ±¤¸¥Õ¥¡¥ó¥¯¥¿¤ò»ı¤Ä¥¢¥È¥à¤È¤ÎÈóÆ±°ìÀ­¤ò¸¡ºº¤¹¤ë
+			// ã™ã§ã«å–å¾—ã—ã¦ã„ã‚‹åŒã˜æ‰€å±è†œã‹ã¤åŒã˜ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’æŒã¤ã‚¢ãƒˆãƒ ã¨ã®éåŒä¸€æ€§ã‚’æ¤œæŸ»ã™ã‚‹
 			emitNeqAtoms(mem, atom, atompath, insts);
 			atomPaths.put(atom, new Integer(atompath));
-			//¥ê¥ó¥¯¤Î°ì³ç¼èÆÀ(RISC²½) by mizuno
+			//ãƒªãƒ³ã‚¯ã®ä¸€æ‹¬å–å¾—(RISCåŒ–) by mizuno
 			getLinks(atompath, atom.functor.getArity(), insts);
 			compileLinkedGroup(atom, list);
 		}
@@ -577,14 +577,14 @@ class HeadCompiler
 			int submempath = memToPath(submem);
 			if (submempath == UNBOUND)
 			{
-				// !fFindDataAtoms¤Î¤È¤­¡¢¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤ò´Ş¤Ş¤Ê¤¤»ÒËì¤Î¼èÆÀ¤ò¸å²ó¤·¤Ë¤¹¤ë
+				// !fFindDataAtomsã®ã¨ãã€ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã‚’å«ã¾ãªã„å­è†œã®å–å¾—ã‚’å¾Œå›ã—ã«ã™ã‚‹
 				if ( !fFindDataAtoms && !hasActiveAtom(submem)) continue;
 
-				// »ÒËì¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+				// å­è†œã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 				submempath = varCount++;
 				insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
 				if(Env.slimcode){
-					// NEQMEM ¤ÏÉÔÍ×¤Ë¤Ê¤Ã¤Æ¤¤¤ë¤¬¡¢»²¹Í¤Î¤¿¤á¤Ë¥³¡¼¥É¤Ï»Ä¤·¤Æ¤ª¤¯¡£
+					// NEQMEM ã¯ä¸è¦ã«ãªã£ã¦ã„ã‚‹ãŒã€å‚è€ƒã®ãŸã‚ã«ã‚³ãƒ¼ãƒ‰ã¯æ®‹ã—ã¦ãŠãã€‚
 					for(Membrane othermem : mem.mems){
 						int other = memToPath(othermem);
 						if (other == UNBOUND) continue;
@@ -596,7 +596,7 @@ class HeadCompiler
 			}
 			
 			
-			//¥×¥í¥»¥¹Ê¸Ì®¤¬¤Ê¤¤¾ì¹ç¤ästable¤Î¸¡ºº¤Ï¡¢¥¬¡¼¥É¥³¥ó¥Ñ¥¤¥é¤Ë°ÜÆ°¤·¤¿¡£by mizuno
+			//ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒãªã„å ´åˆã‚„stableã®æ¤œæŸ»ã¯ã€ã‚¬ãƒ¼ãƒ‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ã«ç§»å‹•ã—ãŸã€‚by mizuno
 			compileMembrane(submem, list);
 		}
 		if(varCount > maxVarCount)
@@ -620,7 +620,7 @@ class HeadCompiler
 			makeSameNameMap(submem, sameNameMap, linkNameToAtomMap);
 	}
 	
-	/* Æ±Ì¾·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬Î¥¤ËÈ¼¤¤¡¢Ãæ´ÖÌ¿Îáfindproccxt¤òÄÉ²Ã¤¹¤ë */
+	/* åŒåå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†é›¢ã«ä¼´ã„ã€ä¸­é–“å‘½ä»¤findproccxtã‚’è¿½åŠ ã™ã‚‹ */
 	void compileSameProcessContext(Membrane mem, InstructionList list) {//seiji
 		List<Instruction> insts = list.insts;
 		HashMap<String, String> sameNameMap = new HashMap<String, String>();
@@ -659,14 +659,14 @@ class HeadCompiler
 		}
 	}
 	
-	/** ¤¹¤Ç¤Ë¼èÆÀ¤·¤Æ¤¤¤ëÆ±¤¸½êÂ°Ëì¤«¤ÄÆ±¤¸¥Õ¥¡¥ó¥¯¥¿¤ò»ı¤Ä¥¢¥È¥à¤È¤ÎÈóÆ±°ìÀ­¤ò¸¡ºº¤¹¤ë 
-	 * (n-kato 2008.01.15) TODO Ã¯¤«¤¬¤³¤Î¥á¥½¥Ã¥É¤ò³ÈÄ¥¤Ş¤¿¤Ï»²¹Í¤Ë¤·¤Æ¥¬¡¼¥ÉunaryÅù¤Î¥³¥ó¥Ñ¥¤¥ë¥Ğ¥°¤ò½¤Àµ¤¹¤ë
-	 * ¥Æ¥¹¥ÈÍÑ¥×¥í¥°¥é¥à-->   5($seven),7($five) :- $seven=$five+2 |. 5=7.
+	/** ã™ã§ã«å–å¾—ã—ã¦ã„ã‚‹åŒã˜æ‰€å±è†œã‹ã¤åŒã˜ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’æŒã¤ã‚¢ãƒˆãƒ ã¨ã®éåŒä¸€æ€§ã‚’æ¤œæŸ»ã™ã‚‹ 
+	 * (n-kato 2008.01.15) TODO èª°ã‹ãŒã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’æ‹¡å¼µã¾ãŸã¯å‚è€ƒã«ã—ã¦ã‚¬ãƒ¼ãƒ‰unaryç­‰ã®ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ãƒã‚°ã‚’ä¿®æ­£ã™ã‚‹
+	 * ãƒ†ã‚¹ãƒˆç”¨ãƒ—ãƒ­ã‚°ãƒ©ãƒ -->   5($seven),7($five) :- $seven=$five+2 |. 5=7.
 	 */
 	private void emitNeqAtoms(Membrane mem, Atom atom, int atompath, List<Instruction> insts) {
 		Membrane[] testmems = { mem };
 		if (proccxteqMap.containsKey(mem)) {
-			// $pÅù¼°¥È¥Ã¥×¥ì¥Ù¥ë¤Î¥¢¥È¥à¤Î¤È¤­¤Ï¡¢$p¤¬¥Ø¥Ã¥É½Ğ¸½¤¹¤ëËì¤È¤âÈæ³Ó¤¹¤ë
+			// $pç­‰å¼ãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã®ã‚¢ãƒˆãƒ ã®ã¨ãã¯ã€$pãŒãƒ˜ãƒƒãƒ‰å‡ºç¾ã™ã‚‹è†œã¨ã‚‚æ¯”è¼ƒã™ã‚‹
 			testmems = new Membrane[]{ mem, proccxteqMap.get(mem).def.lhsOcc.mem };
 		}
 		for (int i = 0; i < testmems.length; i++) {
@@ -676,7 +676,7 @@ class HeadCompiler
 				if (!otheratom.functor.equals(atom.functor)) continue;
 				//if (otheratom == atom) continue;
 				insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
-				/* NEQATOM¤¬¤¢¤ë¾ì¹ç¡¢Æ±¥Õ¥¡¥ó¥¯¥¿¤Î¥¢¥È¥à¤Ë¥Ş¥Ã¥Á¤µ¤ì¤ë¤¬¡¢branch¤ÇÎ¾Êı¤Î¥¢¥È¥à¤òµ¯ÅÀ¤È¤¹¤ëÌ¿ÎáÎó¤¬½ĞÎÏ¤µ¤ì¤ë¤¿¤á¡¢connect¤ÏÉÔÍ×
+				/* NEQATOMãŒã‚ã‚‹å ´åˆã€åŒãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®ã‚¢ãƒˆãƒ ã«ãƒãƒƒãƒã•ã‚Œã‚‹ãŒã€branchã§ä¸¡æ–¹ã®ã‚¢ãƒˆãƒ ã‚’èµ·ç‚¹ã¨ã™ã‚‹å‘½ä»¤åˆ—ãŒå‡ºåŠ›ã•ã‚Œã‚‹ãŸã‚ã€connectã¯ä¸è¦
 				  testmems[i].connect(otheratom, atom);
 				 */
 			}
@@ -738,7 +738,7 @@ class HeadCompiler
 						groupinst.add(new Instruction(Instruction.BRANCH, subinst));
 
 						//tmplabel.insts = ;
-						// ¸«¤Ä¤«¤Ã¤¿¥¢¥È¥à¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+						// è¦‹ã¤ã‹ã£ãŸã‚¢ãƒˆãƒ ã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 						int atompath = varCount++;
 						if(!Env.findatom2){
 							//insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
@@ -752,14 +752,14 @@ class HeadCompiler
 						atomPaths.put(atom, atompath);
 						if(debug)Util.println("put " + atom);
 
-						//¥ê¥ó¥¯¤Î°ì³ç¼èÆÀ(RISC²½) by mizuno
+						//ãƒªãƒ³ã‚¯ã®ä¸€æ‹¬å–å¾—(RISCåŒ–) by mizuno
 						getLinks(atompath, atom.functor.getArity(), subinst.insts);
 						compileLinkedGroup(atom, subinst);
 						// if(ratoms!=null)ratoms.add(atom);
 						List<Integer> memActuals  = getMemActuals();
 						List<Integer> atomActuals = getAtomActuals();
 						List varActuals  = getVarActuals();
-						// - ¥³¡¼¥É#1
+						// - ã‚³ãƒ¼ãƒ‰#1
 
 						subinst.add(new Instruction(Instruction.RESETVARS,memActuals, atomActuals, varActuals) );
 						subinst.add(new Instruction(Instruction.PROCEED));
@@ -784,10 +784,10 @@ class HeadCompiler
 				thismempath = memToPath(mem);
 				int submempath = memToPath(submem);
 				if (submempath == UNBOUND) {
-					// !fFindDataAtoms¤Î¤È¤­¡¢¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤ò´Ş¤Ş¤Ê¤¤»ÒËì¤Î¼èÆÀ¤ò¸å²ó¤·¤Ë¤¹¤ë
+					// !fFindDataAtomsã®ã¨ãã€ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã‚’å«ã¾ãªã„å­è†œã®å–å¾—ã‚’å¾Œå›ã—ã«ã™ã‚‹
 					if ( !fFindDataAtoms && !hasActiveAtom(submem)) continue;
 
-					// »ÒËì¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+					// å­è†œã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 					submempath = varCount++;
 					if(Env.findatom2){
 						//	insts.add(Instruction.anymem2(submempath, thismempath, submem.kind, anymemcount, submem.name));
@@ -796,7 +796,7 @@ class HeadCompiler
 					} else
 						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
 					if(Env.slimcode){
-						// NEQMEM ¤ÏÉÔÍ×¤Ë¤Ê¤Ã¤Æ¤¤¤ë¤¬¡¢»²¹Í¤Î¤¿¤á¤Ë¥³¡¼¥É¤Ï»Ä¤·¤Æ¤ª¤¯¡£
+						// NEQMEM ã¯ä¸è¦ã«ãªã£ã¦ã„ã‚‹ãŒã€å‚è€ƒã®ãŸã‚ã«ã‚³ãƒ¼ãƒ‰ã¯æ®‹ã—ã¦ãŠãã€‚
 						for(Membrane othermem : mem.mems){
 							int other = memToPath(othermem);
 							if (other == UNBOUND) continue;
@@ -807,7 +807,7 @@ class HeadCompiler
 					}
 					memPaths.put(submem, submempath);
 				}
-				//¥×¥í¥»¥¹Ê¸Ì®¤¬¤Ê¤¤¾ì¹ç¤ästable¤Î¸¡ºº¤Ï¡¢¥¬¡¼¥É¥³¥ó¥Ñ¥¤¥é¤Ë°ÜÆ°¤·¤¿¡£by mizuno
+				//ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒãªã„å ´åˆã‚„stableã®æ¤œæŸ»ã¯ã€ã‚¬ãƒ¼ãƒ‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ã«ç§»å‹•ã—ãŸã€‚by mizuno
 				compileMembraneForSlimcode(submem, list, false);
 			}
 		} else {
@@ -857,7 +857,7 @@ class HeadCompiler
 						emitNeqAtoms(mem, atom, atompath, insts);
 						atomPaths.put(atom, atompath);
 
-						//¥ê¥ó¥¯¤Î°ì³ç¼èÆÀ(RISC²½) by mizuno
+						//ãƒªãƒ³ã‚¯ã®ä¸€æ‹¬å–å¾—(RISCåŒ–) by mizuno
 						getLinks(atompath, atom.functor.getArity(), insts);
 						compileLinkedGroup(atom, list);
 						compileMembraneSecondTime(mem, list, atommems, false);
@@ -893,7 +893,7 @@ class HeadCompiler
 						InstructionList subinst = new InstructionList(groupinst);
 						groupinst.add(new Instruction(Instruction.BRANCH, subinst));
 
-						// ¸«¤Ä¤«¤Ã¤¿¥¢¥È¥à¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+						// è¦‹ã¤ã‹ã£ãŸã‚¢ãƒˆãƒ ã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 						int atompath = varCount++;
 						if(Env.findatom2 && rireki){
 //							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
@@ -904,7 +904,7 @@ class HeadCompiler
 						emitNeqAtoms(mem, atom, atompath, subinst.insts);
 						atomPaths.put(atom, atompath);
 
-						//¥ê¥ó¥¯¤Î°ì³ç¼èÆÀ(RISC²½) by mizuno
+						//ãƒªãƒ³ã‚¯ã®ä¸€æ‹¬å–å¾—(RISCåŒ–) by mizuno
 						getLinks(atompath, atom.functor.getArity(), subinst.insts);
 						compileLinkedGroup(atom, subinst);
 						compileMembraneSecondTime(mem, subinst, atommems, false);
@@ -936,10 +936,10 @@ class HeadCompiler
 				thismempath = memToPath(mem);
 				int submempath = memToPath(submem);
 				if (submempath == UNBOUND) {
-					// !fFindDataAtoms¤Î¤È¤­¡¢¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤ò´Ş¤Ş¤Ê¤¤»ÒËì¤Î¼èÆÀ¤ò¸å²ó¤·¤Ë¤¹¤ë
+					// !fFindDataAtomsã®ã¨ãã€ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã‚’å«ã¾ãªã„å­è†œã®å–å¾—ã‚’å¾Œå›ã—ã«ã™ã‚‹
 					if ( !fFindDataAtoms && !hasActiveAtom(submem) ) continue;
 
-					// »ÒËì¤òÊÑ¿ô¤Ë¼èÆÀ¤¹¤ë
+					// å­è†œã‚’å¤‰æ•°ã«å–å¾—ã™ã‚‹
 					submempath = varCount++;
 					if(Env.findatom2 && rireki){
 						//insts.add(Instruction.anymem2(submempath, thismempath, submem.kind, anymemcount, submem.name));
@@ -948,7 +948,7 @@ class HeadCompiler
 					} else
 						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
 					if(Env.slimcode){
-						// NEQMEM ¤ÏÉÔÍ×¤Ë¤Ê¤Ã¤Æ¤¤¤ë¤¬¡¢»²¹Í¤Î¤¿¤á¤Ë¥³¡¼¥É¤Ï»Ä¤·¤Æ¤ª¤¯¡£
+						// NEQMEM ã¯ä¸è¦ã«ãªã£ã¦ã„ã‚‹ãŒã€å‚è€ƒã®ãŸã‚ã«ã‚³ãƒ¼ãƒ‰ã¯æ®‹ã—ã¦ãŠãã€‚
 						for(Membrane othermem : mem.mems){
 							int other = memToPath(othermem);
 							if (other == UNBOUND) continue;
@@ -958,7 +958,7 @@ class HeadCompiler
 					}
 					memPaths.put(submem, submempath);
 				}
-				//¥×¥í¥»¥¹Ê¸Ì®¤¬¤Ê¤¤¾ì¹ç¤ästable¤Î¸¡ºº¤Ï¡¢¥¬¡¼¥É¥³¥ó¥Ñ¥¤¥é¤Ë°ÜÆ°¤·¤¿¡£by mizuno
+				//ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒãªã„å ´åˆã‚„stableã®æ¤œæŸ»ã¯ã€ã‚¬ãƒ¼ãƒ‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ©ã«ç§»å‹•ã—ãŸã€‚by mizuno
 				compileMembraneForSlimcode(submem, list, false);
 				compileMembraneSecondTime(mem, list, atommems.subList(listi+1, atommems.size()), false);
 				return ;
@@ -969,19 +969,19 @@ class HeadCompiler
 	}
 
 
-	/** Ëì¤ª¤è¤Ó»ÒÂ¹¤ÎËì¤ËÂĞ¤·¤Æ¼«Í³¥ê¥ó¥¯¤Î¸Ä¿ô¤òÄ´¤Ù¤ë¡£
-	 * <p>¤«¤Ä¤Æ$pÅù¼°±¦ÊÕËì°Ê³°¤Î¾ì¹ç¤Ï¡¢¼«Í³¥ê¥ó¥¯¤Ë´Ø¤¹¤ë¸¡ºº¤ò¹Ô¤¦É¬Í×¤¬¤¢¤Ã¤¿¡£
-	 * ¤·¤«¤·¸½ºß redex "T¦È" ¤Ë = ¤ò´Ş¤ó¤Ç¤â¤è¤¤¸À¸ì»ÅÍÍ¤Ë¤Ê¤Ã¤Æ¤¤¤ë¤¿¤á¡¢¤³¤Î¸¡ºº¤Ï¼Â¤ÏÉÔÍ×¡£
-	 * ¤·¤¿¤¬¤Ã¤Æ¤³¤Î¥á¥½¥Ã¥É¤Ï¸Æ¤Ğ¤ì¤Ê¤¤¡£(n-kato 2004.11.24--2004.11.26) 
-	 * <p>¤³¤Î¥á¥½¥Ã¥É¤ÎÊı¼°¤À¤È¤³¤ÎËì¤òÄÌ²á¤·¤Æ»ÒËì·ĞÍ³¤ÇºÆ¤Ó¿ÆËì¤ËÌá¤Ã¤Æ¤¤¤¯µ¶¼«Í³¥ê¥ó¥¯¤¬¸¡½Ğ¤Ç¤­¤Ê¤¤¡£
-	 * ¥ê¥ó¥¯Â«¤¬Ìµ¤¤¾ì¹ç¤Î¥³¡¼¥É¤ÏÉ¬Í×¤Ê¤Î¤ÇÉü³è¤µ¤»¤¿¡£(2004.12.4)
+	/** è†œãŠã‚ˆã³å­å­«ã®è†œã«å¯¾ã—ã¦è‡ªç”±ãƒªãƒ³ã‚¯ã®å€‹æ•°ã‚’èª¿ã¹ã‚‹ã€‚
+	 * <p>ã‹ã¤ã¦$pç­‰å¼å³è¾ºè†œä»¥å¤–ã®å ´åˆã¯ã€è‡ªç”±ãƒªãƒ³ã‚¯ã«é–¢ã™ã‚‹æ¤œæŸ»ã‚’è¡Œã†å¿…è¦ãŒã‚ã£ãŸã€‚
+	 * ã—ã‹ã—ç¾åœ¨ redex "TÎ¸" ã« = ã‚’å«ã‚“ã§ã‚‚ã‚ˆã„è¨€èªä»•æ§˜ã«ãªã£ã¦ã„ã‚‹ãŸã‚ã€ã“ã®æ¤œæŸ»ã¯å®Ÿã¯ä¸è¦ã€‚
+	 * ã—ãŸãŒã£ã¦ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã¯å‘¼ã°ã‚Œãªã„ã€‚(n-kato 2004.11.24--2004.11.26) 
+	 * <p>ã“ã®ãƒ¡ã‚½ãƒƒãƒ‰ã®æ–¹å¼ã ã¨ã“ã®è†œã‚’é€šéã—ã¦å­è†œçµŒç”±ã§å†ã³è¦ªè†œã«æˆ»ã£ã¦ã„ãå½è‡ªç”±ãƒªãƒ³ã‚¯ãŒæ¤œå‡ºã§ããªã„ã€‚
+	 * ãƒªãƒ³ã‚¯æŸãŒç„¡ã„å ´åˆã®ã‚³ãƒ¼ãƒ‰ã¯å¿…è¦ãªã®ã§å¾©æ´»ã•ã›ãŸã€‚(2004.12.4)
 	 * */
 	void checkFreeLinkCount(Membrane mem, List<Instruction> insts) {
 		if (!mem.processContexts.isEmpty()) {
 			int thismempath = memToPath(mem);
-			ProcessContext pc = mem.processContexts.get(0); // º¸ÊÕËì¤Î$p¡ÊÉ¬¤ºÈó¥È¥Ã¥×Ëì¡Ë
-//			// ÌÀ¼¨Åª¤Ê¥ê¥ó¥¯Àè¡ÊÉ¬¤ºÈó¥È¥Ã¥×Ëì¤Î¥¢¥È¥à¡Ê¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥à¤ò´Ş¤à¡Ë¡Ë¤¬
-//			// ¼«Í³¥ê¥ó¥¯½ĞÎÏ´ÉÍı¥¢¥È¥à¤Ç¤Ê¤¤¤³¤È¤ò³ÎÇ§¤¹¤ë
+			ProcessContext pc = mem.processContexts.get(0); // å·¦è¾ºè†œã®$pï¼ˆå¿…ãšéãƒˆãƒƒãƒ—è†œï¼‰
+//			// æ˜ç¤ºçš„ãªãƒªãƒ³ã‚¯å…ˆï¼ˆå¿…ãšéãƒˆãƒƒãƒ—è†œã®ã‚¢ãƒˆãƒ ï¼ˆè‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ ã‚’å«ã‚€ï¼‰ï¼‰ãŒ
+//			// è‡ªç”±ãƒªãƒ³ã‚¯å‡ºåŠ›ç®¡ç†ã‚¢ãƒˆãƒ ã§ãªã„ã“ã¨ã‚’ç¢ºèªã™ã‚‹
 //			for (int i = 0; i < pc.args.length; i++) {
 //			int freelinktestedatompath = varcount++;
 //			match.add(new Instruction(Instruction.DEREFATOM, freelinktestedatompath,
@@ -989,7 +989,7 @@ class HeadCompiler
 //			match.add(new Instruction(Instruction.NOTFUNC, freelinktestedatompath,
 //			Functor.INSIDE_PROXY));
 //			}
-			// ¥ê¥ó¥¯Â«¤¬Ìµ¤¤¾ì¹ç
+			// ãƒªãƒ³ã‚¯æŸãŒç„¡ã„å ´åˆ
 			if (pc.bundle == null) {
 				insts.add(new Instruction(Instruction.NFREELINKS, thismempath,
 						mem.getFreeLinkAtomCount()));
@@ -1002,8 +1002,8 @@ class HeadCompiler
 //	public Instruction getResetVarsInstruction() {
 //	return Instruction.resetvars(getMemActuals(), getAtomActuals(), getVarActuals());
 //	}
-	/** ¼¡¤ÎÌ¿ÎáÎó¡Ê¥Ø¥Ã¥ÉÌ¿ÎáÎó¢ª¥¬¡¼¥ÉÌ¿ÎáÎó¢ª¥Ü¥Ç¥£Ì¿ÎáÎó¡Ë¤Ø¤ÎËì°ú¿ôÎó¤òÊÖ¤¹¡£
-	 * ¶ñÂÎÅª¤Ë¤Ïmems¤ËÂĞ±ş¤¹¤ëÊÑ¿ôÈÖ¹æ¤Î¥ê¥¹¥È¤ò³ÊÇ¼¤·¤¿ArrayList¤òÊÖ¤¹¡£*/
+	/** æ¬¡ã®å‘½ä»¤åˆ—ï¼ˆãƒ˜ãƒƒãƒ‰å‘½ä»¤åˆ—â†’ã‚¬ãƒ¼ãƒ‰å‘½ä»¤åˆ—â†’ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ï¼‰ã¸ã®è†œå¼•æ•°åˆ—ã‚’è¿”ã™ã€‚
+	 * å…·ä½“çš„ã«ã¯memsã«å¯¾å¿œã™ã‚‹å¤‰æ•°ç•ªå·ã®ãƒªã‚¹ãƒˆã‚’æ ¼ç´ã—ãŸArrayListã‚’è¿”ã™ã€‚*/
 	List<Integer> getMemActuals() {
 		List<Integer> args = new ArrayList<Integer>();		
 		for (int i = 0; i < mems.size(); i++) {
@@ -1011,8 +1011,8 @@ class HeadCompiler
 		}
 		return args;
 	}
-	/** ¼¡¤ÎÌ¿ÎáÎó¡Ê¥Ø¥Ã¥ÉÌ¿ÎáÎó¢ª¥¬¡¼¥ÉÌ¿ÎáÎó¢ª¥Ü¥Ç¥£Ì¿ÎáÎó¡Ë¤Ø¤Î¥¢¥È¥à°ú¿ôÎó¤òÊÖ¤¹¡£
-	 * ¶ñÂÎÅª¤Ë¤ÏHeadCompiler¤Ïatoms¤ËÂĞ±ş¤¹¤ëÊÑ¿ôÈÖ¹æ¤Î¥ê¥¹¥È¤ò³ÊÇ¼¤·¤¿ArrayList¤òÊÖ¤¹¡£*/
+	/** æ¬¡ã®å‘½ä»¤åˆ—ï¼ˆãƒ˜ãƒƒãƒ‰å‘½ä»¤åˆ—â†’ã‚¬ãƒ¼ãƒ‰å‘½ä»¤åˆ—â†’ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ï¼‰ã¸ã®ã‚¢ãƒˆãƒ å¼•æ•°åˆ—ã‚’è¿”ã™ã€‚
+	 * å…·ä½“çš„ã«ã¯HeadCompilerã¯atomsã«å¯¾å¿œã™ã‚‹å¤‰æ•°ç•ªå·ã®ãƒªã‚¹ãƒˆã‚’æ ¼ç´ã—ãŸArrayListã‚’è¿”ã™ã€‚*/
 	List<Integer> getAtomActuals() {
 		List<Integer> args = new ArrayList<Integer>();		
 		for (int i = 0; i < atoms.size(); i++) {
@@ -1020,8 +1020,8 @@ class HeadCompiler
 		}
 		return args;
 	}		
-	/** ¼¡¤ÎÌ¿ÎáÎó¡Ê¥Ø¥Ã¥ÉÌ¿ÎáÎó¢ª¥¬¡¼¥ÉÌ¿ÎáÎó¢ª¥Ü¥Ç¥£Ì¿ÎáÎó¡Ë¤Ø¤ÎËì¤ä¥¢¥È¥à°Ê³°¤Î°ú¿ôÎó¤òÊÖ¤¹¡£
-	 * ¶ñÂÎÅª¤Ë¤ÏHeadCompiler¤Ï¶õ¤ÎArrayList¤òÊÖ¤¹¡£*/
+	/** æ¬¡ã®å‘½ä»¤åˆ—ï¼ˆãƒ˜ãƒƒãƒ‰å‘½ä»¤åˆ—â†’ã‚¬ãƒ¼ãƒ‰å‘½ä»¤åˆ—â†’ãƒœãƒ‡ã‚£å‘½ä»¤åˆ—ï¼‰ã¸ã®è†œã‚„ã‚¢ãƒˆãƒ ä»¥å¤–ã®å¼•æ•°åˆ—ã‚’è¿”ã™ã€‚
+	 * å…·ä½“çš„ã«ã¯HeadCompilerã¯ç©ºã®ArrayListã‚’è¿”ã™ã€‚*/
 	List getVarActuals() {
 		return new ArrayList();
 	}
@@ -1049,7 +1049,7 @@ class HeadCompiler
 	}
 	////////////////////////////////////////////////////////////////
 
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ò¥³¥ó¥Ñ¥¤¥ë¤¹¤ë */
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹ */
 	void compileNegativeCondition(List<ProcessContextEquation> eqs, InstructionList list) throws CompileException{
 		List<Instruction> insts = list.insts;
 		//int formals = varcount;
@@ -1065,9 +1065,9 @@ class HeadCompiler
 			} else {
 				compileMembrane(eq.mem, list);
 			}
-			// ¥×¥í¥»¥¹Ê¸Ì®¤¬¤Ê¤¤¤È¤­¤Ï¡¢¥¢¥È¥à¤È»ÒËì¤Î¸Ä¿ô¤¬¥Ş¥Ã¥Á¤¹¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë
+			// ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒãªã„ã¨ãã¯ã€ã‚¢ãƒˆãƒ ã¨å­è†œã®å€‹æ•°ãŒãƒãƒƒãƒã™ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹
 			if (eq.mem.processContexts.isEmpty()) {
-				// TODO ¡Êµ¡Ç½³ÈÄ¥¡ËÃ±°ì¤Î¥¢¥È¥à°Ê³°¤Ë¥Ş¥Ã¥Á¤¹¤ë·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Ç¤âÀµ¤·¤¯Æ°¤¯¤è¤¦¤Ë¤¹¤ë(2)
+				// TODO ï¼ˆæ©Ÿèƒ½æ‹¡å¼µï¼‰å˜ä¸€ã®ã‚¢ãƒˆãƒ ä»¥å¤–ã«ãƒãƒƒãƒã™ã‚‹å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã§ã‚‚æ­£ã—ãå‹•ãã‚ˆã†ã«ã™ã‚‹(2)
 				insts.add(new Instruction(Instruction.NATOMS, memPaths.get(eq.mem),
 						eq.def.lhsOcc.mem.getNormalAtomCount() + eq.def.lhsOcc.mem.typedProcessContexts.size()
 						+ eq.mem.getNormalAtomCount() + eq.mem.typedProcessContexts.size() ));
@@ -1077,15 +1077,15 @@ class HeadCompiler
 			else {
 				ProcessContext pc = eq.mem.processContexts.get(0);
 				if (pc.bundle == null) {
-					// TODO ¡Êµ¡Ç½³ÈÄ¥¡Ë¼«Í³¥ê¥ó¥¯¤Î¸Ä¿ô¤ò¸¡ºº¤¹¤ë¡£¤¿¤À¤·¼ÂÁõ¤¹¤ëÁ°¤Ë$pp¤ÎÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯¤Î½¸¹ç¤òÌÀ¤é¤«¤Ë¤·¤Ê¤±¤ì¤Ğ¤Ê¤é¤Ê¤¤¡£
+					// TODO ï¼ˆæ©Ÿèƒ½æ‹¡å¼µï¼‰è‡ªç”±ãƒªãƒ³ã‚¯ã®å€‹æ•°ã‚’æ¤œæŸ»ã™ã‚‹ã€‚ãŸã ã—å®Ÿè£…ã™ã‚‹å‰ã«$ppã®æ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯ã®é›†åˆã‚’æ˜ã‚‰ã‹ã«ã—ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚
 				}
 			}
-			// eq.mem.ruleContexts ¤ÏÌµ»ë¤µ¤ì¤ë					
+			// eq.mem.ruleContexts ã¯ç„¡è¦–ã•ã‚Œã‚‹					
 		}
-		// todo ¥í¥Ã¥¯¤·¤¿Ëì¤Ïunlock¤¹¤ë¡£
-		// todo Ëì¤¬¥í¥Ã¥¯¤Ç¤­¤Ê¤«¤Ã¤¿¤«¤é¤È¤¤¤Ã¤ÆËì¤¬Â¸ºß¤·¤Ê¤¤¤ï¤±¤Ç¤Ï¤Ê¤¤¥Ğ¥°¤ò²¿¤È¤«¤¹¤ë
-		// todo ¼«Í³¥ê¥ó¥¯
-		insts.add(new Instruction(Instruction.PROCEED));	// µìSTOP
+		// todo ãƒ­ãƒƒã‚¯ã—ãŸè†œã¯unlockã™ã‚‹ã€‚
+		// todo è†œãŒãƒ­ãƒƒã‚¯ã§ããªã‹ã£ãŸã‹ã‚‰ã¨ã„ã£ã¦è†œãŒå­˜åœ¨ã—ãªã„ã‚ã‘ã§ã¯ãªã„ãƒã‚°ã‚’ä½•ã¨ã‹ã™ã‚‹
+		// todo è‡ªç”±ãƒªãƒ³ã‚¯
+		insts.add(new Instruction(Instruction.PROCEED));	// æ—§STOP
 		//matchLabel.updateLocals(varcount);
 	}
 
@@ -1153,4 +1153,4 @@ class HeadCompiler
 		return false;
 	}
 }
-//TODO ¡Êµ¡Ç½³ÈÄ¥¡Ë¥¬¡¼¥ÉÈİÄê¾ò·ï¤ÎÃæ¤Î·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ò¥³¥ó¥Ñ¥¤¥ë¤¹¤ë
+//TODO ï¼ˆæ©Ÿèƒ½æ‹¡å¼µï¼‰ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ä¸­ã®å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹

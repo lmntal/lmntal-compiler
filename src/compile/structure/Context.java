@@ -1,25 +1,25 @@
 package compile.structure;
 
 /**
- * ¥½¡¼¥¹¥³¡¼¥ÉÃæ¤Î¥×¥í¥»¥¹Ê¸Ì®½Ğ¸½¡¢·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®½Ğ¸½¡¢¤Ş¤¿¤Ï¥ë¡¼¥ëÊ¸Ì®½Ğ¸½¤òÉ½¤¹Ãê¾İ¥¯¥é¥¹¡£
+ * ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå‡ºç¾ã€å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå‡ºç¾ã€ã¾ãŸã¯ãƒ«ãƒ¼ãƒ«æ–‡è„ˆå‡ºç¾ã‚’è¡¨ã™æŠ½è±¡ã‚¯ãƒ©ã‚¹ã€‚
  * @author n-kato
  */
 public abstract class Context extends Atomic
 {
 	/**
-	 * ¥³¥ó¥Æ¥­¥¹¥È¤Î¸ÂÄêÌ¾
+	 * ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®é™å®šå
 	 */
 	protected String qualifiedName;
 
 	/**
-	 * ¥³¥ó¥Æ¥­¥¹¥ÈÌ¾¤Î¾ğÊó
+	 * ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆåã®æƒ…å ±
 	 */
 	public ContextDef def;
 
-	/** ¥³¥ó¥¹¥È¥é¥¯¥¿
-	 * @param mem ½êÂ°Ëì
-	 * @param qualifiedName ¥³¥ó¥Æ¥­¥¹¥È¤Î¸ÂÄêÌ¾
-	 * @param arity ¥³¥ó¥Æ¥­¥¹¥È½Ğ¸½¤ÎÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯°ú¿ô¤Î¸Ä¿ô
+	/** ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	 * @param mem æ‰€å±è†œ
+	 * @param qualifiedName ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®é™å®šå
+	 * @param arity ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆå‡ºç¾ã®æ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯å¼•æ•°ã®å€‹æ•°
 	 */
 	protected Context(Membrane mem, String qualifiedName, int arity)
 	{
@@ -28,7 +28,7 @@ public abstract class Context extends Atomic
 	}
 
 	/**
-	 * ¥³¥ó¥Æ¥­¥¹¥È¤Î¸ÂÄêÌ¾¤òÊÖ¤¹
+	 * ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®é™å®šåã‚’è¿”ã™
 	 */
 	public String getQualifiedName()
 	{
@@ -36,7 +36,7 @@ public abstract class Context extends Atomic
 	}
 
 	/**
-	 * ¥³¥ó¥Æ¥­¥¹¥È¤ÎÌ¾Á°¤òÊÖ¤¹¡Ê²¾¡Ë
+	 * ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®åå‰ã‚’è¿”ã™ï¼ˆä»®ï¼‰
 	 */
 	public String getName()
 	{

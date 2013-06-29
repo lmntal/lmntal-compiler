@@ -2,7 +2,7 @@ package runtime.functor;
 
 
 /**
- * ¥Ç¡¼¥¿¥¢¥È¥àÍÑ¤Î1°ú¿ô¥Õ¥¡¥ó¥¯¥¿¤òÉ½¤¹¥¯¥é¥¹
+ * ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ç”¨ã®1å¼•æ•°ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  * @author inui
  */
 public abstract class DataFunctor extends Functor {

@@ -4,26 +4,26 @@ import runtime.functor.Functor;
 import runtime.functor.SymbolFunctor;
 
 /**
- * е╜б╝е╣е│б╝е╔├цд╬еве╚ерб╩д▐д┐д╧еве╚ер╜╕├─д▐д┐д╧╖┐└й╠єб╦д╬╣╜┬ддЄ╔╜д╣епеще╣бг
+ * уВ╜уГ╝уВ╣уВ│уГ╝уГЙф╕нуБоуВвуГИуГая╝ИуБ╛уБЯуБпуВвуГИуГащЫЖхЫгуБ╛уБЯуБпхЮЛхИ╢ч┤Дя╝ЙуБоцзЛщАауВТшбиуБЩуВпуГйуВ╣уАВ
  * @author Takahiko Nagata
  * @date 2003/10/28
  */
 public class Atom extends Atomic
 {
 	/**
-	 * еве╚ерд╬е╒ебеєепе┐
+	 * уВвуГИуГауБоуГХуВбуГ│уВпуВ┐
 	 */
 	public Functor functor;
 
 	/**
-	 * ╖┐└й╠єд╬╛ь╣чбз╠╛┴░е╚б╝епеєд╬╝я╬р(─ъ┐Ї├▒╣реве╚ер(unary)╖┐д╬└й╠єдлд╔дждлд╬╚╜─ъд╦╗╚дж)
+	 * хЮЛхИ╢ч┤ДуБоха┤хРИя╝ЪхРНхЙНуГИуГ╝уВпуГ│уБочиощбЮ(хоЪцХ░хНШщаЕуВвуГИуГа(unary)хЮЛуБохИ╢ч┤ДуБЛуБйуБЖуБЛуБохИдхоЪуБлф╜┐уБЖ)
 	 */
 	public boolean isSelfEvaluated = false;
 
 	/**
-	 * е│еєе╣е╚ещепе┐
-	 * @param mem д│д╬еве╚ерд╬╜ъ┬░╦ь
-	 * @param functor е╒ебеєепе┐
+	 * уВ│уГ│уВ╣уГИуГйуВпуВ┐
+	 * @param mem уБУуБоуВвуГИуГауБоцЙАх▒ЮшЖЬ
+	 * @param functor уГХуВбуГ│уВпуВ┐
 	 */
 	public Atom(Membrane mem, Functor functor)
 	{
@@ -32,10 +32,10 @@ public class Atom extends Atomic
 	}
 
 	/**
-	 * е│еєе╣е╚ещепе┐
-	 * @param mem д│д╬еве╚ерд╬╜ъ┬░╦ь
-	 * @param name еве╚ер╠╛дЄ╔╜д╣╩╕╗·╬є
-	 * @param arity еъеєепд╬┐Ї
+	 * уВ│уГ│уВ╣уГИуГйуВпуВ┐
+	 * @param mem уБУуБоуВвуГИуГауБоцЙАх▒ЮшЖЬ
+	 * @param name уВвуГИуГахРНуВТшбиуБЩцЦЗхнЧхИЧ
+	 * @param arity уГкуГ│уВпуБоцХ░
 	 */
 	public Atom(Membrane mem, String name, int arity)
 	{

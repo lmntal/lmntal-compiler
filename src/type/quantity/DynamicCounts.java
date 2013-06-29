@@ -5,15 +5,15 @@ import runtime.Env;
 import compile.structure.Membrane;
 
 /**
- * ¤½¤ì¤¾¤ì¤ÎËì¤Ë¤Ä¤¤¤Æºî¤é¤ì¤ë¡£
- * Æ°Åª¤ÊÎÌ¾ğÊó¤òÉ½¤¹¥¯¥é¥¹
+ * ãã‚Œãã‚Œã®è†œã«ã¤ã„ã¦ä½œã‚‰ã‚Œã‚‹ã€‚
+ * å‹•çš„ãªé‡æƒ…å ±ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  * @author kudo
  *
  */
 public class DynamicCounts {
 	public final Membrane mem;
 	
-	/** Å¬ÍÑ²ó¿ô¤òÉ½¤¹ÊÑ¿ô */
+	/** é©ç”¨å›æ•°ã‚’è¡¨ã™å¤‰æ•° */
 	public final VarCount applyCount;
 	
 	public void assignToVar(IntervalCount ic){
@@ -21,15 +21,15 @@ public class DynamicCounts {
 	}
 	
 	/**
-	 * ¤³¤ÎËì¤Î½êÂ°¥×¥í¥»¥¹¤¬²¿ÇÜ¤µ¤ì¤ë¤«¤òÉ½¤¹¡£
-	 * 1 : °ÜÆ°»ş(¤¢¤ë¤¤¤Ï¥ë¡¼¥ë¤ÎËÜËìÅù)
-	 * >1 : Ê£À½¡¢¥Ş¡¼¥¸
+	 * ã“ã®è†œã®æ‰€å±ãƒ—ãƒ­ã‚»ã‚¹ãŒä½•å€ã•ã‚Œã‚‹ã‹ã‚’è¡¨ã™ã€‚
+	 * 1 : ç§»å‹•æ™‚(ã‚ã‚‹ã„ã¯ãƒ«ãƒ¼ãƒ«ã®æœ¬è†œç­‰)
+	 * >1 : è¤‡è£½ã€ãƒãƒ¼ã‚¸
 	 */
 	public final int multiple;
 	
-	/** ºï½ü¤¹¤ë¥×¥í¥»¥¹ */
+	/** å‰Šé™¤ã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹ */
 	public final StaticCounts removeCounts;
-	/** À¸À®¤¹¤ë¥×¥í¥»¥¹ */
+	/** ç”Ÿæˆã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹ */
 	public final StaticCounts generateCounts;
 
 	public DynamicCounts(StaticCounts removeCounts, int multiple, StaticCounts generateCounts, VarCount applyCount){
@@ -46,7 +46,7 @@ public class DynamicCounts {
 //	}
 	
 	/**
-	 * ¶ñÂÎÃÍ¤Ë¤¹¤ë
+	 * å…·ä½“å€¤ã«ã™ã‚‹
 	 * @return
 	 */
 	public FixedDynamicCounts solve(){
@@ -54,7 +54,7 @@ public class DynamicCounts {
 	}
 	
 	/**
-	 * ÊÑ¿ôÌ¾¤ò¤Ä¤±¤«¤¨¤¿¼«¿È¤Î¥¯¥í¡¼¥ó¤òÊÖ¤¹
+	 * å¤‰æ•°åã‚’ã¤ã‘ã‹ãˆãŸè‡ªèº«ã®ã‚¯ãƒ­ãƒ¼ãƒ³ã‚’è¿”ã™
 	 */
 	public DynamicCounts clone(){
 		VarCount newvar = new VarCount();

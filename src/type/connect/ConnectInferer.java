@@ -16,13 +16,13 @@ public class ConnectInferer {
 	private Membrane root;
 
 	/**
-	 * Functor ¤Î°ú¿ô¤Ë·Ò¤¬¤ë²ÄÇ½À­¤Î¤¢¤ë Functor ¤Î°ú¿ô¤Ø¤Î set
+	 * Functor ã®å¼•æ•°ã«ç¹‹ãŒã‚‹å¯èƒ½æ€§ã®ã‚ã‚‹ Functor ã®å¼•æ•°ã¸ã® set
 	 */
 	private FunctorKindAndArgumentMap functorConnect;
 
 	/**
-	 * a(X) :- b(X). ¤Î¤è¤¦¤Ê¥ë¡¼¥ë¤Ë¤ª¤¤¤Æ
-	 * (a_0, 0) -> (b_0, 0) ¤Î¤è¤¦¤Ê¤â¤Î¤¬½¸¤Ş¤Ã¤¿ multimap 
+	 * a(X) :- b(X). ã®ã‚ˆã†ãªãƒ«ãƒ¼ãƒ«ã«ãŠã„ã¦
+	 * (a_0, 0) -> (b_0, 0) ã®ã‚ˆã†ãªã‚‚ã®ãŒé›†ã¾ã£ãŸ multimap 
 	 */
 	private FunctorKindAndArgumentMap functorTrans;
 
@@ -39,13 +39,13 @@ public class ConnectInferer {
 
 	public void infer(){
 		/**
-		 * ½é´ü¥¢¥È¥à¤È¥ë¡¼¥ë¤ËÌÀ¼¨Åª¤Ë·Ò¤¬¤Ã¤Æ¤¤¤ë¥¢¥È¥àÆ±»Î¤Ë¤Ä¤¤¤Æ
-		 * functorConnect ¤È functorTrans¡¡¤òµá¤á¤ë 
+		 * åˆæœŸã‚¢ãƒˆãƒ ã¨ãƒ«ãƒ¼ãƒ«ã«æ˜ç¤ºçš„ã«ç¹‹ãŒã£ã¦ã„ã‚‹ã‚¢ãƒˆãƒ åŒå£«ã«ã¤ã„ã¦
+		 * functorConnect ã¨ functorTransã€€ã‚’æ±‚ã‚ã‚‹ 
 		 */
 		makeFunctorConnect(root);
 
 		/**
-		 * functorTrans ¤òÍÑ¤¤¤Æ¿ä°ÜÊÄÊı¤ò·×»»¤·¡¢functorConnect ¤òµá¤á¤ë
+		 * functorTrans ã‚’ç”¨ã„ã¦æ¨ç§»é–‰æ–¹ã‚’è¨ˆç®—ã—ã€functorConnect ã‚’æ±‚ã‚ã‚‹
 		 */
 		solveFunctorConnect();
 	}
@@ -116,10 +116,10 @@ public class ConnectInferer {
 	}
 
 	private void makeFunctorConnectRule(RuleStructure rule) {
-		/* functorConnect ¤ÎºîÀ® */		
+		/* functorConnect ã®ä½œæˆ */		
 		makeFunctorConnectRuleRightMem(rule.rightMem, rule);
 
-		/* functorTrans ¤ÎºîÀ® */
+		/* functorTrans ã®ä½œæˆ */
 		makeFunctorConnectRuleLeftMem(rule.leftMem, rule);	
 	}
 
@@ -134,7 +134,7 @@ public class ConnectInferer {
 			Atom atom = (Atom) atomic;
 			for (LinkOccurrence otherSide : atomic.args) {
 
-				// Á°¼Ô¤â¥³¥Í¥¯¥¿¤ò¹ÍÎ¸¤¹¤ë¤Ù¤­¡©
+				// å‰è€…ã‚‚ã‚³ãƒã‚¯ã‚¿ã‚’è€ƒæ…®ã™ã‚‹ã¹ãï¼Ÿ
 				if (!isFreeLink(otherSide, rule) && !(getBuddyAtom(otherSide) instanceof Atom)) {
 					continue;
 				}

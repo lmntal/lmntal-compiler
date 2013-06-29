@@ -4,44 +4,44 @@ import runtime.Env;
 import util.Util;
 
 /**
- * ÄÌ¾ï¥¢¥È¥àÍÑ¤Î¥Õ¥¡¥ó¥¯¥¿¤òÉ½¤¹¥¯¥é¥¹
+ * é€šå¸¸ã‚¢ãƒˆãƒ ç”¨ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  * @author inui
  * @since 2006-08-30
  */
 public class SymbolFunctor extends Functor
 {
 	/**
-	 * ¥·¥ó¥Ü¥ëÌ¾¡£¤³¤Î¥¯¥é¥¹¤Î¥ª¥Ö¥¸¥§¥¯¥È¤Î¾ì¹ç¤Ï¡¢Ì¾Á°¤ÎÉ½¼¨Ì¾¤¬³ÊÇ¼¤µ¤ì¤ë¡£ ¾ï¤Ë intern ¤·¤¿ÃÍ¤ò³ÊÇ¼¤¹¤ë¡£
+	 * ã‚·ãƒ³ãƒœãƒ«åã€‚ã“ã®ã‚¯ãƒ©ã‚¹ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å ´åˆã¯ã€åå‰ã®è¡¨ç¤ºåãŒæ ¼ç´ã•ã‚Œã‚‹ã€‚ å¸¸ã« intern ã—ãŸå€¤ã‚’æ ¼ç´ã™ã‚‹ã€‚
 	 */
 	private String name;
 
-	/** ¥¢¥ê¥Æ¥£¡Ê°ú¿ô¤Î¸Ä¿ô¡Ë */
+	/** ã‚¢ãƒªãƒ†ã‚£ï¼ˆå¼•æ•°ã®å€‹æ•°ï¼‰ */
 	private int arity;
 	
 	/**
-	 * ¥Õ¥¡¥ó¥¯¥¿¤¬½êÂ°¤¹¤ë¥â¥¸¥å¡¼¥ëÌ¾¡¥
-	 * ÌÀ¼¨Åª¤Ë»ØÄê¤µ¤ì¤Æ¤¤¤Ê¤¤¾ì¹ç¤Ïnull¡Ê¶õÊ¸»úÎó¤Ç¤Ï¤¤¤±¤Ê¤¤¡Ë¡¥
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ‰€å±ã™ã‚‹ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åï¼
+	 * æ˜ç¤ºçš„ã«æŒ‡å®šã•ã‚Œã¦ã„ãªã„å ´åˆã¯nullï¼ˆç©ºæ–‡å­—åˆ—ã§ã¯ã„ã‘ãªã„ï¼‰ï¼
 	 */
 	private String path;
 	
 	/**
-	 * ¥â¥¸¥å¡¼¥ëÌ¾¤Ê¤·¤Î¥Õ¥¡¥ó¥¯¥¿¤òÀ¸À®¤¹¤ë¡£
+	 * ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åãªã—ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’ç”Ÿæˆã™ã‚‹ã€‚
 	 * 
-	 * @param name ¥·¥ó¥Ü¥ëÌ¾
+	 * @param name ã‚·ãƒ³ãƒœãƒ«å
 	 */
 	public SymbolFunctor(String name, int arity) {
 		this(name, arity, null);
 	}
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥â¥¸¥å¡¼¥ëÌ¾¤ò»ı¤Ä¥Õ¥¡¥ó¥¯¥¿¤òÀ¸À®¤¹¤ë¡£
+	 * æŒ‡å®šã•ã‚ŒãŸãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åã‚’æŒã¤ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’ç”Ÿæˆã™ã‚‹ã€‚
 	 * 
 	 * @param name
-	 *            ¥·¥ó¥Ü¥ëÌ¾¡Ê¥â¥¸¥å¡¼¥ëÌ¾¤ò»ØÄê¤·¤Æ¤Ï¤¤¤±¤Ê¤¤¡Ë
+	 *            ã‚·ãƒ³ãƒœãƒ«åï¼ˆãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åã‚’æŒ‡å®šã—ã¦ã¯ã„ã‘ãªã„ï¼‰
 	 * @param arity
-	 *            °ú¿ô¤Î¸Ä¿ô
+	 *            å¼•æ•°ã®å€‹æ•°
 	 * @param path
-	 *            ¥â¥¸¥å¡¼¥ëÌ¾¡Ê¤Ş¤¿¤Ïnull¡Ë
+	 *            ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åï¼ˆã¾ãŸã¯nullï¼‰
 	 */
 	public SymbolFunctor(String name, int arity, String path) {
 		this.arity = arity;
@@ -51,14 +51,14 @@ public class SymbolFunctor extends Functor
 	}
 	
 	public boolean equals(Object o) {
-		// ¥³¥ó¥¹¥È¥é¥¯¥¿¤Çintern¤·¤Æ¤¤¤ë¤Î¤Ç¡¢==¤ÇÈæ³Ó¤Ç¤­¤ë¡£
+		// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§internã—ã¦ã„ã‚‹ã®ã§ã€==ã§æ¯”è¼ƒã§ãã‚‹ã€‚
 		if (!(o instanceof SymbolFunctor)) return false;
 		SymbolFunctor f = (SymbolFunctor)o;
 		return f.path == path && f.name == name && f.arity == arity;
 	}
 	
 	/**
-	 * ¥·¥ó¥Ü¥ë¥Õ¥¡¥ó¥¯¥¿¤«¤É¤¦¤«¤òÄ´¤Ù¤ë¡¥
+	 * ã‚·ãƒ³ãƒœãƒ«ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‹ã©ã†ã‹ã‚’èª¿ã¹ã‚‹ï¼
 	 * @return true
 	 */
 	public boolean isSymbol() {
@@ -66,8 +66,8 @@ public class SymbolFunctor extends Functor
 	}
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬¥¢¥¯¥Æ¥£¥Ö¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
-	 * @return ¥¢¥¯¥Æ¥£¥Ö¤Ê¤é true
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
+	 * @return ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªã‚‰ true
 	 */
 	public boolean isActive() {
 		if (name.equals(""))
@@ -82,7 +82,7 @@ public class SymbolFunctor extends Functor
 	}
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬¿ôÃÍ¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ•°å€¤ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
 	 * @return false
 	 */
 	public boolean isNumber(){
@@ -90,7 +90,7 @@ public class SymbolFunctor extends Functor
 	}
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬ int ·¿¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒ int å‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
 	 * @return false
 	 */
 	public boolean isInteger(){
@@ -98,7 +98,7 @@ public class SymbolFunctor extends Functor
 	}
 	
 	/**
-	 * ¤³¤Î¥Õ¥¡¥ó¥¯¥¿¤¬ String ·¿¤«¤É¤¦¤«¤ò¼èÆÀ¤¹¤ë¡£
+	 * ã“ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒ String å‹ã‹ã©ã†ã‹ã‚’å–å¾—ã™ã‚‹ã€‚
 	 * @return false
 	 */
 	public boolean isString() {
@@ -106,8 +106,8 @@ public class SymbolFunctor extends Functor
 	}
 	
 	/**
-	 * ¥Õ¥¡¥ó¥¯¥¿¤ÎÃÍ¤òÊÖ¤¹
-	 * @return ¥Õ¥¡¥ó¥¯¥¿¤ÎÌ¾Á°
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®å€¤ã‚’è¿”ã™
+	 * @return ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã®åå‰
 	 */
 	public Object getValue() {
 		return name;
@@ -120,16 +120,16 @@ public class SymbolFunctor extends Functor
 	}
 	
 	/**
-	 * ¥Ï¥Ã¥·¥å¥³¡¼¥É¤ò·×»»¤¹¤ë
-	 * @return ¥Ï¥Ã¥·¥å¥³¡¼¥É
+	 * ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰ã‚’è¨ˆç®—ã™ã‚‹
+	 * @return ãƒãƒƒã‚·ãƒ¥ã‚³ãƒ¼ãƒ‰
 	 */
 	public int hashCode() {
 		return (path == null ? 0 : path.hashCode()*2) + name.hashCode() + arity;
 	}
 	
 	/**
-	 * ¥Õ¥¡¥ó¥¯¥¿¤¬½êÂ°¤¹¤ë¥â¥¸¥å¡¼¥ëÌ¾¤òÊÖ¤¹
-	 * @return ¥Õ¥¡¥ó¥¯¥¿¤¬½êÂ°¤¹¤ë¥â¥¸¥å¡¼¥ëÌ¾¤òÊÖ¤¹
+	 * ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ‰€å±ã™ã‚‹ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åã‚’è¿”ã™
+	 * @return ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ãŒæ‰€å±ã™ã‚‹ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åã‚’è¿”ã™
 	 */
 	public String getPath() {
 		return path;

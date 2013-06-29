@@ -2,64 +2,64 @@ package compile.parser;
 import java.util.LinkedList;
 
 
-/** ¥½¡¼¥¹¥Õ¥¡¥¤¥ëÃæ¤Î¥¢¥È¥àÉ½¸½ */
+/** ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ä¸­ã®ã‚¢ãƒˆãƒ è¡¨ç¾ */
 class SrcAtom {
 	protected LinkedList process = null;
-	/** Ì¾Á°¥È¡¼¥¯¥ó */
+	/** åå‰ãƒˆãƒ¼ã‚¯ãƒ³ */
 	protected SrcName srcname;
 	
 	/**
-	 * ¥½¡¼¥¹¥³¡¼¥ÉÃæ¤Ç¤Î½Ğ¸½°ÌÃÖ(¹Ô)
+	 * ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã§ã®å‡ºç¾ä½ç½®(è¡Œ)
 	 * @author Tomohito Makino
 	 */
 	int line = -1;
 	/**
-	 * ¥½¡¼¥¹¥³¡¼¥ÉÃæ¤Ç¤Î½Ğ¸½°ÌÃÖ(·å)
+	 * ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã§ã®å‡ºç¾ä½ç½®(æ¡)
 	 * @author Tomohito Makino
 	 */
 	int column = -1;
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤Î»Ò¥×¥í¥»¥¹¤Ê¤·¤Î¥¢¥È¥à¹½Ê¸¤òÀ¸À®¤¹¤ë
-	 * @param name ¥¢¥È¥àÌ¾
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ã®å­ãƒ—ãƒ­ã‚»ã‚¹ãªã—ã®ã‚¢ãƒˆãƒ æ§‹æ–‡ã‚’ç”Ÿæˆã™ã‚‹
+	 * @param name ã‚¢ãƒˆãƒ å
 	 */
 	public SrcAtom(String name) {
 		this(new SrcName(name));
 	}
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¥È¡¼¥¯¥ó¤ò»ı¤Ä»Ò¥×¥í¥»¥¹¤Ê¤·¤Î¥¢¥È¥à¹½Ê¸¤òÀ¸À®¤¹¤ë
-	 * @param srcname Ì¾Á°¥È¡¼¥¯¥ó
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ãƒˆãƒ¼ã‚¯ãƒ³ã‚’æŒã¤å­ãƒ—ãƒ­ã‚»ã‚¹ãªã—ã®ã‚¢ãƒˆãƒ æ§‹æ–‡ã‚’ç”Ÿæˆã™ã‚‹
+	 * @param srcname åå‰ãƒˆãƒ¼ã‚¯ãƒ³
 	 */
 	public SrcAtom(SrcName srcname) {
 		this(srcname, new LinkedList(), -1,-1);
 	}
 	
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤È»Ò¶¡¥×¥í¥»¥¹¤Ç½é´ü²½¤·¤Ş¤¹
-	 * @param name ¥¢¥È¥àÌ¾
-	 * @param process »Ò¶¡¥×¥í¥»¥¹
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ã¨å­ä¾›ãƒ—ãƒ­ã‚»ã‚¹ã§åˆæœŸåŒ–ã—ã¾ã™
+	 * @param name ã‚¢ãƒˆãƒ å
+	 * @param process å­ä¾›ãƒ—ãƒ­ã‚»ã‚¹
 	 */
 	public SrcAtom(String name, LinkedList process) {
 		this(new SrcName(name), process, -1,-1);
 	}
 
 	/**
-	 * ¥Ç¥Ğ¥Ã¥°¾ğÊó¤â¼õ¤±¼è¤ë¥³¥ó¥¹¥È¥é¥¯¥¿(»Ò¶¡¥×¥í¥»¥¹Ìµ¤·)
+	 * ãƒ‡ãƒãƒƒã‚°æƒ…å ±ã‚‚å—ã‘å–ã‚‹ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿(å­ä¾›ãƒ—ãƒ­ã‚»ã‚¹ç„¡ã—)
 	 * @author Tomohito Makino
-	 * @param srcname Ì¾Á°¥È¡¼¥¯¥ó
-	 * @param line ¥½¡¼¥¹¥³¡¼¥É¾å¤Ç¤Î½Ğ¸½°ÌÃÖ(¹Ô)
-	 * @param column ¥½¡¼¥¹¥³¡¼¥É¾å¤Ç¤Î½Ğ¸½°ÌÃÖ(·å)
+	 * @param srcname åå‰ãƒˆãƒ¼ã‚¯ãƒ³
+	 * @param line ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸Šã§ã®å‡ºç¾ä½ç½®(è¡Œ)
+	 * @param column ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸Šã§ã®å‡ºç¾ä½ç½®(æ¡)
 	 */
 	public SrcAtom(SrcName srcname, int line, int column) {
 		this(srcname, new LinkedList(), line, column);
 	}	
 	/**
-	 * ¥Ç¥Ğ¥Ã¥°¾ğÊó¤â¼õ¤±¼è¤ë¥³¥ó¥¹¥È¥é¥¯¥¿
+	 * ãƒ‡ãƒãƒƒã‚°æƒ…å ±ã‚‚å—ã‘å–ã‚‹ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	 * @author Tomohito Makino
-	 * @param nametoken Ì¾Á°¥È¡¼¥¯¥ó
-	 * @param process »Ò¶¡¥×¥í¥»¥¹
-	 * @param line ¥½¡¼¥¹¥³¡¼¥É¾å¤Ç¤Î½Ğ¸½°ÌÃÖ(¹Ô)
-	 * @param column ¥½¡¼¥¹¥³¡¼¥É¾å¤Ç¤Î½Ğ¸½°ÌÃÖ(·å)
+	 * @param nametoken åå‰ãƒˆãƒ¼ã‚¯ãƒ³
+	 * @param process å­ä¾›ãƒ—ãƒ­ã‚»ã‚¹
+	 * @param line ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸Šã§ã®å‡ºç¾ä½ç½®(è¡Œ)
+	 * @param column ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸Šã§ã®å‡ºç¾ä½ç½®(æ¡)
 	 */
 	public SrcAtom(SrcName nametoken, LinkedList process, int line, int column) {
 		this.srcname = nametoken;
@@ -74,22 +74,22 @@ class SrcAtom {
 	}
 
 	
-	/** Ì¾Á°¥È¡¼¥¯¥ó¤ò¼èÆÀ¤¹¤ë 
+	/** åå‰ãƒˆãƒ¼ã‚¯ãƒ³ã‚’å–å¾—ã™ã‚‹ 
 	 * @deprecated*/
 	public SrcName getSrcName() { return srcname; }
 
-	/** ¥¢¥È¥àÌ¾¤ò¼èÆÀ¤¹¤ë */
+	/** ã‚¢ãƒˆãƒ åã‚’å–å¾—ã™ã‚‹ */
 	public String getName() { return srcname.getName(); }
-	/** ¥¢¥È¥àÌ¾¤Î¥½¡¼¥¹¥³¡¼¥ÉÃæ¤ÎÉ½¸½¤ò¼èÆÀ¤¹¤ë¡£*/
+	/** ã‚¢ãƒˆãƒ åã®ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã®è¡¨ç¾ã‚’å–å¾—ã™ã‚‹ã€‚*/
 	public String getSourceName() {
 		return srcname.getSourceName();
 	}
-	/** ¥¢¥È¥àÌ¾¥È¡¼¥¯¥ó¤Î¼ïÎà¤ò¼èÆÀ¤¹¤ë */
+	/** ã‚¢ãƒˆãƒ åãƒˆãƒ¼ã‚¯ãƒ³ã®ç¨®é¡ã‚’å–å¾—ã™ã‚‹ */
 	public int getNameType() { return srcname.getType(); }
 	
 	/**
-	 * ¤³¤Î¥¢¥È¥à¤Î»Ò¥×¥í¥»¥¹¤òÆÀ¤Ş¤¹
-	 * @return »Ò¥×¥í¥»¥¹¤Î¥ê¥¹¥È
+	 * ã“ã®ã‚¢ãƒˆãƒ ã®å­ãƒ—ãƒ­ã‚»ã‚¹ã‚’å¾—ã¾ã™
+	 * @return å­ãƒ—ãƒ­ã‚»ã‚¹ã®ãƒªã‚¹ãƒˆ
 	 */
 	public LinkedList getProcess() { return process; }
 	

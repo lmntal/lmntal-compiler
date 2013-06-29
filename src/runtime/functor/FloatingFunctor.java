@@ -1,7 +1,7 @@
 package runtime.functor;
 
 
-/** ╔т╞░╛о┐Ї┼└┐Їеве╚ер═╤д╬1░·┐Їе╒ебеєепе┐дЄ╔╜д╣епеще╣
+/** ц╡охЛХх░ПцХ░чВ╣цХ░уВвуГИуГачФиуБо1х╝ХцХ░уГХуВбуГ│уВпуВ┐уВТшбиуБЩуВпуГйуВ╣
  * @author n-kato */
 
 public class FloatingFunctor extends DataFunctor {

@@ -5,14 +5,14 @@ package type.argument;
 
 
 /**
- * ³Æ¥Ñ¥¹¤Ë¤Ä¤¤¤Æ¤Î·¿ÊÑ¿ô¡¢¥â¡¼¥ÉÊÑ¿ô¤ò»ı¤Ä
+ * å„ãƒ‘ã‚¹ã«ã¤ã„ã¦ã®å‹å¤‰æ•°ã€ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ã‚’æŒã¤
  * @author kudo
  *
  */
 public class TypeVarConstraint {
 
 	/**
-	 * ·¿¤Å¤±¤é¤ì¤ë¥Ñ¥¹¡£¶ñÂÎ²½¤µ¤ì¤ëÁ°¤ÏRootPath¤¬¡¢¶ñÂÎ²½¤µ¤ì¤¿¸å¤ÏActiveAtomPath or TracingPath¤¬Æş¤ë
+	 * å‹ã¥ã‘ã‚‰ã‚Œã‚‹ãƒ‘ã‚¹ã€‚å…·ä½“åŒ–ã•ã‚Œã‚‹å‰ã¯RootPathãŒã€å…·ä½“åŒ–ã•ã‚ŒãŸå¾Œã¯ActiveAtomPath or TracingPathãŒå…¥ã‚‹
 	 */
 	private Path p;	
 	public Path getPath(){
@@ -20,14 +20,14 @@ public class TypeVarConstraint {
 	}
 	
 	/**
-	 * ·¿ÊÑ¿ô
+	 * å‹å¤‰æ•°
 	 */
 	private TypeVar tv;
 	public TypeVar getTypeVar(){
 		return tv;
 	}
 	/**
-	 * ¥â¡¼¥ÉÊÑ¿ô
+	 * ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°
 	 */
 	private ModeVar mv;
 	public ModeVar getModeVar(){

@@ -1,8 +1,8 @@
 package compile.parser;
 
 /**
- * �������ե�������Υ�󥯡����«���ץ���������ƥ����ȡ��롼�륳��ƥ����Ȥ���ݿƥ��饹
- * <p>�ץ�����ʸ̮̾����ӥ롼��ʸ̮̾�ˤ� '...' �� [[...]] ���Ȥ��ʤ��褦�ˤ�����
+ * ソースファイル中のリンク・リンク束・プロセスコンテキスト・ルールコンテキストの抽象親クラス
+ * <p>プロセス文脈名およびルール文脈名には '...' や [[...]] が使えないようにした。
  */
 
 abstract class SrcContext {
@@ -10,21 +10,21 @@ abstract class SrcContext {
  	protected String name = null;
  	
  	/**
- 	 * ���ꤵ�줿̾���ǥ���ƥ����Ȥ��������ޤ�
- 	 * @param name ����ƥ�����̾
+ 	 * 指定された名前でコンテキストを初期化します
+ 	 * @param name コンテキスト名
  	 */
 	protected SrcContext(String name) {
 		this.name = name;
 	}
 	
 	/**
-	 * ����ƥ����Ȥ�̾�����֤���
-	 * @return ����ƥ����Ȥ�̾��
+	 * コンテキストの名前を返す。
+	 * @return コンテキストの名前
 	 */
 	public String getName() {
 		return name;
 	}
-	/** ����ƥ����Ȥθ���̾�ʼ����̾�����Ȥ��Ф����դʼ��̻ҤȤ��ƻ��ѤǤ���ʸ����ˤ��֤���*/
+	/** コンテキストの限定名（種類と名前の組に対する一意な識別子として使用できる文字列）を返す。*/
 	abstract public String getQualifiedName();
 	public String toString() {
 		return getQualifiedName();

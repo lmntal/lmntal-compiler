@@ -1,6 +1,6 @@
 /**
- * LMNtal Parser ¥á¥¤¥ó¥¯¥é¥¹
- * £±¤Ä¤Î¥½¡¼¥¹¥³¡¼¥É¤ÏMembrane¤È¤·¤ÆÉ½¸½¤µ¤ì¤Ş¤¹¡£
+ * LMNtal Parser ãƒ¡ã‚¤ãƒ³ã‚¯ãƒ©ã‚¹
+ * ï¼‘ã¤ã®ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ã¯Membraneã¨ã—ã¦è¡¨ç¾ã•ã‚Œã¾ã™ã€‚
  */
 
 package compile.parser;
@@ -36,9 +36,9 @@ import compile.structure.RuleStructure;
 
 public class LMNParser {
 
-	private static final String            LINK_NAME_PREFIX = "~"; //         [A-Za-z0-9_]* °Ê³°
-	private static final String      PROXY_LINK_NAME_PREFIX = "^"; //   [A-Z_][A-Za-z0-9_]* °Ê³°
-	private static final String PROCESS_CONTEXT_NAME_PREFIX = "_"; // [a-z0-9][A-Za-z0-9_]* °Ê³°
+	private static final String            LINK_NAME_PREFIX = "~"; //         [A-Za-z0-9_]* ä»¥å¤–
+	private static final String      PROXY_LINK_NAME_PREFIX = "^"; //   [A-Z_][A-Za-z0-9_]* ä»¥å¤–
+	private static final String PROCESS_CONTEXT_NAME_PREFIX = "_"; // [a-z0-9][A-Za-z0-9_]* ä»¥å¤–
 	static final LinkOccurrence CLOSED_LINK = new LinkOccurrence("",null,0);
 
 	private int nLinkNumber = 0;
@@ -55,27 +55,27 @@ public class LMNParser {
 	
 	
 	/**
-	   »ú¶ç²òÀÏ´ï¤ÈÆşÎÏ¤ò»ØÄê¤·¤Æ½é´ü²½
-	   @param lex ÍøÍÑ¤¹¤ë»ú¶ç²òÀÏ´ï
+	   å­—å¥è§£æå™¨ã¨å…¥åŠ›ã‚’æŒ‡å®šã—ã¦åˆæœŸåŒ–
+	   @param lex åˆ©ç”¨ã™ã‚‹å­—å¥è§£æå™¨
 	*/
 	protected LMNParser(Scanner lex) {
 		this.lex = lex;
 	}
 	
 	/**
-		¥Ç¥Õ¥©¥ë¥È¤Î»ú¶ç²òÀÏ´ï¤È»ØÄê¤µ¤ì¤¿¥¹¥È¥ê¡¼¥à¤Ç½é´ü²½
+		ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å­—å¥è§£æå™¨ã¨æŒ‡å®šã•ã‚ŒãŸã‚¹ãƒˆãƒªãƒ¼ãƒ ã§åˆæœŸåŒ–
 	*/
 	public LMNParser(Reader in) {
 		this(new Lexer(in));
 	}
 
 	/**
-	 * ¥á¥¤¥ó¥á¥½¥Ã¥É¡£¥½¡¼¥¹¥Õ¥¡¥¤¥ë¤ò²òÀÏ¤·¡¢¥×¥í¥»¥¹¹½Â¤¤¬Æş¤Ã¤¿Ëì¹½Â¤¤òÀ¸À®¤¹¤ë¡£
-	 * ²òÀÏ¸å¤Ï¹½Ê¸¥¨¥é¡¼¤¬½¤Àµ¤µ¤ì¡¢¥ê¥ó¥¯¤ä¥³¥ó¥Æ¥­¥¹¥ÈÌ¾¤Î²ò·è¡¢¤ª¤è¤Ó¥×¥í¥­¥·¤ÎºîÀ®¤¬¹Ô¤ï¤ì¤Æ¤¤¤ë¡£
+	 * ãƒ¡ã‚¤ãƒ³ãƒ¡ã‚½ãƒƒãƒ‰ã€‚ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ã‚’è§£æã—ã€ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ãŒå…¥ã£ãŸè†œæ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹ã€‚
+	 * è§£æå¾Œã¯æ§‹æ–‡ã‚¨ãƒ©ãƒ¼ãŒä¿®æ­£ã•ã‚Œã€ãƒªãƒ³ã‚¯ã‚„ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆåã®è§£æ±ºã€ãŠã‚ˆã³ãƒ—ãƒ­ã‚­ã‚·ã®ä½œæˆãŒè¡Œã‚ã‚Œã¦ã„ã‚‹ã€‚
 	 * 
-	 * ¾Ü¤·¤¯¤ÏaddSrcRuleToMem ¤ò»²¾È¡£
+	 * è©³ã—ãã¯addSrcRuleToMem ã‚’å‚ç…§ã€‚
 	 * 
-	 * @return ¥½¡¼¥¹¥Õ¥¡¥¤¥ëÁ´ÂÎ¤¬É½¤¹¥×¥í¥»¥¹¹½Â¤¤¬Æş¤Ã¤¿Ëì¹½Â¤
+	 * @return ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«å…¨ä½“ãŒè¡¨ã™ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ãŒå…¥ã£ãŸè†œæ§‹é€ 
 	 * @throws ParseException
 	 */
 	public Membrane parse() throws ParseException {
@@ -85,7 +85,7 @@ public class LMNParser {
 		expander.incorporateSignSymbols(srcProcess);
 //		expander.incorporateModuleNames(srcProcess);
 		expander.expandAtoms(srcProcess);
-//		expander.correctPragma(new LinkedList(), srcProcess, "connectRuntime"); // TODO ¥¬¡¼¥É¤¬Ìµ¤¤¤Î¤Ç½ñ¤±¤Ê¤¤ ( ¤ä¤é¤Ê¤¯¤Æ¤è¤¯¤Ê¤Ã¤¿ )
+//		expander.correctPragma(new LinkedList(), srcProcess, "connectRuntime"); // TODO ã‚¬ãƒ¼ãƒ‰ãŒç„¡ã„ã®ã§æ›¸ã‘ãªã„ ( ã‚„ã‚‰ãªãã¦ã‚ˆããªã£ãŸ )
 		expander.correctWorld(srcProcess);
 		addProcessToMem(srcProcess, mem);
 		HashMap freeLinks = addProxies(mem);
@@ -94,8 +94,8 @@ public class LMNParser {
 	}
 	
 	/**	
-		²òÀÏ¤Î·ë²Ì¤ò LinkedList ¤È¤¹¤ë²òÀÏÌÚ¤È¤·¤ÆÊÖ¤·¤Ş¤¹¡£
-		@return ²òÀÏ¤µ¤ì¤¿¥½¡¼¥¹¥³¡¼¥É¤Î¥ê¥¹¥È
+		è§£æã®çµæœã‚’ LinkedList ã¨ã™ã‚‹è§£ææœ¨ã¨ã—ã¦è¿”ã—ã¾ã™ã€‚
+		@return è§£æã•ã‚ŒãŸã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆ
 		@throws ParseException 
 	*/
 	protected LinkedList parseSrc() throws ParseException {
@@ -114,7 +114,7 @@ public class LMNParser {
 
 	////////////////////////////////////////////////////////////////
 
-	/** ¥ë¡¼¥ë¤Î¥Æ¥­¥¹¥ÈÉ½¸½¤ò·èÄê¤¹¤ë */
+	/** ãƒ«ãƒ¼ãƒ«ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¾ã‚’æ±ºå®šã™ã‚‹ */
 	private void setRuleText(LinkedList process) {
 		ListIterator it = process.listIterator();
 		while (it.hasNext()) {
@@ -133,22 +133,22 @@ public class LMNParser {
 		}
 	}
 
-	/** ¥æ¥Ë¡¼¥¯¤Ê¿·¤·¤¤¥ê¥ó¥¯Ì¾¤òÀ¸À®¤¹¤ë */
+	/** ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªæ–°ã—ã„ãƒªãƒ³ã‚¯åã‚’ç”Ÿæˆã™ã‚‹ */
 	String generateNewLinkName() {
 		nLinkNumber++;
 		return LINK_NAME_PREFIX + nLinkNumber;	
 	}
-	/** ¥æ¥Ë¡¼¥¯¤Ê¿·¤·¤¤¥×¥í¥»¥¹Ê¸Ì®Ì¾¤òÀ¸À®¤¹¤ë */
+	/** ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªæ–°ã—ã„ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆåã‚’ç”Ÿæˆã™ã‚‹ */
 	String generateNewProcessContextName() {
 		nLinkNumber++;
 		return PROCESS_CONTEXT_NAME_PREFIX + nLinkNumber;	
 	}
 	
 	/**
-	 * ¥¢¥È¥à¤Î°ú¿ô¤Ë¥ê¥ó¥¯¤ò¥»¥Ã¥È¤¹¤ë
-	 * @param link ¥»¥Ã¥È¤·¤¿¤¤¥ê¥ó¥¯
-	 * @param atom ¥»¥Ã¥ÈÀè¤Î¥¢¥È¥à
-	 * @param pos ¥»¥Ã¥ÈÀè¤Î¥¢¥È¥à¤Ç¤Î¾ì½ê
+	 * ã‚¢ãƒˆãƒ ã®å¼•æ•°ã«ãƒªãƒ³ã‚¯ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
+	 * @param link ã‚»ãƒƒãƒˆã—ãŸã„ãƒªãƒ³ã‚¯
+	 * @param atom ã‚»ãƒƒãƒˆå…ˆã®ã‚¢ãƒˆãƒ 
+	 * @param pos ã‚»ãƒƒãƒˆå…ˆã®ã‚¢ãƒˆãƒ ã§ã®å ´æ‰€
 	 */
 	private void setLinkToAtomArg(SrcLink link, Atomic atom, int pos) {
 		//if (pos >= atom.args.length) error("SYSTEM ERROR: out of Atom arg length:"+pos);
@@ -157,13 +157,13 @@ public class LMNParser {
 	
 	////////////////////////////////////////////////////////////////
 	//
-	// ¹½Ê¸¥ª¥Ö¥¸¥§¥¯¥È¤òËì¹½Â¤¥ª¥Ö¥¸¥§¥¯¥È¤ËÄÉ²Ã¤¹¤ë¥á¥½¥Ã¥É·²
+	// æ§‹æ–‡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è†œæ§‹é€ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«è¿½åŠ ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ç¾¤
 	//
 	
 	/**
-	 * Ëì¤Ë¥ê¥¹¥ÈÆâ¤Î¹½Ê¸¥ª¥Ö¥¸¥§¥¯¥È¤òÄÉ²Ã¤¹¤ë
-	 * @param list ÅĞÏ¿¤¹¤ë¹½Ê¸¥ª¥Ö¥¸¥§¥¯¥È¤Î¥ê¥¹¥È
-	 * @param mem ÄÉ²ÃÀè¤ÎËì
+	 * è†œã«ãƒªã‚¹ãƒˆå†…ã®æ§‹æ–‡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¿½åŠ ã™ã‚‹
+	 * @param list ç™»éŒ²ã™ã‚‹æ§‹æ–‡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒªã‚¹ãƒˆ
+	 * @param mem è¿½åŠ å…ˆã®è†œ
 	 */
 	void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
 		Iterator it = list.iterator();
@@ -172,53 +172,53 @@ public class LMNParser {
 		}
 	}
 	/**
-	 * Ëì¤Ë¥¢¥È¥à¡¢»ÒËì¡¢¥ë¡¼¥ë¤Ê¤É¤Î¹½Ê¸¥ª¥Ö¥¸¥§¥¯¥È¤òÄÉ²Ã
-	 * @param obj ÄÉ²Ã¤¹¤ë¹½Ê¸¥ª¥Ö¥¸¥§¥¯¥È
-	 * @param mem ÄÉ²ÃÀè¤ÎËì
+	 * è†œã«ã‚¢ãƒˆãƒ ã€å­è†œã€ãƒ«ãƒ¼ãƒ«ãªã©ã®æ§‹æ–‡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¿½åŠ 
+	 * @param obj è¿½åŠ ã™ã‚‹æ§‹æ–‡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+	 * @param mem è¿½åŠ å…ˆã®è†œ
 	 */
 	private void addObjectToMem(Object obj, Membrane mem) throws ParseException {
-		// ¥ê¥¹¥È
+		// ãƒªã‚¹ãƒˆ
 		if (obj instanceof LinkedList) {
 			Iterator it = ((LinkedList)obj).iterator();
 			while (it.hasNext()) {
 				addObjectToMem(it.next(), mem);
 			}
 		}
-		// ¥¢¥È¥à
+		// ã‚¢ãƒˆãƒ 
 		else if (obj instanceof SrcAtom) {
 			addSrcAtomToMem((SrcAtom)obj, mem);
 		}
-		// Ëì
+		// è†œ
 		else if (obj instanceof SrcMembrane) {
 			addSrcMemToMem((SrcMembrane)obj, mem);
 		}
-		// ¥ë¡¼¥ë
+		// ãƒ«ãƒ¼ãƒ«
 		else if (obj instanceof SrcRule) {
 			addSrcRuleToMem((SrcRule)obj, mem);
 		}
-		// ¥×¥í¥»¥¹¥³¥ó¥Æ¥­¥¹¥È
+		// ãƒ—ãƒ­ã‚»ã‚¹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
 		else if (obj instanceof SrcProcessContext) {
 			addSrcProcessContextToMem((SrcProcessContext)obj, mem);
 		}
-		// ¥ë¡¼¥ë¥³¥ó¥Æ¥­¥¹¥È
+		// ãƒ«ãƒ¼ãƒ«ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
 		else if (obj instanceof SrcRuleContext) {
 			addSrcRuleContextToMem((SrcRuleContext)obj, mem);
 		}
-		// ¥ê¥ó¥¯
+		// ãƒªãƒ³ã‚¯
 		else if (obj instanceof SrcLink) {
 			SrcLink link = (SrcLink)obj;
 			error("SYNTAX ERROR: top-level variable occurrence: " + link.getName()+", at line "+link.lineno);
 		}
-		// ¤½¤ÎÂ¾ 
+		// ãã®ä»– 
 		else {
 			throw new ParseException("SYSTEM ERROR: Illegal Object to add to a membrane: "+obj);
 		}
 	}
 
 	/**
-	 * Ëì¹½Ê¸¤òËì¤ËÄÉ²Ã
-	 * @param sMem ÄÉ²Ã¤¹¤ëËì¹½Ê¸
-	 * @param mem ÄÉ²ÃÀè¤ÎËì
+	 * è†œæ§‹æ–‡ã‚’è†œã«è¿½åŠ 
+	 * @param sMem è¿½åŠ ã™ã‚‹è†œæ§‹æ–‡
+	 * @param mem è¿½åŠ å…ˆã®è†œ
 	 */
 	private void addSrcMemToMem(SrcMembrane sMem, Membrane mem) throws ParseException {
 		Membrane submem = new Membrane(mem);
@@ -230,7 +230,7 @@ public class LMNParser {
 			String name = sProc.getQualifiedName();
 			ProcessContext pc = new ProcessContext(mem, name, 0);
 			submem.pragmaAtHost = pc;
-			// todo ¡Ú¥³¡¼¥ÉÀ°Íı¡ÛÄ¾ÀÜContextDef¤òÂåÆş¤Ç¤­¤ë¤è¤¦¤Ë¤¹¤ë(1)
+			// todo ã€ã‚³ãƒ¼ãƒ‰æ•´ç†ã€‘ç›´æ¥ContextDefã‚’ä»£å…¥ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹(1)
 		}
 		if (sMem.pragma != null && submem.pragmaAtHost == null) {
 			warning("WARNING: unrecognized pragma, ignored: " + sMem.pragma );
@@ -240,9 +240,9 @@ public class LMNParser {
 	}
 
 	/**
-	 * ¥¢¥È¥à¹½Ê¸¤òËì¤ËÄÉ²Ã
-	 * @param sAtom ÄÉ²Ã¤·¤¿¤¤¥¢¥È¥à¹½Ê¸
-	 * @param mem ÄÉ²ÃÀè¤ÎËì
+	 * ã‚¢ãƒˆãƒ æ§‹æ–‡ã‚’è†œã«è¿½åŠ 
+	 * @param sAtom è¿½åŠ ã—ãŸã„ã‚¢ãƒˆãƒ æ§‹æ–‡
+	 * @param mem è¿½åŠ å…ˆã®è†œ
 	 */
 	private void addSrcAtomToMem(SrcAtom sAtom, Membrane mem) {
 		boolean alllinks   = true;
@@ -250,19 +250,19 @@ public class LMNParser {
 		LinkedList p = sAtom.getProcess();
 		int arity = p.size();
 		
-		// [1] ¥Õ¥¡¥ó¥¯¥¿¤òÀ¸À®¤¹¤ë
+		// [1] ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã‚’ç”Ÿæˆã™ã‚‹
 		Functor func = Functor.build(sAtom.getName(), arity, sAtom.getNameType());
 		
-		// [2] ¥¢¥È¥à¹½Â¤¤òÀ¸À®¤¹¤ë
+		// [2] ã‚¢ãƒˆãƒ æ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹
 		Atom atom = new Atom(mem, func);
 		atom.setSourceLocation(sAtom.line, sAtom.column);
 		if(sAtom.getNameType() == SrcName.SYMBOL){
 			atom.isSelfEvaluated = true;
 		}
-		// [3] °ú¿ô¤Î¹½Â¤¤òÀ¸À®¤¹¤ë		
+		// [3] å¼•æ•°ã®æ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹		
 		for (int i = 0; i < arity; i++) {
 			Object obj = p.get(i);
-			// ¥ê¥ó¥¯
+			// ãƒªãƒ³ã‚¯
 			if (obj instanceof SrcLink) {
 				setLinkToAtomArg((SrcLink)obj, atom, i);
 				if (obj instanceof SrcLinkBundle) { alllinks = false; }
@@ -272,7 +272,7 @@ public class LMNParser {
 				setLinkToAtomArg((SrcLink)obj, atom, i);
 			}
 
-//			// ¥¢¥È¥à
+//			// ã‚¢ãƒˆãƒ 
 //			else if (obj instanceof SrcAtom) {
 //				String newlinkname = generateNewLinkName();
 //				((SrcAtom)obj).process.add(new SrcLink(newlinkname));
@@ -280,14 +280,14 @@ public class LMNParser {
 //				setLinkToAtomArg(new SrcLink(newlinkname), atom, i);
 //			}
 
-//			// ¥×¥í¥»¥¹Ê¸Ì®
+//			// ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆ
 //			else if (obj instanceof SrcProcessContext) {
 //				error("SYNTAX ERROR: untyped process context in an atom argument: " + obj);
 //				setLinkToAtomArg(new SrcLink(generateNewLinkName()), atom, i);
 //				allbundles = false;
 //			}
 
-			// ¤½¤ÎÂ¾
+			// ãã®ä»–
 			else {
 				error("SYNTAX ERROR: illegal object in an atom argument: " + obj);
 				setLinkToAtomArg(new SrcLink(generateNewLinkName()), atom, i);
@@ -295,7 +295,7 @@ public class LMNParser {
 			}
 		}
 		
-		// [4] ¥¢¥È¥à¤È¥¢¥È¥à½¸ÃÄ¤ò¼±ÊÌ¤¹¤ë
+		// [4] ã‚¢ãƒˆãƒ ã¨ã‚¢ãƒˆãƒ é›†å›£ã‚’è­˜åˆ¥ã™ã‚‹
 		if (arity > 0 && allbundles) 
 			mem.aggregates.add(atom);
 		else if (arity == 0 || alllinks )
@@ -306,10 +306,10 @@ public class LMNParser {
 	}
 
 	/**
-	 * ¥×¥í¥»¥¹Ê¸Ì®¹½Ê¸¤òËì¤ËÄÉ²Ã
-	 * <p>°ú¿ô¤Ê¤·¤Î$p¤Ï$p[|*p]¤È¤¤¤¦ÆâÉôÌ¾*p¤ò»È¤Ã¤¿¹½Â¤¤Ë¼«Æ°Åª¤ËÃÖ´¹¤µ¤ì¤ë
-	 * @param sProc ÄÉ²Ã¤·¤¿¤¤¥×¥í¥»¥¹Ê¸Ì®¹½Ê¸
-	 * @param mem ÄÉ²ÃÀè¤ÎËì
+	 * ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆæ§‹æ–‡ã‚’è†œã«è¿½åŠ 
+	 * <p>å¼•æ•°ãªã—ã®$pã¯$p[|*p]ã¨ã„ã†å†…éƒ¨å*pã‚’ä½¿ã£ãŸæ§‹é€ ã«è‡ªå‹•çš„ã«ç½®æ›ã•ã‚Œã‚‹
+	 * @param sProc è¿½åŠ ã—ãŸã„ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆæ§‹æ–‡
+	 * @param mem è¿½åŠ å…ˆã®è†œ
 	 */
 	private void addSrcProcessContextToMem(SrcProcessContext sProc, Membrane mem) {
 		ProcessContext pc;
@@ -340,9 +340,9 @@ public class LMNParser {
 	}
 	
 	/**
-	 * ¥ë¡¼¥ëÊ¸Ì®¹½Ê¸¤òËì¤ËÄÉ²Ã
-	 * @param sRule ÄÉ²Ã¤·¤¿¤¤¥ë¡¼¥ëÊ¸Ì®¹½Ê¸
-	 * @param mem ÄÉ²ÃÀè¤ÎËì
+	 * ãƒ«ãƒ¼ãƒ«æ–‡è„ˆæ§‹æ–‡ã‚’è†œã«è¿½åŠ 
+	 * @param sRule è¿½åŠ ã—ãŸã„ãƒ«ãƒ¼ãƒ«æ–‡è„ˆæ§‹æ–‡
+	 * @param mem è¿½åŠ å…ˆã®è†œ
 	 */
 	private void addSrcRuleContextToMem(SrcRuleContext sRule, Membrane mem) {
 		RuleContext p = new RuleContext(mem, sRule.getQualifiedName());
@@ -350,49 +350,49 @@ public class LMNParser {
 	}
 	
 	/**
-	 * ¥ë¡¼¥ë¹½Ê¸¤òËì¤ËÄÉ²Ã¤¹¤ë
-	 * @param sRule ÄÉ²Ã¤·¤¿¤¤¥ë¡¼¥ë¹½Ê¸
-	 * @param mem ÄÉ²ÃÀè¤ÎËì
+	 * ãƒ«ãƒ¼ãƒ«æ§‹æ–‡ã‚’è†œã«è¿½åŠ ã™ã‚‹
+	 * @param sRule è¿½åŠ ã—ãŸã„ãƒ«ãƒ¼ãƒ«æ§‹æ–‡
+	 * @param mem è¿½åŠ å…ˆã®è†œ
 	 */
 	private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
-		//2006.1.22 lineno¤òÄÉ²Ã by inui
+		//2006.1.22 linenoã‚’è¿½åŠ  by inui
 		RuleStructure rule = new RuleStructure(mem, sRule.getText(), sRule.lineno);
 		rule.name = sRule.name;
-		// Î¬µ­Ë¡¤ÎÅ¸³«		
+		// ç•¥è¨˜æ³•ã®å±•é–‹		
 		expander.expandRuleAbbreviations(sRule);
-		//  º¸ÊÕ¤Î¥ë¡¼¥ë¤ò¹½Ê¸¥¨¥é¡¼¤È¤·¤Æ½üµî¤¹¤ë
+		//  å·¦è¾ºã®ãƒ«ãƒ¼ãƒ«ã‚’æ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã¨ã—ã¦é™¤å»ã™ã‚‹
 		assertLHSRules(sRule.getHead());
 		
-		// º¸ÊÕ¤ª¤è¤Ó¥¬¡¼¥É·¿À©Ìó¤ËÂĞ¤·¤Æ¡¢¹½Â¤¤òÀ¸À®¤·¡¢¥ê¥ó¥¯°Ê³°¤ÎÌ¾Á°¤ò²ò·è¤¹¤ë
+		// å·¦è¾ºãŠã‚ˆã³ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ã«å¯¾ã—ã¦ã€æ§‹é€ ã‚’ç”Ÿæˆã—ã€ãƒªãƒ³ã‚¯ä»¥å¤–ã®åå‰ã‚’è§£æ±ºã™ã‚‹
 		addProcessToMem(sRule.getHead(), rule.leftMem);		
 		addProcessToMem(sRule.getGuard(), rule.guardMem);
 		HashMap names = resolveHeadContextNames(rule);
-		// ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ª¤è¤Ó±¦ÊÕ¤ËÂĞ¤·¤Æ¡¢¹½Â¤¤òÀ¸À®¤·¡¢¥ê¥ó¥¯°Ê³°¤ÎÌ¾Á°¤ò²ò·è¤¹¤ë
+		// ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ãŠã‚ˆã³å³è¾ºã«å¯¾ã—ã¦ã€æ§‹é€ ã‚’ç”Ÿæˆã—ã€ãƒªãƒ³ã‚¯ä»¥å¤–ã®åå‰ã‚’è§£æ±ºã™ã‚‹
 		addGuardNegatives(sRule.getGuardNegatives(), rule, names);
 		addProcessToMem(sRule.getBody(), rule.rightMem);
 		resolveContextNames(rule, names);
 		
-		//Î¬µ­Ë¡¤¬Å¸³«¤µ¤ì¤Æ¹½Â¤¤¬À¸À®¤µ¤ì¡¤
-		//¥ê¥ó¥¯°Ê³°¤ÎÌ¾Á°¤¬²ò·è¤µ¤ì¤Æ¤¤¤ë ( $p,@p¤ÎContext.def¤¬¥»¥Ã¥È¤µ¤ì¤Æ¤¤¤ë¡¤*V¤ÏÁĞÊı¸ş¥ê¥ó¥¯¤¬¤Ï¤é¤ì¤Æ¤¤¤ë )
+		//ç•¥è¨˜æ³•ãŒå±•é–‹ã•ã‚Œã¦æ§‹é€ ãŒç”Ÿæˆã•ã‚Œï¼Œ
+		//ãƒªãƒ³ã‚¯ä»¥å¤–ã®åå‰ãŒè§£æ±ºã•ã‚Œã¦ã„ã‚‹ ( $p,@pã®Context.defãŒã‚»ãƒƒãƒˆã•ã‚Œã¦ã„ã‚‹ï¼Œ*Vã¯åŒæ–¹å‘ãƒªãƒ³ã‚¯ãŒã¯ã‚‰ã‚Œã¦ã„ã‚‹ )
 		
-		// ¥×¥í¥­¥·¥¢¥È¥à¤òÀ¸À®¤·¡¢¥ê¥ó¥¯¤ò¤Ä¤Ê¤®¡¢Ëì¤Î¼«Í³¥ê¥ó¥¯¥ê¥¹¥È¤ò·èÄê¤¹¤ë
-		// ¤³¤Î»şÅÀ¤Ç¤Ï¥¢¥È¥à¤Î¥ê¥ó¥¯°ú¿ô¤Ë¤Ï¼«Ê¬¼«¿È¤ÎLinkOccurrece¤¬³ÊÇ¼¤µ¤ì¤Æ¤¤¤ë
-		// ¤³¤ì¤é¤¬½ª¤ï¤ë¤È¡¤¥¢¥È¥à¤Î¥ê¥ó¥¯°ú¿ô¤ÎLinkOccurrence¤Îbuddy¤¬¥»¥Ã¥È¤µ¤ì¤ë
-		// ¥ê¥ó¥¯¤ò·Ò¤°ºî¶È¤ÏaddLinkOccurrence¤Ç¹Ô¤ï¤ì¤ë
+		// ãƒ—ãƒ­ã‚­ã‚·ã‚¢ãƒˆãƒ ã‚’ç”Ÿæˆã—ã€ãƒªãƒ³ã‚¯ã‚’ã¤ãªãã€è†œã®è‡ªç”±ãƒªãƒ³ã‚¯ãƒªã‚¹ãƒˆã‚’æ±ºå®šã™ã‚‹
+		// ã“ã®æ™‚ç‚¹ã§ã¯ã‚¢ãƒˆãƒ ã®ãƒªãƒ³ã‚¯å¼•æ•°ã«ã¯è‡ªåˆ†è‡ªèº«ã®LinkOccurreceãŒæ ¼ç´ã•ã‚Œã¦ã„ã‚‹
+		// ã“ã‚Œã‚‰ãŒçµ‚ã‚ã‚‹ã¨ï¼Œã‚¢ãƒˆãƒ ã®ãƒªãƒ³ã‚¯å¼•æ•°ã®LinkOccurrenceã®buddyãŒã‚»ãƒƒãƒˆã•ã‚Œã‚‹
+		// ãƒªãƒ³ã‚¯ã‚’ç¹‹ãä½œæ¥­ã¯addLinkOccurrenceã§è¡Œã‚ã‚Œã‚‹
 		
-		addProxies(rule.leftMem); // addProxiesAndCoupleLinks¤Ç¤¢¤ë¤Ù¤­?
+		addProxies(rule.leftMem); // addProxiesAndCoupleLinksã§ã‚ã‚‹ã¹ã?
 		coupleLinks(rule.guardMem);
 		addProxies(rule.rightMem);
 		addProxiesToGuardNegatives(rule);
-		coupleGuardNegativeLinks(rule);		// ¥¬¡¼¥ÉÈİÄê¾ò·ï¤Î¥ê¥ó¥¯¤òÀÜÂ³¤¹¤ë
-		coupleInheritedLinks(rule);			// ±¦ÊÕ¤Èº¸ÊÕ¤Î¼«Í³¥ê¥ó¥¯¤òÀÜÂ³¤¹¤ë
+		coupleGuardNegativeLinks(rule);		// ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ãƒªãƒ³ã‚¯ã‚’æ¥ç¶šã™ã‚‹
+		coupleInheritedLinks(rule);			// å³è¾ºã¨å·¦è¾ºã®è‡ªç”±ãƒªãƒ³ã‚¯ã‚’æ¥ç¶šã™ã‚‹
 		
 		mem.rules.add(rule);
 	
 	}
 	
 	/**
-	 * ¥¢¥È¥àÅ¸³«¤µ¤ì¤¿¥½¡¼¥¹Ëì¤ËÂĞ¤·¤Æ¥ë¡¼¥ë¤¬Ìµ¤¤¤³¤È¤ò³ÎÇ§¤¹¤ë
+	 * ã‚¢ãƒˆãƒ å±•é–‹ã•ã‚ŒãŸã‚½ãƒ¼ã‚¹è†œã«å¯¾ã—ã¦ãƒ«ãƒ¼ãƒ«ãŒç„¡ã„ã“ã¨ã‚’ç¢ºèªã™ã‚‹
 	 * 
 	 */
 	private void assertLHSRules(List procs)throws ParseException{
@@ -409,10 +409,10 @@ public class LMNParser {
 		}
 	}
 
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ÎÃæ´Ö·Á¼°¤ËÂĞ±ş¤¹¤ë¹½Â¤¤òÀ¸À®¤¹¤ë
-	 *  @param sNegatives ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ÎÃæ´Ö·Á¼°[$p,[Q]]¤Î¥ê¥¹¥È[in]
-	 *  @param rule ¥ë¡¼¥ë¹½Â¤[in,out]
-	 *  @param names º¸ÊÕ¤ª¤è¤Ó¥¬¡¼¥É·¿À©Ìó¤Ë½Ğ¸½¤·¤¿$p¡Ê¤È*X¡Ë¤«¤é¤½¤ÎÄêµÁ¡Ê¤È½Ğ¸½¡Ë¤Ø¤Î¥Ş¥Ã¥×[in] */
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ä¸­é–“å½¢å¼ã«å¯¾å¿œã™ã‚‹æ§‹é€ ã‚’ç”Ÿæˆã™ã‚‹
+	 *  @param sNegatives ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ä¸­é–“å½¢å¼[$p,[Q]]ã®ãƒªã‚¹ãƒˆ[in]
+	 *  @param rule ãƒ«ãƒ¼ãƒ«æ§‹é€ [in,out]
+	 *  @param names å·¦è¾ºãŠã‚ˆã³ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ã«å‡ºç¾ã—ãŸ$pï¼ˆã¨*Xï¼‰ã‹ã‚‰ãã®å®šç¾©ï¼ˆã¨å‡ºç¾ï¼‰ã¸ã®ãƒãƒƒãƒ—[in] */
 	private void addGuardNegatives(LinkedList<List> sNegatives, RuleStructure rule, HashMap names) throws ParseException {
 		for(List<List> list1 : sNegatives){
 			List<ProcessContextEquation> neg = new LinkedList<ProcessContextEquation>();
@@ -441,24 +441,24 @@ public class LMNParser {
 
 	////////////////////////////////////////////////////////////////
 	//
-	// ¥ê¥ó¥¯¤È¥×¥í¥­¥·
+	// ãƒªãƒ³ã‚¯ã¨ãƒ—ãƒ­ã‚­ã‚·
 	//
 	
-	/** »ÒËì¤ËÂĞ¤·¤ÆºÆµ¢Åª¤Ë¥×¥í¥­¥·¤òÄÉ²Ã¤¹¤ë¡£
-	 * @return ¤³¤ÎËì¤Î¹¹¿·¤µ¤ì¤¿¼«Í³¥ê¥ó¥¯¥Ş¥Ã¥× mem.freeLinks */
+	/** å­è†œã«å¯¾ã—ã¦å†å¸°çš„ã«ãƒ—ãƒ­ã‚­ã‚·ã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * @return ã“ã®è†œã®æ›´æ–°ã•ã‚ŒãŸè‡ªç”±ãƒªãƒ³ã‚¯ãƒãƒƒãƒ— mem.freeLinks */
 	private HashMap addProxies(Membrane mem) {
-		HashSet<String> proxyLinkNames = new HashSet<String>();	// mem¤È¤½¤Î»ÒËì¤Î´Ö¤ËºîÀ®¤·¤¿Ëì´Ö¥ê¥ó¥¯Ì¾¤Î½¸¹ç
+		HashSet<String> proxyLinkNames = new HashSet<String>();	// memã¨ãã®å­è†œã®é–“ã«ä½œæˆã—ãŸè†œé–“ãƒªãƒ³ã‚¯åã®é›†åˆ
 		for(Membrane submem : mem.mems){
 			HashMap freeLinks = addProxies(submem);
-			// »ÒËì¤Î¼«Í³¥ê¥ó¥¯¤ËÂĞ¤·¤Æ¥×¥í¥­¥·¤òÄÉ²Ã¤¹¤ë
+			// å­è†œã®è‡ªç”±ãƒªãƒ³ã‚¯ã«å¯¾ã—ã¦ãƒ—ãƒ­ã‚­ã‚·ã‚’è¿½åŠ ã™ã‚‹
 			HashMap newFreeLinks = new HashMap();
 			Iterator it2 = freeLinks.keySet().iterator();
 			while (it2.hasNext()) {
 				LinkOccurrence freeLink = (LinkOccurrence)freeLinks.get(it2.next());
-				// »ÒËì¤Î¼«Í³¥ê¥ó¥¯Ì¾ freeLink.name ¤ËÂĞ¤·¤Æ¡¢Ëì´Ö¥ê¥ó¥¯Ì¾ proxyLinkName ¤ò·èÄê¤¹¤ë¡£
-				// ÄÌ¾ï¤ÏX¤ËÂĞ¤·¤Æ¡¢1^X¤È¤¹¤ë¡£
-				// X¤¬mem¤Î¶É½ê¥ê¥ó¥¯¤Ç¤¢¤ê¡¢1^X¤òmemÆâ¤Ç¤¹¤Ç¤Ë»ÈÍÑ¤·¤¿¾ì¹ç¤Ï¡¢1^^X¤È¤¹¤ë¡£
-				// X¤¬submem¤Î»ÒËì¤Ø¤ÎÄ¾ÄÌ¥ê¥ó¥¯¤Ç¤¢¤ê¡¢¤½¤³¤Ç¤ÎËì´Ö¥ê¥ó¥¯Ì¾¤¬1^X¤Î¾ì¹ç¤Ï¡¢2^X¤È¤¹¤ë¡£
+				// å­è†œã®è‡ªç”±ãƒªãƒ³ã‚¯å freeLink.name ã«å¯¾ã—ã¦ã€è†œé–“ãƒªãƒ³ã‚¯å proxyLinkName ã‚’æ±ºå®šã™ã‚‹ã€‚
+				// é€šå¸¸ã¯Xã«å¯¾ã—ã¦ã€1^Xã¨ã™ã‚‹ã€‚
+				// XãŒmemã®å±€æ‰€ãƒªãƒ³ã‚¯ã§ã‚ã‚Šã€1^Xã‚’memå†…ã§ã™ã§ã«ä½¿ç”¨ã—ãŸå ´åˆã¯ã€1^^Xã¨ã™ã‚‹ã€‚
+				// XãŒsubmemã®å­è†œã¸ã®ç›´é€šãƒªãƒ³ã‚¯ã§ã‚ã‚Šã€ãã“ã§ã®è†œé–“ãƒªãƒ³ã‚¯åãŒ1^Xã®å ´åˆã¯ã€2^Xã¨ã™ã‚‹ã€‚
 				String index = "1";
 				if (freeLink.atom instanceof Atom
 				 && ((Atom)freeLink.atom).functor.isOutsideProxy()
@@ -471,21 +471,21 @@ public class LMNParser {
 						+ PROXY_LINK_NAME_PREFIX + freeLink.name;
 				}
 				proxyLinkNames.add(proxyLinkName);
-				// »ÒËì¤Ëinside_proxy¤òÄÉ²Ã
+				// å­è†œã«inside_proxyã‚’è¿½åŠ 
 //				ProxyAtom inside = new ProxyAtom(submem, ProxyAtom.INSIDE_PROXY);
 				Atom inside = new Atom(submem,Functor.INSIDE_PROXY);
-				inside.args[0] = new LinkOccurrence(proxyLinkName, inside, 0); // ³°Â¦
-				inside.args[1] = new LinkOccurrence(freeLink.name, inside, 1); // ÆâÂ¦
+				inside.args[0] = new LinkOccurrence(proxyLinkName, inside, 0); // å¤–å´
+				inside.args[1] = new LinkOccurrence(freeLink.name, inside, 1); // å†…å´
 				inside.args[1].buddy = freeLink;
 				freeLink.buddy = inside.args[1];
 				submem.atoms.add(inside);
-				// ¿·¤·¤¤¼«Í³¥ê¥ó¥¯Ì¾¤ò¿·¤·¤¤¼«Í³¥ê¥ó¥¯°ìÍ÷¤ËÄÉ²Ã¤¹¤ë
+				// æ–°ã—ã„è‡ªç”±ãƒªãƒ³ã‚¯åã‚’æ–°ã—ã„è‡ªç”±ãƒªãƒ³ã‚¯ä¸€è¦§ã«è¿½åŠ ã™ã‚‹
 				newFreeLinks.put(proxyLinkName, inside.args[0]);			
-				// ¤³¤ÎËì¤Ëoutside_proxy¤òÄÉ²Ã
+				// ã“ã®è†œã«outside_proxyã‚’è¿½åŠ 
 //				ProxyAtom outside = new ProxyAtom(mem, new SpecialFunctor("$out", 2, submem.kind));
 				Atom outside = new Atom(mem, new SpecialFunctor("$out", 2, submem.kind));//Functor.OUTSIDE_PROXY);
-				outside.args[0] = new LinkOccurrence(proxyLinkName, outside, 0); // ÆâÂ¦
-				outside.args[1] = new LinkOccurrence(freeLink.name, outside, 1); // ³°Â¦
+				outside.args[0] = new LinkOccurrence(proxyLinkName, outside, 0); // å†…å´
+				outside.args[1] = new LinkOccurrence(freeLink.name, outside, 1); // å¤–å´
 				outside.args[0].buddy = inside.args[0];
 				inside.args[0].buddy = outside.args[0];
 				mem.atoms.add(outside);
@@ -493,11 +493,11 @@ public class LMNParser {
 			submem.freeLinks = newFreeLinks;
 		}
 		
-		// mem¤Î»ÒËì¤Î¼«Í³¥ê¥ó¥¯¤Ï¥×¥í¥­¥·¤ò¶´¤Ş¤ì¤Æmem¤Ş¤Ç¾å¤¬¤Ã¤Æ¤­¤Æ¤¤¤ë
+		// memã®å­è†œã®è‡ªç”±ãƒªãƒ³ã‚¯ã¯ãƒ—ãƒ­ã‚­ã‚·ã‚’æŒŸã¾ã‚Œã¦memã¾ã§ä¸ŠãŒã£ã¦ãã¦ã„ã‚‹
 		
 		return coupleLinks(mem);
 	}
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ËÂĞ¤·¤ÆaddProxies¤ò¸Æ¤Ö */
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã«å¯¾ã—ã¦addProxiesã‚’å‘¼ã¶ */
 	private void addProxiesToGuardNegatives(RuleStructure rule) {
 		Iterator it = rule.guardNegatives.iterator();
 		while (it.hasNext()) {
@@ -509,13 +509,13 @@ public class LMNParser {
 		}
 	}
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ëì¤Ë¤¢¤ë¥¢¥È¥à¤Î°ú¿ô¤ËÂĞ¤·¤Æ¡¢¥ê¥ó¥¯¤Î·ë¹ç¤ò¹Ô¤¤¡¢¼«Í³¥ê¥ó¥¯¤ÎHashMap¤òÊÖ¤¹¡£
-	 * <p>»ÒËì¤ËÂĞ¤·¤Æ¥ê¥ó¥¯¤Î·ë¹ç¤ª¤è¤Ó¥×¥í¥­¥·¤ÎºîÀ®¤¬¹Ô¤ï¤ì¤¿¸å¤Ç¸Æ¤Ó½Ğ¤µ¤ì¤ë¡£
-	 * <p>ÉûºîÍÑ¤È¤·¤Æ¡¢¥á¥½¥Ã¥É¤ÎÌá¤êÃÍ¤ò mem.freeLinks ¤Ë¥»¥Ã¥È¤¹¤ë¡£
-	 * @return ¥ê¥ó¥¯Ì¾¤«¤é¼«Í³¥ê¥ó¥¯½Ğ¸½¤Ø¤ÎHashMap
+	 * æŒ‡å®šã•ã‚ŒãŸè†œã«ã‚ã‚‹ã‚¢ãƒˆãƒ ã®å¼•æ•°ã«å¯¾ã—ã¦ã€ãƒªãƒ³ã‚¯ã®çµåˆã‚’è¡Œã„ã€è‡ªç”±ãƒªãƒ³ã‚¯ã®HashMapã‚’è¿”ã™ã€‚
+	 * <p>å­è†œã«å¯¾ã—ã¦ãƒªãƒ³ã‚¯ã®çµåˆãŠã‚ˆã³ãƒ—ãƒ­ã‚­ã‚·ã®ä½œæˆãŒè¡Œã‚ã‚ŒãŸå¾Œã§å‘¼ã³å‡ºã•ã‚Œã‚‹ã€‚
+	 * <p>å‰¯ä½œç”¨ã¨ã—ã¦ã€ãƒ¡ã‚½ãƒƒãƒ‰ã®æˆ»ã‚Šå€¤ã‚’ mem.freeLinks ã«ã‚»ãƒƒãƒˆã™ã‚‹ã€‚
+	 * @return ãƒªãƒ³ã‚¯åã‹ã‚‰è‡ªç”±ãƒªãƒ³ã‚¯å‡ºç¾ã¸ã®HashMap
 	 */
 	private HashMap coupleLinks(Membrane mem) {
-		// Æ±¤¸Ëì¥ì¥Ù¥ë¤Î¥ê¥ó¥¯·ë¹ç¤ò¹Ô¤¦
+		// åŒã˜è†œãƒ¬ãƒ™ãƒ«ã®ãƒªãƒ³ã‚¯çµåˆã‚’è¡Œã†
 		HashMap links = new HashMap();
 		List[] lists = {mem.atoms, mem.processContexts, mem.typedProcessContexts};
 		for (int i = 0; i < lists.length; i++) {
@@ -523,7 +523,7 @@ public class LMNParser {
 			while (it.hasNext()) {
 				Atomic a = (Atomic)it.next();
 				for (int j = 0; j < a.args.length; j++) {
-					if (a.args[j].buddy == null) { // outside_proxy¤ÎÂè1°ú¿ô¤Ï¤¹¤Ç¤ËÈónull¤Ë¤Ê¤Ã¤Æ¤¤¤ë
+					if (a.args[j].buddy == null) { // outside_proxyã®ç¬¬1å¼•æ•°ã¯ã™ã§ã«énullã«ãªã£ã¦ã„ã‚‹
 						addLinkOccurrence(links, a.args[j]);
 					}
 				}
@@ -534,7 +534,7 @@ public class LMNParser {
 		return links;
 	}
 	
-	/** ÊÄ¤¸¤¿¥ê¥ó¥¯¤òlinks¤«¤é½üµî¤¹¤ë */
+	/** é–‰ã˜ãŸãƒªãƒ³ã‚¯ã‚’linksã‹ã‚‰é™¤å»ã™ã‚‹ */
 	private static void removeClosedLinks(HashMap links) {
 		Iterator it = links.keySet().iterator();
 		while (it.hasNext()) {
@@ -544,11 +544,11 @@ public class LMNParser {
 	}
 	
 	/**
-	 * »ØÄê¤µ¤ì¤¿¥ê¥ó¥¯½Ğ¸½¤òµ­Ï¿¤¹¤ë¡£Æ±¤¸Ì¾Á°¤Ç2²óÌÜ¤Î½Ğ¸½¤Ê¤é¤Ğ¥ê¥ó¥¯¤Î·ë¹ç¤ò¹Ô¤¦¡£
-	 * @param lnk µ­Ï¿¤¹¤ë¥ê¥ó¥¯½Ğ¸½
+	 * æŒ‡å®šã•ã‚ŒãŸãƒªãƒ³ã‚¯å‡ºç¾ã‚’è¨˜éŒ²ã™ã‚‹ã€‚åŒã˜åå‰ã§2å›ç›®ã®å‡ºç¾ãªã‚‰ã°ãƒªãƒ³ã‚¯ã®çµåˆã‚’è¡Œã†ã€‚
+	 * @param lnk è¨˜éŒ²ã™ã‚‹ãƒªãƒ³ã‚¯å‡ºç¾
 	 */
 	private void addLinkOccurrence(HashMap<String, LinkOccurrence> links, LinkOccurrence lnk) {
-		// 3²ó°Ê¾å¤Î½Ğ¸½
+		// 3å›ä»¥ä¸Šã®å‡ºç¾
 		if (links.get(lnk.name) == CLOSED_LINK) {
 			error("SYNTAX ERROR: link " + lnk.name + " appears more than twice at line " + lnk.atom.line);
 			String linkname = lnk.name + generateNewLinkName();
@@ -557,11 +557,11 @@ public class LMNParser {
 			lnk.name = linkname;
 			links.put(lnk.name, lnk);
 		}
-		// 1²óÌÜ¤Î½Ğ¸½
+		// 1å›ç›®ã®å‡ºç¾
 		if (links.get(lnk.name) == null) {
 			links.put(lnk.name, lnk);
 		}
-		// 2²óÌÜ¤Î½Ğ¸½
+		// 2å›ç›®ã®å‡ºç¾
 		else {
 			LinkOccurrence buddy = links.get(lnk.name);
 			lnk.buddy = buddy;
@@ -570,7 +570,7 @@ public class LMNParser {
 		}
 	}
 	
-	/** Ëìmem¤Î¼«Í³¥ê¥ó¥¯¤òËìÆâ¤ÇÊÄ¤¸¤ë¡Ê¹½Ê¸¥¨¥é¡¼¤«¤é¤ÎÉüµ¢ÍÑ¡Ë */
+	/** è†œmemã®è‡ªç”±ãƒªãƒ³ã‚¯ã‚’è†œå†…ã§é–‰ã˜ã‚‹ï¼ˆæ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã‹ã‚‰ã®å¾©å¸°ç”¨ï¼‰ */
 	public void closeFreeLinks(Membrane mem) {
 		Iterator<String> it = mem.freeLinks.keySet().iterator();
 		while (it.hasNext()) {
@@ -583,41 +583,41 @@ public class LMNParser {
 		}
 		coupleLinks(mem);
 	}
-	/** ¥ë¡¼¥ë¤Î¥¬¡¼¥ÉÈİÄê¾ò·ï¤Î¥È¥Ã¥×¥ì¥Ù¥ë¤Î¥ê¥ó¥¯¤ò¤Ä¤Ê¤°¡£
-	 * <p>³ÆËì¤ÎfreeLinks¤Î·×»»¸å¡¢coupleInheritedLinks(rule)¤ÎÁ°¤Ë¸Æ¤Ö¤³¤È¡£
-	 * <p>ËÜ¥á¥½¥Ã¥É½ªÎ»¸å¡¢ÈİÄê¾ò·ïÃæ¤ÎÅù¼°Æâ¤Î¥ê¥ó¥¯½Ğ¸½¤Ï¼¡¤Î¤¤¤º¤ì¤«¤Ë¤Ê¤ë¡§
+	/** ãƒ«ãƒ¼ãƒ«ã®ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã®ãƒªãƒ³ã‚¯ã‚’ã¤ãªãã€‚
+	 * <p>å„è†œã®freeLinksã®è¨ˆç®—å¾Œã€coupleInheritedLinks(rule)ã®å‰ã«å‘¼ã¶ã“ã¨ã€‚
+	 * <p>æœ¬ãƒ¡ã‚½ãƒƒãƒ‰çµ‚äº†å¾Œã€å¦å®šæ¡ä»¶ä¸­ã®ç­‰å¼å†…ã®ãƒªãƒ³ã‚¯å‡ºç¾ã¯æ¬¡ã®ã„ãšã‚Œã‹ã«ãªã‚‹ï¼š
 	 * <ol>
-	 * <li>Æ±¤¸Åù¼°±¦ÊÕ¤Ø¤Î¶É½ê¥ê¥ó¥¯¡ÊÄÌ¾ï¤ÎÁĞÊı¸ş¥ê¥ó¥¯¡Ë- ËÜ¥á¥½¥Ã¥É¸Æ¤Ó½Ğ¤·»ş¤Ë¤¹¤Ç¤ËÊÄ¤¸¤Æ¤¤¤ë
-	 * <li>Æ±¤¸ÈİÄê¾ò·ïÆâ¤ÎÂ¾¤ÎÅù¼°±¦ÊÕ¤Ø¤Î¡ÖÅù¼°´Ö¥ê¥ó¥¯¡×¡ÊÁĞÊı¸şÄ¾ÀÜ¥ê¥ó¥¯¡Ë
-	 * <li>¤½¤ÎÅù¼°º¸ÊÕ$p¤¬¥ë¡¼¥ëº¸ÊÕ¤Ç½Ğ¸½¤¹¤ëËì¤Ë¤¢¤ë¥¢¥È¥à/·¿ÉÕ¤­$p¤Ø¤Î¡Ö¾å½ñ¤­¥ê¥ó¥¯¡×¡ÊÊÒÊı¸ş¥ê¥ó¥¯¡Ë
-	 *     ¡Ê¤¿¤À¤·¸½¾õ¤Ç¤Ï·¿ÉÕ¤­¥¢¥È¥à¤¬1°ú¿ô¤Î¤ß¤Ç¤¢¤ë¤¿¤á¡¢¥Ñ¥Ã¥·¥Ö·¿À©¸Â¤Ë¤«¤«¤ë¤¿¤á·¿ÉÕ¤­¤Ø¤Î¥ê¥ó¥¯¤ÏÌµ¤¤¡Ë
-	 * <li>null¤ò»Ø¤¹¥¬¡¼¥É¡ÖÆ¿Ì¾¥ê¥ó¥¯¡×¡ÊÀµ³Î¤Ë¤Ï$pp¤ÎÌÀ¼¨Åª¤Ê¥ê¥ó¥¯°ú¿ô¤È¤ÎÄÌ¾ï¤ÎÁĞÊı¸ş¥ê¥ó¥¯¡Ë
+	 * <li>åŒã˜ç­‰å¼å³è¾ºã¸ã®å±€æ‰€ãƒªãƒ³ã‚¯ï¼ˆé€šå¸¸ã®åŒæ–¹å‘ãƒªãƒ³ã‚¯ï¼‰- æœ¬ãƒ¡ã‚½ãƒƒãƒ‰å‘¼ã³å‡ºã—æ™‚ã«ã™ã§ã«é–‰ã˜ã¦ã„ã‚‹
+	 * <li>åŒã˜å¦å®šæ¡ä»¶å†…ã®ä»–ã®ç­‰å¼å³è¾ºã¸ã®ã€Œç­‰å¼é–“ãƒªãƒ³ã‚¯ã€ï¼ˆåŒæ–¹å‘ç›´æ¥ãƒªãƒ³ã‚¯ï¼‰
+	 * <li>ãã®ç­‰å¼å·¦è¾º$pãŒãƒ«ãƒ¼ãƒ«å·¦è¾ºã§å‡ºç¾ã™ã‚‹è†œã«ã‚ã‚‹ã‚¢ãƒˆãƒ /å‹ä»˜ã$pã¸ã®ã€Œä¸Šæ›¸ããƒªãƒ³ã‚¯ã€ï¼ˆç‰‡æ–¹å‘ãƒªãƒ³ã‚¯ï¼‰
+	 *     ï¼ˆãŸã ã—ç¾çŠ¶ã§ã¯å‹ä»˜ãã‚¢ãƒˆãƒ ãŒ1å¼•æ•°ã®ã¿ã§ã‚ã‚‹ãŸã‚ã€ãƒ‘ãƒƒã‚·ãƒ–å‹åˆ¶é™ã«ã‹ã‹ã‚‹ãŸã‚å‹ä»˜ãã¸ã®ãƒªãƒ³ã‚¯ã¯ç„¡ã„ï¼‰
+	 * <li>nullã‚’æŒ‡ã™ã‚¬ãƒ¼ãƒ‰ã€ŒåŒ¿åãƒªãƒ³ã‚¯ã€ï¼ˆæ­£ç¢ºã«ã¯$ppã®æ˜ç¤ºçš„ãªãƒªãƒ³ã‚¯å¼•æ•°ã¨ã®é€šå¸¸ã®åŒæ–¹å‘ãƒªãƒ³ã‚¯ï¼‰
 	 * </ul>
-	 * <p>¥¬¡¼¥É¥³¥ó¥Ñ¥¤¥ë¤Ç¼Âºİ¤Ë»È¤¦¤È¤­¤Ë¤Ï¡¢Åù¼°´Ö¥ê¥ó¥¯¤ËÂĞ¤·¤Æ¡¢¼«Í³¥ê¥ó¥¯´ÉÍı¥¢¥È¥à¤Îº¿¤òÅ¬µ¹Êä¤¦¤³¤È¡£*/
+	 * <p>ã‚¬ãƒ¼ãƒ‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã§å®Ÿéš›ã«ä½¿ã†ã¨ãã«ã¯ã€ç­‰å¼é–“ãƒªãƒ³ã‚¯ã«å¯¾ã—ã¦ã€è‡ªç”±ãƒªãƒ³ã‚¯ç®¡ç†ã‚¢ãƒˆãƒ ã®é–ã‚’é©å®œè£œã†ã“ã¨ã€‚*/
 	void coupleGuardNegativeLinks(RuleStructure rule) {
 		Iterator it = rule.guardNegatives.iterator();
 		while (it.hasNext()) {
-			HashMap interlinks = new HashMap();	// Åù¼°´Ö¥ê¥ó¥¯¤ª¤è¤Ó¥¬¡¼¥ÉÆ¿Ì¾¥ê¥ó¥¯¤Î°ìÍ÷
+			HashMap interlinks = new HashMap();	// ç­‰å¼é–“ãƒªãƒ³ã‚¯ãŠã‚ˆã³ã‚¬ãƒ¼ãƒ‰åŒ¿åãƒªãƒ³ã‚¯ã®ä¸€è¦§
 			Iterator it2 = ((LinkedList)it.next()).iterator();
 			while (it2.hasNext()) {
 				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
-				// Åù¼°±¦ÊÕ¤Î¼«Í³¥ê¥ó¥¯½Ğ¸½¤Î°ìÍ÷¤ò¼èÆÀ¤¹¤ë
+				// ç­‰å¼å³è¾ºã®è‡ªç”±ãƒªãƒ³ã‚¯å‡ºç¾ã®ä¸€è¦§ã‚’å–å¾—ã™ã‚‹
 				Membrane mem = eq.mem;
 				HashMap rhsfreelinks = mem.freeLinks;
-				// Åù¼°º¸ÊÕ¤Î¼«Í³¥ê¥ó¥¯½Ğ¸½¤Î°ìÍ÷¤ò¼èÆÀ¤·¡¢±¦ÊÕ¤Î°ìÍ÷¤ÈÂĞ±ş¤ò¼è¤ë
+				// ç­‰å¼å·¦è¾ºã®è‡ªç”±ãƒªãƒ³ã‚¯å‡ºç¾ã®ä¸€è¦§ã‚’å–å¾—ã—ã€å³è¾ºã®ä¸€è¦§ã¨å¯¾å¿œã‚’å–ã‚‹
 				ProcessContext a = (ProcessContext)eq.def.lhsOcc;
-				HashMap rhscxtfreelinks = new HashMap();	// ¤³¤ÎÅù¼°±¦ÊÕ¥È¥Ã¥×¥ì¥Ù¥ë$pp¤Î¼«Í³¥ê¥ó¥¯½¸¹ç
+				HashMap rhscxtfreelinks = new HashMap();	// ã“ã®ç­‰å¼å³è¾ºãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«$ppã®è‡ªç”±ãƒªãƒ³ã‚¯é›†åˆ
 				for (int i = 0; i < a.args.length; i++) {
 					LinkOccurrence lhslnk = a.args[i];
 					String linkname = lhslnk.name;
 					if (rhsfreelinks.containsKey(lhslnk.name)) {
-						// Î¾ÊÕ¤Ë½Ğ¸½¤¹¤ë¾ì¹ç: ( {$p[X]} :- \+($p=(a(X),$pp)) | ... )
+						// ä¸¡è¾ºã«å‡ºç¾ã™ã‚‹å ´åˆ: ( {$p[X]} :- \+($p=(a(X),$pp)) | ... )
 						LinkOccurrence rhslnk = (LinkOccurrence)rhsfreelinks.get(lhslnk.name);
-						rhslnk.buddy = lhslnk.buddy;	// °ìÊı¸ş¤Î¤ß¤ÎbuddyÀßÄê¤ò¹Ô¤¦
+						rhslnk.buddy = lhslnk.buddy;	// ä¸€æ–¹å‘ã®ã¿ã®buddyè¨­å®šã‚’è¡Œã†
 						rhsfreelinks.put(lhslnk.name, CLOSED_LINK);
 					}
 					else {
-						// º¸ÊÕ¤Ë¤Î¤ß½Ğ¸½¤¹¤ë¾ì¹ç: ( {$p[X]} :- \+($p=(a,$pp)) | ... )
+						// å·¦è¾ºã«ã®ã¿å‡ºç¾ã™ã‚‹å ´åˆ: ( {$p[X]} :- \+($p=(a,$pp)) | ... )
 						rhscxtfreelinks.put(lhslnk.name, lhslnk);
 					}
 				}
@@ -626,24 +626,24 @@ public class LMNParser {
 				while (it3.hasNext()) {
 					String linkname = (String)it3.next();
 					LinkOccurrence lnk = (LinkOccurrence)rhsfreelinks.get(linkname);
-					// ±¦ÊÕ¤Ë¤Î¤ß½Ğ¸½¤¹¤ë¾ì¹ç:
-					// ( ... :- \+($p=a(X),$q=b(X)) | ... ) => Åù¼°´Ö¥ê¥ó¥¯¤Ï¡¢2²óÌÜ¤Î½Ğ¸½¤Î¤È¤­ÊÄ¤¸¤é¤ì¤ë
-					// ( ... :- \+($p=(a(X),$pp)  ) | ... ) => ¥¬¡¼¥ÉÆ¿Ì¾¥ê¥ó¥¯¡Ê¥È¥Ã¥×¥ì¥Ù¥ë$pp¤Î¼«Í³¥ê¥ó¥¯¡Ë
+					// å³è¾ºã«ã®ã¿å‡ºç¾ã™ã‚‹å ´åˆ:
+					// ( ... :- \+($p=a(X),$q=b(X)) | ... ) => ç­‰å¼é–“ãƒªãƒ³ã‚¯ã¯ã€2å›ç›®ã®å‡ºç¾ã®ã¨ãé–‰ã˜ã‚‰ã‚Œã‚‹
+					// ( ... :- \+($p=(a(X),$pp)  ) | ... ) => ã‚¬ãƒ¼ãƒ‰åŒ¿åãƒªãƒ³ã‚¯ï¼ˆãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«$ppã®è‡ªç”±ãƒªãƒ³ã‚¯ï¼‰
 					addLinkOccurrence(interlinks, lnk);
-					// todo lnk¤¬3²óÌÜ°Ê¹ß¤Î½Ğ¸½¤Î¤È¤­¡¢¥ê¥ó¥¯Ì¾¤¬ÊÑ¤ï¤Ã¤¿¤¿¤á¡¢rhsfreelinks¤Î½¤Àµ¤¬É¬Í×
+					// todo lnkãŒ3å›ç›®ä»¥é™ã®å‡ºç¾ã®ã¨ãã€ãƒªãƒ³ã‚¯åãŒå¤‰ã‚ã£ãŸãŸã‚ã€rhsfreelinksã®ä¿®æ­£ãŒå¿…è¦
 				}
 			}
 			removeClosedLinks(interlinks);
 
-			// ¥¬¡¼¥ÉÆ¿Ì¾¥ê¥ó¥¯¤ò½èÍı¤¹¤ë¡Ê$pp¤Î¾êÍ¾¹à¤¬[]¤Ç¤Ê¤¤¸Â¤ê½ÅÍ×¤Ç¤Ï¤Ê¤¤¡Ë
+			// ã‚¬ãƒ¼ãƒ‰åŒ¿åãƒªãƒ³ã‚¯ã‚’å‡¦ç†ã™ã‚‹ï¼ˆ$ppã®å‰°ä½™é …ãŒ[]ã§ãªã„é™ã‚Šé‡è¦ã§ã¯ãªã„ï¼‰
 			
-			// {$p[A|*V]} :- \+($p=(f(A)            )) | ... // *V={}       ÊÒÊı¸ş¥ê¥ó¥¯
-			// {$p[A|*V]} :- \+($p=(e,   $pp[ |*W]  )) | ... // A¢º*W
-			// {$p[A|*V]} :- \+($p=(e,   $pp[A|*W]  )) | ... // *V=*W       ÊÒÊı¸ş¥ê¥ó¥¯
-			// {$p[A|*V]} :- \+($p=(e,   $pp[B|*W]  )) | ... // A¢º*W,B¢º*V 
+			// {$p[A|*V]} :- \+($p=(f(A)            )) | ... // *V={}       ç‰‡æ–¹å‘ãƒªãƒ³ã‚¯
+			// {$p[A|*V]} :- \+($p=(e,   $pp[ |*W]  )) | ... // Aâˆˆ*W
+			// {$p[A|*V]} :- \+($p=(e,   $pp[A|*W]  )) | ... // *V=*W       ç‰‡æ–¹å‘ãƒªãƒ³ã‚¯
+			// {$p[A|*V]} :- \+($p=(e,   $pp[B|*W]  )) | ... // Aâˆˆ*W,Bâˆˆ*V 
 			// {$p[ |*V]} :- \+($p=(f(B)            )) | ... // *V={B}
-			// {$p[A]   } :- \+($p=(f(B)            )) | ... // {A}¡â{B}
-			// {$p[A|*V]} :- \+($p=(f(B)            )) | ... // not A¢º{B} ¤è¤ê¥Ş¥Ã¥Á¤·¤Ê¤¤
+			// {$p[A]   } :- \+($p=(f(B)            )) | ... // {A}â‰ {B}
+			// {$p[A|*V]} :- \+($p=(f(B)            )) | ... // not Aâˆˆ{B} ã‚ˆã‚Šãƒãƒƒãƒã—ãªã„
 			// {$p[A]   } :- \+($p=(f(B),$pp[A,B|*W])) | ... //
 			// {$p[A|*V]} :- \+($p=(f(B),$pp[A,B|*W])) | ... //
 			
@@ -670,7 +670,7 @@ public class LMNParser {
 			}
 		}
 	}
-	/** º¸ÊÕ¤È±¦ÊÕ¤Î¼«Í³¥ê¥ó¥¯¤ò¤Ä¤Ê¤° */
+	/** å·¦è¾ºã¨å³è¾ºã®è‡ªç”±ãƒªãƒ³ã‚¯ã‚’ã¤ãªã */
 	void coupleInheritedLinks(RuleStructure rule) {
 		HashMap lhsFreeLinks = rule.leftMem.freeLinks;
 		HashMap rhsFreeLinks = rule.rightMem.freeLinks;
@@ -707,11 +707,11 @@ public class LMNParser {
 	
 	////////////////////////////////////////////////////////////////
 	//
-	// ¥×¥í¥»¥¹Ê¸Ì®¡¢·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¡¢¥ë¡¼¥ëÊ¸Ì®¡¢¥ê¥ó¥¯Â«
+	// ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã€ãƒªãƒ³ã‚¯æŸ
 	//
 
-	/** ¥¬¡¼¥É·¿À©Ìó¤Î·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Î¥ê¥¹¥È¤òºîÀ®¤¹¤ë¡£
-	 * @param names ¥³¥ó¥Æ¥­¥¹¥È¤Î¸ÂÄêÌ¾ (String) ¤«¤é ContextDef ¤Ø¤Î¼ÌÁü [in,out] */
+	/** ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ã®å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®ãƒªã‚¹ãƒˆã‚’ä½œæˆã™ã‚‹ã€‚
+	 * @param names ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®é™å®šå (String) ã‹ã‚‰ ContextDef ã¸ã®å†™åƒ [in,out] */
 	private void enumTypedNames(Membrane mem, HashMap names) {
 		Iterator it = mem.processContexts.iterator();
 		while (it.hasNext()) {
@@ -719,7 +719,7 @@ public class LMNParser {
 			String name = pc.getQualifiedName();
 			if (!names.containsKey(name)) {
 				pc.def = new ContextDef(pc.getQualifiedName());
-				//TODO ¥¬¡¼¥É¤Ç½Ğ¸½¤¹¤ë¤«¤é¤È¸À¤Ã¤Æ·¿ÉÕ¤­¤È¤Ï¸Â¤é¤Ê¤¤
+				//TODO ã‚¬ãƒ¼ãƒ‰ã§å‡ºç¾ã™ã‚‹ã‹ã‚‰ã¨è¨€ã£ã¦å‹ä»˜ãã¨ã¯é™ã‚‰ãªã„
 				pc.def.typed = true;
 				names.put(name, pc.def);
 			}
@@ -730,14 +730,14 @@ public class LMNParser {
 		}
 	}
 	
-	/** ¥Ø¥Ã¥É¤Î¥×¥í¥»¥¹Ê¸Ì®¡¢·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¡¢¥ë¡¼¥ëÊ¸Ì®¡¢¥ê¥ó¥¯Â«¤Î¥ê¥¹¥È¤òºîÀ®¤¹¤ë¡£
-	 * <strike>·¿¤Ê¤·</strike>(2006/09/13 kudo) ¥×¥í¥»¥¹Ê¸Ì®¤ÎÌÀ¼¨Åª¤Ê°ú¿ô¤¬¸ß¤¤¤Ë°Û¤Ê¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë¡£ 
-	 * TODO Æó¤ÄÌÜ¤Î»Å»ö¤ÏÊÌ¥á¥½¥Ã¥É¤Ë¤¹¤Ù¤­
-	 * @param mem º¸ÊÕËì¡¢¤Ş¤¿¤Ï¥¬¡¼¥ÉÈİÄê¾ò·ïÆâÅù¼°À©Ìó±¦ÊÕ¤Î¹½Â¤¤òÊİ»ı¤¹¤ëËì
-	 * @param names ¥³¥ó¥Æ¥­¥¹¥È¤Î¸ÂÄêÌ¾ (String) ¤«¤é ContextDef ¤Ø¤Î¼ÌÁü [in,out]
-	 * @param isLHS º¸ÊÕ¤«¤É¤¦¤«¡Êdef.lhsOcc¤ËÄÉ²Ã¤¹¤ë¤«¤É¤¦¤«¤ÎÈ½Äê¤Ë»ÈÍÑ¤µ¤ì¤ë¡Ë*/
+	/** ãƒ˜ãƒƒãƒ‰ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã€ãƒªãƒ³ã‚¯æŸã®ãƒªã‚¹ãƒˆã‚’ä½œæˆã™ã‚‹ã€‚
+	 * <strike>å‹ãªã—</strike>(2006/09/13 kudo) ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®æ˜ç¤ºçš„ãªå¼•æ•°ãŒäº’ã„ã«ç•°ãªã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹ã€‚ 
+	 * TODO äºŒã¤ç›®ã®ä»•äº‹ã¯åˆ¥ãƒ¡ã‚½ãƒƒãƒ‰ã«ã™ã¹ã
+	 * @param mem å·¦è¾ºè†œã€ã¾ãŸã¯ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶å†…ç­‰å¼åˆ¶ç´„å³è¾ºã®æ§‹é€ ã‚’ä¿æŒã™ã‚‹è†œ
+	 * @param names ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®é™å®šå (String) ã‹ã‚‰ ContextDef ã¸ã®å†™åƒ [in,out]
+	 * @param isLHS å·¦è¾ºã‹ã©ã†ã‹ï¼ˆdef.lhsOccã«è¿½åŠ ã™ã‚‹ã‹ã©ã†ã‹ã®åˆ¤å®šã«ä½¿ç”¨ã•ã‚Œã‚‹ï¼‰*/
 	private void enumHeadNames(Membrane mem, HashMap names, boolean isLHS) throws ParseException {
-		// »ÒËì
+		// å­è†œ
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
 			Membrane submem = (Membrane)it.next();
@@ -753,16 +753,16 @@ public class LMNParser {
 				names.put(name, pc.def);
 			}
 			else {
-				it.remove(); // ¾¯¤Ê¤¯¤È¤â·¿¤Ê¤·¥×¥í¥»¥¹Ê¸Ì®¤Ç¤Ï¤Ê¤¤¡Ê·¿ÉÕ¤­¤Ş¤¿¤Ï¥¨¥é¡¼¤È¤Ê¤ë¡Ë¤¿¤á¼è¤ê½ü¤¯
+				it.remove(); // å°‘ãªãã¨ã‚‚å‹ãªã—ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã§ã¯ãªã„ï¼ˆå‹ä»˜ãã¾ãŸã¯ã‚¨ãƒ©ãƒ¼ã¨ãªã‚‹ï¼‰ãŸã‚å–ã‚Šé™¤ã
 				pc.def = (ContextDef)names.get(name);
 				if (pc.def.isTyped()) {
-					if (pc.def.lhsOcc != null) { // ´û¤Ëº¸ÊÕ¤Ë½Ğ¸½¤·¤Æ¤¤¤ë
-						// Å¸³«¤ò¼ÂÁõ¤¹¤ì¤ĞÉÔÍ×¤Ë¤Ê¤ë¡Ê¥¬¡¼¥ÉÈİÄê¾ò·ï¤Î¤È¤­¤Ï¤É¤¦¤·¤Æ¤â½ñ¤±¤Ê¤¤¤¬ÊüÃÖ¡Ë
-						// TODO ¹½Ê¸¥¨¥é¡¼¤Ç¤Ï¡© (2006/12/01 kudo)
+					if (pc.def.lhsOcc != null) { // æ—¢ã«å·¦è¾ºã«å‡ºç¾ã—ã¦ã„ã‚‹
+						// å±•é–‹ã‚’å®Ÿè£…ã™ã‚Œã°ä¸è¦ã«ãªã‚‹ï¼ˆã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ã¨ãã¯ã©ã†ã—ã¦ã‚‚æ›¸ã‘ãªã„ãŒæ”¾ç½®ï¼‰
+						// TODO æ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã§ã¯ï¼Ÿ (2006/12/01 kudo)
 						error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name: " + name + " at line " + pc.line);
 						continue;
 					}
-					// 2°ú¿ô°Ê¾å¤Îº¸ÊÕ½Ğ¸½·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤òµö¤¹ ( 2006/09/13 by kudo )
+					// 2å¼•æ•°ä»¥ä¸Šã®å·¦è¾ºå‡ºç¾å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã‚’è¨±ã™ ( 2006/09/13 by kudo )
 					if (pc.args.length == 0){//!= 1) {
 //						error("SYNTAX ERROR: typed process context occurring in head must have exactly one explicit free link argument: " + pc);
 						error("SYNTAX ERROR: typed process context occurring in head must have some explicit free link arguments: " + pc + " at line " + pc.line);
@@ -771,13 +771,13 @@ public class LMNParser {
 					mem.typedProcessContexts.add(pc);
 				}
 				else {
-					// ¹½Â¤Èæ³Ó¤Ø¤ÎÊÑ´¹¤ò¼ÂÁõ¤¹¤ì¤ĞÉÔÍ×¤Ë¤Ê¤ë¡Ê¥¬¡¼¥ÉÈİÄê¾ò·ï¤Î¤È¤­¤Ï¤É¤¦¤·¤Æ¤â½ñ¤±¤Ê¤¤¤¬ÊüÃÖ¡Ë
-					// TODO ¹½Ê¸¥¨¥é¡¼¤Ç¤Ï¡© (2006/12/01 kudo)
+					// æ§‹é€ æ¯”è¼ƒã¸ã®å¤‰æ›ã‚’å®Ÿè£…ã™ã‚Œã°ä¸è¦ã«ãªã‚‹ï¼ˆã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®ã¨ãã¯ã©ã†ã—ã¦ã‚‚æ›¸ã‘ãªã„ãŒæ”¾ç½®ï¼‰
+					// TODO æ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã§ã¯ï¼Ÿ (2006/12/01 kudo)
 					error("FEATURE NOT IMPLEMENTED: untyped process context name appeared more than once in a head: " + name + " at line " + pc.line);
 					continue;
 				}
 			}
-			if (isLHS)  pc.def.lhsOcc = pc;	// º¸ÊÕ¤Ç¤Î½Ğ¸½¤òÅĞÏ¿
+			if (isLHS)  pc.def.lhsOcc = pc;	// å·¦è¾ºã§ã®å‡ºç¾ã‚’ç™»éŒ²
 			if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
 			//
 			if (!pc.def.isTyped()) {
@@ -820,39 +820,39 @@ public class LMNParser {
 			it = mem.processContexts.iterator();
 			while (it.hasNext()) {
 				ProcessContext pc = (ProcessContext)it.next();
-				if (pc.def.lhsOcc == pc)  pc.def.lhsOcc = null; // º¸ÊÕ¤Ç¤Î½Ğ¸½¤ÎÅĞÏ¿¤ò¼è¤ê¾Ã¤¹
-				it.remove(); // names¤Ë¤Ï»Ä¤ë
+				if (pc.def.lhsOcc == pc)  pc.def.lhsOcc = null; // å·¦è¾ºã§ã®å‡ºç¾ã®ç™»éŒ²ã‚’å–ã‚Šæ¶ˆã™
+				it.remove(); // namesã«ã¯æ®‹ã‚‹
 				error("SYNTAX ERROR: head membrane cannot contain more than one untyped process context: " + pc.def.getName() + " at line " + pc.line);
 			}
 		}
 		if (mem.ruleContexts.size() > 1) {
 			while (it.hasNext()) {
 				RuleContext rc = (RuleContext)it.next();
-				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // º¸ÊÕ¤Ç¤Î½Ğ¸½¤ÎÅĞÏ¿¤ò¼è¤ê¾Ã¤¹
-				it.remove(); // names¤Ë¤Ï»Ä¤ë
+				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // å·¦è¾ºã§ã®å‡ºç¾ã®ç™»éŒ²ã‚’å–ã‚Šæ¶ˆã™
+				it.remove(); // namesã«ã¯æ®‹ã‚‹
 				error("SYNTAX ERROR: head membrane cannot contain more than one rule context: " + rc.def.getName() + " at line " + rc.line);
 			}
 		}
 		//
-		if (mem.pragmaAtHost != null) { // ¡÷»ØÄê¤Ï·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¡Ê²¾¡Ë
+		if (mem.pragmaAtHost != null) { // ï¼ æŒ‡å®šã¯å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆï¼ˆä»®ï¼‰
 			ProcessContext pc = mem.pragmaAtHost;
 			String name = pc.getQualifiedName();
 			pc.def = (ContextDef)names.get(name);
 			if (pc.def == null) {
 				error("SYSTEM ERROR: contextdef not set for pragma " + name + " at line " + pc.line);
 			}			
-			// todo ¡Ú¥³¡¼¥ÉÀ°Íı¡ÛÄ¾ÀÜContextDef¤òÂåÆş¤Ç¤­¤ë¤è¤¦¤Ë¤¹¤ë(2)
+			// todo ã€ã‚³ãƒ¼ãƒ‰æ•´ç†ã€‘ç›´æ¥ContextDefã‚’ä»£å…¥ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹(2)
 			if (pc.def.lhsMem == null) {
 				pc.def.lhsMem = mem;
 			}
 			else {
-				// Å¸³«¤ò¼ÂÁõ¤¹¤ì¤ĞÉÔÍ×¤Ë¤Ê¤ë¡©
+				// å±•é–‹ã‚’å®Ÿè£…ã™ã‚Œã°ä¸è¦ã«ãªã‚‹ï¼Ÿ
 				error("FEATURE NOT IMPLEMENTED: head contains more than one occurrence of a typed process context name for pragma: " + name);
 			}
 		}
 	}
-	/** ¥Ü¥Ç¥£¤Î¥×¥í¥»¥¹Ê¸Ì®¡¢·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¡¢¥ë¡¼¥ëÊ¸Ì®¡¢¥ê¥ó¥¯Â«¤Î¥ê¥¹¥È¤òºîÀ®¤¹¤ë¡£
-	 * @param names ¥³¥ó¥Æ¥­¥¹¥È¤Î¸ÂÄêÌ¾ (String) ¤«¤é ContextDef ¤Ø¤Î¼ÌÁü [in] */
+	/** ãƒœãƒ‡ã‚£ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã€ãƒªãƒ³ã‚¯æŸã®ãƒªã‚¹ãƒˆã‚’ä½œæˆã™ã‚‹ã€‚
+	 * @param names ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®é™å®šå (String) ã‹ã‚‰ ContextDef ã¸ã®å†™åƒ [in] */
 	private void enumBodyNames(Membrane mem, HashMap names) throws ParseException {
 		Iterator it = mem.mems.iterator();
 		while (it.hasNext()) {
@@ -891,7 +891,7 @@ public class LMNParser {
 				}
 				else {
 					if (pc.def.lhsOcc == null) {
-						// ¹½Ê¸¥¨¥é¡¼¤Ë¤è¤ê¥Ø¥Ã¥É½Ğ¸½¤¬¼è¤ê¾Ã¤µ¤ì¤¿·¿¤Ê¤·$p¤Ï¡¢¥Ü¥Ç¥£½Ğ¸½¤¬Ìµ¸À¤Ç¼è¤ê½ü¤«¤ì¤ë¡£
+						// æ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã«ã‚ˆã‚Šãƒ˜ãƒƒãƒ‰å‡ºç¾ãŒå–ã‚Šæ¶ˆã•ã‚ŒãŸå‹ãªã—$pã¯ã€ãƒœãƒ‡ã‚£å‡ºç¾ãŒç„¡è¨€ã§å–ã‚Šé™¤ã‹ã‚Œã‚‹ã€‚
 						it.remove();
 						continue;
 					}
@@ -920,55 +920,55 @@ public class LMNParser {
 			}
 		}
 		//
-		if (mem.pragmaAtHost != null) { // ¡÷»ØÄê¤Ï·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¡Ê²¾¡Ë
+		if (mem.pragmaAtHost != null) { // ï¼ æŒ‡å®šã¯å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆï¼ˆä»®ï¼‰
 			ProcessContext pc = mem.pragmaAtHost;
 			String name = pc.getQualifiedName();
 			pc.def = (ContextDef)names.get(name);
 			if (pc.def == null) {
 				error("SYSTEM ERROR: contextdef not set for pragma " + name + " at line " + pc.line);
 			}	
-			// todo ¡Ú¥³¡¼¥ÉÀ°Íı¡ÛÄ¾ÀÜContextDef¤òÂåÆş¤Ç¤­¤ë¤è¤¦¤Ë¤¹¤ë(2)
+			// todo ã€ã‚³ãƒ¼ãƒ‰æ•´ç†ã€‘ç›´æ¥ContextDefã‚’ä»£å…¥ã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹(2)
 		}
 	}
 
-	/** º¸ÊÕ¤ª¤è¤Ó¥¬¡¼¥É·¿À©Ìó¤ËÂĞ¤·¤Æ¡¢¥×¥í¥»¥¹Ê¸Ì®¤ª¤è¤Ó¥ë¡¼¥ëÊ¸Ì®¤ÎÌ¾Á°²ò·è¤ò¹Ô¤¦¡£
-	 *  Ì¾Á°²ò·è¤Ë¤è¤êÈ¯¸«¤µ¤ì¤¿¹½Ê¸¥¨¥é¡¼¤òÄûÀµ¤¹¤ë¡£
-	 *  @return º¸ÊÕ¤ª¤è¤Ó¥¬¡¼¥É¤Ë½Ğ¸½¤¹¤ë¸ÂÄêÌ¾(String) -> ContextDef / LinkOccurrence(Bundles) */
+	/** å·¦è¾ºãŠã‚ˆã³ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ã«å¯¾ã—ã¦ã€ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŠã‚ˆã³ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã®åå‰è§£æ±ºã‚’è¡Œã†ã€‚
+	 *  åå‰è§£æ±ºã«ã‚ˆã‚Šç™ºè¦‹ã•ã‚ŒãŸæ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã‚’è¨‚æ­£ã™ã‚‹ã€‚
+	 *  @return å·¦è¾ºãŠã‚ˆã³ã‚¬ãƒ¼ãƒ‰ã«å‡ºç¾ã™ã‚‹é™å®šå(String) -> ContextDef / LinkOccurrence(Bundles) */
 	private HashMap resolveHeadContextNames(RuleStructure rule) throws ParseException {
 		HashMap names = new HashMap();
-		//¼¡¤Î¥á¥½¥Ã¥É¸å¤Ë¤Ï·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Î pc.def.typed ¤¬ true ¤Ë¤Ê¤ë
-		enumTypedNames(rule.guardMem, names); // ¤³¤Î»şÅÀ¤Ç¤Ï·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Î¤ß
-		enumHeadNames(rule.leftMem, names, true); // ¤³¤Î»şÅÀ¤Ç·¿¤Ê¤·¥×¥í¥»¥¹Ê¸Ì®¤ª¤è¤Ó¥ë¡¼¥ëÊ¸Ì®¤ª¤è¤Ó¥ê¥ó¥¯Â«¤¬ÅĞÏ¿¤µ¤ì¤ë
-		// todo ¥ê¥ó¥¯Â«¤¬º¸ÊÕ¤ÇÊÄ¤¸¤Æ¤¤¤Ê¤¤¤³¤È¤ò³ÎÇ§¤¹¤ë
-		// ---¥ê¥ó¥¯Â«¤¬2²ó½Ğ¸½¤·¤¿¤«¤É¤¦¤«¤òÄ´¤Ù¤ì¤Ğ¤è¤¤¤À¤±¡£
-		// ( ¤³¤³¤Ç¤Ï¤ä¤é¤Ê¤¯¤Æ¤è¤¤¤«¤â¤·¤ì¤Ê¤¤ )
+		//æ¬¡ã®ãƒ¡ã‚½ãƒƒãƒ‰å¾Œã«ã¯å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã® pc.def.typed ãŒ true ã«ãªã‚‹
+		enumTypedNames(rule.guardMem, names); // ã“ã®æ™‚ç‚¹ã§ã¯å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®ã¿
+		enumHeadNames(rule.leftMem, names, true); // ã“ã®æ™‚ç‚¹ã§å‹ãªã—ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŠã‚ˆã³ãƒ«ãƒ¼ãƒ«æ–‡è„ˆãŠã‚ˆã³ãƒªãƒ³ã‚¯æŸãŒç™»éŒ²ã•ã‚Œã‚‹
+		// todo ãƒªãƒ³ã‚¯æŸãŒå·¦è¾ºã§é–‰ã˜ã¦ã„ãªã„ã“ã¨ã‚’ç¢ºèªã™ã‚‹
+		// ---ãƒªãƒ³ã‚¯æŸãŒ2å›å‡ºç¾ã—ãŸã‹ã©ã†ã‹ã‚’èª¿ã¹ã‚Œã°ã‚ˆã„ã ã‘ã€‚
+		// ( ã“ã“ã§ã¯ã‚„ã‚‰ãªãã¦ã‚ˆã„ã‹ã‚‚ã—ã‚Œãªã„ )
 		
-		// º¸ÊÕ¥È¥Ã¥×¥ì¥Ù¥ë¤Î¥×¥í¥»¥¹Ê¸Ì®¤òºï½ü¤¹¤ë
+		// å·¦è¾ºãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã‚’å‰Šé™¤ã™ã‚‹
 		Iterator it = rule.leftMem.processContexts.iterator();
 		while (it.hasNext()) {
 			ProcessContext pc = (ProcessContext)it.next();
 			error("SYNTAX ERROR: untyped head process context requires an enclosing membrane: " + pc + " at line " + pc.line);
 			names.remove(pc.def.getName());
-			pc.def.lhsOcc = null;	// º¸ÊÕ¤Ç¤Î½Ğ¸½¤ÎÅĞÏ¿¤ò¼è¤ê¾Ã¤¹
+			pc.def.lhsOcc = null;	// å·¦è¾ºã§ã®å‡ºç¾ã®ç™»éŒ²ã‚’å–ã‚Šæ¶ˆã™
 			it.remove();
 		}
 		return names;
 	}
 
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤ª¤è¤Ó±¦ÊÕ¤ËÂĞ¤·¤Æ¡¢¥×¥í¥»¥¹Ê¸Ì®¤ª¤è¤Ó¥ë¡¼¥ëÊ¸Ì®¤ÎÌ¾Á°²ò·è¤ò¹Ô¤¦¡£
-	 *  Ì¾Á°²ò·è¤Ë¤è¤êÈ¯¸«¤µ¤ì¤¿¹½Ê¸¥¨¥é¡¼¤òÄûÀµ¤¹¤ë¡£*/
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ãŠã‚ˆã³å³è¾ºã«å¯¾ã—ã¦ã€ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŠã‚ˆã³ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã®åå‰è§£æ±ºã‚’è¡Œã†ã€‚
+	 *  åå‰è§£æ±ºã«ã‚ˆã‚Šç™ºè¦‹ã•ã‚ŒãŸæ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã‚’è¨‚æ­£ã™ã‚‹ã€‚*/
 	private void resolveContextNames(RuleStructure rule, HashMap names) throws ParseException {
 
-		// Æ±¤¸Ì¾Á°¤Î¥×¥í¥»¥¹Ê¸Ì®¤Î°ú¿ô¥Ñ¥¿¡¼¥ó¤òÆ±¤¸¤Ë¤¹¤ë¡£
-		// ·¿ÉÕ¤­¤ÏÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯¤Î¸Ä¿ô¤ò1¤Ë¤¹¤ë¡£
+		// åŒã˜åå‰ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®å¼•æ•°ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’åŒã˜ã«ã™ã‚‹ã€‚
+		// å‹ä»˜ãã¯æ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯ã®å€‹æ•°ã‚’1ã«ã™ã‚‹ã€‚
 
 		Iterator it;
 		
-		// ¥¬¡¼¥ÉÈİÄê¾ò·ï
+		// ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶
 		it = rule.guardNegatives.iterator();
 		while (it.hasNext()) {
 			Iterator it2 = ((LinkedList)it.next()).iterator();
-			HashMap tmpnames = (HashMap)names.clone();	// Â¾¤Î¾ò·ï¤ä¥Ü¥Ç¥£¤È¤Ï´Ø·¸¤Ê¤¤¤¿¤á
+			HashMap tmpnames = (HashMap)names.clone();	// ä»–ã®æ¡ä»¶ã‚„ãƒœãƒ‡ã‚£ã¨ã¯é–¢ä¿‚ãªã„ãŸã‚
 			HashSet cxtnames = new HashSet();
 			while (it2.hasNext()) {
 				ProcessContextEquation eq = (ProcessContextEquation)it2.next();
@@ -984,25 +984,25 @@ public class LMNParser {
 			}
 		}
 				
-		// ±¦ÊÕ
+		// å³è¾º
 		enumBodyNames(rule.rightMem, names);
 		
-		// todo ¥ê¥ó¥¯Â«¤òÊÄ¤¸¤ë
+		// todo ãƒªãƒ³ã‚¯æŸã‚’é–‰ã˜ã‚‹
 		
-		// todo ¥×¥í¥»¥¹Ê¸Ì®´Ö¤Ç·Ñ¾µ¤µ¤ì¤¿¥ê¥ó¥¯Â«¤¬Æ±¤¸Ì¾Á°¤Ç¤¢¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë
-		// todo ±¦ÊÕ¤Î¥¢¥È¥à½¸ÃÄ¤Î¥ê¥ó¥¯Àè¤¬Á´¤ÆÆ±¤¸¥×¥í¥»¥¹Ê¸Ì®Ì¾¤ò»ı¤Ä¤³¤È¤ò³ÎÇ§¤¹¤ë
+		// todo ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆé–“ã§ç¶™æ‰¿ã•ã‚ŒãŸãƒªãƒ³ã‚¯æŸãŒåŒã˜åå‰ã§ã‚ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹
+		// todo å³è¾ºã®ã‚¢ãƒˆãƒ é›†å›£ã®ãƒªãƒ³ã‚¯å…ˆãŒå…¨ã¦åŒã˜ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆåã‚’æŒã¤ã“ã¨ã‚’ç¢ºèªã™ã‚‹
 		
-		// rule.processContexts/ruleContexts/typedProcessContexts ¤òÀ¸À®¤¹¤ë
+		// rule.processContexts/ruleContexts/typedProcessContexts ã‚’ç”Ÿæˆã™ã‚‹
 		it = names.keySet().iterator();
 		while (it.hasNext()) {
 			String name = (String)it.next();
 			Object obj = names.get(name);
-			if (obj instanceof LinkOccurrence) continue;	// ¥ê¥ó¥¯Â«¤Î¤È¤­¤ÏÌµ»ë
+			if (obj instanceof LinkOccurrence) continue;	// ãƒªãƒ³ã‚¯æŸã®ã¨ãã¯ç„¡è¦–
 			ContextDef def = (ContextDef)obj;
 			if (def.isTyped()) {
 				rule.typedProcessContexts.put(name, def);
 			}
-			else { // ·¿ÉÕ¤­¤Ç¤Ê¤¤¾ì¹ç¡¢lhsOcc!=null¤È¤Ê¤Ã¤Æ¤¤¤ë
+			else { // å‹ä»˜ãã§ãªã„å ´åˆã€lhsOcc!=nullã¨ãªã£ã¦ã„ã‚‹
 				if (def.lhsOcc instanceof ProcessContext) {
 					rule.processContexts.put(name, def);
 				}
@@ -1011,13 +1011,13 @@ public class LMNParser {
 				}
 			}
 //			if (def.rhsOccs.size() == 1) {
-//				if (def.lhsOcc != null) {	// ¥¬¡¼¥É¤Ç¤Ê¤¤¤È¤­
+//				if (def.lhsOcc != null) {	// ã‚¬ãƒ¼ãƒ‰ã§ãªã„ã¨ã
 //					Context rhsocc = ((Context)def.rhsOccs.get(0));
 //					rhsocc.buddy = def.lhsOcc;
 //					def.lhsOcc.buddy = rhsocc;
 //				}
 //			}
-			if( def.lhsOcc != null) {	// ¥¬¡¼¥É¤Ç¤Ê¤¤¤È¤­
+			if( def.lhsOcc != null) {	// ã‚¬ãƒ¼ãƒ‰ã§ãªã„ã¨ã
 				for(int i=0;i<def.rhsOccs.size();i++){
 					Context rhsocc = ((Context)def.rhsOccs.get(i));
 					rhsocc.def.lhsOcc = def.lhsOcc;
@@ -1026,7 +1026,7 @@ public class LMNParser {
 			}
 		}
 		
-		// ¡ÊÈóÀş·¿¥×¥í¥»¥¹Ê¸Ì®¤¬¼ÂÁõ¤µ¤ì¤ë¤Ş¤Ç¤Î²¾Á¼ÃÖ¤È¤·¤Æ¡ËÀş·¿¤Ç¤Ê¤¯¾êÍ¾°ú¿ô¤¬[]¤Ç¤Ê¤¤·¿¤Ê¤·$p¤ò¼è¤ê½ü¤¯
+		// ï¼ˆéç·šå‹ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒå®Ÿè£…ã•ã‚Œã‚‹ã¾ã§ã®ä»®æªç½®ã¨ã—ã¦ï¼‰ç·šå‹ã§ãªãå‰°ä½™å¼•æ•°ãŒ[]ã§ãªã„å‹ãªã—$pã‚’å–ã‚Šé™¤ã
 		it = rule.processContexts.values().iterator();
 		while (it.hasNext()) {
 			ContextDef def = (ContextDef)it.next();
@@ -1069,7 +1069,7 @@ public class LMNParser {
 
 ////////////////////////////////////////////////////////////////
 //
-// ¹½Ê¸Åª¤Ê½ñ¤­´¹¤¨¤ò¹Ô¤¦¥á¥½¥Ã¥É¤òÊİ»ı¤¹¤ë¥¯¥é¥¹
+// æ§‹æ–‡çš„ãªæ›¸ãæ›ãˆã‚’è¡Œã†ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä¿æŒã™ã‚‹ã‚¯ãƒ©ã‚¹
 //
 
 class SyntaxExpander {
@@ -1081,13 +1081,13 @@ class SyntaxExpander {
 	
 	////////////////////////////////////////////////////////////////
 	//
-	// Î¬µ­Ë¡¤ÎÅ¸³«
+	// ç•¥è¨˜æ³•ã®å±•é–‹
 	//
 
-	/** ¥ë¡¼¥ë¹½Ê¸¤ËÂĞ¤·¤ÆÎ¬µ­Ë¡¤ÎÅ¸³«¤ò¹Ô¤¦ */
+	/** ãƒ«ãƒ¼ãƒ«æ§‹æ–‡ã«å¯¾ã—ã¦ç•¥è¨˜æ³•ã®å±•é–‹ã‚’è¡Œã† */
 	void expandRuleAbbreviations(SrcRule sRule) throws ParseException {
 
-		// ¥¬¡¼¥É¤ò·¿À©Ìó¤ÈÈİÄê¾ò·ï¤ËÊ¬Îà¤¹¤ë
+		// ã‚¬ãƒ¼ãƒ‰ã‚’å‹åˆ¶ç´„ã¨å¦å®šæ¡ä»¶ã«åˆ†é¡ã™ã‚‹
 		flatten(sRule.getGuard());
 		ListIterator lit = sRule.getGuard().listIterator();
 		while (lit.hasNext()) {
@@ -1103,96 +1103,96 @@ class SyntaxExpander {
 		LinkedList typeConstraints = sRule.getGuard();
 		LinkedList guardNegatives  = sRule.getGuardNegatives();
 
-		// - ¥¬¡¼¥ÉÈİÄê¾ò·ï¤Îº¬ËÜÅª¤Ê¹½Ê¸¥¨¥é¡¼¤òÄûÀµ¤·¡¢³ÆÈİÄê¾ò·ï¤ò[$p,[Q]]¤Î¥ê¥¹¥È¤È¤¤¤¦Ãæ´ÖÉ½¸½¤ËÊÑ´¹¤¹¤ë
+		// - ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®æ ¹æœ¬çš„ãªæ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã‚’è¨‚æ­£ã—ã€å„å¦å®šæ¡ä»¶ã‚’[$p,[Q]]ã®ãƒªã‚¹ãƒˆã¨ã„ã†ä¸­é–“è¡¨ç¾ã«å¤‰æ›ã™ã‚‹
 		correctGuardNegatives(guardNegatives);
 		
-		// - ¿ôÃÍ¤ÎÀµÉé¹æ¤Î¼è¤ê¹ş¤ß
+		// - æ•°å€¤ã®æ­£è² å·ã®å–ã‚Šè¾¼ã¿
 		incorporateSignSymbols(sRule.getHead());
 		incorporateSignSymbols(typeConstraints);
 		incorporateSignSymbols(guardNegatives);
 		incorporateSignSymbols(sRule.getBody());
 		
-		// - ¥â¥¸¥å¡¼¥ëÌ¾¤Î¥¢¥È¥à¥Õ¥¡¥ó¥¯¥¿¤Ø¤Î¼è¤ê¹ş¤ß
+		// - ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åã®ã‚¢ãƒˆãƒ ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã¸ã®å–ã‚Šè¾¼ã¿
 //		incorporateModuleNames(sRule.getHead());
 //		incorporateModuleNames(typeConstraints);
 //		incorporateModuleNames(guardNegatives);
 //		incorporateModuleNames(sRule.getBody());
 		
-		// - ·¿À©Ìó¤Î¾éÄ¹¤Ê = ¤ò½üµî¤¹¤ë
+		// - å‹åˆ¶ç´„ã®å†—é•·ãª = ã‚’é™¤å»ã™ã‚‹
 		shrinkUnificationConstraints(typeConstraints);
 		
-		// - ¥¢¥È¥àÅ¸³«¡Ê¥¢¥È¥à°ú¿ô¤ÎºÆµ¢Åª¤ÊÅ¸³«¡Ë
+		// - ã‚¢ãƒˆãƒ å±•é–‹ï¼ˆã‚¢ãƒˆãƒ å¼•æ•°ã®å†å¸°çš„ãªå±•é–‹ï¼‰
 		expandAtoms(sRule.getHead());
 		expandAtoms(guardNegatives);
 		expandAtoms(sRule.getBody());
 
-		// - º¸ÊÕ¤È±¦ÊÕ¤Î¡÷»ØÄê¤ò½èÍı¤¹¤ë
+		// - å·¦è¾ºã¨å³è¾ºã®ï¼ æŒ‡å®šã‚’å‡¦ç†ã™ã‚‹
 		correctPragma(typeConstraints, sRule.getHead(), "string");
 		correctPragma(typeConstraints, sRule.getBody(), "connectRuntime");
 
-		// - ¥¢¥È¥àÅ¸³«¡Ê¥¬¡¼¥É·¿À©Ìó¡Ë
+		// - ã‚¢ãƒˆãƒ å±•é–‹ï¼ˆã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ï¼‰
 		expandAtoms(typeConstraints);
 		
-		// - ·¿À©Ìó¤Î¹½Ê¸¥¨¥é¡¼¤òÄûÀµ¤·¡¢¥¢¥È¥à°ú¿ô¤Ë¥ê¥ó¥¯¤«¥×¥í¥»¥¹Ê¸Ì®¤Î¤ß¤¬Â¸ºß¤¹¤ë¤è¤¦¤Ë¤¹¤ë
+		// - å‹åˆ¶ç´„ã®æ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã‚’è¨‚æ­£ã—ã€ã‚¢ãƒˆãƒ å¼•æ•°ã«ãƒªãƒ³ã‚¯ã‹ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®ã¿ãŒå­˜åœ¨ã™ã‚‹ã‚ˆã†ã«ã™ã‚‹
 		correctTypeConstraints(typeConstraints);
 		
-		// - ·¿À©Ìó¤Ë½Ğ¸½¤¹¤ë¥ê¥ó¥¯Ì¾X¤ËÂĞ¤·¤Æ¡¢¥ë¡¼¥ëÆâ¤ÎÁ´¤Æ¤ÎX¤ò$X¤ËÃÖ´¹¤¹¤ë
+		// - å‹åˆ¶ç´„ã«å‡ºç¾ã™ã‚‹ãƒªãƒ³ã‚¯åXã«å¯¾ã—ã¦ã€ãƒ«ãƒ¼ãƒ«å†…ã®å…¨ã¦ã®Xã‚’$Xã«ç½®æ›ã™ã‚‹
 		HashMap typedLinkNameMap = computeTypedLinkNameMap(typeConstraints);//" X"->"X"
 		unabbreviateTypedLinks(sRule.getHead(), typedLinkNameMap);
 		unabbreviateTypedLinks(typeConstraints, typedLinkNameMap);
 		unabbreviateTypedLinks(guardNegatives,  typedLinkNameMap);
 		unabbreviateTypedLinks(sRule.getBody(), typedLinkNameMap);
 
-		// - ¹½Â¤ÂåÆş
-		// º¸ÊÕ¤Ë2²ó°Ê¾å$p¤¬½Ğ¸½¤·¤¿¾ì¹ç¤Ë¡¢¿·¤·¤¤Ì¾Á°$q¤Ë¤·¤Æ $p=$q¤ò·¿À©Ìó¤ËÄÉ²Ã¤¹¤ë
-		// todo ¼ÂÁõ¤¹¤ë
-		// // ¼ÂÁõ¤·¤Ş¤·¤¿¡£ÊØµ¹¾å¡¢"Æ±Ì¾·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬Î¥"¤È¸Æ¤ó¤Ç¤¤¤Ş¤¹
-		// // ¸½¾õ¤Ç¤Ï¡¢SLIM¤Ç¤Î¤ß(--slimcode¤È-hl·Ï¤òÊ»ÍÑ¤·¤¿¾ì¹ç¤Î¤ß)»ÈÍÑ²ÄÇ½ (10/09/29 seiji)
+		// - æ§‹é€ ä»£å…¥
+		// å·¦è¾ºã«2å›ä»¥ä¸Š$pãŒå‡ºç¾ã—ãŸå ´åˆã«ã€æ–°ã—ã„åå‰$qã«ã—ã¦ $p=$qã‚’å‹åˆ¶ç´„ã«è¿½åŠ ã™ã‚‹
+		// todo å®Ÿè£…ã™ã‚‹
+		// // å®Ÿè£…ã—ã¾ã—ãŸã€‚ä¾¿å®œä¸Šã€"åŒåå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†é›¢"ã¨å‘¼ã‚“ã§ã„ã¾ã™
+		// // ç¾çŠ¶ã§ã¯ã€SLIMã§ã®ã¿(--slimcodeã¨-hlç³»ã‚’ä½µç”¨ã—ãŸå ´åˆã®ã¿)ä½¿ç”¨å¯èƒ½ (10/09/29 seiji)
 		HashMap ruleProcNameMap = new HashMap();
 		if (Env.hyperLink) 
   		sameTypedProcessContext(sRule.getHead(), typeConstraints, ruleProcNameMap);
 
-		// - ¹½Â¤Èæ³Ó
-		// ·¿À©Ìó¤ÎÆ±¤¸¥¢¥È¥à¤Ë2²ó°Ê¾å$p¤¬½Ğ¸½¤·¤¿¾ì¹ç¤Ë¡¢¿·¤·¤¤Ì¾Á°$q¤Ë¤·¤Æ $p==$q¤ò·¿À©Ìó¤ËÄÉ²Ã¤¹¤ë
-		// ¤³¤ì¤ÏÇÑ»ß¡£
+		// - æ§‹é€ æ¯”è¼ƒ
+		// å‹åˆ¶ç´„ã®åŒã˜ã‚¢ãƒˆãƒ ã«2å›ä»¥ä¸Š$pãŒå‡ºç¾ã—ãŸå ´åˆã«ã€æ–°ã—ã„åå‰$qã«ã—ã¦ $p==$qã‚’å‹åˆ¶ç´„ã«è¿½åŠ ã™ã‚‹
+		// ã“ã‚Œã¯å»ƒæ­¢ã€‚
 
-		// - ´ğÄì¹à
-		// ·¿À©Ìó¤Ë½Ğ¸½¤»¤º¡¢Body¤Ç¤Î½Ğ¸½¤¬1²ó¤Ç¤Ê¤¤$p¤ËÂĞ¤·¤Æ¥¬¡¼¥É¤Ëground($p)¤òÄÉ²Ã¤¹¤ë
-		// todo ¼ÂÁõ¤¹¤ë
+		// - åŸºåº•é …
+		// å‹åˆ¶ç´„ã«å‡ºç¾ã›ãšã€Bodyã§ã®å‡ºç¾ãŒ1å›ã§ãªã„$pã«å¯¾ã—ã¦ã‚¬ãƒ¼ãƒ‰ã«ground($p)ã‚’è¿½åŠ ã™ã‚‹
+		// todo å®Ÿè£…ã™ã‚‹
 		
-		// - ¥¢¥È¥à°ú¿ô¤Ë¥×¥í¥»¥¹Ê¸Ì®¤¬½ñ¤±¤ë¹½Ê¸¡Ê¤¤¤ï¤æ¤ë¡Ö·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¹½Ê¸¡×¡Ë¤ÎÅ¸³«
-		// todo $p¤ò¶¯À©Åª¤Ë$p[X]¤ËÅ¸³«¤¹¤ë¤È$p[X|*V]¤ËÅ¸³«¤Ç¤­¤ë²ÄÇ½À­¤òÀ©¸Â¤·¤Æ¤¤¤ë¤Î¤ò²¿¤È¤«¤¹¤ë
+		// - ã‚¢ãƒˆãƒ å¼•æ•°ã«ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒæ›¸ã‘ã‚‹æ§‹æ–‡ï¼ˆã„ã‚ã‚†ã‚‹ã€Œå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆæ§‹æ–‡ã€ï¼‰ã®å±•é–‹
+		// todo $pã‚’å¼·åˆ¶çš„ã«$p[X]ã«å±•é–‹ã™ã‚‹ã¨$p[X|*V]ã«å±•é–‹ã§ãã‚‹å¯èƒ½æ€§ã‚’åˆ¶é™ã—ã¦ã„ã‚‹ã®ã‚’ä½•ã¨ã‹ã™ã‚‹
 		expandTypedProcessContexts(sRule.getHead());
 		expandTypedProcessContexts(typeConstraints);
 		expandTypedProcessContexts(guardNegatives);
 		expandTypedProcessContexts(sRule.getBody());
 		
-		// - Ãæ´ÖÌ¿ÎáfindproccxtÍÑ¤Î½èÍı(--hl, --hl-opt¸ÂÄê) //seiji
+		// - ä¸­é–“å‘½ä»¤findproccxtç”¨ã®å‡¦ç†(--hl, --hl-opté™å®š) //seiji
 		if (Env.hyperLink && Env.hyperLinkOpt)
 		  procCxtNameToLinkName(sRule.getHead(), typeConstraints, ruleProcNameMap);
 		
-		// ½ª¤ï¤ë¤È¡§
-		// - ¥¬¡¼¥ÉÈİÄê¾ò·ï¤Ï[$p,[Q]]¤Î¥ê¥¹¥È¤È¤¤¤¦Ãæ´ÖÉ½¸½¤ËÊÑ´¹¤µ¤ì¤Æ¤¤¤ë
-		// - ¿ôÃÍ¤ÎÀµÉé¹æ¤Î¼è¤ê¹ş¤Ş¤ì¤Æ¤¤¤ë ( -(3) -> -3 )
-		// - ¥¬¡¼¥É·¿À©Ìó¤Î¥¢¥È¥àÅ¸³«
-		// -- ·¿À©Ìó¤Î¾éÄ¹¤Ê = ¤ò½üµî¤¹¤ë
-		// - ¥¢¥È¥àÅ¸³«¡Ê¥¢¥È¥à°ú¿ô¤ÎºÆµ¢Åª¤ÊÅ¸³«¡Ë
-		// - º¸ÊÕ¤È±¦ÊÕ¤Î¡÷»ØÄê¤ò½èÍı¤¹¤ë ( pragmaAtHost¤¬null¤«SrcProcessContext¤Ë¤Ê¤ê¡¢É¬Í×¤Ë±ş¤¸¤Æ  getruntime ¤È connectruntime ¤¬ÄÉ²Ã¤µ¤ì¤ë )
-		// - ¥¬¡¼¥É¤Î¥¢¥È¥à°ú¿ô¤Ë¥×¥í¥»¥¹Ê¸Ì®¤Ø¤Î¥ê¥ó¥¯¤Î¤ß¤¬Â¸ºß¤¹¤ë¤è¤¦¤Ë¤Ê¤Ã¤Æ¤¤¤ë
-		// - ¥ê¥ó¥¯Ê¸»ú¤ò»È¤Ã¤ÆÉ½¤µ¤ì¤Æ¤¤¤¿·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤¬$p¤ËÃÖ´¹¤µ¤ì¤Æ¤¤¤ë
-		// - ¥¢¥È¥à¤Î°ú¿ô¤ÏÁ´¤Æ¥ê¥ó¥¯¤Ë¤Ê¤Ã¤Æ¤¤¤ë ( ? ) -> ¤Ê¤Ã¤Æ¤¤¤Ê¤¤ ( @p, ¥ë¡¼¥ëÅù )
-		// - Æ±Ì¾·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬Î¥ ( a($p), a($p) :- ... ¢ª a($p), a($q) :- $p = $q | ... )
+		// çµ‚ã‚ã‚‹ã¨ï¼š
+		// - ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã¯[$p,[Q]]ã®ãƒªã‚¹ãƒˆã¨ã„ã†ä¸­é–“è¡¨ç¾ã«å¤‰æ›ã•ã‚Œã¦ã„ã‚‹
+		// - æ•°å€¤ã®æ­£è² å·ã®å–ã‚Šè¾¼ã¾ã‚Œã¦ã„ã‚‹ ( -(3) -> -3 )
+		// - ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ã®ã‚¢ãƒˆãƒ å±•é–‹
+		// -- å‹åˆ¶ç´„ã®å†—é•·ãª = ã‚’é™¤å»ã™ã‚‹
+		// - ã‚¢ãƒˆãƒ å±•é–‹ï¼ˆã‚¢ãƒˆãƒ å¼•æ•°ã®å†å¸°çš„ãªå±•é–‹ï¼‰
+		// - å·¦è¾ºã¨å³è¾ºã®ï¼ æŒ‡å®šã‚’å‡¦ç†ã™ã‚‹ ( pragmaAtHostãŒnullã‹SrcProcessContextã«ãªã‚Šã€å¿…è¦ã«å¿œã˜ã¦  getruntime ã¨ connectruntime ãŒè¿½åŠ ã•ã‚Œã‚‹ )
+		// - ã‚¬ãƒ¼ãƒ‰ã®ã‚¢ãƒˆãƒ å¼•æ•°ã«ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã¸ã®ãƒªãƒ³ã‚¯ã®ã¿ãŒå­˜åœ¨ã™ã‚‹ã‚ˆã†ã«ãªã£ã¦ã„ã‚‹
+		// - ãƒªãƒ³ã‚¯æ–‡å­—ã‚’ä½¿ã£ã¦è¡¨ã•ã‚Œã¦ã„ãŸå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒ$pã«ç½®æ›ã•ã‚Œã¦ã„ã‚‹
+		// - ã‚¢ãƒˆãƒ ã®å¼•æ•°ã¯å…¨ã¦ãƒªãƒ³ã‚¯ã«ãªã£ã¦ã„ã‚‹ ( ? ) -> ãªã£ã¦ã„ãªã„ ( @p, ãƒ«ãƒ¼ãƒ«ç­‰ )
+		// - åŒåå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†é›¢ ( a($p), a($p) :- ... â†’ a($p), a($q) :- $p = $q | ... )
 		
 	}
 
-	/** ¥¬¡¼¥ÉÈİÄê¾ò·ï¤Îº¬ËÜÅª¤Ê¹½Ê¸¥¨¥é¡¼¤òÄûÀµ¤·¡¢³ÆÈİÄê¾ò·ï¤ò[$p,[Q]]¤Î¥ê¥¹¥È¤È¤¤¤¦Ãæ´Ö·Á¼°¤ËÊÑ´¹¤¹¤ë¡£
-	 *  ¤³¤ÎÃæ´Ö·Á¼°¤Ï¡¢¥¢¥È¥àÅ¸³«¤Ê¤É¤òÆ©²áÅª¤Ë¹Ô¤¦¤¿¤á¤ËºÎÍÑ¤µ¤ì¤¿¡£*/
+	/** ã‚¬ãƒ¼ãƒ‰å¦å®šæ¡ä»¶ã®æ ¹æœ¬çš„ãªæ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã‚’è¨‚æ­£ã—ã€å„å¦å®šæ¡ä»¶ã‚’[$p,[Q]]ã®ãƒªã‚¹ãƒˆã¨ã„ã†ä¸­é–“å½¢å¼ã«å¤‰æ›ã™ã‚‹ã€‚
+	 *  ã“ã®ä¸­é–“å½¢å¼ã¯ã€ã‚¢ãƒˆãƒ å±•é–‹ãªã©ã‚’é€éçš„ã«è¡Œã†ãŸã‚ã«æ¡ç”¨ã•ã‚ŒãŸã€‚*/
 	private void correctGuardNegatives(LinkedList guardNegatives) {
 		ListIterator lit = guardNegatives.listIterator();
 		while (lit.hasNext()) {
 			Object obj = lit.next();
 			LinkedList eqlist;
-			// \+¤Î°ú¿ô¤ò¥ê¥¹¥È¤ËºÆ¹½À®¤¹¤ë
+			// \+ã®å¼•æ•°ã‚’ãƒªã‚¹ãƒˆã«å†æ§‹æˆã™ã‚‹
 			if (obj instanceof LinkedList) {
 				eqlist = (LinkedList)obj;
 				flatten(eqlist);
@@ -1203,7 +1203,7 @@ class SyntaxExpander {
 			}
 			lit.remove();
 			lit.add(eqlist);
-			// ¥ê¥¹¥È¤ÎÍ×ÁÇ¤Î¤¦¤Á¡¢$p=Q ¤Î¤ß¤ò[$p,[Q]]¤È¤·¤Æ»Ä¤¹¡£
+			// ãƒªã‚¹ãƒˆã®è¦ç´ ã®ã†ã¡ã€$p=Q ã®ã¿ã‚’[$p,[Q]]ã¨ã—ã¦æ®‹ã™ã€‚
 			ListIterator lit2 = eqlist.listIterator();
 			while (lit2.hasNext()) {
 				Object obj2 = lit2.next();
@@ -1235,10 +1235,10 @@ class SyntaxExpander {
 		}
 	}
 
-	/** ¥×¥í¥»¥¹¹½Â¤¡Ê»Ò¥ë¡¼¥ë³°¡Ë¤Ë½Ğ¸½¤¹¤ëÀµÉé¹æ¤ò¿ôÃÍ¥¢¥È¥à¤Ë¼è¤ê¹ş¤à¡£
+	/** ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆå­ãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã«å‡ºç¾ã™ã‚‹æ­£è² å·ã‚’æ•°å€¤ã‚¢ãƒˆãƒ ã«å–ã‚Šè¾¼ã‚€ã€‚
 	 * <pre>
-	 * '+'(x) ¢ª '+x'
-	 * '-'(x) ¢ª '-x'
+	 * '+'(x) â†’ '+x'
+	 * '-'(x) â†’ '-x'
 	 * </pre>
 	 */
 	void incorporateSignSymbols(LinkedList process) {
@@ -1268,9 +1268,9 @@ class SyntaxExpander {
 			}
 		}
 	}
-//	/** ¥×¥í¥»¥¹¹½Â¤¡Ê»Ò¥ë¡¼¥ë³°¡Ë¤Ë½Ğ¸½¤¹¤ë¥â¥¸¥å¡¼¥ëÌ¾¤ò¥Õ¥¡¥ó¥¯¥¿¤Ë¼è¤ê¹ş¤à¡£
+//	/** ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆå­ãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã«å‡ºç¾ã™ã‚‹ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åã‚’ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ã«å–ã‚Šè¾¼ã‚€ã€‚
 //	 * <pre>
-//	 * ':'(m,p(t1..tn)) ¢ª 'm.p'(t1..tn)
+//	 * ':'(m,p(t1..tn)) â†’ 'm.p'(t1..tn)
 //	 * </pre>
 //	 */
 //	void incorporateModuleNames(LinkedList process) {
@@ -1304,10 +1304,10 @@ class SyntaxExpander {
 //			}
 //		}
 //	}
-	/** ¡Ê¥¬¡¼¥É·¿À©Ìó¤Î¡Ë¥×¥í¥»¥¹¹½Â¤¤Î¥È¥Ã¥×¥ì¥Ù¥ë¤Ë½Ğ¸½¤¹¤ë¾éÄ¹¤Ê = ¤ò½üµî¤¹¤ë¡£
+	/** ï¼ˆã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ã®ï¼‰ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ã®ãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã«å‡ºç¾ã™ã‚‹å†—é•·ãª = ã‚’é™¤å»ã™ã‚‹ã€‚
 	 * <pre>
-	 * $p = f(t1..tn) ¢ª f(t1..tn,$p)
-	 * f(t1..tn) = $p ¢ª f(t1..tn,$p)
+	 * $p = f(t1..tn) â†’ f(t1..tn,$p)
+	 * f(t1..tn) = $p â†’ f(t1..tn,$p)
 	 * </pre>
 	 */
 	private void shrinkUnificationConstraints(LinkedList process) {
@@ -1330,9 +1330,9 @@ class SyntaxExpander {
 			}
 		}
 	}
-	/** ¥×¥í¥»¥¹¹½Â¤¤Î¥ë¡¼¥È¤«¤é¤¿¤É¤ì¤ëÈÏ°Ï¤Î¥ê¥¹¥È¤òºÆµ¢Åª¤ËÅ¸³«¤¹¤ë¡£
+	/** ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ã®ãƒ«ãƒ¼ãƒˆã‹ã‚‰ãŸã©ã‚Œã‚‹ç¯„å›²ã®ãƒªã‚¹ãƒˆã‚’å†å¸°çš„ã«å±•é–‹ã™ã‚‹ã€‚
 	 * <pre>
-	 * (t1,,tn) ¢ª t1,,tn
+	 * (t1,,tn) â†’ t1,,tn
 	 * </pre>
 	 */
 	private void flatten(LinkedList process) {
@@ -1349,12 +1349,12 @@ class SyntaxExpander {
 			else process.add(obj);
 		}
 	}
-	/** ¥×¥í¥»¥¹¹½Â¤¡Ê»Ò¥ë¡¼¥ë³°¡Ë¤ò¥¢¥È¥àÅ¸³«¤¹¤ë¡£
-	 * ¤¹¤Ê¤ï¤Á¡¢¥¢¥È¥à°ú¿ô¤Ë½Ğ¸½¤¹¤ëÁ´¤Æ¤Î¥¢¥È¥à¹½Â¤¤ÈËì¹½Â¤¤òºÆµ¢Åª¤ËÅ¸³«¤¹¤ë¡£
+	/** ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆå­ãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã‚’ã‚¢ãƒˆãƒ å±•é–‹ã™ã‚‹ã€‚
+	 * ã™ãªã‚ã¡ã€ã‚¢ãƒˆãƒ å¼•æ•°ã«å‡ºç¾ã™ã‚‹å…¨ã¦ã®ã‚¢ãƒˆãƒ æ§‹é€ ã¨è†œæ§‹é€ ã‚’å†å¸°çš„ã«å±•é–‹ã™ã‚‹ã€‚
 	 * <pre>
-	 * f(s1,g(t1,,tn),sm) ¢ª f(s1,X,sm), g(t1,,tn,X)
-	 * f(s1, {t1,,tn},sm) ¢ª f(s1,X,sm), {+X,t1,,tm}
-	 * f(s1, (t1,,tn),sm) ¢ª f(s1,X,sm), ','(t1,(t2,,tn),X)
+	 * f(s1,g(t1,,tn),sm) â†’ f(s1,X,sm), g(t1,,tn,X)
+	 * f(s1, {t1,,tn},sm) â†’ f(s1,X,sm), {+X,t1,,tm}
+	 * f(s1, (t1,,tn),sm) â†’ f(s1,X,sm), ','(t1,(t2,,tn),X)
 	 * </pre>
 	 */
 	void expandAtoms(LinkedList process) {
@@ -1375,15 +1375,15 @@ class SyntaxExpander {
 			process.add(obj);
 		}
 	}
-	/** ¥¢¥È¥à¤Î³Æ°ú¿ô¤ËÂĞ¤·¤Æ¥¢¥È¥àÅ¸³«¤ò¹Ô¤¦¡£
-	 * @param sAtom ¥¢¥È¥àÅ¸³«¤¹¤ë¥¢¥È¥à¡£Ìá¤ë¤È¤­¤Ë¤ÏÇË²õ¤µ¤ì¤ë¡£
-	 * @param result ¥¢¥È¥àÅ¸³«·ë²Ì¤Î¥ª¥Ö¥¸¥§¥¯¥ÈÎó¤òÄÉ²Ã¤¹¤ë¥ê¥¹¥È¥ª¥Ö¥¸¥§¥¯¥È¡Ê¥×¥í¥»¥¹¹½Â¤¡Ë
+	/** ã‚¢ãƒˆãƒ ã®å„å¼•æ•°ã«å¯¾ã—ã¦ã‚¢ãƒˆãƒ å±•é–‹ã‚’è¡Œã†ã€‚
+	 * @param sAtom ã‚¢ãƒˆãƒ å±•é–‹ã™ã‚‹ã‚¢ãƒˆãƒ ã€‚æˆ»ã‚‹ã¨ãã«ã¯ç ´å£Šã•ã‚Œã‚‹ã€‚
+	 * @param result ã‚¢ãƒˆãƒ å±•é–‹çµæœã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆåˆ—ã‚’è¿½åŠ ã™ã‚‹ãƒªã‚¹ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼ˆãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼‰
 	 */
 	private void expandAtom(SrcAtom sAtom, LinkedList result) {
 		LinkedList process = sAtom.getProcess();
 		for (int i = 0; i < process.size(); i++) {
 			Object obj = process.get(i);
-			// ¥¢¥È¥à
+			// ã‚¢ãƒˆãƒ 
 			if (obj instanceof SrcAtom) {
 				SrcAtom subatom = (SrcAtom)obj;
 				//
@@ -1394,7 +1394,7 @@ class SyntaxExpander {
 				expandAtom(subatom, result);
 				result.add(subatom);
 			}
-			// Ëì
+			// è†œ
 			else if (obj instanceof SrcMembrane) {
 				SrcMembrane submem = (SrcMembrane)obj;
 				SrcAtom subatom = new SrcAtom("+");
@@ -1407,7 +1407,7 @@ class SyntaxExpander {
 				expandAtoms(submem.getProcess());
 				result.add(submem);
 			}
-			// ¹àÁÈ¡Ê²¾¡Ë
+			// é …çµ„ï¼ˆä»®ï¼‰
 			else if (obj instanceof LinkedList) {
 				 LinkedList list = (LinkedList)obj;
 				 if (list.isEmpty()) {				
@@ -1440,13 +1440,13 @@ class SyntaxExpander {
 			 }
 		}
 	}
-	/** ¥¢¥È¥àÅ¸³«¸å¤Î¥×¥í¥»¥¹¹½Â¤¡Ê»Ò¥ë¡¼¥ë³°¡Ë¤Ë½Ğ¸½¤¹¤ë¥ê¥ó¥¯Ì¾¤ª¤è¤Ó¥³¥ó¥Æ¥­¥¹¥ÈÌ¾¤òËçµó¤¹¤ë¡£
-	 * @param names ¸ÂÄêÌ¾ (String) ¤«¤é¥³¥ó¥Æ¥­¥¹¥È½Ğ¸½¤ÎLinkedList¤Ø¤Î¼ÌÁü [in,out] */
+	/** ã‚¢ãƒˆãƒ å±•é–‹å¾Œã®ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆå­ãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã«å‡ºç¾ã™ã‚‹ãƒªãƒ³ã‚¯åãŠã‚ˆã³ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆåã‚’æšæŒ™ã™ã‚‹ã€‚
+	 * @param names é™å®šå (String) ã‹ã‚‰ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆå‡ºç¾ã®LinkedListã¸ã®å†™åƒ [in,out] */
 	private void enumNames(LinkedList process, HashMap names) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
-			// ¥¢¥È¥à
+			// ã‚¢ãƒˆãƒ 
 			if (obj instanceof SrcAtom) {
 				SrcAtom sAtom = (SrcAtom)obj;
 				for (int i = 0; i < sAtom.getProcess().size(); i++) {
@@ -1456,11 +1456,11 @@ class SyntaxExpander {
 					}
 				}
 			}
-			// Ëì
+			// è†œ
 			else if (obj instanceof SrcMembrane) {
 				enumNames(((SrcMembrane)obj).getProcess(), names);
 			}
-			// ¥×¥í¥»¥¹Ê¸Ì®¡¢¥ë¡¼¥ëÊ¸Ì®
+			// ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã€ãƒ«ãƒ¼ãƒ«æ–‡è„ˆ
 			else if (obj instanceof SrcProcessContext || obj instanceof SrcRuleContext) {
 				addNameOccurrence((SrcContext)obj, names);
 			}
@@ -1474,10 +1474,10 @@ class SyntaxExpander {
 		((LinkedList)names.get(name)).add(sContext);
 	}
 		
-	/** unabbreviateTypedLinks¤Ç»È¤¦¤¿¤á¤Î¼ÌÁü¤òÀ¸À®¤¹¤ë¡£
-	 * @return ·¿ÉÕ¤­¥ê¥ó¥¯¤Î¸ÂÄêÌ¾ " X" (String) ¤«¤é¡¢
-	 * ÂĞ±ş¤¹¤ë·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®Ì¾¥Æ¥­¥¹¥È "X" (String) ¤Ø¤Î¼ÌÁü
-	 * <p>todo ¤â¤Ï¤äÉÔÍ×¡£Ã±¤Ë¥ê¥ó¥¯Ì¾¥Æ¥­¥¹¥È "X" ¤«¤éÀ¸À®¤¹¤ë¤è¤¦¤Ë½¤Àµ¤¹¤Ù¤­¤Ç¤¢¤ë¡£
+	/** unabbreviateTypedLinksã§ä½¿ã†ãŸã‚ã®å†™åƒã‚’ç”Ÿæˆã™ã‚‹ã€‚
+	 * @return å‹ä»˜ããƒªãƒ³ã‚¯ã®é™å®šå " X" (String) ã‹ã‚‰ã€
+	 * å¯¾å¿œã™ã‚‹å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆåãƒ†ã‚­ã‚¹ãƒˆ "X" (String) ã¸ã®å†™åƒ
+	 * <p>todo ã‚‚ã¯ã‚„ä¸è¦ã€‚å˜ã«ãƒªãƒ³ã‚¯åãƒ†ã‚­ã‚¹ãƒˆ "X" ã‹ã‚‰ç”Ÿæˆã™ã‚‹ã‚ˆã†ã«ä¿®æ­£ã™ã¹ãã§ã‚ã‚‹ã€‚
 	 */
 	HashMap computeTypedLinkNameMap(LinkedList typeConstraints) {	
 		HashMap typedLinkNameMap = new HashMap();
@@ -1494,11 +1494,11 @@ class SyntaxExpander {
 		return typedLinkNameMap;
 	}
 
-	/** ¥¢¥È¥àÅ¸³«¸å¤Î¥×¥í¥»¥¹¹½Â¤¡Ê»Ò¥ë¡¼¥ë³°¡Ë¤Ë½Ğ¸½¤¹¤ëÁ´¤Æ¤ÎtypedLinkNameMapÆâ¤Î¥ê¥ó¥¯Ì¾¤ò
-	 * ¥×¥í¥»¥¹Ê¸Ì®¹½Ê¸¤ËÃÖ´¹¤¹¤ë¡£
-	 * @param typedLinkNameMap ·¿ÉÕ¤­¥ê¥ó¥¯¤Î¸ÂÄêÌ¾ " X" (String) ¤«¤é¡¢
-	 * ÂĞ±ş¤¹¤ë·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®Ì¾¥Æ¥­¥¹¥È "X" (String) ¤Ø¤Î¼ÌÁü
-	 * <pre> p(s1,X,sn) ¢ª p(s1,$X,sn)
+	/** ã‚¢ãƒˆãƒ å±•é–‹å¾Œã®ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆå­ãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã«å‡ºç¾ã™ã‚‹å…¨ã¦ã®typedLinkNameMapå†…ã®ãƒªãƒ³ã‚¯åã‚’
+	 * ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆæ§‹æ–‡ã«ç½®æ›ã™ã‚‹ã€‚
+	 * @param typedLinkNameMap å‹ä»˜ããƒªãƒ³ã‚¯ã®é™å®šå " X" (String) ã‹ã‚‰ã€
+	 * å¯¾å¿œã™ã‚‹å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆåãƒ†ã‚­ã‚¹ãƒˆ "X" (String) ã¸ã®å†™åƒ
+	 * <pre> p(s1,X,sn) â†’ p(s1,$X,sn)
 	 * </pre>*/
 	private void unabbreviateTypedLinks(LinkedList process, HashMap typedLinkNameMap) {
 		Iterator it = process.iterator();
@@ -1519,7 +1519,7 @@ class SyntaxExpander {
 				}
 			}
 			else if (obj instanceof SrcMembrane) {
-				// {..}@H ¢ª {..}@($h) //¡Ê²¾¡Ë
+				// {..}@H â†’ {..}@($h) //ï¼ˆä»®ï¼‰
 				SrcMembrane sMem = (SrcMembrane)obj;
 				if (sMem.pragma instanceof SrcLink) {
 					SrcLink srcLink = (SrcLink)sMem.pragma;
@@ -1536,25 +1536,25 @@ class SyntaxExpander {
 		}
 	}
 	
-	/** Æ±Ì¾·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬Î¥¡§
-	 *  ¡¡º¸ÊÕ¤Ë2²ó°Ê¾å$p¤¬½Ğ¸½¤·¤¿¾ì¹ç¤Ë¡¢¿·¤·¤¤Ì¾Á°$q¤Ë¤·¤Æ $p=$q¤ò·¿À©Ìó¤ËÄÉ²Ã¤¹¤ë
-	 * <pre> a($p), a($p) :- ... ¢ª a($p), a($q) :- $p = $q | ...
+	/** åŒåå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†é›¢ï¼š
+	 *  ã€€å·¦è¾ºã«2å›ä»¥ä¸Š$pãŒå‡ºç¾ã—ãŸå ´åˆã«ã€æ–°ã—ã„åå‰$qã«ã—ã¦ $p=$qã‚’å‹åˆ¶ç´„ã«è¿½åŠ ã™ã‚‹
+	 * <pre> a($p), a($p) :- ... â†’ a($p), a($q) :- $p = $q | ...
 	 * </pre>
 	 */
 	private void sameTypedProcessContext(LinkedList head, LinkedList cons, HashMap ruleProcNameMap) {//seiji
 
-		HashMap usedProcNameMap = new HashMap(); // ´û¤Ë½Ğ¸½¤·¤Æ¤¤¤ë¥×¥í¥»¥¹Ê¸Ì®Ì¾
+		HashMap usedProcNameMap = new HashMap(); // æ—¢ã«å‡ºç¾ã—ã¦ã„ã‚‹ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå
 		int j = 0;
 		
-		/* ¥¬¡¼¥ÉÀ©Ìó¤Ç½Ğ¸½¤¹¤ë¥×¥í¥»¥¹Ê¸Ì®¤ÎÌ¾Á°É½¤òºîÀ® */
+		/* ã‚¬ãƒ¼ãƒ‰åˆ¶ç´„ã§å‡ºç¾ã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åå‰è¡¨ã‚’ä½œæˆ */
 		processContextNameMap(head, ruleProcNameMap);
 		processContextNameMap(cons, ruleProcNameMap);
 
-		/* ¥Ø¥Ã¥É¤ËÆ±Ì¾¤Î¥×¥í¥»¥¹Ê¸Ì®¤¬½Ğ¸½¤¹¤ë¾ì¹ç¤Ë¤Ï¡¢¥æ¥Ë¡¼¥¯¤ÊÌ¾Á°¤ËÊÑ¹¹¤¹¤ë */
+		/* ãƒ˜ãƒƒãƒ‰ã«åŒåã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒå‡ºç¾ã™ã‚‹å ´åˆã«ã¯ã€ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªåå‰ã«å¤‰æ›´ã™ã‚‹ */
 		separateProcessContext(head, cons, ruleProcNameMap, usedProcNameMap);
 
 	}
-	/** ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÌ¾Á°É½¤òºîÀ®¤¹¤ë */ //seiji
+	/** å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åå‰è¡¨ã‚’ä½œæˆã™ã‚‹ */ //seiji
 	private void processContextNameMap(LinkedList list, HashMap ruleProcNameMap) {
 		ListIterator it = list.listIterator();
 		while (it.hasNext()) {
@@ -1576,7 +1576,7 @@ class SyntaxExpander {
 			}
 		}
 	}
-	/** ¥Ø¥Ã¥É¤ËÆ±Ì¾¤Î¥×¥í¥»¥¹Ê¸Ì®¤¬½Ğ¸½¤¹¤ë¾ì¹ç¤Ë¤Ï¡¢¥æ¥Ë¡¼¥¯¤ÊÌ¾Á°¤ËÊÑ¹¹¤¹¤ë */
+	/** ãƒ˜ãƒƒãƒ‰ã«åŒåã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒå‡ºç¾ã™ã‚‹å ´åˆã«ã¯ã€ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªåå‰ã«å¤‰æ›´ã™ã‚‹ */
 	private void separateProcessContext(LinkedList head, LinkedList cons, 
 			HashMap ruleProcNameMap, HashMap usedProcNameMap) {//seiji
 		ListIterator it = head.listIterator();
@@ -1592,7 +1592,7 @@ class SyntaxExpander {
 						String name = srcProcessContext.getName();
 						if (usedProcNameMap.containsKey(name)) {
 							
-							/* name ¤Î¸å¤í¤Ë¿ô»ú¤ò¤Ä¤±¤ë¤³¤È¤Ç¡¢¿·¤·¤¤Ì¾Á°¤È¤¹¤ë */
+							/* name ã®å¾Œã‚ã«æ•°å­—ã‚’ã¤ã‘ã‚‹ã“ã¨ã§ã€æ–°ã—ã„åå‰ã¨ã™ã‚‹ */
 							String newName = name + j;
 							while (ruleProcNameMap.containsKey((newName))) {
 								j++;
@@ -1608,7 +1608,7 @@ class SyntaxExpander {
 							SrcAtom sa = new SrcAtom("==", procList);
 							cons.add(sa);
 	            
-				            /* --hl-opt¤Ç¤Ï¥¬¡¼¥É¤Ëhlink·¿¥Á¥§¥Ã¥¯¤òÄÉ²Ã¤·¤Æ¡¢¹½Â¤Èæ³Ó¤Ë¤«¤«¤ë»ş´Ö¤òÃ»½Ì¤·¤Æ¤¤¤ë */
+				            /* --hl-optã§ã¯ã‚¬ãƒ¼ãƒ‰ã«hlinkå‹ãƒã‚§ãƒƒã‚¯ã‚’è¿½åŠ ã—ã¦ã€æ§‹é€ æ¯”è¼ƒã«ã‹ã‹ã‚‹æ™‚é–“ã‚’çŸ­ç¸®ã—ã¦ã„ã‚‹ */
 				            if (Env.hyperLinkOpt) {
 	  							LinkedList<SrcProcessContext> procList2 = new LinkedList();
 	  							procList2.add(new SrcProcessContext(name));
@@ -1620,7 +1620,7 @@ class SyntaxExpander {
 	  							cons.add(sa3);
 				            }
 
-							/* ¥ª¥ê¥¸¥Ê¥ë¤ÎÌ¾Á°¤ò»ı¤Ä·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Ë¡¢¿·¤·¤¤Ì¾Á°¤òµ­²±¤µ¤»¤ë */
+							/* ã‚ªãƒªã‚¸ãƒŠãƒ«ã®åå‰ã‚’æŒã¤å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«ã€æ–°ã—ã„åå‰ã‚’è¨˜æ†¶ã•ã›ã‚‹ */
 							SrcProcessContext oriProcessContext = (SrcProcessContext)ruleProcNameMap.get(name);
 							if (oriProcessContext.getSameNameList() == null) {
 								oriProcessContext.sameNameList = new LinkedList();
@@ -1639,11 +1639,11 @@ class SyntaxExpander {
 		}
 	}
 	
-	/** ¥¢¥È¥àÅ¸³«¸å¤Î¥×¥í¥»¥¹¹½Â¤¡Ê»Ò¥ë¡¼¥ë³°¡Ë¤Î¥¢¥È¥à°ú¿ô¤Ë½Ğ¸½¤¹¤ë¥×¥í¥»¥¹Ê¸Ì®¤òÅ¸³«¤¹¤ë¡£
-	 * <pre> p(s1,$p,sn) ¢ª p(s1,X,sn), $p[X]
+	/** ã‚¢ãƒˆãƒ å±•é–‹å¾Œã®ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆå­ãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã®ã‚¢ãƒˆãƒ å¼•æ•°ã«å‡ºç¾ã™ã‚‹ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã‚’å±•é–‹ã™ã‚‹ã€‚
+	 * <pre> p(s1,$p,sn) â†’ p(s1,X,sn), $p[X]
 	 * </pre>
-	 * <p>¥á¥½¥Ã¥É¤ÎÌ¾Á°¤È¤Ï°Û¤Ê¤ê¡¢·¿ÉÕ¤­¤Ç¤Ê¤¤¥×¥í¥»¥¹Ê¸Ì®¤âÅ¸³«¤¹¤ë»ÅÍÍ¤Ë¤Ê¤Ã¤Æ¤¤¤ë¡£
-	 * <p>todo $p[X|*p] ¤ËÅ¸³«¤¹¤Ù¤­¾ì¹ç¤â¤¢¤ë¤Ï¤º
+	 * <p>ãƒ¡ã‚½ãƒƒãƒ‰ã®åå‰ã¨ã¯ç•°ãªã‚Šã€å‹ä»˜ãã§ãªã„ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã‚‚å±•é–‹ã™ã‚‹ä»•æ§˜ã«ãªã£ã¦ã„ã‚‹ã€‚
+	 * <p>todo $p[X|*p] ã«å±•é–‹ã™ã¹ãå ´åˆã‚‚ã‚ã‚‹ã¯ãš
 	 */
 	private void expandTypedProcessContexts(LinkedList process) {
 		ListIterator it = process.listIterator();
@@ -1660,7 +1660,7 @@ class SyntaxExpander {
 						sAtom.getProcess().set(i, new SrcLink(newlinkname));
 						srcProcessContext.linkName = newlinkname;//seiji
 						it.add(srcProcessContext);
-						// ¥¢¥È¥à°ú¿ô¤Ë$p[...]¤òµö¤¹¤è¤¦¤Ë¹½Ê¸³ÈÄ¥¤µ¤ì¤¿¾ì¹ç¤Î¤ß args!=null ¤È¤Ê¤ë
+						// ã‚¢ãƒˆãƒ å¼•æ•°ã«$p[...]ã‚’è¨±ã™ã‚ˆã†ã«æ§‹æ–‡æ‹¡å¼µã•ã‚ŒãŸå ´åˆã®ã¿ args!=null ã¨ãªã‚‹
 						if (srcProcessContext.args == null)
 							srcProcessContext.args = new LinkedList();
 						srcProcessContext.args.add(new SrcLink(newlinkname));
@@ -1672,10 +1672,10 @@ class SyntaxExpander {
 			}
 		}
 	}
-	/** Ãæ´ÖÌ¿ÎáfindproccxtÍÑ¤Î½èÍı(--hl, --hl-opt¸ÂÄê)
-	 * ¥×¥í¥»¥¹Ê¸Ì®Ì¾($p, $q, ...)¤«¤é
-	 * ÆâÉôÅª¤Ê¥×¥í¥»¥¹Ê¸Ì®Ì¾(~5, ~6, ...)¤ËÊÑ´¹¤·¡¢
-	 * SrcProcessContext¤ËÊİ»ı¤µ¤»¤ë
+	/** ä¸­é–“å‘½ä»¤findproccxtç”¨ã®å‡¦ç†(--hl, --hl-opté™å®š)
+	 * ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå($p, $q, ...)ã‹ã‚‰
+	 * å†…éƒ¨çš„ãªãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå(~5, ~6, ...)ã«å¤‰æ›ã—ã€
+	 * SrcProcessContextã«ä¿æŒã•ã›ã‚‹
 	 * */
 	private void procCxtNameToLinkName(LinkedList head, LinkedList cons, HashMap ruleProcNameMap) {//seiji
 		ListIterator it = head.listIterator();
@@ -1702,9 +1702,9 @@ class SyntaxExpander {
 		}
 	}
 	
-	/* ¥¢¥È¥àÅ¸³«¸å¤Î¥×¥í¥»¥¹¹½Â¤¡Ê»Ò¥ë¡¼¥ë³°¡Ë¤Ë½Ğ¸½¤¹¤ë·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Ëtyped¥Ş¡¼¥¯¤ò¹Ô¤¦¡£
-	 * @param typedNames ·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤Î¸ÂÄêÌ¾ "$p" (String) ¤ò¥­¡¼¤È¤¹¤ë¼ÌÁü
-	 * <pre> $p[X] ¢ª $p[X]
+	/* ã‚¢ãƒˆãƒ å±•é–‹å¾Œã®ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆå­ãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã«å‡ºç¾ã™ã‚‹å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã«typedãƒãƒ¼ã‚¯ã‚’è¡Œã†ã€‚
+	 * @param typedNames å‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®é™å®šå "$p" (String) ã‚’ã‚­ãƒ¼ã¨ã™ã‚‹å†™åƒ
+	 * <pre> $p[X] â†’ $p[X]
 	 * </pre> *
 	private void markAsTyped(LinkedList process, HashMap typedNames) {
 		ListIterator it = process.listIterator();
@@ -1724,14 +1724,14 @@ class SyntaxExpander {
 
 	////////////////////////////////////////////////////////////////
 	//
-	// ¡÷»ØÄê¤ò½èÍı¤¹¤ë¥á¥½¥Ã¥É
+	// ï¼ æŒ‡å®šã‚’å‡¦ç†ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰
 	//
 	
-	/** ¥¢¥È¥àÅ¸³«¸å¤Î¥×¥í¥»¥¹¹½Â¤¤ËÂĞ¤·¤Æ¡¢
-	 * (1) {..}@"hostname"¤ò{..}@H¤ËÃÖ´¹¤·¡¢¥¬¡¼¥É·¿À©Ìó H="hostname" ¤òÄÉ²Ã¤¹¤ë¡£
-	 * (2) {..}@H¤ËÂĞ¤·¤Æ¡¢¥¬¡¼¥É·¿À©Ìó cmd(H) ¤òÄÉ²Ã¤¹¤ë¡£
-	 * <p>º¸ÊÕ¤Î¾ì¹ç¤Îpragma¥Õ¥£¡¼¥ë¥É¤Ø¤ÎÅĞÏ¿¤Ï¡¢addProcessToMem¤Ç¹Ô¤¦¡£
-	 * @param cmd ±¦ÊÕ¤Ê¤é¤Ğ"connectRuntime"¤ò¡¢º¸ÊÕ¤Ê¤é¤Ğ"string"¤òÅÏ¤¹¤³¤È¡£(2)¤Ç»ÈÍÑ¤µ¤ì¤ë¡£*/
+	/** ã‚¢ãƒˆãƒ å±•é–‹å¾Œã®ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ã«å¯¾ã—ã¦ã€
+	 * (1) {..}@"hostname"ã‚’{..}@Hã«ç½®æ›ã—ã€ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ H="hostname" ã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * (2) {..}@Hã«å¯¾ã—ã¦ã€ã‚¬ãƒ¼ãƒ‰å‹åˆ¶ç´„ cmd(H) ã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * <p>å·¦è¾ºã®å ´åˆã®pragmaãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¸ã®ç™»éŒ²ã¯ã€addProcessToMemã§è¡Œã†ã€‚
+	 * @param cmd å³è¾ºãªã‚‰ã°"connectRuntime"ã‚’ã€å·¦è¾ºãªã‚‰ã°"string"ã‚’æ¸¡ã™ã“ã¨ã€‚(2)ã§ä½¿ç”¨ã•ã‚Œã‚‹ã€‚*/
 	void correctPragma(LinkedList typeConstraints, LinkedList process, String cmd) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
@@ -1741,7 +1741,7 @@ class SyntaxExpander {
 				correctPragma(typeConstraints, sMem.process, cmd);
 				if (sMem.pragma instanceof SrcAtom) {
 					SrcAtom sAtom = (SrcAtom)sMem.pragma;
-					// (1) | {..}@"hostname" ¢ª "hostname"($h) | {..}@($h)
+					// (1) | {..}@"hostname" â†’ "hostname"($h) | {..}@($h)
 					if (sAtom.getProcess().size() == 0 && sAtom.getNameType() == SrcName.STRING) {
 						String cxtname = generateNewProcessContextName();
 						sMem.pragma = new SrcProcessContext(cxtname);
@@ -1751,7 +1751,7 @@ class SyntaxExpander {
 					}
 				}
 				if (sMem.pragma instanceof SrcLink) {
-					// (2) | {..}@H ¢ª cmd(H) | {..}@H
+					// (2) | {..}@H â†’ cmd(H) | {..}@H
 					LinkedList args = new LinkedList();
 					args.add(new SrcLink(((SrcLink)sMem.pragma).getName()));
 					typeConstraints.add(new SrcAtom(cmd,args));
@@ -1760,7 +1760,7 @@ class SyntaxExpander {
 				if (sMem.pragma instanceof SrcProcessContext) {
 					SrcProcessContext sProcCxt = (SrcProcessContext)sMem.pragma;
 					if (sProcCxt.args == null && sProcCxt.bundle == null) {
-						// (2) | {..}@($h) ¢ª cmd($h) | {..}@($h)
+						// (2) | {..}@($h) â†’ cmd($h) | {..}@($h)
 						LinkedList args = new LinkedList();
 						args.add(new SrcProcessContext(sProcCxt.getName()));
 						typeConstraints.add(new SrcAtom(cmd,args));
@@ -1776,12 +1776,12 @@ class SyntaxExpander {
 
 	////////////////////////////////////////////////////////////////
 	//
-	// ¹½Ê¸¥¨¥é¡¼¸¡½Ğ¤ª¤è¤ÓÉüµ¢¤ò¹Ô¤¦¥á¥½¥Ã¥É
+	// æ§‹æ–‡ã‚¨ãƒ©ãƒ¼æ¤œå‡ºãŠã‚ˆã³å¾©å¸°ã‚’è¡Œã†ãƒ¡ã‚½ãƒƒãƒ‰
 	//
 	
-	/** ¥¢¥È¥àÅ¸³«¸å¤Î¥×¥í¥»¥¹¹½Â¤¡Ê¥¬¡¼¥É¤Î·¿À©Ìó¡Ë¤ËÂĞ¤·¤Æ¡¢
-	 * Ëì¤ä¥ë¡¼¥ëÊ¸Ì®¤ä¥ë¡¼¥ë¤ä¥ê¥ó¥¯Â«¤ä¥È¥Ã¥×¥ì¥Ù¥ë¤Î¥×¥í¥»¥¹Ê¸Ì®¤¬Â¸ºß¤·¤¿¤é
-	 * ¥³¥ó¥Ñ¥¤¥ë¥¨¥é¡¼¤È¤¹¤ë¡£¥¢¥È¥à°ú¿ô¤Ç¤Î½Ğ¸½¤ÏÌµÌ¾¤Î¥×¥í¥»¥¹ÊÑ¿ô¤ÇÃÖ´¹¤¹¤ë¡£*/
+	/** ã‚¢ãƒˆãƒ å±•é–‹å¾Œã®ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆã‚¬ãƒ¼ãƒ‰ã®å‹åˆ¶ç´„ï¼‰ã«å¯¾ã—ã¦ã€
+	 * è†œã‚„ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã‚„ãƒ«ãƒ¼ãƒ«ã‚„ãƒªãƒ³ã‚¯æŸã‚„ãƒˆãƒƒãƒ—ãƒ¬ãƒ™ãƒ«ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆãŒå­˜åœ¨ã—ãŸã‚‰
+	 * ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚¨ãƒ©ãƒ¼ã¨ã™ã‚‹ã€‚ã‚¢ãƒˆãƒ å¼•æ•°ã§ã®å‡ºç¾ã¯ç„¡åã®ãƒ—ãƒ­ã‚»ã‚¹å¤‰æ•°ã§ç½®æ›ã™ã‚‹ã€‚*/
 	private void correctTypeConstraints(LinkedList process) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
@@ -1806,9 +1806,9 @@ class SyntaxExpander {
 		}
 	}
 
-	/** ¥¢¥È¥àÅ¸³«¸å¤Î¥×¥í¥»¥¹¹½Â¤¡Ê¥½¡¼¥¹¥Õ¥¡¥¤¥ë¡Ë¡Ê¥ë¡¼¥ë³°¡Ë¤ËÂĞ¤·¤Æ¡¢
-	 * ¥×¥í¥»¥¹Ê¸Ì®¤ä¥ë¡¼¥ëÊ¸Ì®¤ä¥ê¥ó¥¯Â«¤¬½Ğ¸½¤·¤¿¤é¥³¥ó¥Ñ¥¤¥ë¥¨¥é¡¼¤È¤¹¤ë¡£
-	 * ¥¢¥È¥à°ú¿ô¤Ç¤Î½Ğ¸½¤ÏÌµÌ¾¤Î¥ê¥ó¥¯¤ÇÃÖ´¹¤¹¤ë¡£*/
+	/** ã‚¢ãƒˆãƒ å±•é–‹å¾Œã®ãƒ—ãƒ­ã‚»ã‚¹æ§‹é€ ï¼ˆã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ï¼‰ï¼ˆãƒ«ãƒ¼ãƒ«å¤–ï¼‰ã«å¯¾ã—ã¦ã€
+	 * ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã‚„ãƒ«ãƒ¼ãƒ«æ–‡è„ˆã‚„ãƒªãƒ³ã‚¯æŸãŒå‡ºç¾ã—ãŸã‚‰ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚¨ãƒ©ãƒ¼ã¨ã™ã‚‹ã€‚
+	 * ã‚¢ãƒˆãƒ å¼•æ•°ã§ã®å‡ºç¾ã¯ç„¡åã®ãƒªãƒ³ã‚¯ã§ç½®æ›ã™ã‚‹ã€‚*/
 	void correctWorld(LinkedList process) {
 		Iterator it = process.iterator();
 		while (it.hasNext()) {
@@ -1864,11 +1864,11 @@ class SyntaxExpander {
 	private void warning(String text) {
 		parser.warning(text);
 	}
-	/** ¥æ¥Ë¡¼¥¯¤Ê¿·¤·¤¤¥ê¥ó¥¯Ì¾¤òÀ¸À®¤¹¤ë */
+	/** ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªæ–°ã—ã„ãƒªãƒ³ã‚¯åã‚’ç”Ÿæˆã™ã‚‹ */
 	private String generateNewLinkName() {
 		return parser.generateNewLinkName();
 	}
-	/** ¥æ¥Ë¡¼¥¯¤Ê¿·¤·¤¤¥×¥í¥»¥¹Ê¸Ì®Ì¾¤òÀ¸À®¤¹¤ë */
+	/** ãƒ¦ãƒ‹ãƒ¼ã‚¯ãªæ–°ã—ã„ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆåã‚’ç”Ÿæˆã™ã‚‹ */
 	private String generateNewProcessContextName() {
 		return parser.generateNewProcessContextName();
 	}

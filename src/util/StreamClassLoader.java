@@ -1,5 +1,5 @@
 /*
- * ºîÀ®Æü: 2005/12/30
+ * ä½œæˆæ—¥: 2005/12/30
  * */
 
 package util;
@@ -9,16 +9,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * ¥¹¥È¥ê¡¼¥à¤«¤é¥¯¥é¥¹¤ò¥í¡¼¥É¤¹¤ë¡£¤½¤ì¤À¤±¡£
+ * ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‹ã‚‰ã‚¯ãƒ©ã‚¹ã‚’ãƒ­ãƒ¼ãƒ‰ã™ã‚‹ã€‚ãã‚Œã ã‘ã€‚
  * 
- * TODO ¥­¥ã¥Ã¥·¥å¤È¤«¤½¤ÎÂ¾¤¤¤í¤¤¤í
+ * TODO ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã¨ã‹ãã®ä»–ã„ã‚ã„ã‚
  * 
  * @author okabe
  * 
  */
 public class StreamClassLoader extends ClassLoader {
 	/**
-	 * @param name ¥Ğ¥¤¥Ê¥êÌ¾(Java API »²¾È)
+	 * @param name ãƒã‚¤ãƒŠãƒªå(Java API å‚ç…§)
 	 * @param in InputStream
 	 * @return Class
 	 * @throws ClassNotFoundException
@@ -30,7 +30,7 @@ public class StreamClassLoader extends ClassLoader {
 	}
 
 	/**
-	 * @param name ¥Ğ¥¤¥Ê¥êÌ¾
+	 * @param name ãƒã‚¤ãƒŠãƒªå
 	 * @param in InputStream
 	 * @return classData
 	 */

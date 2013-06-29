@@ -1,7 +1,7 @@
 package type.quantity;
 
 /**
- * Ìµ¸ÂÃÍ¡£
+ * ç„¡é™å€¤ã€‚
  * @author kudo
  *
  */
@@ -23,7 +23,7 @@ public class InfinityCount extends ValueCount {
 		else return Count.M_INFINITY;
 	}
 	/**
-	 * Ìµ¸Â¤Ë²¿¤òÂ­¤·¤Æ¤âÌµ¸Â(-Ìµ¸Â¤Î»ş¤Ï¤¢¤ê¤¦¤ë¤«?)
+	 * ç„¡é™ã«ä½•ã‚’è¶³ã—ã¦ã‚‚ç„¡é™(-ç„¡é™ã®æ™‚ã¯ã‚ã‚Šã†ã‚‹ã‹?)
 	 */
 	public ValueCount add(ValueCount v){
 		return this;

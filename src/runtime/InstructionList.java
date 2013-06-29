@@ -4,52 +4,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ¥é¥Ù¥ëÉÕ¤­Ì¿ÎáÎó¤òÉ½¤¹¥¯¥é¥¹¡£
- * ÀèÆ¬¤ÎÌ¿Îá¤È¤·¤ÆÉ¬¤ºspec¤ò»ı¤Ä¡£
+ * ãƒ©ãƒ™ãƒ«ä»˜ãå‘½ä»¤åˆ—ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹ã€‚
+ * å…ˆé ­ã®å‘½ä»¤ã¨ã—ã¦å¿…ãšspecã‚’æŒã¤ã€‚
  * 
  * @author n-kato
  */
 public class InstructionList implements Cloneable
 {
 	/**
-	 * ¥é¥Ù¥ëÀ¸À®ÍÑÀ°¿ôÃÍ
+	 * ãƒ©ãƒ™ãƒ«ç”Ÿæˆç”¨æ•´æ•°å€¤
 	 */
 	private static int nextId = 100;
 
 	/**
-	 * ¥é¥Ù¥ë
+	 * ãƒ©ãƒ™ãƒ«
 	 */
 	public String label;
 
 	/**
-	 * ²¾°ú¿ô¤Î¸Ä¿ô
+	 * ä»®å¼•æ•°ã®å€‹æ•°
 	 */
 	private int formals;
 
 	/**
-	 * ¶É½êÊÑ¿ô¤Î¸Ä¿ô¡Ê²¾°ú¿ô¤Î¸Ä¿ô¤ò´Ş¤à¡Ë
+	 * å±€æ‰€å¤‰æ•°ã®å€‹æ•°ï¼ˆä»®å¼•æ•°ã®å€‹æ•°ã‚’å«ã‚€ï¼‰
 	 */
 	private int locals;
 
 	/**
-	 * Ì¿ÎáÎó (Instruction¤ÎList)
+	 * å‘½ä»¤åˆ— (Instructionã®List)
 	 */
 	public List<Instruction> insts = new ArrayList<Instruction>();
 
 	/**
-	 * ¿ÆÌ¿ÎáÎó¤Ş¤¿¤Ïnull
+	 * è¦ªå‘½ä»¤åˆ—ã¾ãŸã¯null
 	 */
 	public InstructionList parent;
 
 	/**
-	 * Ì¤»ÈÍÑ¥á¥½¥Ã¥É¡£
+	 * æœªä½¿ç”¨ãƒ¡ã‚½ãƒƒãƒ‰ã€‚
 	 */
 	public void setFormals(int formals)
 	{
 	}
 
 	/**
-	 * Ì¤»ÈÍÑ¥á¥½¥Ã¥É¡£¶É½êÊÑ¿ô¤Î¸Ä¿ô¤ò¹¹¿·¤¹¤ë¡£
+	 * æœªä½¿ç”¨ãƒ¡ã‚½ãƒƒãƒ‰ã€‚å±€æ‰€å¤‰æ•°ã®å€‹æ•°ã‚’æ›´æ–°ã™ã‚‹ã€‚
 	 */
 	public void updateLocals(int locals)
 	{
@@ -58,14 +58,14 @@ public class InstructionList implements Cloneable
 	}
 
 	/**
-	 * ¿ÆÌ¿ÎáÎó¤¬Ìµ¤¤¤«¤É¤¦¤«ÊÖ¤¹
+	 * è¦ªå‘½ä»¤åˆ—ãŒç„¡ã„ã‹ã©ã†ã‹è¿”ã™
 	 */
 	public boolean isRoot()
 	{
 		return parent == null;
 	}
 
-	/** ÄÌ¾ï¤Î¥³¥ó¥¹¥È¥é¥¯¥¿ */
+	/** é€šå¸¸ã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ */
 	public InstructionList()
 	{
 		label = "L" + nextId++;
@@ -79,7 +79,7 @@ public class InstructionList implements Cloneable
 	}
 
 	/**
-	 * ¥Ñ¡¼¥¶¡¼¤ÇÍøÍÑ¤¹¤ë¥³¥ó¥¹¥È¥é¥¯¥¿
+	 * ãƒ‘ãƒ¼ã‚¶ãƒ¼ã§åˆ©ç”¨ã™ã‚‹ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	 */
 	public InstructionList(List<Instruction> insts)
 	{
@@ -88,7 +88,7 @@ public class InstructionList implements Cloneable
 	}
 
 	/**
-	 * ¥Ñ¡¼¥¶¡¼¤ÇÍøÍÑ¤¹¤ë¥³¥ó¥¹¥È¥é¥¯¥¿
+	 * ãƒ‘ãƒ¼ã‚¶ãƒ¼ã§åˆ©ç”¨ã™ã‚‹ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	 */
 	public InstructionList(int id, List<Instruction> insts)
 	{
@@ -99,7 +99,7 @@ public class InstructionList implements Cloneable
 	public void setLabel(int id)
 	{
 		this.label = "L" + id;
-		//¤â¤Ã¤È¸­¤¤ÊıË¡¤Ï¤Ê¤¤¤â¤Î¤À¤í¤¦¤«¡£
+		//ã‚‚ã£ã¨è³¢ã„æ–¹æ³•ã¯ãªã„ã‚‚ã®ã ã‚ã†ã‹ã€‚
 		if (nextId <= id)
 			nextId = id + 1;
 	}
@@ -114,9 +114,9 @@ public class InstructionList implements Cloneable
 	}
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¿ÎáÎó¡ÊInstruction¤ÎList¡Ë¤Î¥¯¥í¡¼¥ó¤òºîÀ®¤¹¤ë¡£
-	 * @param insts ¥¯¥í¡¼¥ó¤òºîÀ®¤¹¤ëÌ¿ÎáÎó
-	 * @return ºîÀ®¤·¤¿¥¯¥í¡¼¥ó
+	 * æŒ‡å®šã•ã‚ŒãŸå‘½ä»¤åˆ—ï¼ˆInstructionã®Listï¼‰ã®ã‚¯ãƒ­ãƒ¼ãƒ³ã‚’ä½œæˆã™ã‚‹ã€‚
+	 * @param insts ã‚¯ãƒ­ãƒ¼ãƒ³ã‚’ä½œæˆã™ã‚‹å‘½ä»¤åˆ—
+	 * @return ä½œæˆã—ãŸã‚¯ãƒ­ãƒ¼ãƒ³
 	 */
 	public static List<Instruction> cloneInstructions(List<Instruction> insts)
 	{
@@ -129,7 +129,7 @@ public class InstructionList implements Cloneable
 	}
 
 	/**
-	 * Ì¿ÎáÎó¤ÎËöÈø¤ËÌ¿Îá¤òÄÉ²Ã¤¹¤ë¡£
+	 * å‘½ä»¤åˆ—ã®æœ«å°¾ã«å‘½ä»¤ã‚’è¿½åŠ ã™ã‚‹ã€‚
 	 */
 	public void add(Instruction inst)
 	{
@@ -137,7 +137,7 @@ public class InstructionList implements Cloneable
 	}
 
 	/**
-	 * Ì¿ÎáÎó¤Î»ØÄê¤Î¾ì½ê¤ËÌ¿Îá¤òÄÉ²Ã¤¹¤ë¡£
+	 * å‘½ä»¤åˆ—ã®æŒ‡å®šã®å ´æ‰€ã«å‘½ä»¤ã‚’è¿½åŠ ã™ã‚‹ã€‚
 	 */
 	public void add(int index, Instruction inst)
 	{

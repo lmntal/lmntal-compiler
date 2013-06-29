@@ -32,20 +32,20 @@ import compile.structure.Membrane;
 /** */
 public class TypeChecker {
 	
-	//ËìÌ¾¤´¤È¤Ë¡¢»ÒËì¤ª¤è¤Ó¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î¸Ä¿ô¤ò´ÉÍı¤¹¤ë
+	//è†œåã”ã¨ã«ã€å­è†œãŠã‚ˆã³ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®å€‹æ•°ã‚’ç®¡ç†ã™ã‚‹
 	private final Map<String, Map<String, IntervalCount>> memCounts = new HashMap<String, Map<String, IntervalCount>>();
 	private final Map<String, Map<Functor,IntervalCount>> functorCounts = new HashMap<String, Map<Functor, IntervalCount>>();
 	
-	// ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î·¿¾ğÊó
+	// ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®å‹æƒ…å ±
 	private final Map<String, Map<Functor, List<ModedType>>> activeAtomTypes = new HashMap<String, Map<Functor, List<ModedType>>>();
-	// ¥Ç¡¼¥¿¥¢¥È¥à¤Î·¿¾ğÊó (?)
+	// ãƒ‡ãƒ¼ã‚¿ã‚¢ãƒˆãƒ ã®å‹æƒ…å ± (?)
 	private final Map<Functor, List<ModedType>> dataAtomTypes = new HashMap<Functor, List<ModedType>>();
 	
 	private final Set<String> nomores = new HashSet<String>();
 	
 	/**
-	 * ¥Ç¡¼¥¿·¿Àë¸À¤ò¥Ñ¡¼¥º¤¹¤ë
-	 * @param atom datatype¥¢¥È¥à
+	 * ãƒ‡ãƒ¼ã‚¿å‹å®£è¨€ã‚’ãƒ‘ãƒ¼ã‚ºã™ã‚‹
+	 * @param atom datatypeã‚¢ãƒˆãƒ 
 	 * @throws TypeParseException
 	 */
 	private void parseDatatypeAtom(Atom atom)throws TypeParseException{
@@ -119,7 +119,7 @@ public class TypeChecker {
 	}
 	
 	/**
-	 * ·¿ÄêµÁËì¤òÆÉ¤ß¹ş¤ó¤Ç·¿¾ğÊó¤òÆÀ¤ë
+	 * å‹å®šç¾©è†œã‚’èª­ã¿è¾¼ã‚“ã§å‹æƒ…å ±ã‚’å¾—ã‚‹
 	 * @param typedefmem
 	 */
 	public boolean parseTypeDefinition(List<Membrane> typedefmems){
@@ -146,12 +146,12 @@ public class TypeChecker {
 							Functor lastf = lastatom.functor;
 							if(lastf.equals(new SymbolFunctor(".", 3)))
 								continue;
-							else if(lastf.equals(new SymbolFunctor("+", 1)) && lastatom.mem.parent == mem){ // »ÒËì¤Ê¤é
-								String childname = TypeEnv.getMemName(lastatom.mem); // 0°ú¿ôÌÜ¤ÎÀè($in)¤Î1°ú¿ôÌÜ¤ÎÀè¤Î¥¢¥È¥à¤Î½êÂ°Ëì
+							else if(lastf.equals(new SymbolFunctor("+", 1)) && lastatom.mem.parent == mem){ // å­è†œãªã‚‰
+								String childname = TypeEnv.getMemName(lastatom.mem); // 0å¼•æ•°ç›®ã®å…ˆ($in)ã®1å¼•æ•°ç›®ã®å…ˆã®ã‚¢ãƒˆãƒ ã®æ‰€å±è†œ
 								IntervalCount fc = getCountFromList(atom);
 								addChildCount(memname, childname, fc);
 							}
-							else{ // ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à
+							else{ // ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ 
 								constrainActiveAtomArgument(memname, lastatom);
 								IntervalCount fc = getCountFromList(atom);
 								addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
@@ -166,18 +166,18 @@ public class TypeChecker {
 							int count = ((IntegerFunctor)f).intValue();
 							if(lastf.equals(new SymbolFunctor(".",3)))
 								continue;
-							else if(lastf.equals(new SymbolFunctor("+",1)) && lastatom.mem.parent == mem){ // »ÒËì¤Ê¤é
-								String childname = TypeEnv.getMemName(lastatom.mem); // 0°ú¿ôÌÜ¤ÎÀè($in)¤Î1°ú¿ôÌÜ¤ÎÀè¤Î¥¢¥È¥à¤Î½êÂ°Ëì
+							else if(lastf.equals(new SymbolFunctor("+",1)) && lastatom.mem.parent == mem){ // å­è†œãªã‚‰
+								String childname = TypeEnv.getMemName(lastatom.mem); // 0å¼•æ•°ç›®ã®å…ˆ($in)ã®1å¼•æ•°ç›®ã®å…ˆã®ã‚¢ãƒˆãƒ ã®æ‰€å±è†œ
 								IntervalCount fc = new IntervalCount(count,count);//new NumCount(count);
 								addChildCount(memname, childname, fc);
 							}
-							else{ //¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à
+							else{ //ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ 
 								constrainActiveAtomArgument(memname, lastatom);
 								IntervalCount fc = new IntervalCount(count,count);//new NumCount(count);
 								addFunctorCount(memname, new SymbolFunctor(lastf.getName(),lastf.getArity()-1),fc);
 							}
 						}
-						// "nomore" Ì¤ÄêµÁ¥¢¥È¥à¤Î½Ğ¸½¶Ø»ß¥Õ¥é¥°
+						// "nomore" æœªå®šç¾©ã‚¢ãƒˆãƒ ã®å‡ºç¾ç¦æ­¢ãƒ•ãƒ©ã‚°
 						else if(f.equals(new SymbolFunctor("nomore",0))){
 							nomores.add(TypeEnv.getMemName(mem));
 						}
@@ -251,7 +251,7 @@ public class TypeChecker {
 	}
 	
 	/**
-	 * 2Í×ÁÇ¤Î¥ê¥¹¥È¤«¤é¶è´ÖÃÍ¤òÆÀ¤ë
+	 * 2è¦ç´ ã®ãƒªã‚¹ãƒˆã‹ã‚‰åŒºé–“å€¤ã‚’å¾—ã‚‹
 	 * @param firstcons
 	 * @return
 	 * @throws TypeParseException
@@ -305,11 +305,11 @@ public class TypeChecker {
 	}
 	
 	/**
-	 * »ÒËì¤Î¸Ä¿ô¾ğÊó¤òÄÉ²Ã¤¹¤ë
-	 * @param parentname ½êÂ°ËìÌ¾
-	 * @param childname »ÒËìÌ¾
-	 * @param fc ¸Ä¿ô¾ğÊó
-	 * @throws TypeParseException Æ±¤¸ËìÌ¾¤Ë¤Ä¤¤¤Æ2¤Ä¸Ä¿ô¾ğÊó¤òÄÉ²Ã¤·¤è¤¦¤È¤¹¤ë¤È¥¨¥é¡¼
+	 * å­è†œã®å€‹æ•°æƒ…å ±ã‚’è¿½åŠ ã™ã‚‹
+	 * @param parentname æ‰€å±è†œå
+	 * @param childname å­è†œå
+	 * @param fc å€‹æ•°æƒ…å ±
+	 * @throws TypeParseException åŒã˜è†œåã«ã¤ã„ã¦2ã¤å€‹æ•°æƒ…å ±ã‚’è¿½åŠ ã—ã‚ˆã†ã¨ã™ã‚‹ã¨ã‚¨ãƒ©ãƒ¼
 	 */
 	private void addChildCount(String parentname, String childname, IntervalCount fc)throws TypeParseException{
 		if(!memCounts.containsKey(parentname))
@@ -323,11 +323,11 @@ public class TypeChecker {
 	}
 	
 	/**
-	 * ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î¸Ä¿ô¾ğÊó¤òÄÉ²Ã¤¹¤ë
-	 * @param parentname ½êÂ°Ëì
-	 * @param functor ¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Î¥Õ¥¡¥ó¥¯¥¿
-	 * @param fc ¸Ä¿ô¾ğÊó
-	 * @throws TypeParseException Æ±¤¸¥¢¥¯¥Æ¥£¥Ö¥¢¥È¥à¤Ë¤Ä¤¤¤Æ2¤Ä¸Ä¿ô¾ğÊó¤òÄÉ²Ã¤·¤è¤¦¤È¤¹¤ë¤È¥¨¥é¡¼
+	 * ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®å€‹æ•°æƒ…å ±ã‚’è¿½åŠ ã™ã‚‹
+	 * @param parentname æ‰€å±è†œ
+	 * @param functor ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã®ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿
+	 * @param fc å€‹æ•°æƒ…å ±
+	 * @throws TypeParseException åŒã˜ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã‚¢ãƒˆãƒ ã«ã¤ã„ã¦2ã¤å€‹æ•°æƒ…å ±ã‚’è¿½åŠ ã—ã‚ˆã†ã¨ã™ã‚‹ã¨ã‚¨ãƒ©ãƒ¼
 	 */
 	private void addFunctorCount(String parentname, Functor functor, IntervalCount fc)throws TypeParseException{
 		if(!functorCounts.containsKey(parentname))
@@ -341,11 +341,11 @@ public class TypeChecker {
 	}
 	
 	/**
-	 * ¥æ¡¼¥¶¤¬Í¿¤¨¤¿·¿ÄêµÁ¤È¿äÏÀ·ë²Ì¤È¤Î¡¢À°¹çÀ­¤ò¥Á¥§¥Ã¥¯¤¹¤ë
+	 * ãƒ¦ãƒ¼ã‚¶ãŒä¸ãˆãŸå‹å®šç¾©ã¨æ¨è«–çµæœã¨ã®ã€æ•´åˆæ€§ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 	 * @throws TypeException
 	 */
 	public void check(ArgumentInferer ai, QuantityInferer qi)throws TypeException{
-		//¤Ş¤º°ú¿ô¤Î·¿¸¡ºº¤¹¤ë
+		//ã¾ãšå¼•æ•°ã®å‹æ¤œæŸ»ã™ã‚‹
 		ConstraintSet cs = ai.getConstraints();
 		Set<TypeVarConstraint> tvcs = cs.getTypeVarConstraints();
 		for(TypeVarConstraint tvc : tvcs){
@@ -361,12 +361,12 @@ public class TypeChecker {
 				int pos = aap.getPos();
 				ModedType mt = types.get(pos);
 				ModeVar mv = tvc.getModeVar();
-				if(mv.value == 0)mv.bindSign(mt.sign); // ¤â¤·¥â¡¼¥ÉÊÑ¿ô¤¬Ì¤·èÄê¤Ê¤é·èÄê¤¹¤ë
+				if(mv.value == 0)mv.bindSign(mt.sign); // ã‚‚ã—ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ãŒæœªæ±ºå®šãªã‚‰æ±ºå®šã™ã‚‹
 				else if(mv.value != mt.sign)
 					throw new TypeException("mode error : " + mt.sign + "(user def) <=> " + mv.value + "(infered)");
 				TypeVar tv = tvc.getTypeVar();
-				Set<String> typeNames = tv.getTypeName(); // ¥Ç¡¼¥¿·¿Ì¾¤ò¼èÆÀ¤¹¤ë
-				if(typeNames == null){ // ¥Ç¡¼¥¿·¿¤¬Ì¤Äê
+				Set<String> typeNames = tv.getTypeName(); // ãƒ‡ãƒ¼ã‚¿å‹åã‚’å–å¾—ã™ã‚‹
+				if(typeNames == null){ // ãƒ‡ãƒ¼ã‚¿å‹ãŒæœªå®š
 					tv.setTypeName(mt.typenames);
 				}
 				else if(!checkDataTypes(mt.typenames,typeNames))//typeName.equals(mt.typename))
@@ -387,34 +387,34 @@ public class TypeChecker {
 				if(!f2ts.containsKey(af))continue;
 				List<ModedType> amts = f2ts.get(af);
 				ModedType amt = amts.get(ap.getPos());
-				//¡¡ÅşÃ£¤â¤È¤ÎActiveAtomPath¤Î¥â¡¼¥É¤Ë¤è¤êµÕ¤Ë¤Ê¤ë
+				//ã€€åˆ°é”ã‚‚ã¨ã®ActiveAtomPathã®ãƒ¢ãƒ¼ãƒ‰ã«ã‚ˆã‚Šé€†ã«ãªã‚‹
 				if(amt.sign == -1){
-					if(mv.value == 0)mv.bindSign(-mt.sign); // ¤â¤·¥â¡¼¥ÉÊÑ¿ô¤¬Ì¤·èÄê¤Ê¤é·èÄê¤¹¤ë
+					if(mv.value == 0)mv.bindSign(-mt.sign); // ã‚‚ã—ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ãŒæœªæ±ºå®šãªã‚‰æ±ºå®šã™ã‚‹
 					else if(mv.value != -mt.sign)
 						throw new TypeException("mode error : " + f + "/" + pos + " : " + mt.sign + "(user def) <=> " + mv.value + "(infered)");
 				}
 				else if(amt.sign == 1){
-					if(mv.value == 0)mv.bindSign(mt.sign); // ¤â¤·¥â¡¼¥ÉÊÑ¿ô¤¬Ì¤·èÄê¤Ê¤é·èÄê¤¹¤ë
+					if(mv.value == 0)mv.bindSign(mt.sign); // ã‚‚ã—ãƒ¢ãƒ¼ãƒ‰å¤‰æ•°ãŒæœªæ±ºå®šãªã‚‰æ±ºå®šã™ã‚‹
 					else if(mv.value != mt.sign)
 						throw new TypeException("mode error : " + f + "/" + pos + " : " + mt.sign + "(user def) <=> " + mv.value + "(infered)");
-				}else{ // ¥ë¡¼¥È¤¬ÉÔÌÀ¤Î¾ì¹ç¡¢ÆÃ¤Ë¥Á¥§¥Ã¥¯¤·¤Ê¤¤
+				}else{ // ãƒ«ãƒ¼ãƒˆãŒä¸æ˜ã®å ´åˆã€ç‰¹ã«ãƒã‚§ãƒƒã‚¯ã—ãªã„
 					continue;
 				}
 				TypeVar tv = tvc.getTypeVar();
-				Set<String> typeNames = tv.getTypeName(); // ¥Ç¡¼¥¿·¿Ì¾¤ò¼èÆÀ¤¹¤ë
-				if(typeNames == null){ // ¥Ç¡¼¥¿·¿¤¬Ì¤Äê
+				Set<String> typeNames = tv.getTypeName(); // ãƒ‡ãƒ¼ã‚¿å‹åã‚’å–å¾—ã™ã‚‹
+				if(typeNames == null){ // ãƒ‡ãƒ¼ã‚¿å‹ãŒæœªå®š
 					tv.setTypeName(mt.typenames);
 				}
 				else if(!checkDataTypes(mt.typenames,typeNames))
 					throw new TypeException("type error : " + f + "/" + pos + " : " + mt.typenames + "(user def) <=> " + typeNames + "(infered)");
 			}
-			else{ // RootPath ¤Î¤Ş¤Ş¤Ë¤Ê¤Ã¤Æ¤¤¤ë¤³¤È¤â¤¢¤ê¤¦¤ë¡£
-				// TODO ArgumentInferer.getPolarizedPath¤Ç1¤Ä¼êÁ°¤Ş¤Çtrace¤¹¤ë¡£
+			else{ // RootPath ã®ã¾ã¾ã«ãªã£ã¦ã„ã‚‹ã“ã¨ã‚‚ã‚ã‚Šã†ã‚‹ã€‚
+				// TODO ArgumentInferer.getPolarizedPathã§1ã¤æ‰‹å‰ã¾ã§traceã™ã‚‹ã€‚
 				//
 //				Env.p("fatal error : RootPath");
 			}
 		}
-		//¼¡¤Ë¸Ä¿ô¤Î¸¡ºº¤ò¤¹¤ë
+		//æ¬¡ã«å€‹æ•°ã®æ¤œæŸ»ã‚’ã™ã‚‹
 		Map<String, FixedCounts> memnameToCounts = qi.getMemNameToFixedCountsSet();
 		for(String memname : memnameToCounts.keySet()){
 			FixedCounts fcs = memnameToCounts.get(memname);
@@ -450,7 +450,7 @@ public class TypeChecker {
 	}
 	
 	/**
-	 * $conÆâ¤Ë$inf¤¬¼ı¤Ş¤Ã¤Æ¤¤¤ë¤³¤È¤ò³ÎÇ§¤¹¤ë
+	 * $conå†…ã«$infãŒåã¾ã£ã¦ã„ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹
 	 * @param con
 	 * @param inf
 	 * @return

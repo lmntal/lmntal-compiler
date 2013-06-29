@@ -4,30 +4,30 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
- * ¥½¡¼¥¹¥³¡¼¥ÉÃæ¤Î¥×¥í¥»¥¹Ê¸Ì®½Ğ¸½¤òÉ½¤¹¥¯¥é¥¹
+ * ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ä¸­ã®ãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆå‡ºç¾ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  */
 public final class ProcessContext extends Context
 {
 	/**
-	 * °ú¿ô¤Î¥ê¥ó¥¯Â«
+	 * å¼•æ•°ã®ãƒªãƒ³ã‚¯æŸ
 	 */
 	public LinkOccurrence bundle = null;
 
 	/**
-	 * Ê¬Î¥¤·¤¿Æ±Ì¾·¿ÉÕ¤­¥×¥í¥»¥¹Ê¸Ì®¤ÎÌ¾Á°¤ò³ÊÇ¼
+	 * åˆ†é›¢ã—ãŸåŒåå‹ä»˜ããƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åå‰ã‚’æ ¼ç´
 	 */
 	public LinkedList sameNameList = null;//seiji
 
 	/**
-	 * ¥ê¥ó¥¯Ì¾
+	 * ãƒªãƒ³ã‚¯å
 	 */
 	public String linkName = null;//seiji
 
 	/**
-	 * ¥³¥ó¥¹¥È¥é¥¯¥¿
-	 * @param mem ½êÂ°Ëì
-	 * @param qualifiedName ¸ÂÄêÌ¾
-	 * @param arity ÌÀ¼¨Åª¤Ê¼«Í³¥ê¥ó¥¯°ú¿ô¤Î¸Ä¿ô
+	 * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	 * @param mem æ‰€å±è†œ
+	 * @param qualifiedName é™å®šå
+	 * @param arity æ˜ç¤ºçš„ãªè‡ªç”±ãƒªãƒ³ã‚¯å¼•æ•°ã®å€‹æ•°
 	 */
 	public ProcessContext(Membrane mem, String qualifiedName, int arity)
 	{
@@ -35,7 +35,7 @@ public final class ProcessContext extends Context
 	}
 
 	/**
-	 * »ØÄê¤µ¤ì¤¿Ì¾Á°¤Ç¥ê¥ó¥¯Â«¤òÅĞÏ¿¤¹¤ë
+	 * æŒ‡å®šã•ã‚ŒãŸåå‰ã§ãƒªãƒ³ã‚¯æŸã‚’ç™»éŒ²ã™ã‚‹
 	 */
 	public void setBundleName(String bundleName)
 	{
@@ -43,12 +43,12 @@ public final class ProcessContext extends Context
 	}
 
 	/**
-	 * $p[A,B|*Z]¤Î¤è¤¦¤ÊÊ¸»úÎóÉ½¸½¤òÊÖ¤¹¡£¼«Æ°Êä´°¤µ¤ì¤¿$p[...|*p]¤Î¤È¤­¤Ï$p¤òÊÖ¤¹¡£
+	 * $p[A,B|*Z]ã®ã‚ˆã†ãªæ–‡å­—åˆ—è¡¨ç¾ã‚’è¿”ã™ã€‚è‡ªå‹•è£œå®Œã•ã‚ŒãŸ$p[...|*p]ã®ã¨ãã¯$pã‚’è¿”ã™ã€‚
 	 */
 	public String toString()
 	{
 		String argstext = "";
-		if (bundle == null || bundle.name.matches("\\*[A-Z_].*")) // TODO: (buddy!=null)¤«¤É¤¦¤«¤ÇÈ½Äê¤¹¤Ù¤­¤Ç¤¢¤ë
+		if (bundle == null || bundle.name.matches("\\*[A-Z_].*")) // TODO: (buddy!=null)ã‹ã©ã†ã‹ã§åˆ¤å®šã™ã¹ãã§ã‚ã‚‹
 		{
 			argstext = "[" + Arrays.asList(args).toString()
 				.replaceAll("^.|.$","").replaceAll(", ",",");
@@ -59,7 +59,7 @@ public final class ProcessContext extends Context
 	}
 
 	/**
-	 * Æ±Ì¾¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬Î¥¤Ë¤è¤ê¿·¤¿¤ËÀ¸À®¤µ¤ì¤¿Ì¾Á°¤ò³ÊÇ¼¤·¤Æ¤¤¤ë¥ê¥¹¥È¤òÊÖ¤¹
+	 * åŒåãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†é›¢ã«ã‚ˆã‚Šæ–°ãŸã«ç”Ÿæˆã•ã‚ŒãŸåå‰ã‚’æ ¼ç´ã—ã¦ã„ã‚‹ãƒªã‚¹ãƒˆã‚’è¿”ã™
 	 */
 	public LinkedList getSameNameList()
 	{//seiji
@@ -67,7 +67,7 @@ public final class ProcessContext extends Context
 	}
 
 	/**
-	 * Æ±Ì¾¥×¥í¥»¥¹Ê¸Ì®¤ÎÊ¬Î¥¤ò¹Ô¤Ê¤Ã¤Æ¤¤¤ë¤«Èİ¤«
+	 * åŒåãƒ—ãƒ­ã‚»ã‚¹æ–‡è„ˆã®åˆ†é›¢ã‚’è¡Œãªã£ã¦ã„ã‚‹ã‹å¦ã‹
 	 */
 	public boolean hasSameName()
 	{//seiji

@@ -10,7 +10,7 @@ package type.argument;
  */
 public class UnifyConstraint /* implements Constraint */ {
 
-	/** Åù¤·¤¤¤È¤¹¤ë¥Ñ¥¹ */
+	/** ç­‰ã—ã„ã¨ã™ã‚‹ãƒ‘ã‚¹ */
 	private PolarizedPath pp1;
 	private PolarizedPath pp2;
 
@@ -23,7 +23,7 @@ public class UnifyConstraint /* implements Constraint */ {
 	}
 	
 	/**
-	 * Î¾ÊÕ¤È¤âÉä¹æ¤¬-¤Ê¤é¡¢ÁĞÊı¤Ò¤Ã¤¯¤êÊÖ¤¹
+	 * ä¸¡è¾ºã¨ã‚‚ç¬¦å·ãŒ-ãªã‚‰ã€åŒæ–¹ã²ã£ãã‚Šè¿”ã™
 	 *
 	 */
 	public void regularize(){

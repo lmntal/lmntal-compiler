@@ -12,8 +12,8 @@ import compile.structure.Atom;
 import compile.structure.Membrane;
 
 /**
- * ¤½¤ì¤¾¤ì¤ÎËì¤Ë¤Ä¤¤¤Æºî¤é¤ì¤ë¡£
- * ÀÅÅª¤ÊÎÌ¾ğÊó¤òÉ½¤¹¥¯¥é¥¹
+ * ãã‚Œãã‚Œã®è†œã«ã¤ã„ã¦ä½œã‚‰ã‚Œã‚‹ã€‚
+ * é™çš„ãªé‡æƒ…å ±ã‚’è¡¨ã™ã‚¯ãƒ©ã‚¹
  * @author kudo
  *
  */
@@ -21,9 +21,9 @@ public class StaticCounts{
 	
 	public Membrane mem;
 	
-	/** ¥Õ¥¡¥ó¥¯¥¿ -> ÎÌ */
+	/** ãƒ•ã‚¡ãƒ³ã‚¯ã‚¿ -> é‡ */
 	public final Map<Functor,Count> functorToCount;
-	/** ËìÌ¾ -> ÎÌ */
+	/** è†œå -> é‡ */
 	public final Map<String,Count> memnameToCount;
 
 	public StaticCounts(Membrane mem){
@@ -34,7 +34,7 @@ public class StaticCounts{
 	}
 	
 	/**
-	 * ¥¢¥È¥à¤Ë´Ø¤¹¤ëÎÌ¤ò²Ã»»
+	 * ã‚¢ãƒˆãƒ ã«é–¢ã™ã‚‹é‡ã‚’åŠ ç®—
 	 * @param atom
 	 * @param count
 	 */
@@ -50,7 +50,7 @@ public class StaticCounts{
 		}
 	}
 	/**
-	 * Ëì¤Ë´Ø¤¹¤ëÎÌ¤ò²Ã»»
+	 * è†œã«é–¢ã™ã‚‹é‡ã‚’åŠ ç®—
 	 * @param m
 	 * @param count
 	 */
@@ -66,8 +66,8 @@ public class StaticCounts{
 		}
 	}
 	/**
-	 * ÊÌ¤ÎÎÌ¥»¥Ã¥È¤«¤éÁ´¤Æ²Ã»»
-	 * TODO ÇÜ¿ô¤Ë¤è¤êÊ¬¤±¤ë
+	 * åˆ¥ã®é‡ã‚»ãƒƒãƒˆã‹ã‚‰å…¨ã¦åŠ ç®—
+	 * TODO å€æ•°ã«ã‚ˆã‚Šåˆ†ã‘ã‚‹
 	 * @param com2
 	 */
 	public void addAllCounts(StaticCounts com2){
@@ -92,7 +92,7 @@ public class StaticCounts{
 //	}
 	
 	/**
-	 * ¸ú²Ì¤ò¤³¤Î¶ñÂÎËì¤ËÅ¬ÍÑ¤¹¤ë
+	 * åŠ¹æœã‚’ã“ã®å…·ä½“è†œã«é©ç”¨ã™ã‚‹
 	 * @param dom
 	 */
 	public void apply(DynamicCounts dom){
@@ -102,7 +102,7 @@ public class StaticCounts{
 	}
 	
 	/**
-	 * ¾å¸Â¤ò¼è¤Ã¤Ñ¤é¤¦
+	 * ä¸Šé™ã‚’å–ã£ã±ã‚‰ã†
 	 */
 	public void removeUpperBounds(){
 		VarCount infVar = new VarCount();
@@ -127,7 +127,7 @@ public class StaticCounts{
 	}
 	
 	/**
-	 * ÊÑ¿ôÌ¾¤òÉÕ¤±ÊÑ¤¨¤¿Ê£À½¤òÊÖ¤¹
+	 * å¤‰æ•°åã‚’ä»˜ã‘å¤‰ãˆãŸè¤‡è£½ã‚’è¿”ã™
 	 */
 	public StaticCounts clone(VarCount oldvar, VarCount newvar){
 		StaticCounts cloned = new StaticCounts(mem);
@@ -139,7 +139,7 @@ public class StaticCounts{
 	}
 	
 	/**
-	 * ¶ñÂÎÃÍ¤Ë¤¹¤ë
+	 * å…·ä½“å€¤ã«ã™ã‚‹
 	 * @return
 	 */
 	public FixedCounts solve(){

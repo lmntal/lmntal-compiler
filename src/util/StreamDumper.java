@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /*
- *  ���ȥ꡼��������äƥ��󥽡���˽��Ϥ��륯�饹��
- * Runtime.exec()���̥ץ������ˤ��Ƥ��ޤ��ȡ����󥽡���˽Фʤ��ʤäƥǥХå��˺���Τǡ�
+ *  ストリームを受け取ってコンソールに出力するクラス。
+ * Runtime.exec()で別プロセスにしてしまうと、コンソールに出なくなってデバッグに困るので。
  * 
  * @author nakajima
  */
