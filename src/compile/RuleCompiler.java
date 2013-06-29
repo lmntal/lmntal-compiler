@@ -1774,21 +1774,14 @@ public class RuleCompiler
 	private void compileLinkOperations(Set<Atomic> removed, Set<Atomic> created, Map<Atom, Atom> reusable)
 	{
 		Env.c("RuleCompiler::compileLinkOperations");
-		
-		System.err.println("Compiling: " + lhsatoms + " :- " + rhsatoms);
-		
+
 		Set<LinkOccurrence> freeLinks = getFreeLinkOccurrence();
-		//System.err.println("FreeLinks      : " + freeLinks);
-		
+
 		// ファンクタが同じものには最低限同じ順序数を割り当てる
-		//System.err.println("Correspondings : " + reusable);
-		//System.err.println("Removed        : " + removed);
-		//System.err.println("Created        : " + created);
-		
 		int linkCount = countLinkOccurrence(reusable.keySet()) / 2
 			+ countLinkOccurrence(removed)
 			+ countLinkOccurrence(created);
-		
+
 		// リンク名 -> 順序数
 		Map<LinkOccurrence, Integer> order = new HashMap<LinkOccurrence, Integer>();
 		LinkOccurrence[] links1 = new LinkOccurrence[linkCount];
@@ -1856,11 +1849,8 @@ public class RuleCompiler
 				id++;
 			}
 		}
-		//System.err.println("Links1  : " + Arrays.toString(links1));
-		//System.err.println("Links2  : " + Arrays.toString(links2));
-		
+
 		// 置換
-		System.err.println(Arrays.toString(links1));
 		for (int i = 0; i < links2.length; i++)
 		{
 			LinkOccurrence link = links2[i].buddy;
@@ -1869,12 +1859,7 @@ public class RuleCompiler
 			{
 				Atomic a1 = links1[i].atom;
 				Atomic a2 = links1[j].atom;
-				
-				/*
-				System.err.printf("swap: %s.%d <-> %s.%d\n", links1[i].atom, links1[i].pos, links1[j].atom, links1[j].pos);
-				System.err.println(i + " <-> " + j);
-				//*/
-				
+
 				if (created.contains(a1))
 				{
 					body.add(swaplink(
@@ -1895,36 +1880,16 @@ public class RuleCompiler
 				}
 				LinkOccurrence buddy1 = links1[i].buddy;
 				LinkOccurrence buddy2 = links1[j].buddy;
-				
+
 				links1[i].buddy = buddy2;
 				if (buddy2 != null) buddy2.buddy = links1[i];
-				
+
 				links1[j].buddy = buddy1;
 				if (buddy1 != null) buddy1.buddy = links1[j];
-				
+
 				String tmpName = links1[i].name;
 				links1[i].name = links1[j].name;
 				links1[j].name = tmpName;
-				
-				System.err.println(Arrays.toString(links1));
-			}
-		}
-		//System.err.println("E Links    : " + Arrays.toString(links1));
-		for (Atomic a : created)
-		{
-			for (LinkOccurrence l1 : a.args)
-			{
-				if (!freeLinks.contains(l1))
-				{
-					LinkOccurrence l2 = l1.buddy;
-					Instruction inst = Instruction.newlink(
-						rhsatompath.get(l1.atom), l1.pos,
-						rhsatompath.get(l2.atom), l2.pos,
-						rhsmempath.get(l1.atom.mem));
-					body.add(inst);
-					freeLinks.add(l1);
-					freeLinks.add(l2);
-				}
 			}
 		}
 	}
@@ -1935,20 +1900,14 @@ public class RuleCompiler
 	private void compileCycleLinks(Set<Atomic> removed, Set<Atomic> created, Map<Atom, Atom> reusable)
 	{
 		Env.c("RuleCompiler::compileCycleLinks");
-		
-		System.err.println(lhsatoms + " :- " + rhsatoms);
-		
+
 		Set<LinkOccurrence> freeLinks = getFreeLinkOccurrence();
-		
-		//System.err.println("Correspondings : " + reusable);
-		//System.err.println("Removed        : " + removed);
-		//System.err.println("Created        : " + created);
-		
+
 		// ルール両辺のリンク出現の和集合の要素数
 		int linkCount = countLinkOccurrence(reusable.keySet()) / 2
 			+ countLinkOccurrence(removed)
 			+ countLinkOccurrence(created);
-		
+
 		// リンク名 -> 順序数
 		Map<LinkOccurrence, Integer> order = new HashMap<LinkOccurrence, Integer>();
 		LinkOccurrence[] links1 = new LinkOccurrence[linkCount];
@@ -2015,30 +1974,20 @@ public class RuleCompiler
 				id++;
 			}
 		}
-		
-		//System.err.println(Arrays.toString(links1));
-		//System.err.println(Arrays.toString(links2));
-		
+
 		// 巡回置換
 		boolean[] checked = new boolean[links1.length];
 		for (int i = 0; i < links1.length; i++)
 		{
 			if (links1[i].name.equals(".") || links1[i].buddy == links2[i] || checked[i]) continue;
-			
-			//System.err.println(Arrays.toString(checked));
-			
+
 			List<Integer> alist = new ArrayList<Integer>();
 			List<Integer> plist = new ArrayList<Integer>();
-			
+
 			int j = i;
-			//System.err.print("( ");
 			do
 			{
 				checked[j] = true;
-				//System.err.print(links1[j] + " <- " + links2[j] + " ");
-				//System.err.print(links1[j] + " ");
-				//System.err.print(j + " ");
-				
 				if (links1[j].name.equals("."))
 				{
 					alist.add(rhsatompath.get(links1[j].atom));
@@ -2047,9 +1996,9 @@ public class RuleCompiler
 				{
 					alist.add(lhsatompath.get(links1[j].atom));
 				}
-				
+
 				plist.add(links1[j].pos);
-				
+
 				if (links2[j].name.equals("."))
 				{
 					for (j = 0; j < links1.length; j++)
@@ -2066,25 +2015,7 @@ public class RuleCompiler
 				}
 			}
 			while (j != i && j < links1.length);
-			//System.err.println(")");
 			body.add(new Instruction(Instruction.CYCLELINKS, alist, plist));
-		}
-		
-		for (Atomic a : created)
-		{
-			for (LinkOccurrence l1 : a.args)
-			{
-				if (!freeLinks.contains(l1))
-				{
-					LinkOccurrence l2 = l1.buddy;
-					body.add(newlink(
-						rhsatompath.get(l1.atom), l1.pos,
-						rhsatompath.get(l2.atom), l2.pos,
-						rhsmempath.get(l1.atom.mem)));
-					freeLinks.add(l1);
-					freeLinks.add(l2);
-				}
-			}
 		}
 	}
 
@@ -2418,7 +2349,7 @@ public class RuleCompiler
 	/**
 	 * エラー出力とともに例外を発する。
 	 */
-	private void systemError(String text) throws CompileException
+	private static void systemError(String text) throws CompileException
 	{
 		Env.error(text);
 		throw new CompileException("SYSTEM ERROR");
