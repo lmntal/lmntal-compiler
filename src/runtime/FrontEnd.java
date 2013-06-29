@@ -45,6 +45,11 @@ public class FrontEnd
 		}
 		else
 		{
+			if (Env.srcs.isEmpty())
+			{
+				System.err.println("no input file.");
+				System.exit(0);
+			}
 			run(Env.srcs);
 		}
 	}
