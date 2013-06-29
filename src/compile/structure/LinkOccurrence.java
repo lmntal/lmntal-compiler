@@ -1,27 +1,29 @@
 package compile.structure;
 
 /** 
- * ソースコード中のリンクまたはリンク束の各出現を表すクラス。<br>
- * runtime.Link と違って、LinkOccurrence.atom はこちら側のアトムオブジェクトが入っている。
+ * ソースコード中のリンクまたはリンク束の各出現を表す。<br>
+ * {@link runtime.Link} と違って、{@code LinkOccurrence.atom} はこちら側のアトムオブジェクトが入っている。
  */
 public final class LinkOccurrence
 {
 	/**
-	 * リンク名
+	 * このリンクの名前
 	 */
 	public String name;
 
 	/**
-	 * 所属するアトムオブジェクト（こちら側）
+	 * このリンクが所属するアトムオブジェクト
 	 */
 	public Atomic atom;
 
 	/**
-	 * （こちら側の）アトムでのリンク位置
+	 * このリンクが所属するアトムにおけるこのリンクの引数番号
 	 */
 	public int pos;
 
-	/** 2回しか出現しない場合に、もう片方の出現を保持する */
+	/**
+	 * 2回しか出現しない場合に、もう片方の出現を保持する
+	 */
 	public LinkOccurrence buddy = null;
 
 	/**
@@ -39,7 +41,12 @@ public final class LinkOccurrence
 
 	public String toString()
 	{
-		return name.replaceAll("~", "_");
+		return name.replace('~', '_');
+	}
+
+	public String getInformativeText()
+	{
+		return toString() + "(" + atom.getName() + "/" + atom.getArity() + "," + pos + ")";
 	}
 
 	public boolean equals(Object o)
