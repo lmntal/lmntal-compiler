@@ -1,9 +1,7 @@
 package runtime;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +41,11 @@ public final class Env
 	public static String oneLineCode = "";
 
 	/**
+	 * <p>初期生成ルール以外のルールについて空ヘッド警告を出す。</p>
+	 */
+	public static boolean warnEmptyHead = false;
+
+	/**
 	 * <p>リンク操作に{@code swaplink}命令を使用する。</p>
 	 */
 	public static boolean useSwapLink = false;
@@ -51,6 +54,11 @@ public final class Env
 	 * <p>リンク操作に{@code cyclelinks}命令を使用する。</p>
 	 */
 	public static boolean useCycleLinks = false;
+
+	/**
+	 * <p>{@code swaplink/cyclelinks} 命令を使用する場合、コンパイル情報を標準エラー出力に出力する。</p>
+	 */
+	public static boolean verboseLinkExt = false;
 
 	////////////////////////////////////////////////////////////////
 

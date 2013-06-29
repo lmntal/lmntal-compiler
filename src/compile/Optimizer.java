@@ -29,6 +29,8 @@ public class Optimizer {
 	public static boolean fReuseMem;
 	/** アトムの再利用を行う */
 	public static boolean fReuseAtom;
+	/** {@code --slimcode} オプションにかかわらず、アトム再利用最適化を有効化する */
+	public static boolean forceReuseAtom;
 	/** 命令列のループ化を行う */
 	public static boolean fLoop;
 	/** 命令列の並び替えを行う */

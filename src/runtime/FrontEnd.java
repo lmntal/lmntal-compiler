@@ -240,6 +240,7 @@ public class FrontEnd
 							//@ --optimize-reuse-atom
 							//@ Reuse atoms.
 							Optimizer.fReuseAtom = true;
+							Optimizer.forceReuseAtom = true;
 						} else if (args[i].equals("--optimize-reuse-mem")) {
 							//@ --optimize-reuse-mem
 							//@ Reuse mems.
@@ -337,6 +338,8 @@ public class FrontEnd
 							Env.useSwapLink = true;
 						} else if (args[i].equals("--use-cyclelinks")) {
 							Env.useCycleLinks = true;
+						} else if (args[i].equals("--verbose-linkext")) {
+							Env.verboseLinkExt = true;
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util
@@ -359,7 +362,8 @@ public class FrontEnd
 			}
 		}
 
-		if (Env.slimcode) {
+		if (Env.slimcode && !Optimizer.forceReuseAtom)
+		{
 			Optimizer.fReuseAtom = false;
 			// Env.findatom2 = true;
 		}
