@@ -173,27 +173,13 @@ public class RuleCompiler
 		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
 		theRule.body      = body;
-		if (theRule.name != null)
+
+		String ruleName = theRule.name;
+		if (theRule.name == null)
 		{
-			 theRule.body.add(1, Instruction.commit(theRule.name, theRule.lineno));
+			ruleName = makeRuleName(rs.name, Env.showlongrulename, 4);
 		}
-		else
-		{
-			//ルール名を生成
-			StringBuilder ruleName = new StringBuilder("_");
-			String orgName = rs.toString();
-			for (int i = 0; i < orgName.length(); i++)
-			{
-				char c = orgName.charAt(i);
-				if (isAlphabetOrDigit(c) || c == '_')
-				{
-					ruleName.append(c);
-				}
-				//1+4文字で打ち切り
-				if (!Env.showlongrulename && ruleName.length() >= 5) break;
-			}
-			theRule.body.add(1, Instruction.commit(ruleName.toString(), theRule.lineno));
-		}
+		theRule.body.add(1, Instruction.commit(ruleName, theRule.lineno));
 
 		optimize();
 		return theRule;
@@ -2366,5 +2352,23 @@ public class RuleCompiler
 		return '0' <= c && c <= '9'
 			|| 'A' <= c && c <= 'Z'
 			|| 'a' <= c && c <= 'z';
+	}
+
+	private static String makeRuleName(String s, boolean fullName, int limit)
+	{
+		StringBuilder buf = new StringBuilder("_");
+		for (int i = 0; i < s.length(); i++)
+		{
+			char c = s.charAt(i);
+			if (isAlphabetOrDigit(c) || c == '_')
+			{
+				buf.append(c);
+			}
+			if (!fullName && buf.length() > limit)
+			{
+				break;
+			}
+		}
+		return buf.toString();
 	}
 }
