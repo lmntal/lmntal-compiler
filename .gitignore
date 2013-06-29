@@ -1,0 +1,9 @@
+bin/
+classes/
+.settings/
+
+*.class
+
+*.jar
+*.zip
+*.tgz
