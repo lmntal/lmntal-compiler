@@ -701,7 +701,7 @@ public class RuleCompiler
 		// 右辺の内部リンクを取得する
 		Set<LinkOccurrence> newLinks = getInternalLinks(rs.rightMem);
 
-		if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+		if (Env.verboseLinkExt && !rs.isInitialRule())
 		{
 			System.err.println("===============================");
 			String name = rs.name != null ? rs.name + " @@ " : "";
@@ -722,7 +722,7 @@ public class RuleCompiler
 			compileLinkOperations(removed, created, reusable);
 		}
 
-		if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+		if (Env.verboseLinkExt && !rs.isInitialRule())
 		{
 			System.err.print("New links: ");
 			boolean first = true;
@@ -1199,7 +1199,7 @@ public class RuleCompiler
 		staticUnify(rs.leftMem);
 		checkExplicitFreeLinks(rs.leftMem);
 		staticUnify(rs.rightMem);
-		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning)
+		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
 		{
 			Env.warning("Warning: rule with empty head: " + rs);
 		}
@@ -1313,12 +1313,15 @@ public class RuleCompiler
 		}
 	}
 
-	/** 命令列を最適化する */
+	/**
+	 * 命令列を最適化する
+	 */
 	private void optimize()
 	{
 		Env.c("optimize");
-//		Optimizer.optimize(memMatch, body);
-		if (!rs.fSuppressEmptyHeadWarning) {
+		//Optimizer.optimize(memMatch, body);
+		if (!rs.isInitialRule())
+		{
 			//このフラグがtrue <=> theRuleは初期データ生成用ルール
 			Optimizer.optimizeRule(theRule);
 		}
@@ -1858,7 +1861,7 @@ public class RuleCompiler
 			}
 		}
 
-		if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+		if (Env.verboseLinkExt && !rs.isInitialRule())
 		{
 			System.err.println(Arrays.toString(links1));
 		}
@@ -1904,7 +1907,7 @@ public class RuleCompiler
 				links1[i].name = links1[j].name;
 				links1[j].name = tmpName;
 
-				if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+				if (Env.verboseLinkExt && !rs.isInitialRule())
 				{
 					System.err.println(Arrays.toString(links1));
 				}

@@ -12,7 +12,6 @@ public final class RuleStructure
 {
 	/**
 	 * 所属膜。コンパイル時につかう
-	 * <p>todo parentはいずれmemに名称変更する
 	 */
 	public Membrane parent;
 
@@ -24,11 +23,13 @@ public final class RuleStructure
 	/**
 	 * テキスト表現
 	 */
-	private  String text;
+	private String text;
 
 	/**
 	 * 左辺が空のときの警告を抑制するかどうか
+	 * @deprecated
 	 */
+	@Deprecated
 	public boolean fSuppressEmptyHeadWarning = false;
 
 	/**
@@ -48,12 +49,12 @@ public final class RuleStructure
 
 //	/** ガードの型制約 (TypeConstraint) のリスト */
 //	public LinkedList typeConstraints = new LinkedList();
-	
+
 	/**
 	 * ガード否定条件（ProcessContextEquationのLinkedList）のリスト
 	 */
-	public List guardNegatives = new LinkedList();
-	
+	public List<List<ProcessContextEquation>> guardNegatives = new LinkedList<List<ProcessContextEquation>>();
+
 	/**
 	 * プロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef)
 	 */
@@ -73,6 +74,11 @@ public final class RuleStructure
 	 * 行番号 2006.1.22 by inui
 	 */
 	public int lineno;
+
+	/**
+	 * このルールが初期構造生成ルールであることを表す。
+	 */
+	private boolean initialRule;
 
 	/**
 	 * コンストラクタ
@@ -100,8 +106,29 @@ public final class RuleStructure
 		this.lineno = lineno;
 	}
 
+	/**
+	 * このルールが初期構造生成ルールである場合に {@code true} を返す。
+	 * @return 初期構造生成ルールである場合に {@code true}
+	 */
+	public boolean isInitialRule()
+	{
+		return initialRule;
+	}
+
 	public String toString()
 	{
 		return text;
+	}
+
+	/**
+	 * 初期構造生成ルールを作成する。
+	 * @param parentMem 所属膜
+	 * @return 初期構造生成ルール
+	 */
+	public static RuleStructure createInitialRule(Membrane parentMem)
+	{
+		RuleStructure rs = new RuleStructure(parentMem, "(initial rule)");
+		rs.initialRule = true;
+		return rs;
 	}
 }

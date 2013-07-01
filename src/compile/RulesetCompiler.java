@@ -67,8 +67,7 @@ public class RulesetCompiler
 		Membrane root = new Membrane(null);
 
 		// 初期構造を生成するルール
-		RuleStructure rs = new RuleStructure(root, "(initial rule)");
-		rs.fSuppressEmptyHeadWarning = true;
+		RuleStructure rs = RuleStructure.createInitialRule(root);
 		rs.leftMem  = new Membrane(null);
 		rs.rightMem = m;
 		root.rules.add(rs);
