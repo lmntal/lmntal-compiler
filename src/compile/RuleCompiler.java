@@ -1199,9 +1199,9 @@ public class RuleCompiler
 		staticUnify(rs.leftMem);
 		checkExplicitFreeLinks(rs.leftMem);
 		staticUnify(rs.rightMem);
-		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning)
+		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning)
 		{
-			Env.warning("WARNING: rule with empty head: " + rs);
+			Env.warning("Warning: rule with empty head: " + rs);
 		}
 
 		// ガード膜に関する操作（ここでいいのか？）

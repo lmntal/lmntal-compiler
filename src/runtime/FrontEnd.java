@@ -87,13 +87,13 @@ public class FrontEnd
 	 * コマンドライン引数の処理
 	 * 2011-10-04 追記 (shinobu): コマンドラインオプションのHelp用文字列の記述は
 	 * 行コメントの冒頭を "//@ " とするように統一しました（help_gen.plも修正済み）
-	 * @param args
-	 *            引数
+	 * @param args 引数
 	 */
-	public static void processOptions(String[] args) {
-		// --args 以降ならばfalse
-		boolean isSrcs = true;
-		for (int i = 0; i < args.length; i++) {
+	public static void processOptions(String[] args)
+	{
+		boolean isSrcs = true; // --args 以降ならばfalse
+		for (int i = 0; i < args.length; i++)
+		{
 			// 必ずlength>0, '-'ならオプション
 			// -> 引数を "" にすると長さ 0 になるのでチェックする。
 			// 2006/07/11 --args　以降を全てLMNtalプログラムへのコマンドライン引数とするように変更 by kudo
@@ -342,6 +342,10 @@ public class FrontEnd
 							Env.useCycleLinks = true;
 						} else if (args[i].equals("--verbose-linkext")) {
 							Env.verboseLinkExt = true;
+						} else if (args[i].equals("--Wempty-head")) {
+							//@ --Wempty-head
+							//@ Warn if there are any rules that has an empty head.
+							Env.warnEmptyHead = true;
 						} else {
 							Util.errPrintln("Invalid option: " + args[i]);
 							Util
