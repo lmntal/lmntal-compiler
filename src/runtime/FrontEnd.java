@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -371,25 +373,32 @@ public class FrontEnd
 
 	/**
 	 * 与えられた名前のファイルたちをくっつけたソースについて、一連の実行を行う。
-	 * @param files ソースファイル名のリスト
+	 * @param files ソースファイル名のリスト（少なくとも1つの要素を含む）
 	 */
 	public static void run(List<String> files)
 	{
-		InputStream is = null;
+		Charset sourceCharset = null;
 		try
 		{
-			for (String filename : files)
+			sourceCharset = Charset.forName("UTF-8");
+		}
+		catch (UnsupportedCharsetException e)
+		{
+			sourceCharset = Charset.defaultCharset();
+			System.err.println("Warning: '" + e.getCharsetName() + "' is not available (default encoding '" + sourceCharset + "' is used)");
+		}
+
+		try
+		{
+			InputStream is = new FileInputStream(files.get(0));
+			for (int i = 1; i < files.size(); i++)
 			{
-				InputStream fis = new FileInputStream(filename);
-				if (is == null)
-				{
-					is = fis;
-				}
-				else
-				{
-					is = new SequenceInputStream(is, fis);
-				}
+				is = new SequenceInputStream(is, new FileInputStream(files.get(i)));
 			}
+
+			// 複数のファイルのときはファイル名が１つに決められない。
+			String unitName = files.size() == 1 ? files.get(0) : InlineUnit.DEFAULT_UNITNAME;
+			run(new BufferedReader(new InputStreamReader(is, sourceCharset)), unitName);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -401,10 +410,6 @@ public class FrontEnd
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
-		// 複数のファイルのときはファイル名が１つに決められない。
-		String unitName = files.size() == 1 ? files.get(0) : InlineUnit.DEFAULT_UNITNAME;
-		run(new BufferedReader(new InputStreamReader(is)), unitName);
 	}
 
 	/**
