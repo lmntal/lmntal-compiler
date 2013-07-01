@@ -902,7 +902,7 @@ public class RuleCompiler
 	 *     [newhlinkなどのシンボルアトム生成命令列]
 	 *        ....
 	 */
-	void fixUniqOrder()
+	private void fixUniqOrder()
 	{
 		boolean found = guard.contains(Instruction.UNIQ);
 		List<Integer> vars = new ArrayList<Integer>();
@@ -916,7 +916,7 @@ public class RuleCompiler
 				it.remove();
 			}
 		}
-		
+
 //		if(found) guard.add(new Instruction(Instruction.UNIQ, vars));
 		if (found)
 		{
@@ -1198,15 +1198,7 @@ public class RuleCompiler
 	{
 		staticUnify(rs.leftMem);
 		checkExplicitFreeLinks(rs.leftMem);
-		/*
-		if (!verifyExplicitFreeLinks(rs.leftMem))
-		{
-			throw new CompileException("System error");
-		}
-		*/
-
 		staticUnify(rs.rightMem);
-
 		if (rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.fSuppressEmptyHeadWarning)
 		{
 			Env.warning("WARNING: rule with empty head: " + rs);
@@ -1218,16 +1210,27 @@ public class RuleCompiler
 		List<Atom> unaryList = new ArrayList<Atom>();
 		List<Atom> unifyList = new ArrayList<Atom>();
 		List<Atom> groundList = new ArrayList<Atom>();
-		Iterator<Atom> it = typeConstraints.iterator();
-		while (it.hasNext())
+		for (Iterator<Atom> it = typeConstraints.iterator(); it.hasNext(); )
 		{
 			Atom cstr = it.next();
 			Functor func = cstr.functor;
-			if (func.equals("unary", 1))    { unaryList.add(cstr); it.remove(); }
-			if (func.equals(Functor.UNIFY)) { unifyList.add(cstr); it.remove(); }
-			if (func.equals("==", 2))       { unifyList.add(cstr); it.remove(); }
-			if (func.equals("\\==", 2))     { unifyList.add(cstr); it.remove(); }
-			if (func.equals("ground", 1))   { groundList.add(cstr); it.remove(); }
+			if (func.equals("unary", 1))
+			{
+				unaryList.add(cstr);
+			}
+			else if (func.equals(Functor.UNIFY) || func.equals("==", 2) || func.equals("\\==", 2))
+			{
+				unifyList.add(cstr);
+			}
+			else if (func.equals("ground", 1))
+			{
+				groundList.add(cstr);
+			}
+			else
+			{
+				continue;
+			}
+			it.remove();
 		}
 		typeConstraints.addAll(unaryList);
 		typeConstraints.addAll(unifyList);
@@ -1235,8 +1238,9 @@ public class RuleCompiler
 	}
 
 	/**
-	 * 指定された膜とその子孫に存在する冗長な =（todo および自由リンク管理アトム）を除去する
-	 * { a(X), b(Y), X=Y } <==> { a(X), b(X) }
+	 * <p>指定された膜とその子孫に存在する冗長な {@code '='/2} を除去する。</p>
+	 * <p><code>{ a(X), b(Y), X=Y } <==> { a(X), b(X) }</code></p>
+	 * TODO: 冗長な自由リンク管理アトムを除去する
 	 */
 	private void staticUnify(Membrane mem) throws CompileException
 	{
@@ -1245,9 +1249,9 @@ public class RuleCompiler
 			staticUnify(submem);
 		}
 
-		List<Atom> removedAtoms = new ArrayList<Atom>();
-		for (Atom atom : mem.atoms)
+		for (Iterator<Atom> it = mem.atoms.iterator(); it.hasNext(); )
 		{
+			Atom atom = it.next();
 			if (atom.functor.equals(Functor.UNIFY))
 			{
 				LinkOccurrence link1 = atom.args[0].buddy;
@@ -1258,9 +1262,6 @@ public class RuleCompiler
 				{
 					if (mem == rs.leftMem)
 					{
-						// // <strike> ( X=Y :- p(X,Y) ) は意味解析エラー
-						// //（=は通常のヘッドアトムと見なして放置される）</strike>
-						// error("COMPILE ERROR: head contains body unification");
 						// ( X=Y :- p(X,Y) ) は ( :- p(X,X) ) になる
 					}
 					else
@@ -1273,10 +1274,9 @@ public class RuleCompiler
 				link1.buddy = link2;
 				link2.buddy = link1;
 				link2.name = link1.name;
-				removedAtoms.add(atom);
+				it.remove();
 			}
 		}
-		mem.atoms.removeAll(removedAtoms);
 	}
 
 	/**
@@ -1284,7 +1284,7 @@ public class RuleCompiler
 	 * @param mem
 	 * @throws CompileException
 	 */
-	private void checkExplicitFreeLinks(Membrane mem) throws CompileException
+	private static void checkExplicitFreeLinks(Membrane mem) throws CompileException
 	{
 		for (Membrane submem : mem.mems)
 		{
@@ -1298,60 +1298,19 @@ public class RuleCompiler
 		{
 			if (pc.def.isTyped()) continue;
 
-			Set<String> explicitfreelinks = new HashSet<String>();
-			for (int i = 0; i < pc.args.length; i++)
+			Set<String> occurredNames = new HashSet<String>();
+			for (LinkOccurrence link : pc.args)
 			{
-				LinkOccurrence lnk = pc.args[i];
-				if (explicitfreelinks.contains(lnk.name))
+				if (occurredNames.contains(link.name))
 				{
-					systemError("SYNTAX ERROR: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
+					systemError("Syntax Error: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
 				}
 				else
 				{
-					explicitfreelinks.add(lnk.name);
+					occurredNames.add(link.name);
 				}
 			}
 		}
-	}
-
-	/**
-	 * 型なしプロセス文脈の明示的な引数を再帰的に検査する．
-	 * 途中で落ちない。
-	 * @param mem
-	 * @throws CompileException
-	 */
-	private boolean verifyExplicitFreeLinks(Membrane mem)
-	{
-		boolean valid = true;
-
-		for (Membrane submem : mem.mems)
-		{
-			valid = verifyExplicitFreeLinks(submem) && valid;
-		}
-
-		// $p[X,X] などを検出
-		// 右辺では許される（単一化）。
-		// 左辺では「内部リンクの存在」という制約を示すと考えられるが、これは意味論エラー。
-		for (ProcessContext pc : mem.processContexts)
-		{
-			if (pc.def.isTyped()) continue;
-
-			Set<String> occuredNames = new HashSet<String>();
-			for (int i = 0; i < pc.args.length; i++)
-			{
-				LinkOccurrence lnk = pc.args[i];
-				if (occuredNames.contains(lnk.name))
-				{
-					Env.error("Syntax error: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
-					valid = false;
-				}
-				else
-				{
-					occuredNames.add(lnk.name);
-				}
-			}
-		}
-		return valid;
 	}
 
 	/** 命令列を最適化する */
@@ -1427,8 +1386,8 @@ public class RuleCompiler
 
 	//
 
-	HashMap<ProcessContext, Integer> rhsmappaths = new HashMap<ProcessContext, Integer>();	// 右辺の非線型$p出現(ProcessContext) -> mapの変数番号(Integer)
-	static final int NOTCOPIED = -1;		// rhsmappaths未登録時の値
+	private Map<ProcessContext, Integer> rhsmappaths = new HashMap<ProcessContext, Integer>();	// 右辺の非線型$p出現(ProcessContext) -> mapの変数番号(Integer)
+	private static final int NOTCOPIED = -1;		// rhsmappaths未登録時の値
 	private int rhspcToMapPath(ProcessContext pc)
 	{
 		if (!rhsmappaths.containsKey(pc)) return NOTCOPIED;
@@ -1682,7 +1641,7 @@ public class RuleCompiler
 	}
 
 	/** プロセス文脈定義->setの変数番号 */
-	private HashMap<ContextDef, Integer> cxtlinksetpaths = new HashMap<ContextDef, Integer>();
+	private Map<ContextDef, Integer> cxtlinksetpaths = new HashMap<ContextDef, Integer>();
 
 	/** コピーする$pについて、そのリンクオブジェクトへの参照を取得し、
 	 * そのリストを引数にinsertconnectors命令を発行する。
