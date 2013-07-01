@@ -127,7 +127,7 @@ public final class Membrane
 		list.addAll(ruleContexts);
 		list.addAll(typedProcessContexts);
 		//return list.toString().replaceAll("^.|.$","");
-		return Env.parray(list, ", ").toString();
+		return Env.parray(list, ", ");
 	}
 
 	public String toString()

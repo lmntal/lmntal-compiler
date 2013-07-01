@@ -31,6 +31,7 @@ import compile.structure.ProcessContext;
 import compile.structure.ProcessContextEquation;
 import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
+import compile.util.Collector;
 
 /**
  * コンパイル時ルール構造（compile.structure.RuleStructure）を
@@ -155,16 +156,27 @@ public class RuleCompiler
 		compile_g();
 
 		// 右辺膜のコンパイル
-		if (isSwapLinkUsable() && (Env.useSwapLink || Env.useCycleLinks))
+		boolean compileWithSwaplink = false;
+		if (Env.useSwapLink || Env.useCycleLinks)
+		{
+			if (isSwapLinkUsable())
+			{
+				compileWithSwaplink = true;
+			}
+			else
+			{
+				if (Env.verboseLinkExt)
+				{
+					System.err.println("WARNING: swaplink/cyclelinks was suppressed. - " + rs);
+				}
+			}
+		}
+		if (compileWithSwaplink)
 		{
 			compile_r_swaplink();
 		}
 		else
 		{
-			if (Env.useSwapLink || Env.useCycleLinks)
-			{
-				System.err.println("WARNING: swaplink/cyclelinks was suppressed.");
-			}
 			compile_r();
 		}
 
@@ -177,7 +189,7 @@ public class RuleCompiler
 		String ruleName = theRule.name;
 		if (theRule.name == null)
 		{
-			ruleName = makeRuleName(rs.name, Env.showlongrulename, 4);
+			ruleName = makeRuleName(rs.toString(), Env.showlongrulename, 4);
 		}
 		theRule.body.add(1, Instruction.commit(ruleName, theRule.lineno));
 
@@ -195,23 +207,15 @@ public class RuleCompiler
 	private boolean isSwapLinkUsable()
 	{
 		// 1. 型無しプロセス文脈が存在しない
-		// 2. 型付きプロセス文脈が存在しない
-		// 3. 単一化アトムが存在しない
-		return rs.processContexts.isEmpty()
-			&& rs.typedProcessContexts.isEmpty()
-			&& !containsUnify();
+		// 2. ground 型プロセス文脈が存在しない
+		return rs.processContexts.isEmpty() && !containsGround();
 	}
 
-	/**
-	 * <p>右辺膜中に単一化アトム '='/2 が存在するか調べます。</p>
-	 */
-	private boolean containsUnify()
+	private boolean containsGround()
 	{
-		Set<Atom> ratoms = new HashSet<Atom>();
-		getAllAtoms(ratoms, rs.rightMem);
-		for (Atom a : ratoms)
+		for (ProcessContext pc : Collector.collectTypedProcessContexts(rs.rightMem))
 		{
-			if (a.functor.equals(Functor.UNIFY))
+			if (gc.typedCxtTypes.get(pc.def) == GuardCompiler.GROUND_LINK_TYPE)
 			{
 				return true;
 			}
@@ -638,8 +642,7 @@ public class RuleCompiler
 		int toplevelmemid = lhsmemToPath(rs.leftMem);
 		rhsmempath.put(rs.rightMem, toplevelmemid);
 
-		Set<Atom> rhsAtomSet = new HashSet<Atom>();
-		getAllAtoms(rhsAtomSet, rs.rightMem);
+		Set<Atom> rhsAtomSet = Collector.collectAtomsExceptUnify(rs.rightMem);
 		rhsatoms.addAll(rhsAtomSet);
 		//rhsAtomics.addAll(rhsatoms);
 
@@ -695,6 +698,18 @@ public class RuleCompiler
 		buildRHSAtoms_swaplink(rs.rightMem, created, reusable);
 		// ここでvarcountの最終値が確定することになっている。変更時は適切に下に移動すること。
 
+		// 右辺の内部リンクを取得する
+		Set<LinkOccurrence> newLinks = getInternalLinks(rs.rightMem);
+
+		if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+		{
+			System.err.println("===============================");
+			String name = rs.name != null ? rs.name + " @@ " : "";
+			String kind = Env.useSwapLink ? "swap" : "cycle";
+			System.err.println("Compiling[" + kind + "]: " + name + rs.leftMem.toStringWithoutBrace() + " :- " + rs.rightMem.toStringWithoutBrace());
+		}
+
+		compileUnify();
 
 		//右辺の明示的なリンクを貼る
 		//getLHSLinks();
@@ -706,6 +721,25 @@ public class RuleCompiler
 		{
 			compileLinkOperations(removed, created, reusable);
 		}
+
+		if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+		{
+			System.err.print("New links: ");
+			boolean first = true;
+			for (LinkOccurrence l : newLinks)
+			{
+				if (!first)
+				{
+					System.err.print(", ");
+				}
+				first = false;
+				System.err.print(l.getInformativeText());
+			}
+			System.err.println();
+		}
+		// 右辺で生成されるリンクを処理
+		compileNewlinks(newLinks);
+
 		deleteconnectors();
 
 		//右辺のアトムを実行アトムスタックに積む
@@ -735,15 +769,30 @@ public class RuleCompiler
 	}
 
 	/**
-	 * <p>膜{@code mem}以下に含まれるすべてのアトムを再帰的に取得します。</p>
-	 * @param destAtoms 取得したアトムの格納先
-	 * @param mem 探索する膜
+	 * <p>膜 {@code mem} 内に含まれる内部リンクの端の集合を取得する。</p>
+	 * <p>端とは、1つのリンクを構成する2つのリンク出現のそれぞれを指す。
+	 * このメソッドが返す集合には、ある内部リンクをなす端が両方が含まれることはなく、必ずどちらか一方のみが含まれる。</p>
+	 * @param mem 対象膜
+	 * @return 内部リンクの端の集合
 	 */
-	private void getAllAtoms(Set<Atom> destAtoms, Membrane mem)
+	private static Set<LinkOccurrence> getInternalLinks(Membrane mem)
 	{
-		for (Membrane submem : mem.mems) getAllAtoms(destAtoms, submem);
-		for (Atom a : mem.atoms) destAtoms.add(a);
+		Set<LinkOccurrence> occurredLinks = new HashSet<LinkOccurrence>();
+		Set<LinkOccurrence> internalLinks = new HashSet<LinkOccurrence>();
+		for (Atomic a : Collector.collectAllAtomsAndTypedPCs(mem))
+		{
+			for (LinkOccurrence l : a.args)
+			{
+				if (occurredLinks.contains(l.buddy))
+				{
+					internalLinks.add(l);
+				}
+				occurredLinks.add(l);
+			}
+		}
+		return internalLinks;
 	}
+
 
 	/**
 	 * <p>2つのアトムが同型アトムであるかを調べます。</p>
@@ -821,7 +870,7 @@ public class RuleCompiler
 		lhsmems  = hc.mems;
 		lhsatoms = hc.atoms;
 		genLHSPaths();
-		gc = new GuardCompiler2(this, hc);		/* 変数番号の正規化 */
+		gc = new GuardCompiler(this, hc);		/* 変数番号の正規化 */
 		if (guard == null) return;
 		int formals = gc.varCount;
 		gc.getLHSLinks();								/* 左辺の全てのアトムのリンクについてgetlink命令を発行する */
@@ -911,7 +960,7 @@ public class RuleCompiler
 
 	// 型付きプロセス文脈関係
 
-	private GuardCompiler2 gc;
+	private GuardCompiler gc;
 	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
 	private HashMap<ProcessContext, Integer> rhstypedcxtpaths = new HashMap<ProcessContext, Integer>();
 	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkのリストを指す)変数番号 */
@@ -1755,6 +1804,20 @@ public class RuleCompiler
 	}
 
 	/**
+	 * 単一化アトムによって右辺で unify されるものをコンパイルする。
+	 */
+	private void compileUnify()
+	{
+		for (Atom atom : Collector.collectUnifyAtoms(rs.rightMem))
+		{
+			LinkOccurrence l1 = atom.args[0];
+			LinkOccurrence l2 = atom.args[1];
+			l1.atom.args[l1.pos] = l2;
+			l2.atom.args[l2.pos] = l1;
+		}
+	}
+
+	/**
 	 * <p>リンク互換命令{@code swaplink}を使用してリンク操作をコンパイルします。</p>
 	 */
 	private void compileLinkOperations(Set<Atomic> removed, Set<Atomic> created, Map<Atom, Atom> reusable)
@@ -1836,6 +1899,11 @@ public class RuleCompiler
 			}
 		}
 
+		if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+		{
+			System.err.println(Arrays.toString(links1));
+		}
+
 		// 置換
 		for (int i = 0; i < links2.length; i++)
 		{
@@ -1876,6 +1944,11 @@ public class RuleCompiler
 				String tmpName = links1[i].name;
 				links1[i].name = links1[j].name;
 				links1[j].name = tmpName;
+
+				if (Env.verboseLinkExt && !rs.fSuppressEmptyHeadWarning)
+				{
+					System.err.println(Arrays.toString(links1));
+				}
 			}
 		}
 	}
@@ -2003,6 +2076,38 @@ public class RuleCompiler
 			while (j != i && j < links1.length);
 			body.add(new Instruction(Instruction.CYCLELINKS, alist, plist));
 		}
+	}
+
+	/**
+	 * 右辺で生成されるリンクに対して {@code newlink} 命令を生成する。
+	 */
+	private void compileNewlinks(Set<LinkOccurrence> newlinks)
+	{
+		for (LinkOccurrence l1 : newlinks)
+		{
+			LinkOccurrence l2 = l1.buddy;
+			int atom1 = getRegisterIndexOf(l1.atom);
+			int atom2 = getRegisterIndexOf(l2.atom);
+			int pos1 = l1.pos;
+			int pos2 = l2.pos;
+			int memi = rhsmemToPath(l1.atom.mem);
+			body.add(newlink(atom1, pos1, atom2, pos2, memi));
+		}
+	}
+
+	private int getRegisterIndexOf(Atomic atomic)
+	{
+		if (atomic instanceof ProcessContext)
+		{
+			ProcessContext pc = (ProcessContext)atomic;
+			return rhspcToMapPath(pc);
+		}
+		else if (atomic instanceof Atom)
+		{
+			Atom atom = (Atom)atomic;
+			return rhsatomToPath(atom);
+		}
+		throw new RuntimeException("method unimplemented");
 	}
 
 	/**

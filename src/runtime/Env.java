@@ -212,12 +212,12 @@ public final class Env
 		boolean first = true;
 		for (E e : l)
 		{
-			s.append(e);
-			if (first)
+			if (!first)
 			{
 				s.append(delim);
-				first = false;
 			}
+			first = false;
+			s.append(e);
 		}
 		return s.toString();
 	}
