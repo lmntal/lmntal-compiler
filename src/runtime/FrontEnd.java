@@ -27,6 +27,8 @@ import compile.parser.ParseException;
 
 public class FrontEnd
 {
+	private static Charset sourceCharset = Charset.forName("UTF-8");
+
 	public static void main(String[] args)
 	{
 		checkVersion();
@@ -62,7 +64,7 @@ public class FrontEnd
 	 * java1.4以上を使っていないとエラー出力する
 	 * </p>
 	 */
-	public static void checkVersion()
+	private static void checkVersion()
 	{
 		// バージョンチェック by 水野
 		try {
@@ -89,7 +91,7 @@ public class FrontEnd
 	 * 行コメントの冒頭を "//@ " とするように統一しました（help_gen.plも修正済み）
 	 * @param args 引数
 	 */
-	public static void processOptions(String[] args)
+	private static void processOptions(String[] args)
 	{
 		boolean isSrcs = true; // --args 以降ならばfalse
 		for (int i = 0; i < args.length; i++)
@@ -196,6 +198,26 @@ public class FrontEnd
 							// コンパイル後の中間命令列を出力するモード
 							Env.compileonly = true;
 							Env.slimcode = true;
+						} else if (args[i].equals("--charset")) {
+							//@ --charset
+							//@ Specify charset of LMNtal source code (the default charset is UTF-8).
+							if (++i < args.length)
+							{
+								try
+								{
+									sourceCharset = Charset.forName(args[i]);
+								}
+								catch (UnsupportedCharsetException e)
+								{
+									sourceCharset = Charset.defaultCharset();
+									System.err.println("Warning: '" + e.getCharsetName() + "' is not available (default encoding '" + sourceCharset + "' is used)");
+								}
+							}
+							else
+							{
+								System.err.println("Error: no argument was provided to '--charset'");
+								System.exit(1);
+							}
 						} else if (args[i].equals("--use-findatom2")) {
 							// Env.compileonly = true;
 							Env.slimcode = true;
@@ -206,14 +228,13 @@ public class FrontEnd
 						} else if (args[i].equals("--help")) {
 							//@ --help
 							//@ Show usage (this).
-							Util
-							.println("usage: java -jar lmntal.jar [options...] [filenames...]");
+							Util.println("usage: java -jar lmntal.jar [options...] [filenames...]");
 							// usage: FrontEnd [options...] [filenames...]
 
 							// commandline: perl src/help_gen.pl <
 							// src/runtime/FrontEnd.java > src/runtime/Help.java
 							Help.show();
-							System.exit(-1);
+							System.exit(0);
 						} else if (args[i].equals("--optimize-grouping")) {
 							//@ --optimize-grouping
 							//@ Group the head instructions. (EXPERIMENTAL)
@@ -379,19 +400,8 @@ public class FrontEnd
 	 * 与えられた名前のファイルたちをくっつけたソースについて、一連の実行を行う。
 	 * @param files ソースファイル名のリスト（少なくとも1つの要素を含む）
 	 */
-	public static void run(List<String> files)
+	private static void run(List<String> files)
 	{
-		Charset sourceCharset = null;
-		try
-		{
-			sourceCharset = Charset.forName("UTF-8");
-		}
-		catch (UnsupportedCharsetException e)
-		{
-			sourceCharset = Charset.defaultCharset();
-			System.err.println("Warning: '" + e.getCharsetName() + "' is not available (default encoding '" + sourceCharset + "' is used)");
-		}
-
 		try
 		{
 			InputStream is = new FileInputStream(files.get(0));
@@ -422,7 +432,7 @@ public class FrontEnd
 	 * @param src Reader型で表されたソース
 	 * @param unitName ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
 	 */
-	public static void run(Reader src, String unitName)
+	private static void run(Reader src, String unitName)
 	{
 		if (Env.preProcess0)
 		{
@@ -544,7 +554,7 @@ public class FrontEnd
 	 * @param r
 	 * @return
 	 */
-	static Reader preProcess0(Reader r) {
+	private static Reader preProcess0(Reader r) {
 		try {
 			BufferedReader br = new BufferedReader(r);
 			String s;

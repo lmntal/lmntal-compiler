@@ -4,6 +4,9 @@ package runtime;
 class Help {
 	public static void show() {
 		System.out.println(""
+			+"    -e <LMNtal program>\n"
+			+"                    One liner code execution like Perl.\n"
+			+"                    Example: -e 'a,(a:-b)'\n"
 			+"    -d[<0-9>]\n"
 			+"                    Debug output level.\n"
 			+"    -I <path>\n"
@@ -34,6 +37,8 @@ class Help {
 			+"                    dump2  propertyfile: apply LMNtal prettyprinter\n"
 			+"                                         to output\n"
 			+"                    chorus filename    : output chorus file\n"
+			+"    --charset\n"
+			+"                    Specify charset of LMNtal source code (the default charset is UTF-8).\n"
 			+"    --help\n"
 			+"                    Show usage (this).\n"
 			+"    --optimize-grouping\n"
@@ -52,12 +57,6 @@ class Help {
 			+"                    Reuse mems.\n"
 			+"    --stdin-lmn\n"
 			+"                    read LMNtal program from standard input\n"
-			+"    --showproxy\n"
-			+"                    Show proxy atoms\n"
-			+"    --hideruleset\n"
-			+"                    Hide ruleset\n"
-			+"    --hiderule\n"
-			+"                    Hide rule names\n"
 			+"    --show-converted_rules\n"
 			+"                    Dump converted rules\n"
 			+"    --thread-max=<integer>\n"
@@ -69,6 +68,8 @@ class Help {
 			+"                    run command-line debugger.\n"
 			+"    --args\n"
 			+"                    give command-line options after this to LMNtal program.\n"
+			+"    --Wempty-head\n"
+			+"                    Warn if there are any rules that has an empty head.\n"
 		);
 	}
 }
