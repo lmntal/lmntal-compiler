@@ -1,5 +1,7 @@
 package runtime;
 
+import runtime.exception.GuardNotFoundException;
+
 /**
  * ガードインラインのコードは、このインターフェースを実装するクラスに書く必要がある。
  * 

@@ -4,6 +4,8 @@
  */
 package runtime;
 
+import runtime.exception.GuardNotFoundException;
+
 /**
  * インラインコードのインターフェース。
  * これを実装するクラスはコンパイラが自動生成する。

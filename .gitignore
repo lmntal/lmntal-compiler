@@ -1,9 +1,14 @@
 bin/
 classes/
 .settings/
+sample-input/
+
+_errors_help_gen.txt
 
 *.class
 
 *.jar
 *.zip
 *.tgz
+
+*~

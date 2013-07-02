@@ -460,17 +460,8 @@ public class FrontEnd
 
 			if (Env.fType)
 			{
-				TypeInferer tci = new TypeInferer(m);
-				try
+				if (!analyseTypes(m))
 				{
-					tci.infer();
-					// tci.printAllConstraints();
-				}
-				catch (TypeException e)
-				{
-					Env.p("Type Inference Failed");
-					Env.e("TYPE ERROR: " + e.getMessage());
-					// tci.printAllConstraints();
 					return;
 				}
 			}
@@ -528,6 +519,24 @@ public class FrontEnd
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private static boolean analyseTypes(compile.structure.Membrane m)
+	{
+		try
+		{
+			TypeInferer tci = new TypeInferer(m);
+			tci.infer();
+			// tci.printAllConstraints();
+			return true;
+		}
+		catch (TypeException e)
+		{
+			Env.p("Type Inference Failed");
+			Env.e("TYPE ERROR: " + e.getMessage());
+			// tci.printAllConstraints();
+		}
+		return false;
 	}
 
 	/**
