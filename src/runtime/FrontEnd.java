@@ -209,8 +209,7 @@ public class FrontEnd
 								}
 								catch (UnsupportedCharsetException e)
 								{
-									sourceCharset = Charset.defaultCharset();
-									System.err.println("Warning: '" + e.getCharsetName() + "' is not available (default encoding '" + sourceCharset + "' is used)");
+									System.err.println("Warning: '" + e.getCharsetName() + "' is not available (default charset '" + sourceCharset + "' is used)");
 								}
 							}
 							else
