@@ -309,7 +309,7 @@ public class FrontEnd
 		{
 			//@ --version
 			//@ Show LMNtal compiler version.
-			Util.println(String.format("LMNtal Compiler %s (%s)", Env.LMNTAL_VERSION, Env.RELEASE_DATE));
+			Util.println(String.format("LMNtal Compiler %s (%s)", Env.LMNTAL_COMPILER_VERSION, Env.RELEASE_DATE));
 			System.exit(0);
 		}
 		else if (opt.equals("--optimize-grouping"))

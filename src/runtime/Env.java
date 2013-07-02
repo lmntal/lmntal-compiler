@@ -9,7 +9,15 @@ import util.Util;
 
 public final class Env
 {
-	public static final String LMNTAL_VERSION = "1.21.20111226 dev";
+	/**
+	 * LMNtal Compiler のバージョン
+	 */
+	public static final String LMNTAL_COMPILER_VERSION = "1.30";
+
+	/**
+	 * このバージョンをリリースした日付
+	 */
+	public static final String RELEASE_DATE = "2013-07-02";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
