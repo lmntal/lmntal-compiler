@@ -12,7 +12,6 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import type.TypeException;
@@ -59,36 +58,41 @@ public class FrontEnd
 	}
 
 	/**
-	 * Javaのバージョンをチェックする
-	 * <p>
-	 * java1.4以上を使っていないとエラー出力する
-	 * </p>
+	 * <p>Javaのバージョンをチェックする。</p>
+	 * <p>Java1.4以上を使っていないとエラーを出力して終了する。</p>
 	 */
 	private static void checkVersion()
 	{
 		// バージョンチェック by 水野
-		try {
+		try
+		{
 			String ver = System.getProperty("java.version");
 			StringTokenizer tokenizer = new StringTokenizer(ver, ".");
 			int major = Integer.parseInt(tokenizer.nextToken());
 			int minor = Integer.parseInt(tokenizer.nextToken());
-			if (major < 1 || (major == 1 && minor < 4)) {
+			if (major < 1 || (major == 1 && minor < 4))
+			{
 				Util.errPrintln("use jre 1.4 or higher!!");
 				System.exit(-1);
 			}
 			Env.majorVersion = major;
 			Env.minorVersion = minor;
 			// うまくいかなかった場合は無視する
-		} catch (SecurityException e) {
-		} catch (NoSuchElementException e) {
-		} catch (NumberFormatException e) {
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * コマンドライン引数の処理
+	 * <p>コマンドライン引数の処理</p>
+	 * <p>
 	 * 2011-10-04 追記 (shinobu): コマンドラインオプションのHelp用文字列の記述は
-	 * 行コメントの冒頭を "//@ " とするように統一しました（help_gen.plも修正済み）
+	 * 行コメントの冒頭を {@code "//@ "} とするように統一しました（help_gen.plも修正済み）</p>
+	 * <p>Help 出力を更新するには、Ant タスクの help を実行するか、端末上で
+	 * <code>perl src/help_gen.pl &lt; src/runtime/FrontEnd.java &gt; src/runtime/Help.java</code><br>
+	 * を実行します。</p>
 	 * @param args 引数
 	 */
 	private static void processOptions(String[] args)
@@ -99,12 +103,17 @@ public class FrontEnd
 			// 必ずlength>0, '-'ならオプション
 			// -> 引数を "" にすると長さ 0 になるのでチェックする。
 			// 2006/07/11 --args　以降を全てLMNtalプログラムへのコマンドライン引数とするように変更 by kudo
-			if (isSrcs && (args[i].length() > 0) && (args[i].charAt(0) == '-')) {
-				if (args[i].length() < 2) { // '-'のみの時
+			if (isSrcs && (args[i].length() > 0) && (args[i].charAt(0) == '-'))
+			{
+				if (args[i].length() < 2) // '-'のみの時
+				{
 					Util.errPrintln("不明なオプション:" + args[i]);
 					System.exit(-1);
-				} else { // オプション解釈部
-					switch (args[i].charAt(1)) {
+				}
+				else // オプション解釈部
+				{
+					switch (args[i].charAt(1))
+					{
 					case 'e':
 						//@ -e <LMNtal program>
 						//@ One liner code execution like Perl.
@@ -118,9 +127,12 @@ public class FrontEnd
 					case 'd':
 						//@ -d[<0-9>]
 						//@ Debug output level.
-						if (args[i].matches("-d[0-9]")) {
+						if (args[i].matches("-d[0-9]"))
+						{
 							Env.debug = args[i].charAt(2) - '0';
-						} else {
+						}
+						else
+						{
 							Env.debug = Env.DEBUG_DEFAULT;
 						}
 						// System.out.println("debug level " + Env.debug);
@@ -150,14 +162,20 @@ public class FrontEnd
 						//@ -O3 is equivalent to --O2 --optimize-inlining
 						int level = -1;
 						if (args[i].length() == 2)
+						{
 							level = 1;
+						}
 						else if (args[i].length() == 3)
+						{
 							level = args[i].charAt(2) - '0';
-
-						if (level >= 0 && level <= 9) {
+						}
+						if (level >= 0 && level <= 9)
+						{
 							Optimizer.setLevel(level);
 							break;
-						} else {
+						}
+						else
+						{
 							Util.errPrintln("Invalid option: " + args[i]);
 							System.exit(-1);
 						}
@@ -165,9 +183,12 @@ public class FrontEnd
 					case 'v':
 						//@ -v[<0-9>]
 						//@ Verbose output level.
-						if (args[i].matches("-v[0-9]")) {
+						if (args[i].matches("-v[0-9]"))
+						{
 							Env.verbose = args[i].charAt(2) - '0';
-						} else {
+						}
+						else
+						{
 							Env.verbose = Env.VERBOSE_DEFAULT;
 						}
 						// System.out.println("verbose level " + Env.verbose);
@@ -183,7 +204,8 @@ public class FrontEnd
 						//@ dump2  propertyfile: apply LMNtal prettyprinter
 						//@                      to output
 						//@ chorus filename    : output chorus file
-						if (i + 2 < args.length) {
+						if (i + 2 < args.length)
+						{
 							String name = i + 1 < args.length ? args[i + 1] : "";
 							String value = i + 2 < args.length ? args[i + 2] : "";
 							Env.extendedOption.put(name, value);
@@ -191,198 +213,32 @@ public class FrontEnd
 						i += 2;
 						break;
 					case '-': // 文字列オプション
-						if (args[i].equals("--compileonly")) {
-							// コンパイル後の中間命令列を出力するモード
-							Env.compileonly = true;
-						} else if (args[i].equals("--slimcode")) {
-							// コンパイル後の中間命令列を出力するモード
-							Env.compileonly = true;
-							Env.slimcode = true;
-						} else if (args[i].equals("--charset")) {
-							//@ --charset
-							//@ Specify charset of LMNtal source code (the default charset is UTF-8).
-							if (++i < args.length)
-							{
-								try
-								{
-									sourceCharset = Charset.forName(args[i]);
-								}
-								catch (UnsupportedCharsetException e)
-								{
-									System.err.println("Warning: '" + e.getCharsetName() + "' is not available (default charset '" + sourceCharset + "' is used)");
-								}
-							}
-							else
-							{
-								System.err.println("Error: no argument was provided to '--charset'");
-								System.exit(1);
-							}
-						} else if (args[i].equals("--use-findatom2")) {
-							// Env.compileonly = true;
-							Env.slimcode = true;
-							Env.findatom2 = true;
-							Optimizer.fGuardMove = true; // これをtrueにしないと動かない
-						} else if (args[i].equals("--memtest-only")) {
-							Env.memtestonly = true;
-						} else if (args[i].equals("--help")) {
-							//@ --help
-							//@ Show usage (this).
-							Util.println("usage: java -jar lmntal.jar [options...] [filenames...]");
-							// usage: FrontEnd [options...] [filenames...]
-
-							// commandline: perl src/help_gen.pl <
-							// src/runtime/FrontEnd.java > src/runtime/Help.java
-							Help.show();
-							System.exit(0);
-						} else if (args[i].equals("--optimize-grouping")) {
-							//@ --optimize-grouping
-							//@ Group the head instructions. (EXPERIMENTAL)
-							Optimizer.fGrouping = true;
-						} else if (args[i].equals("--optimize-guard-move")) {
-							//@ --optimize-guard-move
-							//@ Move up the guard instructions.
-							Optimizer.fGuardMove = true;
-						} else if (args[i].equals("--optimize-merging")) {
-							//@ --optimize-merging
-							//@ Merge instructions.
-							Optimizer.fMerging = true;
-							Env.fMerging = true;
-						} else if (args[i]
-						                .equals("--optimize-systemrulesetsinlining")) {
-							Optimizer.fSystemRulesetsInlining = true;
-						} else if (args[i].equals("--optimize-inlining")) {
-							//@ --optimize-inlining
-							//@ Inlining tail jump.
-							Optimizer.fInlining = true;
-						} else if (args[i].equals("--optimize-loop")) {
-							//@ --optimize-loop
-							//@ Use loop instruction. (EXPERIMENTAL)
-							Optimizer.fLoop = true;
-						} else if (args[i].equals("--optimize-reuse-atom")) {
-							//@ --optimize-reuse-atom
-							//@ Reuse atoms.
-							Optimizer.fReuseAtom = true;
-							Optimizer.forceReuseAtom = true;
-						} else if (args[i].equals("--optimize-reuse-mem")) {
-							//@ --optimize-reuse-mem
-							//@ Reuse mems.
-							Optimizer.fReuseMem = true;
-						} else if (args[i].equals("--optimize-slimoptimizer")) {
-
-						} else if (args[i].equals("--pp0")) {
-							// 暫定オプション
-							Env.preProcess0 = true;
-						} else if (args[i].equals("--stdin-lmn")) { // 2006.07.11
-							// inui
-							//@ --stdin-lmn
-							//@ read LMNtal program from standard input
-							Env.stdinLMN = true;
-						} else if (args[i].equals("--showlongrulename")) {
-							Env.showlongrulename = true;
-						} else if (args[i].equals("--dump-converted-rules")) {
-							//@ --show-converted_rules
-							//@ Dump converted rules
-							Env.dumpConvertedRules = true;
-						} else if (args[i].startsWith("--thread-max=")) {
-							//@ --thread-max=<integer>
-							//@ set <integer> as the upper limit of threads occured
-							//@ in leftside rules.
-							Env.threadMax = Integer.parseInt(args[i]
-							                                      .substring(13));
-						} else if (args[i].equals("--use-source-library")) {
-							//@ --use-source-library
-							//@ Use source libraries in lib/src and lib/public.
-							Env.fUseSourceLibrary = true;
-						} else if (args[i].equals("--debug")) {
-							//@ --debug
-							//@ run command-line debugger.
-							Env.debugOption = true;
-						} else if (args[i].equals("--type")) {
-							// --type
-							// enable type check
-							// ( 今はまだ非公開 )
-							Env.fType = true;
-						} else if (args[i].startsWith("--type-count-level=")) {
-							// --type-count-level
-							// set count-analysis level.
-							int ctlevel = 0;
-							try {
-								ctlevel = Integer.parseInt(args[i]
-								                                .substring(19));
-							} catch (NumberFormatException e) {
-								ctlevel = Env.COUNT_DEFAULT; // 最大限
-							}
-							if (ctlevel > Env.COUNT_APPLYANDMERGEDETAIL)
-								ctlevel = Env.COUNT_APPLYANDMERGEDETAIL;
-							Env.quantityInferenceLevel = ctlevel;
-							Env.fType = true;
-						} else if (args[i].equals("--type-argument")) {
-							// --type-argument
-							// enable argument type system.
-							Env.flgArgumentInference = true;
-							Env.flgQuantityInference = false;
-							Env.flgOccurrenceInference = false;
-							Env.fType = true;
-						} else if (args[i].equals("--type-count")) {
-							// --type-count
-							// enable count type system
-							Env.flgArgumentInference = false;
-							Env.flgQuantityInference = true;
-							Env.flgOccurrenceInference = false;
-							Env.fType = true;
-						} else if (args[i].equals("--type-verbose")) {
-							// --type-verbose
-							// print type information.
-							Env.fType = true;
-							Env.flgShowConstraints = true;
-						} else if (args[i].equals("--args")) {
+						if (args[i].equals("--args"))
+						{
 							//@ --args
 							//@ give command-line options after this to LMNtal program.
 							isSrcs = false;
-						} else if (args[i].equals("--compile-rule")) {
-							// -- --compile-rule
-							// compile one rule (for SLIM model checking mode)
-							Env.compileRule = true;
-							Env.compileonly = true;
-						} else if (args[i].equals("--hl") || args[i].equals("--hl-opt")) { //seiji
-							boolean slimcode = false;
-							for (int j = 0; j < args.length; j++)
-								if (args[j].equals("--slimcode")) slimcode = true;
-							if (slimcode) {
-								Env.hyperLink = true;
-								if (args[i].equals("--hl-opt")) 
-									Env.hyperLinkOpt = true;
-							} else {
-								Util.errPrintln("Can't use option " + args[i] + " without option --slimcode.");
-								System.exit(-1);
-							}
-						} else if (args[i].equals("--use-swaplink")) {
-							Env.useSwapLink = true;
-						} else if (args[i].equals("--use-cyclelinks")) {
-							Env.useCycleLinks = true;
-						} else if (args[i].equals("--verbose-linkext")) {
-							Env.verboseLinkExt = true;
-						} else if (args[i].equals("--Wempty-head")) {
-							//@ --Wempty-head
-							//@ Warn if there are any rules that has an empty head.
-							Env.warnEmptyHead = true;
-						} else {
-							Util.errPrintln("Invalid option: " + args[i]);
-							Util
-							.errPrintln("Use option --help to see a long list of options.");
-							System.exit(-1);
+						}
+						else
+						{
+							i = processLongOptions(args, i);
 						}
 						break;
 					default:
 						Util.errPrintln("Invalid option: " + args[i]);
 						Util.errPrintln("Use option --help to see a long list of options.");
-					System.exit(-1);
+						System.exit(-1);
 					}
 				}
-			} else { // '-'以外で始まるものは (実行ファイル名, argv[0], argv[1], ...) とみなす
-				if (isSrcs) {
+			}
+			else // '-'以外で始まるものは (実行ファイル名, argv[0], argv[1], ...) とみなす
+			{
+				if (isSrcs)
+				{
 					Env.srcs.add(args[i]);
-				} else {
+				}
+				else
+				{
 					Env.argv.add(args[i]);
 				}
 			}
@@ -393,6 +249,266 @@ public class FrontEnd
 			Optimizer.fReuseAtom = false;
 			// Env.findatom2 = true;
 		}
+	}
+
+	private static int processLongOptions(String[] args, int i)
+	{
+		String opt = args[i];
+		if (opt.equals("--compileonly"))
+		{
+			// コンパイル後の中間命令列を出力するモード
+			Env.compileonly = true;
+		}
+		else if (opt.equals("--slimcode"))
+		{
+			// コンパイル後の中間命令列を出力するモード
+			Env.compileonly = true;
+			Env.slimcode = true;
+		}
+		else if (opt.equals("--charset"))
+		{
+			//@ --charset
+			//@ Specify charset of LMNtal source code (the default charset is UTF-8).
+			if (++i < args.length)
+			{
+				try
+				{
+					sourceCharset = Charset.forName(args[i]);
+				}
+				catch (UnsupportedCharsetException e)
+				{
+					System.err.println("Warning: '" + e.getCharsetName() + "' is not available (default charset '" + sourceCharset + "' is used)");
+				}
+			}
+			else
+			{
+				System.err.println("Error: no argument was provided to '--charset'");
+				System.exit(1);
+			}
+		}
+		else if (opt.equals("--use-findatom2"))
+		{
+			// Env.compileonly = true;
+			Env.slimcode = true;
+			Env.findatom2 = true;
+			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
+		}
+		else if (opt.equals("--memtest-only"))
+		{
+			Env.memtestonly = true;
+		}
+		else if (opt.equals("--help"))
+		{
+			//@ --help
+			//@ Show usage (this).
+			Util.println("usage: java -jar lmntal.jar [options...] [filenames...]");
+			Help.show();
+			System.exit(0);
+		}
+		else if (opt.equals("--optimize-grouping"))
+		{
+			//@ --optimize-grouping
+			//@ Group the head instructions. (EXPERIMENTAL)
+			Optimizer.fGrouping = true;
+		}
+		else if (opt.equals("--optimize-guard-move"))
+		{
+			//@ --optimize-guard-move
+			//@ Move up the guard instructions.
+			Optimizer.fGuardMove = true;
+		}
+		else if (opt.equals("--optimize-merging"))
+		{
+			//@ --optimize-merging
+			//@ Merge instructions.
+			Optimizer.fMerging = true;
+			Env.fMerging = true;
+		}
+		else if (opt.equals("--optimize-systemrulesetsinlining"))
+		{
+			Optimizer.fSystemRulesetsInlining = true;
+		}
+		else if (opt.equals("--optimize-inlining"))
+		{
+			//@ --optimize-inlining
+			//@ Inlining tail jump.
+			Optimizer.fInlining = true;
+		}
+		else if (opt.equals("--optimize-loop"))
+		{
+			//@ --optimize-loop
+			//@ Use loop instruction. (EXPERIMENTAL)
+			Optimizer.fLoop = true;
+		}
+		else if (opt.equals("--optimize-reuse-atom"))
+		{
+			//@ --optimize-reuse-atom
+			//@ Reuse atoms.
+			Optimizer.fReuseAtom = true;
+			Optimizer.forceReuseAtom = true;
+		}
+		else if (opt.equals("--optimize-reuse-mem"))
+		{
+			//@ --optimize-reuse-mem
+			//@ Reuse mems.
+			Optimizer.fReuseMem = true;
+		}
+		else if (opt.equals("--optimize-slimoptimizer"))
+		{
+		}
+		else if (opt.equals("--pp0"))
+		{
+			// 暫定オプション
+			Env.preProcess0 = true;
+		}
+		else if (opt.equals("--stdin-lmn")) // 2006.07.11
+		{
+			// inui
+			//@ --stdin-lmn
+			//@ read LMNtal program from standard input
+			Env.stdinLMN = true;
+		}
+		else if (opt.equals("--showlongrulename"))
+		{
+			Env.showlongrulename = true;
+		}
+		else if (opt.equals("--dump-converted-rules"))
+		{
+			//@ --show-converted_rules
+			//@ Dump converted rules
+			Env.dumpConvertedRules = true;
+		}
+		else if (opt.startsWith("--thread-max="))
+		{
+			//@ --thread-max=<integer>
+			//@ set <integer> as the upper limit of threads occured
+			//@ in leftside rules.
+			Env.threadMax = Integer.parseInt(args[i].substring(13));
+		}
+		else if (opt.equals("--use-source-library"))
+		{
+			//@ --use-source-library
+			//@ Use source libraries in lib/src and lib/public.
+			Env.fUseSourceLibrary = true;
+		}
+		else if (opt.equals("--debug"))
+		{
+			//@ --debug
+			//@ run command-line debugger.
+			Env.debugOption = true;
+		}
+		else if (opt.equals("--type"))
+		{
+			// --type
+			// enable type check
+			// ( 今はまだ非公開 )
+			Env.fType = true;
+		}
+		else if (opt.startsWith("--type-count-level="))
+		{
+			// --type-count-level
+			// set count-analysis level.
+			int ctlevel = 0;
+			try
+			{
+				ctlevel = Integer.parseInt(args[i].substring(19));
+			}
+			catch (NumberFormatException e)
+			{
+				ctlevel = Env.COUNT_DEFAULT; // 最大限
+			}
+			if (ctlevel > Env.COUNT_APPLYANDMERGEDETAIL)
+			{
+				ctlevel = Env.COUNT_APPLYANDMERGEDETAIL;
+			}
+			Env.quantityInferenceLevel = ctlevel;
+			Env.fType = true;
+		}
+		else if (opt.equals("--type-argument"))
+		{
+			// --type-argument
+			// enable argument type system.
+			Env.flgArgumentInference = true;
+			Env.flgQuantityInference = false;
+			Env.flgOccurrenceInference = false;
+			Env.fType = true;
+		}
+		else if (args[i].equals("--type-count"))
+		{
+			// --type-count
+			// enable count type system
+			Env.flgArgumentInference = false;
+			Env.flgQuantityInference = true;
+			Env.flgOccurrenceInference = false;
+			Env.fType = true;
+		}
+		else if (args[i].equals("--type-verbose"))
+		{
+			// --type-verbose
+			// print type information.
+			Env.fType = true;
+			Env.flgShowConstraints = true;
+		}
+		else if (args[i].equals("--compile-rule"))
+		{
+			// -- --compile-rule
+			// compile one rule (for SLIM model checking mode)
+			Env.compileRule = true;
+			Env.compileonly = true;
+		}
+		else if (opt.equals("--hl") || opt.equals("--hl-opt")) //seiji
+		{
+			boolean slimcode = false;
+			for (String arg : args)
+			{
+				if (arg.equals("--slimcode"))
+				{
+					slimcode = true;
+					break;
+				}
+			}
+			if (slimcode)
+			{
+				Env.hyperLink = true;
+				if (opt.equals("--hl-opt"))
+				{
+					Env.hyperLinkOpt = true;
+				}
+			}
+			else
+			{
+				Util.errPrintln("Can't use option " + opt + " without option --slimcode.");
+				System.exit(-1);
+			}
+		}
+		else if (opt.equals("--use-swaplink"))
+		{
+			// リンク操作に swaplink 命令を使用する (shinobu)
+			Env.useSwapLink = true;
+		}
+		else if (opt.equals("--use-cyclelinks"))
+		{
+			// リンク操作に cyclelinks 命令を使用する (shinobu)
+			Env.useCycleLinks = true;
+		}
+		else if (opt.equals("--verbose-linkext"))
+		{
+			// swaplink/cyclelinks使用時において置換過程を出力する開発者用オプション (shinobu)
+			Env.verboseLinkExt = true;
+		}
+		else if (opt.equals("--Wempty-head"))
+		{
+			//@ --Wempty-head
+			//@ Warn if there are any rules that has an empty head.
+			Env.warnEmptyHead = true;
+		}
+		else
+		{
+			Util.errPrintln("Invalid option: " + opt);
+			Util.errPrintln("Use option --help to see a long list of options.");
+			System.exit(-1);
+		}
+		return i;
 	}
 
 	/**
