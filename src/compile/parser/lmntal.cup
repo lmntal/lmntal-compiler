@@ -55,7 +55,7 @@ non terminal Object				Atom700;
 non terminal Object				Atom800;
 non terminal Object				Atom;
 
-// ¸½¾õ: (a,b)¤È(a,b:-c)¤Ç¾×ÆÍ¤¹¤ë¤¿¤á¡¢¹àÆâ¤Ç¤ÎAtomList¤ÎºÎÍÑ¤¬ÊİÎ±¤È¤Ê¤Ã¤Æ¤¤¤ë¡£
+// ç¾çŠ¶: (a,b)ã¨(a,b:-c)ã§è¡çªã™ã‚‹ãŸã‚ã€é …å†…ã§ã®AtomListã®æ¡ç”¨ãŒä¿ç•™ã¨ãªã£ã¦ã„ã‚‹ã€‚
 non terminal Object				AtomList;
 non terminal Object				AtomListRest;
 
@@ -89,7 +89,7 @@ Link		::=   LINK_NAME:name
 HyperLink		::=   EXCLA LINK_NAME:name
 					{: RESULT = new SrcHyperLink(name.toString(), -1); :};
 
-// °ú¿ô¤Ê¤·¤Ş¤¿¤Ï°ú¿ô¤¢¤ê¤Î¥¢¥È¥à¤ÎÌ¾Á°¤È¤·¤Æ»ÈÍÑ¤Ç¤­¤ë¥ê¥Æ¥é¥ë
+// å¼•æ•°ãªã—ã¾ãŸã¯å¼•æ•°ã‚ã‚Šã®ã‚¢ãƒˆãƒ ã®åå‰ã¨ã—ã¦ä½¿ç”¨ã§ãã‚‹ãƒªãƒ†ãƒ©ãƒ«
 FuncName	::=   ATOM_NAME:name
 					{: RESULT = new SrcName(name); :}
 				| MOD
@@ -116,7 +116,7 @@ RuleName    ::=
 				| LINK_NAME:name
 					{: RESULT = name.toString(); :};
 
-// ±é»»»Ò¤¬ÉÕ¤¤¤Æ¤¤¤Ê¤¤¹à
+// æ¼”ç®—å­ãŒä»˜ã„ã¦ã„ãªã„é …
 UnitAtom	::=	  NUMBER_NAME:name
 					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
 				| CHAR_CODE_LITERAL:name
@@ -257,7 +257,7 @@ Atom700		::=   Atom500:atom
 					   list.add(atom1); list.add(atom2);
 					   RESULT = new SrcAtom(op, list); :};
 
-// :¤Îº¸Â¦¤Ë¤Ï ([a-z][A-Za-z_0-9]* | [0-9]+) ¤Î¤ß¤òµ­½Ò¤Ç¤­¤ë
+// :ã®å·¦å´ã«ã¯ ([a-z][A-Za-z_0-9]* | [0-9]+) ã®ã¿ã‚’è¨˜è¿°ã§ãã‚‹
 Atom800		::=   Atom700:atom
 					{: RESULT = atom; :}
 				| AtomName:name COLON Atom800:atom
@@ -265,11 +265,11 @@ Atom800		::=   Atom700:atom
 					   list.add(new SrcAtom(new SrcName(name))); list.add(atom);
 					   RESULT = new SrcAtom(":", list); :};
 
-// ¥¢¥È¥à¤äËì¤Ê¤É¤«¤éµ¢Ç¼Åª¤Ë¹½À®¤µ¤ì¤ë¼°¡£Atom¤È¤¤¤¦Ì¾¾Î¤Ï¤â¤Ï¤äÀµ¤·¤¯¤Ê¤¤
+// ã‚¢ãƒˆãƒ ã‚„è†œãªã©ã‹ã‚‰å¸°ç´çš„ã«æ§‹æˆã•ã‚Œã‚‹å¼ã€‚Atomã¨ã„ã†åç§°ã¯ã‚‚ã¯ã‚„æ­£ã—ããªã„
 Atom		::=   Atom800:atom
 					{: RESULT = atom; :};
 
-// ( ) ¤Ç°Ï¤Ã¤Æ±é»»»Ò¤¬ÉÕ¤¤¤Æ¤¤¤Ê¤¤Ã±ÆÈ¤Î¹à¤Ë¤Ç¤­¤ë±é»»»Ò
+// ( ) ã§å›²ã£ã¦æ¼”ç®—å­ãŒä»˜ã„ã¦ã„ãªã„å˜ç‹¬ã®é …ã«ã§ãã‚‹æ¼”ç®—å­
 QuotedOperatorAtom ::=
 				  PLUS			{: RESULT = new SrcAtom("+");	:}
 				| MINUS			{: RESULT = new SrcAtom("-");	:}
@@ -280,7 +280,7 @@ QuotedOperatorAtom ::=
 				| MINUS_DOT		{: RESULT = new SrcAtom("-.");	:}
 				| ASTERISK_DOT	{: RESULT = new SrcAtom("*.");	:}
 				| SLASH_DOT		{: RESULT = new SrcAtom("/.");	:}
-//				| MOD			{: RESULT = new SrcAtom("mod");	:} //ÄÌ¾ï¤Î¥¢¥È¥àÌ¾¤È¤·¤Æ½èÍı
+//				| MOD			{: RESULT = new SrcAtom("mod");	:} //é€šå¸¸ã®ã‚¢ãƒˆãƒ åã¨ã—ã¦å‡¦ç†
 				| RELOP:op		{: RESULT = new SrcAtom(op);	:}
 				| HL:op			{: RESULT = new SrcAtom(op);	:} //seiji
 				| HAT			{: RESULT = new SrcAtom("^");	:}
@@ -304,7 +304,7 @@ ListCdr     ::=   GUARD Process:atom
                 |  
                     {: RESULT = new SrcAtom("[]"); :};
 
-// Atom¤ò¥«¥ó¥Ş¤Ç¶èÀÚ¤Ã¤¿Îó¡£¸½ºßÌ¤»ÈÍÑ
+// Atomã‚’ã‚«ãƒ³ãƒã§åŒºåˆ‡ã£ãŸåˆ—ã€‚ç¾åœ¨æœªä½¿ç”¨
 AtomList     ::=  Atom:atom AtomList:atomlist
 					{: if (atomlist == null) { RESULT = atom; }
 					   else {
@@ -371,10 +371,10 @@ UnnamedMembrane ::=
 						RESULT = sMem; :}
 				;
 					
-// ´İ¥«¥Ã¥³¤Ê¤·¤Î¥ë¡¼¥ë¹½Ê¸
-// ¥ë¡¼¥ëÌ¾¤ËÂĞ±ş by Hara
-// ½Ğ¸½¤·¤¿¹ÔÈÖ¹æ¤òÄÉ²Ã by Inui
-// simpagation¤òÄÉ²Ã by Kudo
+// ä¸¸ã‚«ãƒƒã‚³ãªã—ã®ãƒ«ãƒ¼ãƒ«æ§‹æ–‡
+// ãƒ«ãƒ¼ãƒ«åã«å¯¾å¿œ by Hara
+// å‡ºç¾ã—ãŸè¡Œç•ªå·ã‚’è¿½åŠ  by Inui
+// simpagationã‚’è¿½åŠ  by Kudo
 Rule		::=	  ProcessList:head RULE:lineno ProcessList:body 
 					{: RESULT = new SrcRule(null, head, body, lineno.intValue()); :}
 				| RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:body 
@@ -393,10 +393,10 @@ Rule		::=	  ProcessList:head RULE:lineno ProcessList:body
 					{: RESULT = new SrcRule(name, head, head2, guard, body, lineno.intValue()); :}
 ;
 
-// ¡Ö´İ¥«¥Ã¥³¤¢¤ê¤Î¥ë¡¼¥ë¹½Ê¸¡¢¤Ş¤¿¤Ï´İ¥«¥Ã¥³¤È¥«¥ó¥Ş¤Ë¤è¤ë¹àÁÈ¹½Ê¸¡×¤Î¤¿¤á¤ÎÈó½ªÃ¼µ­¹æ
-// ¤³¤Ã¤Á¤Ï¥ë¡¼¥ëÌ¾¤Ë¤ÏÈóÂĞ±ş¡£(a,b,c :- ( ÂĞ±ş¤·¤Æ¤¤¤ë¤è¤¦¤À¤¬¡Ä¡£)
-// ½Ğ¸½¤·¤¿¹ÔÈÖ¹æ¤òÄÉ²Ã by Inui
-// simpagation¤òÄÉ²Ã by Kudo
+// ã€Œä¸¸ã‚«ãƒƒã‚³ã‚ã‚Šã®ãƒ«ãƒ¼ãƒ«æ§‹æ–‡ã€ã¾ãŸã¯ä¸¸ã‚«ãƒƒã‚³ã¨ã‚«ãƒ³ãƒã«ã‚ˆã‚‹é …çµ„æ§‹æ–‡ã€ã®ãŸã‚ã®éçµ‚ç«¯è¨˜å·
+// ã“ã£ã¡ã¯ãƒ«ãƒ¼ãƒ«åã«ã¯éå¯¾å¿œã€‚(a,b,c :- ( å¯¾å¿œã—ã¦ã„ã‚‹ã‚ˆã†ã ãŒâ€¦ã€‚)
+// å‡ºç¾ã—ãŸè¡Œç•ªå·ã‚’è¿½åŠ  by Inui
+// simpagationã‚’è¿½åŠ  by Kudo
 ProcessListContinuation ::= RPAREN
 					{: RESULT = null; :}
 				| RULE:lineno ProcessList:body RPAREN
@@ -469,9 +469,9 @@ Process		::=   Atom:p
 //					{:  RESULT = p; :}
 				;
 
-// Process¤ò¥«¥ó¥Ş¤Ç¶èÀÚ¤Ã¤¿Îó¡£
-// ¡Ê¸½ºß¡¢¹½Ê¸¥¨¥é¡¼¤ò¸º¤é¤¹¤¿¤á¤Ë¡¢Ëì¤ÎÁ°¤Î¥«¥ó¥Ş¤Ï¾ÊÎ¬¤Ç¤­¤ë¤È¤¤¤¦ÆÃÊÌ°·¤¤¤¬ºÎÍÑ¤µ¤ì¤Æ¤¤¤ë¡Ë
-// -> ÇÑ»ß¤·¤Ş¤·¤¿¡£ 2006/06/26 by kudo ( ËìÌ¾Æ³Æş¤Ëºİ¤·¾×ÆÍ¤¹¤ë°Ù )
+// Processã‚’ã‚«ãƒ³ãƒã§åŒºåˆ‡ã£ãŸåˆ—ã€‚
+// ï¼ˆç¾åœ¨ã€æ§‹æ–‡ã‚¨ãƒ©ãƒ¼ã‚’æ¸›ã‚‰ã™ãŸã‚ã«ã€è†œã®å‰ã®ã‚«ãƒ³ãƒã¯çœç•¥ã§ãã‚‹ã¨ã„ã†ç‰¹åˆ¥æ‰±ã„ãŒæ¡ç”¨ã•ã‚Œã¦ã„ã‚‹ï¼‰
+// -> å»ƒæ­¢ã—ã¾ã—ãŸã€‚ 2006/06/26 by kudo ( è†œåå°å…¥ã«éš›ã—è¡çªã™ã‚‹ç‚º )
 ProcessList ::= /* epsilon */
 					{: RESULT = new LinkedList(); :}
 				| NonemptyProcessList:list
@@ -482,13 +482,13 @@ ProcessList ::= /* epsilon */
 NonemptyProcessList ::=
 				  Process:p
 					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
-// ËìÌ¾Æ³Æş¤Ëºİ¤·¡¢¾×ÆÍ¤¹¤ë¤è¤¦¤Ë¤Ê¤Ã¤¿¤Î¤ÇÇÑ»ß¡£
+// è†œåå°å…¥ã«éš›ã—ã€è¡çªã™ã‚‹ã‚ˆã†ã«ãªã£ãŸã®ã§å»ƒæ­¢ã€‚
 //				| NonemptyProcessList:list Membrane:p
 //					{: list.add(p); RESULT = list; :}
 				| NonemptyProcessList:list COMMA Process:p
 					{: list.add(p); RESULT = list; :};
 
-// ProcessList¤ª¤è¤ÓRule¤ò¥Ô¥ê¥ª¥É¤Ç¶èÀÚ¤Ã¤¿Îó¡£ËöÈø¤Ë1¤Ä¤Î¥Ô¥ê¥ª¥É¤òÄÉ²Ã¤·¤Æ¤â¼õÍı¤¹¤ë¡£
+// ProcessListãŠã‚ˆã³Ruleã‚’ãƒ”ãƒªã‚ªãƒ‰ã§åŒºåˆ‡ã£ãŸåˆ—ã€‚æœ«å°¾ã«1ã¤ã®ãƒ”ãƒªã‚ªãƒ‰ã‚’è¿½åŠ ã—ã¦ã‚‚å—ç†ã™ã‚‹ã€‚
 WorldProcessList ::= /* epsilon */
 					{: RESULT = new LinkedList(); :}
 				| NonemptyWorldProcessList:list

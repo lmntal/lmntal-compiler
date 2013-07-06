@@ -1,69 +1,69 @@
 /**
- * LMNtal�������ե����� =(1)=> ������ =(2)=> ��̣���� =(3)=> �롼�륪�֥�������
+ * LMNtalソースファイル =(1)=> 解析木 =(2)=> 意味解析 =(3)=> ルールオブジェクト
  *
- * 2004/07/14 (n-kato) ���Υե�����ϸŤ��Τǻ������٤ˤ��Ƥ�������
+ * 2004/07/14 (n-kato) このファイルは古いので参考程度にしてください
  *
- * (1) ��ʸ���ϴ� LMNParser::parserSrc()
- *   @ �������ե�����򤽤Τޤ�Java�Υ��֥������Ȥؤ��Ѵ����롣
+ * (1) 構文解析器 LMNParser::parserSrc()
+ *   @ ソースファイルをそのままJavaのオブジェクトへと変換する。
  *     compile.parser.*
- *   @ JFlex, Java CUP�����
+ *   @ JFlex, Java CUPを使用
  *     JFlex (http://jflex.de/) Ver 1.4 pre5
  *         ant flex_compile
  *         Lexer.java
  *     Java CUP (http://www.cs.princeton.edu/~appel/modern/java/CUP/) Ver 0.10k
  *         ant bison_compile
  *         parser.java
- *   @ ��ά��ˡ���б�����
- *   @ �롼��Ǥ����и����ʤ����(RuleContext)���ǡ�����ʬ�˽ФƤ���
- *     �褦�ʤ��Ȥϥ����å����Ƥ��ʤ�
- *      P �� T �ζ��̤Ϥ��Ƥ��ʤ�
- *   @ �֤��ͤ� LinkedList (Process�Τɤ줫)
+ *   @ 簡略記法も対応する
+ *   @ ルールでしか出現しないもの(RuleContext)がデータ部分に出ている
+ *     ようなことはチェックしていない
+ *      P と T の区別はしていない
+ *   @ 返り値は LinkedList (Processのどれか)
  *     parser p = new parser(new Lexer(Reader in));
  *     LinkedList result = (LinkedList)p.parse().value();
  * 
- * (2) ��̣���ϴ� LMNParser::parse()
- *   @ compile.struture.* �ؤ��Ѵ�
- *     �ȥåפ�Membrane�Ȥʤ�
- *   @ ���ȥ���Υ��ȥ�ʤɤδ�ά��ˡ��Ÿ������
- *     1. �����ɤ˽и�������̾X���Ф��ƥ롼��������Ƥ�X��$p_X���ִ�����
- *        ά��ˡ�ʣ��� - ��󥯲�
- *        �����ɤˤϥ�󥯤Ͻи����ʤ��褦�ˤ���
- *     2. �����ɤ�term��Ÿ������
- *        ά��ˡ�ʣ��� - ������ - 1
- *        ���롼�뤬¸�ߤ������ˤϥ���ѥ��륨�顼
- *        ���ϻ����ȥ�ΰ���������$p�Ȥʤ� (������)
+ * (2) 意味解析器 LMNParser::parse()
+ *   @ compile.struture.* へと変換
+ *     トップはMembraneとなる
+ *   @ アトム中のアトムなどの簡略記法を展開する
+ *     1. ガードに出現するリンク名Xに対してルール内の全てのXを$p_Xに置換する
+ *        略記法（３） - リンク化
+ *        ガードにはリンクは出現しないようにする
+ *     2. ガードのtermを展開する
+ *        略記法（１） - 引数化 - 1
+ *        膜やルールが存在した場合にはコンパイルエラー
+ *        解析時アトムの引数は全て$pとなる (型制約)
  *        ex. $i < $c, 3($c)
- *     3. ά��ˡ�ʣ��� - ��¤��ӡ������
- *        ���դ�2��ʾ�$p���и��������ˡ�������̾��$q�ˤ���
- *        $p==$q�򥬡��ɤ��ɲä���
- *        �����ɤ˽и�������Body�Ǥνи���1��Ǥʤ�$p���Ф���
- *        �����ɤ�ground($p)���ɲä���
- *        TODO ��¤�����Ϥ��ʤ��Ƥ�����ͳ���
- *   @ �Ƶ�Ū�˰�̣���Ϥ�Ԥ�
- *     ���ϻ��ǡ�����¤ > ����ѥ�����ǡ�����¤
- *        �إåɡ��ܥǥ���ά����Ÿ��
+ *     3. 略記法（２） - 構造比較、基底項
+ *        左辺に2回以上$pが出現した場合に、新しい名前$qにして
+ *        $p==$qをガードに追加する
+ *        ガードに出現せず、Bodyでの出現が1回でない$pに対して
+ *        ガードにground($p)を追加する
+ *        TODO 構造代入はやらなくていい理由を書く
+ *   @ 再帰的に意味解析を行う
+ *     解析時データ構造 > コンパイル時データ構造
+ *        ヘッド、ボディの略記の展開
  *        a(4) => a(X),4(X)
  *        p($p) => p(X), {'+'(X), $p}     p(X),{+X, $p}
- *         ���������դǤʤ����Τ� (�����ɤ򻲾�)
- *        ���դξ���
- *        p($p) => p(X), $q[X] (����)
- *   ����󥯤�Ž���դ�
- *     ����̲᤹���󥯤Υץ�����������������
+ *         ただし型付でない場合のみ (ガードを参照)
+ *        型付の場合は
+ *        p($p) => p(X), $q[X] (型付)
+ *   　リンクの貼り付け
+ *     膜を通過するリンクのプロキシーを生成する
  * 
- * (3) �롼�륳��ѥ��顼 (compile.RuleCompiler)
- *   @ �ץ��������Υ롼����ʬ(RuleStructure)��롼�륪�֥�������(Rule)���Ѵ�����
+ * (3) ルールコンパイラー (compile.RuleCompiler)
+ *   @ プログラム中のルール部分(RuleStructure)をルールオブジェクト(Rule)に変換する
  *     compile.Rule
  *
- * <LMNtal�ι�ʸ>
+ * <LMNtalの構文>
  * P ::= 0 | p(X1, ... ,Xm) | P, P | { P } | (T :- G | T)
  * T ::= 0 | p(X1, ... ,Xm) | T, T | { T } | (T :- G | T)
  *     | @p | $p[X1, ... ,Xm|A] | p(*X1, ... , *Xm)
  * A ::= [] | *X
  * G ::= 0 | G, G | \+($p1=(T1), ..., $pn=(Tn))
- * <��ʸ���>
- * @ �ץ������Υ롼�볰��Ʊ����󥯤�2���ۤ��ƽи����ƤϤʤ�ʤ�
- * @ �롼��ϥ롼��κ��դޤ��ϥ����ɤ˽и����ƤϤʤ�ʤ�
- * @ �롼��κ��դ˽и����� @p $p �������¦�˽и����ʤ���Фʤ�ʤ�
+ * <構文条件>
+ * @ プロセスのルール外に同じリンクが2回を越えて出現してはならない
+ * @ ルールはルールの左辺またはガードに出現してはならない
+ * @ ルールの左辺に出現する @p $p は膜の内側に出現しなければならない
  */
 
 <LinkName>      =   [A-Z][a-zA-Z0-9]*
