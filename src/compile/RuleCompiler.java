@@ -215,7 +215,7 @@ public class RuleCompiler
 	{
 		for (ProcessContext pc : Collector.collectTypedProcessContexts(rs.rightMem))
 		{
-			if (gc.typedCxtTypes.get(pc.def) == GuardCompiler.GROUND_LINK_TYPE)
+			if (gc.typedCxtTypes.get(pc.def) == GuardCompiler.GROUND_LINK_TYPE || gc.typedCxtTypes.get(pc.def) == GuardCompiler.HLGROUND_LINK_TYPE)
 			{
 				return true;
 			}
@@ -1006,7 +1006,7 @@ public class RuleCompiler
 		groundsrcs = new HashMap<ContextDef, Integer>();
 		for (ContextDef def : gc.groundSrcs.keySet())
 		{
-			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
+			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE || gc.typedCxtTypes.get(def) == GuardCompiler.HLGROUND_LINK_TYPE)
 			{
 				//ProcessContext lhsOcc = def.lhsOcc
 				int linklistpath = varcount++;
@@ -1054,6 +1054,12 @@ public class RuleCompiler
 					body.add(new Instruction( Instruction.REMOVEGROUND,
 							groundToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
+				else if (gc.typedCxtTypes.get(def) == GuardCompiler.HLGROUND_LINK_TYPE)
+				{
+					List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+					body.add(new Instruction( Instruction.REMOVEHLGROUND,
+							groundToSrcPath(def), lhsmemToPath(pc.mem), attrs ));
+				}				
 			}
 		}
 	}
@@ -1070,6 +1076,11 @@ public class RuleCompiler
 			else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
 			{
 				body.add(new Instruction( Instruction.FREEGROUND,groundToSrcPath(def)));
+			}
+			else if (gc.typedCxtTypes.get(def) == GuardCompiler.HLGROUND_LINK_TYPE)
+			{
+				List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+				body.add(new Instruction( Instruction.FREEHLGROUND,groundToSrcPath(def), attrs));
 			}
 		}
 	}
@@ -1139,6 +1150,22 @@ public class RuleCompiler
 					body.add(new Instruction( Instruction.COPYGROUND, retlistpath,
 							groundToSrcPath(pc.def), // groundの場合はリンクの変数番号のリストを指す変数番号
 							rhsmemToPath(pc.mem) ));
+					int groundpath = varcount++;
+					body.add(new Instruction( Instruction.GETFROMLIST,groundpath,retlistpath,0));
+					int mappath = varcount++;
+					body.add(new Instruction(Instruction.GETFROMLIST,mappath,retlistpath,1));
+					rhsgroundpaths.put(pc, groundpath);
+					rhsmappaths.put(pc, mappath);
+				}
+				else if (gc.typedCxtTypes.get(def) == GuardCompiler.HLGROUND_LINK_TYPE)
+				{
+					int retlistpath = varcount++;
+					//System.out.println("cp");
+					//int mappath = varcount++;
+					List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+					body.add(new Instruction( Instruction.COPYHLGROUND, retlistpath,
+							groundToSrcPath(pc.def), // groundの場合はリンクの変数番号のリストを指す変数番号
+							rhsmemToPath(pc.mem), attrs));
 					int groundpath = varcount++;
 					body.add(new Instruction( Instruction.GETFROMLIST,groundpath,retlistpath,0));
 					int mappath = varcount++;

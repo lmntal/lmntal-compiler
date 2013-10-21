@@ -75,6 +75,8 @@ public class Instruction implements Cloneable
 	public static final int ARG_VARS = 6;
 	/**その他オブジェクト(ルールなど)への参照*/
 	public static final int ARG_OBJ = 7;
+	/**その他オブジェクト(ルールなど)への参照のList*/
+	public static final int ARG_OBJS = 8;
 	
 	
 	/** 命令の種類を保持する。*/	
@@ -1569,7 +1571,52 @@ public class Instruction implements Cloneable
 	@LMNtalIL public static final int FINDPROCCXT= 300;
 	static {setArgType(FINDPROCCXT, new ArgType(false, ARG_ATOM, ARG_INT,  ARG_INT, ARG_ATOM, ARG_INT, ARG_INT));};
 
+	
+	
+	///////////////////////////////////////////////////////////////////////
 
+	// hlground命令 (280--283)
+	// hlground型関連の命令列一覧。具体的な内容はmeguroさんの修論またはwiki等参照してください。
+	
+	/**
+	 * copyhlground [dstlist, srclist, mem, attrs]
+	 *
+	 * srclistの接続先の、attrsを属性としたhlground型の構造をdstlistの先にコピーする。 
+	 * attrsに指定されていない属性のハイパーリンクのコピーしない。
+	 * 
+	 * @see ishlground
+	 */
+	@LMNtalIL public static final int COPYHLGROUND = 280;
+	static {setArgType(COPYHLGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM, ARG_OBJS));}
+
+	/**
+	 * removehlground [srclist, mem, attrs]
+	 * 
+	 * mem内のsrclistの接続先の、attrsを属性としたhlground型の構造を削除する。
+	 * attrsに指定されていない属性のハイパーリンクは削除しない。
+	 */
+	@LMNtalIL public static final int REMOVEHLGROUND = 281;
+	static {setArgType(REMOVEHLGROUND, new ArgType(false, ARG_VAR, ARG_MEM, ARG_OBJS));}
+
+	/**
+	 * freehlground [srclist, attrs]
+	 * 
+	 * srclistの接続先のattrsを属性としたhlground型の構造のメモリを解放する。
+	 * attrsに指定されていない属性のハイパーリンクのメモリの解放しない。
+	 */
+	@LMNtalIL public static final int FREEHLGROUND = 282;
+	static {setArgType(FREEHLGROUND, new ArgType(false, ARG_VAR, ARG_OBJS));}
+
+	/**
+	 * ishlground [natoms, srclist, avoidlist, attrs]
+	 *
+	 * srclistに含まれるリンク群に接続している構造が、attrsを属性としたhlground型であることを検査し、探索したアトムの個数を natomsに格納する。
+	 * attrsに指定されていない属性のハイパーリンクは探索しない。探索中に膜やavoidlistに含まれるリンク群に遭遇したときは完全には失敗とならず、マッチするものだけを対象に処理する。
+	 */
+	@LMNtalIL public static final int ISHLGROUND = 283;
+	static {setArgType(ISHLGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS));}
+	
+	
 	///////////////////////////////////////////////////////////////////////
 
 	// 整数用の組み込みボディ命令 (400--419+OPT)

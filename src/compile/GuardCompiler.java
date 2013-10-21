@@ -26,8 +26,9 @@ class GuardCompiler extends HeadCompiler
 {
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
+	static final Object HLGROUND_LINK_TYPE = "HLG"; // ハイパーリンク基底項プロセス
 //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
-
+	
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
 	HashMap<ContextDef, Integer> typedCxtDataTypes = new HashMap<ContextDef, Integer>();
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型のパターンを表す定数オブジェクト */
@@ -539,6 +540,11 @@ class GuardCompiler extends HeadCompiler
 					{
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						checkGroundLink(def1);
+					}
+					else if (func.equals("hlground", 1))
+					{
+						if (!identifiedCxtdefs.contains(def1)) continue;
+						checkHLGroundLink(def1);						
 					}
 					// ガードインライン
 					else if (func.getName().startsWith("custom_"))
@@ -1056,7 +1062,7 @@ class GuardCompiler extends HeadCompiler
 	/** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
 	 *  @param def プロセス文脈定義 */
 	private void checkGroundLink(ContextDef def) {
-		if(typedCxtTypes.get(def) != UNARY_ATOM_TYPE && typedCxtTypes.get(def) != GROUND_LINK_TYPE){
+		if(typedCxtTypes.get(def) != UNARY_ATOM_TYPE && typedCxtTypes.get(def) != GROUND_LINK_TYPE && typedCxtTypes.get(def) != HLGROUND_LINK_TYPE){
 			typedCxtTypes.put(def,GROUND_LINK_TYPE);
 //			int linkid = loadGroundLink(def);
 //			ArrayList linkids = loadGroundLink(def);
@@ -1110,7 +1116,67 @@ class GuardCompiler extends HeadCompiler
 		}
 		return;
 	}
+	
+	/** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
+	 *  @param def プロセス文脈定義 */
+	// hlground@onuma
+	private void checkHLGroundLink(ContextDef def) {
+		if(typedCxtTypes.get(def) != UNARY_ATOM_TYPE && typedCxtTypes.get(def) != GROUND_LINK_TYPE && typedCxtTypes.get(def) != HLGROUND_LINK_TYPE){
+			typedCxtTypes.put(def,HLGROUND_LINK_TYPE);
+//			int linkid = loadGroundLink(def);
+//			ArrayList linkids = loadGroundLink(def);
+			int linkids = loadGroundLink(def);
+			int srclinklistpath;
+//			if(!memToLinkListPath.containsKey(def.lhsOcc.mem)){
+			srclinklistpath = varCount++;
+			// 避けるリンクのリスト
+			match.add(new Instruction(Instruction.NEWLIST,srclinklistpath));
 
+			// 左辺出現アトムの，全ての引数(を指すリンク)のうち,
+			// 左辺の自由リンクもしくは同じ膜のプロセス文脈に接続していて
+			// このプロセス文脈の根でないものをリストに追加する
+			for(Atom atom : def.lhsOcc.mem.atoms){
+//				Util.println("checkGroundLink"+atom);
+				int[] paths = (int[])linkPaths.get(atomToPath(atom));
+				for(int i=0;i<atom.args.length;i++){
+//					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
+					if(def.lhsOcc.mem.parent == null){ // 左辺出現がルール最外部
+						if( atom.args[i].buddy.atom.mem!=rc.rs.rightMem)
+							// 反対側が右辺出現の時のみ追加
+							if(!def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom))
+								continue;
+					}else{ // 左辺出現が膜内
+						if(!def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom))  // 反対側がプロセス文脈の引数の時のみ追加
+							if(!def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom))
+								continue;
+					}
+					boolean flgNotAdd = false; // その引数を避けるべきリストに「加えない」場合true
+					for(int j=0;j<def.lhsOcc.args.length;j++){
+						LinkOccurrence ro = def.lhsOcc.args[j].buddy;
+						if(ro == atom.args[i])
+							flgNotAdd = true;
+					}
+					if(!flgNotAdd){
+						match.add(new Instruction(Instruction.ADDTOLIST,srclinklistpath,paths[i]));
+						if(Env.findatom2 && def.lhsOcc!=null)
+							connectAtoms(def.lhsOcc.args[0].buddy.atom, atom.args[i].atom);
+					}
+				}
+			}
+//			memToLinkListPath.put(def.lhsOcc.mem, srclinklistpath);
+//			}
+//			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
+			List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+			int natom = varCount++;
+			match.add(new Instruction(Instruction.ISHLGROUND, natom, linkids, srclinklistpath, attrs));//,memToPath(def.lhsOcc.mem)));
+			rc.hasISGROUND = false;
+			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem,new HashMap<ContextDef, Integer>());
+			memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
+			
+		}
+		return;
+	}
+	
 	/**
 	 * unary型に制約されたプロセス文脈が左辺に出現し、1引数であることを確認する．
 	 * @param def
