@@ -509,6 +509,10 @@ public class FrontEnd
 			//@ Warn if there are any rules that has an empty head.
 			Env.warnEmptyHead = true;
 		}
+		else if (opt.equals("--interpret"))
+		{
+			// DO NOTHING
+		}
 		else
 		{
 			Util.errPrintln("Invalid option: " + opt);
