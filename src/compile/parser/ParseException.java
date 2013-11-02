@@ -1,17 +1,28 @@
+package compile.parser;
+
 /**
  * 構文解析でのエラー
  */
-
-package compile.parser;
-
-public class ParseException extends Exception {
-	public ParseException() {
+@SuppressWarnings("serial")
+public class ParseException extends Exception
+{
+	public ParseException()
+	{
 		super();
 	}
-	public ParseException(String s) {
-		super(s);	
+
+	public ParseException(String message)
+	{
+		super(message);	
 	}
-	public ParseException(String s, Throwable e) {
-		super(s,e);
+
+	public ParseException(Throwable cause)
+	{
+		super(cause);
+	}
+
+	public ParseException(String message, Throwable cause)
+	{
+		super(message, cause);
 	}
 }

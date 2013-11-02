@@ -1,18 +1,21 @@
 package compile.parser;
+
 import java.util.LinkedList;
 
-
 /** ソースファイル中のアトム表現 */
-class SrcAtom {
+class SrcAtom
+{
 	protected LinkedList process = null;
+
 	/** 名前トークン */
 	protected SrcName srcname;
-	
+
 	/**
 	 * ソースコード中での出現位置(行)
 	 * @author Tomohito Makino
 	 */
 	int line = -1;
+
 	/**
 	 * ソースコード中での出現位置(桁)
 	 * @author Tomohito Makino
@@ -23,23 +26,27 @@ class SrcAtom {
 	 * 指定された名前の子プロセスなしのアトム構文を生成する
 	 * @param name アトム名
 	 */
-	public SrcAtom(String name) {
+	public SrcAtom(String name)
+	{
 		this(new SrcName(name));
 	}
+
 	/**
 	 * 指定された名前トークンを持つ子プロセスなしのアトム構文を生成する
 	 * @param srcname 名前トークン
 	 */
-	public SrcAtom(SrcName srcname) {
+	public SrcAtom(SrcName srcname)
+	{
 		this(srcname, new LinkedList(), -1,-1);
 	}
-	
+
 	/**
 	 * 指定された名前と子供プロセスで初期化します
 	 * @param name アトム名
 	 * @param process 子供プロセス
 	 */
-	public SrcAtom(String name, LinkedList process) {
+	public SrcAtom(String name, LinkedList process)
+	{
 		this(new SrcName(name), process, -1,-1);
 	}
 
@@ -50,9 +57,11 @@ class SrcAtom {
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(SrcName srcname, int line, int column) {
+	public SrcAtom(SrcName srcname, int line, int column)
+	{
 		this(srcname, new LinkedList(), line, column);
 	}	
+
 	/**
 	 * デバッグ情報も受け取るコンストラクタ
 	 * @author Tomohito Makino
@@ -61,37 +70,54 @@ class SrcAtom {
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(SrcName nametoken, LinkedList process, int line, int column) {
+	public SrcAtom(SrcName nametoken, LinkedList process, int line, int column)
+	{
 		this.srcname = nametoken;
 		this.process = process;
 		this.line = line;
 		this.column = column;	
 	}
-	
-	public void setSourceLocation(int line, int column) {
+
+	public void setSourceLocation(int line, int column)
+	{
 		this.line = line;
 		this.column = column;
 	}
 
-	
 	/** 名前トークンを取得する 
-	 * @deprecated*/
+	 * @deprecated
+	 */
 	public SrcName getSrcName() { return srcname; }
 
 	/** アトム名を取得する */
-	public String getName() { return srcname.getName(); }
+	public String getName()
+	{
+		return srcname.getName();
+	}
+
 	/** アトム名のソースコード中の表現を取得する。*/
-	public String getSourceName() {
+	public String getSourceName()
+	{
 		return srcname.getSourceName();
 	}
+
 	/** アトム名トークンの種類を取得する */
-	public int getNameType() { return srcname.getType(); }
-	
+	public int getNameType()
+	{
+		return srcname.getType();
+	}
+
 	/**
 	 * このアトムの子プロセスを得ます
 	 * @return 子プロセスのリスト
 	 */
-	public LinkedList getProcess() { return process; }
-	
-	public String toString() { return SrcDumper.dump(this); }
+	public LinkedList getProcess()
+	{
+		return process;
+	}
+
+	public String toString()
+	{
+		return SrcDumper.dump(this);
+	}
 }

@@ -14,9 +14,11 @@ import util.Util;
  * <p>
  * runtime.Functorから参照するためにpublicクラスに変更してみた。
  */
-public class SrcName {
+public class SrcName
+{
 	/** 名前トークンが表す文字列 */
 	protected String name;	
+
 	/** 名前トークンの種類 */
 	protected int type;
 
@@ -27,28 +29,40 @@ public class SrcName {
 	public static final int QUOTED = 3; // [:aaa:] [:AAA:] [:12:] [:-12:] [:3.14:] [:-3.14e-1:]
 	public static final int PATHED = 4; // module.p module:p
 
-	/** 標準の名前トークンの表現を生成する。
-	 * @param name 名前 */
-	public SrcName(String name) {
+	/**
+	 * 標準の名前トークンの表現を生成する。
+	 * @param name 名前
+	 */
+	public SrcName(String name)
+	{
 		this.name = name;
 		this.type = PLAIN;
 	}
+
 	/** 指定された種類の名前トークンの表現を生成する。*/
-	public SrcName(String name, int type) {
+	public SrcName(String name, int type)
+	{
 		this.name = name;
 		this.type = type;
 	}
+
 	/** この名前トークンが表す文字列を取得する */
-	public String getName() {
+	public String getName()
+	{
 		return name;
 	}
+
 	/** トークンの種類を返す */
-	public int getType() {
+	public int getType()
+	{
 		return type;
 	}
+
 	/** ソースコード中の表現を取得する。*/
-	public String getSourceName() {
-		switch (type) {
+	public String getSourceName()
+	{
+		switch (type)
+		{
 		case SYMBOL:
 			return Util.quoteString(name, '\'');
 		case STRING:
