@@ -83,244 +83,279 @@ start with WorldProcessList;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
 
-Link		::=   LINK_NAME:name
-					{: RESULT = new SrcLink(name.toString(), nameleft); :};
+Link ::=
+    LINK_NAME:name
+      {: RESULT = new SrcLink(name.toString(), nameleft); :}
+;
 
-HyperLink		::=   EXCLA LINK_NAME:name
-					{: RESULT = new SrcHyperLink(name.toString(), -1); :};
+HyperLink ::=
+    EXCLA LINK_NAME:name
+      {: RESULT = new SrcHyperLink(name.toString(), -1); :}
+;
 
 // 引数なしまたは引数ありのアトムの名前として使用できるリテラル
-FuncName	::=   ATOM_NAME:name
-					{: RESULT = new SrcName(name); :}
-				| MOD
-					{: RESULT = new SrcName("mod"); :}
-				| QUOTED_STRING:name
-					{: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
-				| SYMBOL_NAME:name
-					{: RESULT = new SrcName(name.replaceAll("^'|'$","").replaceAll("''","'"),
-											SrcName.SYMBOL); :}
-				| STRING:name
-					{: RESULT = new SrcName(name, SrcName.STRING); :}
-				| PATHED_ATOM_NAME:name
-					{: RESULT = new SrcName(name, SrcName.PATHED); :};
+FuncName ::=
+    ATOM_NAME:name
+      {: RESULT = new SrcName(name); :}
+  | MOD
+      {: RESULT = new SrcName("mod"); :}
+  | QUOTED_STRING:name
+      {: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
+  | SYMBOL_NAME:name
+      {: RESULT = new SrcName(name.replaceAll("^'|'$","").replaceAll("''","'"), SrcName.SYMBOL); :}
+  | STRING:name
+      {: RESULT = new SrcName(name, SrcName.STRING); :}
+  | PATHED_ATOM_NAME:name
+      {: RESULT = new SrcName(name, SrcName.PATHED); :}
+;
 
 // [a-z][A-Za-z_0-9]* | [0-9]+
-AtomName    ::= ATOM_NAME:name
-					{: RESULT = name.toString(); :}
-				| MOD
-					{: RESULT = "mod"; :};
+AtomName ::=
+    ATOM_NAME:name
+      {: RESULT = name.toString(); :}
+  | MOD
+      {: RESULT = "mod"; :}
+;
 
-RuleName    ::= 
-				  ATOM_NAME:name
-					{: RESULT = name.toString(); :}
-				| LINK_NAME:name
-					{: RESULT = name.toString(); :};
+RuleName ::=
+    ATOM_NAME:name
+      {: RESULT = name.toString(); :}
+  | LINK_NAME:name
+      {: RESULT = name.toString(); :}
+;
 
 // 演算子が付いていない項
-UnitAtom	::=	  NUMBER_NAME:name
-					{: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
-				| CHAR_CODE_LITERAL:name
-					{: RESULT = new SrcAtom(new SrcName(""+(int)name.charAt(2)), nameleft, nameright); :}
-				| FuncName:name
-					{: RESULT = new SrcAtom(name, nameleft, nameright); :}
-				| FuncName:name LPAREN ProcessList:list RPAREN
-					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
-				| List:list
-					{: RESULT = list; :}
+UnitAtom ::=
+    NUMBER_NAME:name
+      {: RESULT = new SrcAtom(new SrcName(name), nameleft, nameright); :}
+  | CHAR_CODE_LITERAL:name
+      {: RESULT = new SrcAtom(new SrcName(""+(int)name.charAt(2)), nameleft, nameright); :}
+  | FuncName:name
+      {: RESULT = new SrcAtom(name, nameleft, nameright); :}
+  | FuncName:name LPAREN ProcessList:list RPAREN
+      {: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
+  | List:list
+      {: RESULT = list; :}
 //				| LPAREN Rule:rule RPAREN
 //					{: RESULT = rule; :}
-				| LPAREN RuleName:name RULENAMESEP ProcessList:list ProcessListContinuation:rule
-					{: rule.name = name;
-					   if (rule == null) {
-					     if (list.size() == 1) {
-					     	RESULT = list.getFirst();
-					     }
-					     else {
-					     	RESULT = list;
-					     }
-					   }
-					   else {
-						 rule.setHead(list);
-						 RESULT = rule;
-					   } :}
-				| LPAREN ProcessList:list ProcessListContinuation:rule
-					{: if (rule == null) {
-					     if (list.size() == 1) {
-					     	RESULT = list.getFirst();
-					     }
-					     else {
-					     	RESULT = list;
-					     }
-					   }
-					   else {
-						 rule.setHead(list);
-						 RESULT = rule;
-					   } :}
-				| LPAREN QuotedOperatorAtom:atom RPAREN
-					{: RESULT = atom; :}
-				| Context:p
-					{: RESULT = p; :}
+  | LPAREN RuleName:name RULENAMESEP ProcessList:list ProcessListContinuation:rule
+      {: rule.name = name;
+         if (rule == null) {
+           if (list.size() == 1) {
+             RESULT = list.getFirst();
+           }
+           else {
+             RESULT = list;
+           }
+         }
+         else {
+           rule.setHead(list);
+           RESULT = rule;
+         }
+      :}
+  | LPAREN ProcessList:list ProcessListContinuation:rule
+      {: if (rule == null) {
+           if (list.size() == 1) {
+             RESULT = list.getFirst();
+           }
+           else {
+             RESULT = list;
+           }
+         }
+         else {
+           rule.setHead(list);
+           RESULT = rule;
+         }
+      :}
+  | LPAREN QuotedOperatorAtom:atom RPAREN
+      {: RESULT = atom; :}
+  | Context:p
+      {: RESULT = p; :}
 //				| LPAREN Atom:atom RPAREN
 //					{: RESULT = atom; :}
-				| Link:link
-					{: RESULT = link; :}
-				| HyperLink:link
-					{: RESULT = link; :}
-				| Membrane:mem
-					{: RESULT = mem; :}
-				;
+  | Link:link
+      {: RESULT = link; :}
+  | HyperLink:link
+      {: RESULT = link; :}
+  | Membrane:mem
+      {: RESULT = mem; :}
+;
 
-UnaryOpAtom	::=	  UnitAtom:atom
-					{: RESULT = atom; :}
-				| PLUS UnitAtom:atom
-					{: LinkedList list = new LinkedList();
-					   list.add(atom);
-					   RESULT = new SrcAtom("+", list); :}
-				| MINUS UnitAtom:atom
-					{: LinkedList list = new LinkedList();
-					   list.add(atom);
-					   RESULT = new SrcAtom("-", list); :}
-				| PLUS_DOT UnitAtom:atom
-					{: LinkedList list = new LinkedList();
-					   list.add(atom);
-					   RESULT = new SrcAtom("+.", list); :}
-				| MINUS_DOT UnitAtom:atom
-					{: LinkedList list = new LinkedList();
-					   list.add(atom);
-					   RESULT = new SrcAtom("-.", list); :}
-				;
+UnaryOpAtom ::=
+    UnitAtom:atom
+      {: RESULT = atom; :}
+  | PLUS UnitAtom:atom
+      {: LinkedList list = new LinkedList();
+         list.add(atom);
+         RESULT = new SrcAtom("+", list); :}
+  | MINUS UnitAtom:atom
+      {: LinkedList list = new LinkedList();
+         list.add(atom);
+         RESULT = new SrcAtom("-", list); :}
+  | PLUS_DOT UnitAtom:atom
+      {: LinkedList list = new LinkedList();
+         list.add(atom);
+         RESULT = new SrcAtom("+.", list); :}
+  | MINUS_DOT UnitAtom:atom
+      {: LinkedList list = new LinkedList();
+         list.add(atom);
+         RESULT = new SrcAtom("-.", list); :}
+;
 
-Atom200		::=   UnaryOpAtom:atom
-					{: RESULT = atom; :}
-				| Atom200:atom1 HAT UnaryOpAtom:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("^", list); :};
+Atom200 ::=
+    UnaryOpAtom:atom
+      {: RESULT = atom; :}
+  | Atom200:atom1 HAT UnaryOpAtom:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("^", list); :}
+;
 
-Atom300		::=   Atom200:atom
-					{: RESULT = atom; :}
-				| Atom200:atom1 MOD Atom200:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("mod", list); :}
-				| Atom300:atom1 ASTERISK_ASTERISK Atom200:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("**", list); :};
+Atom300 ::=
+    Atom200:atom
+      {: RESULT = atom; :}
+  | Atom200:atom1 MOD Atom200:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("mod", list); :}
+  | Atom300:atom1 ASTERISK_ASTERISK Atom200:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("**", list); :}
+;
 
-Atom400		::=   Atom300:atom
-					{: RESULT = atom; :}
-				| Atom400:atom1 ASTERISK_DOT Atom300:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("*.", list); :}
-				| Atom400:atom1 SLASH_DOT Atom300:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("/.", list); :}
-				| Atom400:atom1 ASTERISK Atom300:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("*", list); :}
-				| Atom400:atom1 SLASH Atom300:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("/", list); :};
+Atom400 ::=
+    Atom300:atom
+      {: RESULT = atom; :}
+  | Atom400:atom1 ASTERISK_DOT Atom300:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("*.", list); :}
+  | Atom400:atom1 SLASH_DOT Atom300:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("/.", list); :}
+  | Atom400:atom1 ASTERISK Atom300:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("*", list); :}
+  | Atom400:atom1 SLASH Atom300:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("/", list); :}
+;
 
-Atom500		::=   Atom400:atom
-					{: RESULT = atom; :}
-				| Atom500:atom1 MINUS_DOT Atom400:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("-.", list); :}
-				| Atom500:atom1 PLUS_DOT Atom400:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("+.", list); :}
-				| Atom500:atom1 MINUS Atom400:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("-", list); :}
-				| Atom500:atom1 PLUS Atom400:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom("+", list); :};
+Atom500 ::=
+    Atom400:atom
+      {: RESULT = atom; :}
+  | Atom500:atom1 MINUS_DOT Atom400:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("-.", list); :}
+  | Atom500:atom1 PLUS_DOT Atom400:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("+.", list); :}
+  | Atom500:atom1 MINUS Atom400:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("-", list); :}
+  | Atom500:atom1 PLUS Atom400:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("+", list); :}
+;
 
-Atom700		::=   Atom500:atom
-					{: RESULT = atom; :}
-				| Atom500:atom1 HL:op Atom500:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom(op, list); :}
-				| Atom500:atom1 RELOP:op Atom500:atom2
-					{: LinkedList list = new LinkedList();
-					   list.add(atom1); list.add(atom2);
-					   RESULT = new SrcAtom(op, list); :};
+Atom700 ::=
+    Atom500:atom
+      {: RESULT = atom; :}
+  | Atom500:atom1 HL:op Atom500:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom(op, list); :}
+  | Atom500:atom1 RELOP:op Atom500:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom(op, list); :}
+;
 
 // :の左側には ([a-z][A-Za-z_0-9]* | [0-9]+) のみを記述できる
-Atom800		::=   Atom700:atom
-					{: RESULT = atom; :}
-				| AtomName:name COLON Atom800:atom
-					{: LinkedList list = new LinkedList();
-					   list.add(new SrcAtom(new SrcName(name))); list.add(atom);
-					   RESULT = new SrcAtom(":", list); :};
+Atom800 ::=
+    Atom700:atom
+      {: RESULT = atom; :}
+  | AtomName:name COLON Atom800:atom
+      {: LinkedList list = new LinkedList();
+         list.add(new SrcAtom(new SrcName(name)));
+         list.add(atom); RESULT = new SrcAtom(":", list); :}
+;
 
 // アトムや膜などから帰納的に構成される式。Atomという名称はもはや正しくない
-Atom		::=   Atom800:atom
-					{: RESULT = atom; :};
+Atom ::=
+    Atom800:atom
+      {: RESULT = atom; :}
+;
 
 // ( ) で囲って演算子が付いていない単独の項にできる演算子
 QuotedOperatorAtom ::=
-				  PLUS			{: RESULT = new SrcAtom("+");	:}
-				| MINUS			{: RESULT = new SrcAtom("-");	:}
-				| EXCLA			{: RESULT = new SrcAtom("!");	:}
-				| ASTERISK		{: RESULT = new SrcAtom("*");	:}
-				| SLASH			{: RESULT = new SrcAtom("/");	:}
-				| PLUS_DOT		{: RESULT = new SrcAtom("+.");	:}
-				| MINUS_DOT		{: RESULT = new SrcAtom("-.");	:}
-				| ASTERISK_DOT	{: RESULT = new SrcAtom("*.");	:}
-				| SLASH_DOT		{: RESULT = new SrcAtom("/.");	:}
-//				| MOD			{: RESULT = new SrcAtom("mod");	:} //通常のアトム名として処理
-				| RELOP:op		{: RESULT = new SrcAtom(op);	:}
-				| HL:op			{: RESULT = new SrcAtom(op);	:} //seiji
-				| HAT			{: RESULT = new SrcAtom("^");	:}
-				| TILDE			{: RESULT = new SrcAtom("~");	:}
-				| COLON			{: RESULT = new SrcAtom(":");	:}
-				| ASTERISK_ASTERISK	{: RESULT = new SrcAtom("**");	:}
-				;
-					   
-List        ::=   LBRACKET RBRACKET
-					{: RESULT = new SrcAtom("[]"); :}
-                | LBRACKET Process:atom ListCdr:cdr RBRACKET
-                    {: LinkedList list = new LinkedList();
-                       list.add(atom); list.add(cdr);
-                       RESULT = new SrcAtom(".", list); :};
-ListCdr     ::=   GUARD Process:atom
-                    {: RESULT = atom;  :}
-               | COMMA Process:atom ListCdr:cdr
-                    {: LinkedList list = new LinkedList();
-                       list.add(atom); list.add(cdr);
-                       RESULT = new SrcAtom(".", list); :}
-                |  
-                    {: RESULT = new SrcAtom("[]"); :};
+    PLUS              {: RESULT = new SrcAtom("+"); :}
+  | MINUS             {: RESULT = new SrcAtom("-"); :}
+  | EXCLA             {: RESULT = new SrcAtom("!"); :}
+  | ASTERISK          {: RESULT = new SrcAtom("*"); :}
+  | SLASH             {: RESULT = new SrcAtom("/"); :}
+  | PLUS_DOT          {: RESULT = new SrcAtom("+."); :}
+  | MINUS_DOT         {: RESULT = new SrcAtom("-."); :}
+  | ASTERISK_DOT      {: RESULT = new SrcAtom("*."); :}
+  | SLASH_DOT         {: RESULT = new SrcAtom("/."); :}
+//| MOD               {: RESULT = new SrcAtom("mod"); :} //通常のアトム名として処理
+  | RELOP:op          {: RESULT = new SrcAtom(op); :}
+  | HL:op             {: RESULT = new SrcAtom(op); :} //seiji
+  | HAT               {: RESULT = new SrcAtom("^"); :}
+  | TILDE             {: RESULT = new SrcAtom("~"); :}
+  | COLON             {: RESULT = new SrcAtom(":"); :}
+  | ASTERISK_ASTERISK {: RESULT = new SrcAtom("**"); :}
+;
+
+List ::=
+    LBRACKET RBRACKET
+      {: RESULT = new SrcAtom("[]"); :}
+  | LBRACKET Process:atom ListCdr:cdr RBRACKET
+      {: LinkedList list = new LinkedList(); list.add(atom); list.add(cdr); RESULT = new SrcAtom(".", list); :}
+;
+
+ListCdr ::=
+    GUARD Process:atom
+      {: RESULT = atom; :}
+  | COMMA Process:atom ListCdr:cdr
+      {: LinkedList list = new LinkedList(); list.add(atom); list.add(cdr); RESULT = new SrcAtom(".", list); :}
+  | /* epsilon */
+      {: RESULT = new SrcAtom("[]"); :}
+;
 
 // Atomをカンマで区切った列。現在未使用
-AtomList     ::=  Atom:atom AtomList:atomlist
-					{: if (atomlist == null) { RESULT = atom; }
-					   else {
-					     LinkedList list = new LinkedList();
-                         list.add(atom); list.add(atomlist);
-                         RESULT = new SrcAtom(",", list);
-                       } :};
-AtomListRest ::=  RPAREN
-					{: RESULT = null; :}
-                | COMMA Atom:atom AtomListRest:atomlist
-                    {: LinkedList list = new LinkedList();
-                       list.add(atom); list.add(atomlist);
-                       RESULT = new SrcAtom(",", list); :};
+AtomList ::=
+    Atom:atom AtomList:atomlist
+      {: if (atomlist == null) { RESULT = atom; }
+         else {
+           LinkedList list = new LinkedList();
+           list.add(atom); list.add(atomlist);
+           RESULT = new SrcAtom(",", list);
+         }
+      :}
+;
 
-Membrane	::= UnnamedMembrane:mem {: RESULT = mem; :}
-				| AtomName:name UnnamedMembrane:mem {: mem.name = name; RESULT = mem; :};
+AtomListRest ::=
+    RPAREN
+     {: RESULT = null; :}
+  | COMMA Atom:atom AtomListRest:atomlist
+     {: LinkedList list = new LinkedList(); list.add(atom); list.add(atomlist); RESULT = new SrcAtom(",", list); :}
+;
+
+Membrane ::=
+    UnnamedMembrane:mem
+      {: RESULT = mem; :}
+  | AtomName:name UnnamedMembrane:mem
+      {: mem.name = name; RESULT = mem; :}
+;
 
 UnnamedMembrane ::=
 				//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
@@ -330,177 +365,176 @@ UnnamedMembrane ::=
 				//| AtomName:name COLON LBRACE WorldProcessList:list RBRACE
 				//	{: RESULT = new SrcMembrane(name, list); :}
 				//|
-				  LBRACE WorldProcessList:list RBRACE_SLASH
-					{: SrcMembrane sMem = new SrcMembrane(list);
-					   sMem.stable = true;
-					   RESULT = sMem; :}
-				| LBRACE WorldProcessList:list RBRACE
-					{: RESULT = new SrcMembrane(list); :}
-				| LBRACE WorldProcessList:list RBRACE_SLASH_AT UnitAtom:atom
-					{: SrcMembrane sMem = new SrcMembrane(list);
-					   sMem.stable = true;
-					   sMem.pragma = atom;
-					   RESULT = sMem; :}
-				| LBRACE WorldProcessList:list RBRACE_AT UnitAtom:atom
-					{: SrcMembrane sMem = new SrcMembrane(list);
-					   sMem.pragma = atom;
-					   RESULT = sMem; :}
-				| LBRACE WorldProcessList:list RBRACE_UNDERBAR_SLASH
-					{: SrcMembrane sMem = new SrcMembrane(list);
-					   sMem.stable = true;
-					   sMem.kind = 1;
-					   RESULT = sMem; :}
-				| LBRACE WorldProcessList:list RBRACE_UNDERBAR
-					{: SrcMembrane sMem = new SrcMembrane(list);
-					   sMem.kind = 1;
-					   RESULT = sMem; :}
-				| LBRACE WorldProcessList:list RBRACE_UNDERBAR_SLASH_AT UnitAtom:atom
-					{: SrcMembrane sMem = new SrcMembrane(list);
-					   sMem.stable = true;
-					   sMem.kind = 1;
-					   sMem.pragma = atom;
-					   RESULT = sMem; :}
-				| LBRACE WorldProcessList:list RBRACE_UNDERBAR_AT UnitAtom:atom
-					{: SrcMembrane sMem = new SrcMembrane(list);
-					   sMem.kind = 1;
-					   sMem.pragma = atom;
-					   RESULT = sMem; :}
-				| LBRACE WorldProcessList:list RBRACE_ASTERISK
-					{: SrcMembrane sMem = new SrcMembrane(list);
-						sMem.kind = runtime.Membrane.KIND_ND;
-						RESULT = sMem; :}
-				;
-					
+    LBRACE WorldProcessList:list RBRACE_SLASH
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.stable = true; RESULT = sMem; :}
+  | LBRACE WorldProcessList:list RBRACE
+      {: RESULT = new SrcMembrane(list); :}
+  | LBRACE WorldProcessList:list RBRACE_SLASH_AT UnitAtom:atom
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.stable = true; sMem.pragma = atom; RESULT = sMem; :}
+  | LBRACE WorldProcessList:list RBRACE_AT UnitAtom:atom
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.pragma = atom; RESULT = sMem; :}
+  | LBRACE WorldProcessList:list RBRACE_UNDERBAR_SLASH
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.stable = true; sMem.kind = 1; RESULT = sMem; :}
+  | LBRACE WorldProcessList:list RBRACE_UNDERBAR
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.kind = 1; RESULT = sMem; :}
+  | LBRACE WorldProcessList:list RBRACE_UNDERBAR_SLASH_AT UnitAtom:atom
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.stable = true; sMem.kind = 1; sMem.pragma = atom; RESULT = sMem; :}
+  | LBRACE WorldProcessList:list RBRACE_UNDERBAR_AT UnitAtom:atom
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.kind = 1; sMem.pragma = atom; RESULT = sMem; :}
+  | LBRACE WorldProcessList:list RBRACE_ASTERISK
+      {: SrcMembrane sMem = new SrcMembrane(list); sMem.kind = runtime.Membrane.KIND_ND; RESULT = sMem; :}
+;
+
 // 丸カッコなしのルール構文
 // ルール名に対応 by Hara
 // 出現した行番号を追加 by Inui
 // simpagationを追加 by Kudo
-Rule		::=	  ProcessList:head RULE:lineno ProcessList:body 
-					{: RESULT = new SrcRule(null, head, body, lineno.intValue()); :}
-				| RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:body 
-					{: RESULT = new SrcRule(name, head, body, lineno.intValue()); :}
-			    | ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(null, head, guard, body, lineno.intValue()); :}
-			    | RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body 
-					{: RESULT = new SrcRule(name, head, guard, body, lineno.intValue()); :}
-				| ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body
-					{: RESULT = new SrcRule(null, head, head2, null, body, lineno.intValue()); :}
-				| RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body
-					{: RESULT = new SrcRule(name, head, head2, null, body, lineno.intValue()); :}
-				| ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
-					{: RESULT = new SrcRule(null, head, head2, guard, body, lineno.intValue()); :}
-				| RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
-					{: RESULT = new SrcRule(name, head, head2, guard, body, lineno.intValue()); :}
+Rule ::=
+    ProcessList:head RULE:lineno ProcessList:body
+      {: RESULT = new SrcRule(null, head, body, lineno.intValue()); :}
+  | RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:body
+      {: RESULT = new SrcRule(name, head, body, lineno.intValue()); :}
+  | ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body
+      {: RESULT = new SrcRule(null, head, guard, body, lineno.intValue()); :}
+  | RuleName:name RULENAMESEP ProcessList:head RULE:lineno ProcessList:guard GUARD ProcessList:body
+      {: RESULT = new SrcRule(name, head, guard, body, lineno.intValue()); :}
+  | ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body
+      {: RESULT = new SrcRule(null, head, head2, null, body, lineno.intValue()); :}
+  | RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body
+      {: RESULT = new SrcRule(name, head, head2, null, body, lineno.intValue()); :}
+  | ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
+      {: RESULT = new SrcRule(null, head, head2, guard, body, lineno.intValue()); :}
+  | RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
+      {: RESULT = new SrcRule(name, head, head2, guard, body, lineno.intValue()); :}
 ;
 
 // 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
 // こっちはルール名には非対応。(a,b,c :- ( 対応しているようだが…。)
 // 出現した行番号を追加 by Inui
 // simpagationを追加 by Kudo
-ProcessListContinuation ::= RPAREN
-					{: RESULT = null; :}
-				| RULE:lineno ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, body, lineno.intValue()); :}
-				| RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, guard, body, lineno.intValue()); :}
-				| BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, head2, null, body, lineno.intValue()); :}
-				| BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-					{: RESULT = new SrcRule(null, null, head2, guard, body, lineno.intValue()); :}
+ProcessListContinuation ::=
+    RPAREN
+      {: RESULT = null; :}
+  | RULE:lineno ProcessList:body RPAREN
+      {: RESULT = new SrcRule(null, null, body, lineno.intValue()); :}
+  | RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
+      {: RESULT = new SrcRule(null, null, guard, body, lineno.intValue()); :}
+  | BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body RPAREN
+      {: RESULT = new SrcRule(null, null, head2, null, body, lineno.intValue()); :}
+  | BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
+      {: RESULT = new SrcRule(null, null, head2, guard, body, lineno.intValue()); :}
 ;
 
-ProcessContext	::= PROCVAR AtomName:name
-					 {: RESULT = new SrcProcessContext(name); :}
-				  | PROCVAR AtomName:name LBRACKET LinkList:list RBRACKET
-					 {: SrcProcessContext pc = new SrcProcessContext(name);
-						pc.args = list;
-						RESULT = pc; :}
-				  | PROCVAR AtomName:name LBRACKET LinkList:list GUARD Bundle:bundle  RBRACKET
-					 {: SrcProcessContext pc = new SrcProcessContext(name);
-						pc.args = list;
-						pc.bundle = bundle;
-						RESULT = pc; :};
+ProcessContext ::=
+    PROCVAR AtomName:name
+      {: RESULT = new SrcProcessContext(name); :}
+  | PROCVAR AtomName:name LBRACKET LinkList:list RBRACKET
+      {: SrcProcessContext pc = new SrcProcessContext(name); pc.args = list; RESULT = pc; :}
+  | PROCVAR AtomName:name LBRACKET LinkList:list GUARD Bundle:bundle  RBRACKET
+      {: SrcProcessContext pc = new SrcProcessContext(name); pc.args = list; pc.bundle = bundle; RESULT = pc; :}
+;
 
-RuleContext	::=   RULEVAR AtomName:name
-					{: RESULT = new SrcRuleContext(name); :};
+RuleContext ::=
+    RULEVAR AtomName:name
+      {: RESULT = new SrcRuleContext(name); :}
+;
 
-Context		::=   ProcessContext:p
-					{: RESULT = p; :}
-				| RuleContext:r
-					{: RESULT = r; :};
+Context ::=
+    ProcessContext:p
+      {: RESULT = p; :}
+  | RuleContext:r
+      {: RESULT = r; :}
+;
 
-Bundle		::= ASTERISK LINK_NAME:name
-					{: RESULT = new SrcLinkBundle(name); :};
+Bundle ::=
+    ASTERISK LINK_NAME:name
+      {: RESULT = new SrcLinkBundle(name); :}
+;
 
-BundleList	::=   Bundle:bundle
-					{: LinkedList list = new LinkedList(); list.add(bundle); RESULT = list; :}
-				| BundleList:list COMMA Bundle:bundle
-					{: list.add(bundle); RESULT = list; :};
-				
-Aggregate	::= FuncName:name LPAREN BundleList:list RPAREN
-					{: RESULT = new SrcAtom(name, list, nameleft, nameright); :};
+BundleList ::=
+    Bundle:bundle
+      {: LinkedList list = new LinkedList(); list.add(bundle); RESULT = list; :}
+  | BundleList:list COMMA Bundle:bundle
+      {: list.add(bundle); RESULT = list; :}
+;
 
-LinkList	::=   /* epsilon */
-					{: RESULT = new LinkedList(); :}
-				| NonemptyLinkList:list
-					{: RESULT = list; :};
-NonemptyLinkList ::=  Link:link
-					{: LinkedList list = new LinkedList(); list.add(link); RESULT = list; :}
-				| NonemptyLinkList:list COMMA Link:link
-					{: list.add(link); RESULT = list; :};
-				
-Process		::=   Atom:p
-					{:  RESULT = p; :}
-				| NEGATIVE Atom:atom
-					{: LinkedList list = new LinkedList();
-					   list.add(atom);
-					   RESULT = new SrcAtom(new SrcName("\\+"), list, atomleft, atomright); :}
+Aggregate ::=
+    FuncName:name LPAREN BundleList:list RPAREN
+      {: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
+;
+
+LinkList ::=
+    /* epsilon */
+      {: RESULT = new LinkedList(); :}
+  | NonemptyLinkList:list
+      {: RESULT = list; :}
+;
+
+NonemptyLinkList ::=
+    Link:link
+      {: LinkedList list = new LinkedList(); list.add(link); RESULT = list; :}
+  | NonemptyLinkList:list COMMA Link:link
+      {: list.add(link); RESULT = list; :}
+;
+
+Process ::=
+    Atom:p
+      {:  RESULT = p; :}
+  | NEGATIVE Atom:atom
+      {: LinkedList list = new LinkedList(); list.add(atom); RESULT = new SrcAtom(new SrcName("\\+"), list, atomleft, atomright); :}
 //				| NEGATIVE LPAREN AtomList:atomlist
 //					{: LinkedList list = new LinkedList();
 //					   list.add(atomlist);
 //					   RESULT = new SrcAtom(new SrcName("\\+"), list, atomleft, atomright); :}
-				| Aggregate:p
-					{:  RESULT = p; :}
+  | Aggregate:p
+      {:  RESULT = p; :}
 //				| Membrane:p
 //					{:  RESULT = p; :}
 //				| Rule:p
 //					{:  RESULT = p; :}
 //				| Context:p
 //					{:  RESULT = p; :}
-				;
+;
 
 // Processをカンマで区切った列。
 // （現在、構文エラーを減らすために、膜の前のカンマは省略できるという特別扱いが採用されている）
 // -> 廃止しました。 2006/06/26 by kudo ( 膜名導入に際し衝突する為 )
-ProcessList ::= /* epsilon */
-					{: RESULT = new LinkedList(); :}
-				| NonemptyProcessList:list
-					{: RESULT = list; :}
-				| NonemptyProcessList:list COMMA
-					{: RESULT = list; :}
-				;
+ProcessList ::=
+    /* epsilon */
+      {: RESULT = new LinkedList(); :}
+  | NonemptyProcessList:list
+      {: RESULT = list; :}
+  | NonemptyProcessList:list COMMA
+      {: RESULT = list; :}
+;
+
 NonemptyProcessList ::=
-				  Process:p
-					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
+    Process:p
+      {: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
 // 膜名導入に際し、衝突するようになったので廃止。
 //				| NonemptyProcessList:list Membrane:p
 //					{: list.add(p); RESULT = list; :}
-				| NonemptyProcessList:list COMMA Process:p
-					{: list.add(p); RESULT = list; :};
+  | NonemptyProcessList:list COMMA Process:p
+      {: list.add(p); RESULT = list; :}
+;
 
 // ProcessListおよびRuleをピリオドで区切った列。末尾に1つのピリオドを追加しても受理する。
-WorldProcessList ::= /* epsilon */
-					{: RESULT = new LinkedList(); :}
-				| NonemptyWorldProcessList:list
-					{: RESULT = list; :}
-				| NonemptyWorldProcessList:list PERIOD
-					{: RESULT = list; :};
+WorldProcessList ::=
+    /* epsilon */
+      {: RESULT = new LinkedList(); :}
+  | NonemptyWorldProcessList:list
+      {: RESULT = list; :}
+  | NonemptyWorldProcessList:list PERIOD
+      {: RESULT = list; :}
+;
+
 NonemptyWorldProcessList ::=
-				  NonemptyProcessList:p
-					{: RESULT = p; :}
-				| Rule:p
-					{: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
-				| NonemptyWorldProcessList:list PERIOD Rule:p
-					{: list.add(p); RESULT = list; :}
-				| NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
-					{: list.addAll(p); RESULT = list; :};
+    NonemptyProcessList:p
+      {: RESULT = p; :}
+  | Rule:p
+      {: LinkedList list = new LinkedList(); list.add(p); RESULT = list; :}
+  | NonemptyWorldProcessList:list PERIOD Rule:p
+      {: list.add(p); RESULT = list; :}
+  | NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
+      {: list.addAll(p); RESULT = list; :}
+;
