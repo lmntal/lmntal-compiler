@@ -34,7 +34,7 @@
 	<!-- generate java sources -->
 	<target name="help" description="generate Help.java from comment of FrontEnd.java">
 		<exec executable="perl" input="${src}/runtime/FrontEnd.java" output="${src}/runtime/Help.java" error="_errors_help_gen.txt">
-			<arg file="${src}/help_gen.pl"/>
+			<arg file="help_gen.pl"/>
 		</exec>
 	</target>
 
