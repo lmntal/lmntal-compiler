@@ -10,14 +10,14 @@ import util.Util;
 public final class Env
 {
 	/**
-	 * LMNtal Compiler のバージョン
+	 * LMNtal Compiler のバージョン (M.mm)
 	 */
-	public static final String LMNTAL_COMPILER_VERSION = "1.30";
+	public static final String LMNTAL_COMPILER_VERSION = "1.40";
 
 	/**
-	 * このバージョンをリリースした日付
+	 * このバージョンをリリースした日付 (yyyy-MM-dd)
 	 */
-	public static final String RELEASE_DATE = "2013-07-02";
+	public static final String RELEASE_DATE = "2013-11-15";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
