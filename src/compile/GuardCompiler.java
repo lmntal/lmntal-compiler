@@ -48,11 +48,11 @@ class GuardCompiler extends HeadCompiler
 	/** newアトム -> newアトムの引数の接続先アトム一覧 */
   	HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<Atom, Atom[]>(); // hlgroundattr@onuma
 	
-  	private List<String> getHlgroundAttrs(Atom[] newArgAtoms) {
-		List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+  	private List<Functor> getHlgroundAttrs(Atom[] newArgAtoms) {
+		List<Functor> attrs = new ArrayList<Functor>(); // hlgroundの属性
 		for (Atom a : newArgAtoms) {
 			if (a != null) {
-				attrs.add(a.functor.toString());	
+				attrs.add(a.functor);	
 			}
 		}
 		return attrs;
@@ -803,7 +803,8 @@ class GuardCompiler extends HeadCompiler
 							i++;
 						}
 						newAtomArgAtoms.put(newAtom, newArgAtoms);
-
+						List<Functor> attrs = getHlgroundAttrs(newArgAtoms);
+						
 						for (Atom c : typeConstraints) {
 							Context pc0 = (Context)c.args[0].buddy.atom;
 							String v0 = tu.getTypeVariable(pc0.def);
@@ -811,7 +812,7 @@ class GuardCompiler extends HeadCompiler
 						}
 
 						int atomid = varCount++;
-						match.add(new Instruction(Instruction.NEWHLINKWITHATTR, atomid, getHlgroundAttrs(newArgAtoms)));
+						match.add(new Instruction(Instruction.NEWHLINKWITHATTR, atomid, attrs.get(0)));
 						bindToUnaryAtom(def1, atomid);
 						typedCxtDataTypes.put(def1, Instruction.ISINT);
 						if (identifiedCxtdefs.contains(def1))
@@ -825,6 +826,19 @@ class GuardCompiler extends HeadCompiler
 							identifiedCxtdefs.add(def1);
 							typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
 						}
+					}
+					else if (func.getName().equals("hlink") && func.getArity() >= 2) // getattratom@onuma
+					{
+						int[] desc = array(ISHLINK);
+						if (!identifiedCxtdefs.contains(def1)) continue;
+						int atomid1 = loadUnaryAtom(def1);
+						int dstatomid = varCount++;
+						if (desc[0] != 0 && (!typedCxtDataTypes.containsKey(def1) || desc[0] != typedCxtDataTypes.get(def1)))
+						{
+							match.add(new Instruction(desc[0], atomid1));
+							typedCxtDataTypes.put(def1, desc[0]);
+						}
+						match.add(new Instruction(Instruction.GETATTRATOM, dstatomid, atomid1));
 					}
 					else if (guardLibrary0.containsKey(func)) // 0入力制約//seiji
 					{
