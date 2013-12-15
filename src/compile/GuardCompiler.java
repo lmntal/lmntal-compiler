@@ -45,7 +45,19 @@ class GuardCompiler extends HeadCompiler
 	/** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
 	 * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
 	List<ContextDef> typedCxtDefs = new ArrayList<ContextDef>();
-
+	/** newアトム -> newアトムの引数の接続先アトム一覧 */
+  	HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<Atom, Atom[]>(); // hlgroundattr@onuma
+	
+  	private List<String> getHlgroundAttrs(Atom[] newArgAtoms) {
+		List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+		for (Atom a : newArgAtoms) {
+			if (a != null) {
+				attrs.add(a.functor.toString());	
+			}
+		}
+		return attrs;
+  	}
+  	
 	private int typedcxtToSrcPath(ContextDef def) {
 		if (!typedCxtSrcs.containsKey(def)) return UNBOUND;
 		return typedCxtSrcs.get(def);
@@ -450,6 +462,10 @@ class GuardCompiler extends HeadCompiler
 					}
 				}
 			}
+			else if (f.getName().equals("new") && f.getArity() >= 2)
+			{
+				// newアトムで引数が3つ以上のとき
+			}
 			else
 			{
 				System.err.println("Unknown! " + c.toStringAsTypeConstraint());
@@ -766,6 +782,50 @@ class GuardCompiler extends HeadCompiler
 //						match.add(new Instruction(Instruction.ISHLINK, atomid2));
 //						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
 //					}
+					else if (func.getName().equals("new") && func.getArity() >= 2) // newhlinkwithattr@onuma
+					{
+						// newの2番目以降についてアトムを取得しnewAtomArgAtomsに格納する
+						Atom newAtom = cstr;
+						int i = 0;
+						Atom[] newArgAtoms = new Atom[newAtom.args.length];
+						for (LinkOccurrence link : newAtom.args) {
+							if (i != 0) {
+								Atomic linkedAtom = link.buddy.atom;
+								ContextDef d = ((ProcessContext) linkedAtom).def;
+								for (ProcessContext pc : linkedAtom.mem.typedProcessContexts) {
+									if (pc.def == d && pc != linkedAtom) {
+										if (pc.args.length != 0) {
+											newArgAtoms[i] = (Atom) pc.args[0].buddy.atom;	
+										}
+									}
+								}
+							}
+							i++;
+						}
+						newAtomArgAtoms.put(newAtom, newArgAtoms);
+
+						for (Atom c : typeConstraints) {
+							Context pc0 = (Context)c.args[0].buddy.atom;
+							String v0 = tu.getTypeVariable(pc0.def);
+							Functor f = c.functor;														
+						}
+
+						int atomid = varCount++;
+						match.add(new Instruction(Instruction.NEWHLINKWITHATTR, atomid, getHlgroundAttrs(newArgAtoms)));
+						bindToUnaryAtom(def1, atomid);
+						typedCxtDataTypes.put(def1, Instruction.ISINT);
+						if (identifiedCxtdefs.contains(def1))
+						{
+							int funcid2 = varCount++;
+							match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid));
+							int atomid1 = varCount++;
+							match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
+							typedCxtSrcs.put(def1, atomid1);
+							typedCxtDefs.add(def1);
+							identifiedCxtdefs.add(def1);
+							typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
+						}
+					}
 					else if (guardLibrary0.containsKey(func)) // 0入力制約//seiji
 					{
 						int[] desc = guardLibrary0.get(func);
@@ -866,6 +926,9 @@ class GuardCompiler extends HeadCompiler
 							typedCxtDataTypes.put(def3, desc[3]);
 						}
 					}
+					else if (func.getArity() == 1 && func.isSymbol()) {
+						// newアトムにつくシンボルアトム
+					}
 					else
 					{
 						error("COMPILE ERROR: unrecognized type constraint: " + cstr);
@@ -888,7 +951,7 @@ class GuardCompiler extends HeadCompiler
 		}
 		error("COMPILE ERROR: never proceeding type constraint: " + text);
 	}
-
+	
 	private boolean GROUND_ALLOWED = true;
 	/** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。*/
 	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) throws CompileException{

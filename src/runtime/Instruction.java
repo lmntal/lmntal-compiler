@@ -1575,7 +1575,7 @@ public class Instruction implements Cloneable
 	
 	///////////////////////////////////////////////////////////////////////
 
-	// hlground命令 (280--283)
+	// hlground命令 (280--286)
 	// hlground型関連の命令列一覧。具体的な内容はmeguroさんの修論またはwiki等参照してください。
 	
 	/**
@@ -1616,6 +1616,29 @@ public class Instruction implements Cloneable
 	@LMNtalIL public static final int ISHLGROUND = 283;
 	static {setArgType(ISHLGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS));}
 	
+	/**
+	 * newhlinkwithattr [dstatom, attr]
+	 * 
+	 * 新たな属性付きhyperlinkを生成し, link先に接続することを示す。
+	 */
+	@LMNtalIL public static final int NEWHLINKWITHATTR = 284;
+	static {setArgType(NEWHLINKWITHATTR, new ArgType(true, ARG_VAR, ARG_OBJ));};
+
+	/**
+	 * getattratom [dstatom, atom]
+	 * 
+	 * ハイパーリンクの属性を取得する
+	 */
+	@LMNtalIL public static final int GETATTRATOM = 285;
+	static {setArgType(GETATTRATOM, new ArgType(false, ARG_VAR, ARG_VAR));};
+	
+	/**
+	 * hypergetlink [link, atom, pos]
+	 * 
+	 * アトム$atomの第pos引数に格納されたリンクオブジェクトへの参照を$linkに代入する。
+	 */
+	@LMNtalIL public static final int HYPERGETLINK = 286;
+	static {setArgType(HYPERGETLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));}	
 	
 	///////////////////////////////////////////////////////////////////////
 
