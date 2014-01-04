@@ -47,10 +47,12 @@ class GuardCompiler extends HeadCompiler
 	List<ContextDef> typedCxtDefs = new ArrayList<ContextDef>();
 	/** newアトム -> newアトムの引数の接続先アトム一覧 */
   	HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<Atom, Atom[]>(); // hlgroundattr@onuma
+	/** hlground型付きプロセス文脈定義(ContextDef) -> hlgroundの属性 */
+	HashMap<ContextDef, Atom[]> hlgroundAttrs = new HashMap<ContextDef, Atom[]>();
 	
-  	private List<Functor> getHlgroundAttrs(Atom[] newArgAtoms) {
+  	public List<Functor> getHlgroundAttrs(Atom[] hlgroundArgAtoms) {
 		List<Functor> attrs = new ArrayList<Functor>(); // hlgroundの属性
-		for (Atom a : newArgAtoms) {
+		for (Atom a : hlgroundArgAtoms) {
 			if (a != null) {
 				attrs.add(a.functor);	
 			}
@@ -557,10 +559,30 @@ class GuardCompiler extends HeadCompiler
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						checkGroundLink(def1);
 					}
-					else if (func.equals("hlground", 1))
+					else if (func.getName().equals("hlground"))
 					{
 						if (!identifiedCxtdefs.contains(def1)) continue;
-						checkHLGroundLink(def1);						
+						// hlgroundの属性取得 hlgroundattr@onuma
+						Atom hlgroundAtom = cstr;
+						int i = 0;
+						Atom[] attrAtoms = new Atom[hlgroundAtom.args.length-1];
+						for (LinkOccurrence link : hlgroundAtom.args) {
+							if (i != 0) {
+								Atomic linkedAtom = link.buddy.atom;
+								ContextDef d = ((ProcessContext) linkedAtom).def;
+								for (ProcessContext pc : linkedAtom.mem.typedProcessContexts) {
+									if (pc.def == d && pc != linkedAtom) {
+										if (pc.args.length != 0) {
+											attrAtoms[i-1] = (Atom) pc.args[0].buddy.atom;	
+										}
+									}
+								}
+							}
+							i++;
+						}
+						hlgroundAttrs.put(def1, attrAtoms);
+						
+						checkHLGroundLink(def1);
 					}
 					// ガードインライン
 					else if (func.getName().startsWith("custom_"))
@@ -1243,7 +1265,8 @@ class GuardCompiler extends HeadCompiler
 //			memToLinkListPath.put(def.lhsOcc.mem, srclinklistpath);
 //			}
 //			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
-			List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+			Atom[] atoms = hlgroundAttrs.get(def); // hlgroundの属性
+			List<Functor> attrs = getHlgroundAttrs(atoms);
 			int natom = varCount++;
 			match.add(new Instruction(Instruction.ISHLGROUND, natom, linkids, srclinklistpath, attrs));//,memToPath(def.lhsOcc.mem)));
 			rc.hasISGROUND = false;
