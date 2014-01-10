@@ -235,7 +235,11 @@ class GuardCompiler extends HeadCompiler
 			int[] paths = new int[arity];
 			for (int j = 0; j < arity; j++) {
 				paths[j] = varCount;
-				match.add(new Instruction(Instruction.GETLINK, varCount, atompath, j));
+				if (!atom.args[j].name.startsWith("!")) { // hlground hypergetlink
+					match.add(new Instruction(Instruction.GETLINK, varCount, atompath, j));					
+				} else {
+					match.add(new Instruction(Instruction.HYPERGETLINK, varCount, atompath, j));
+				}
 				varCount++;
 			}
 			linkPaths.put(atompath, paths);
@@ -464,9 +468,9 @@ class GuardCompiler extends HeadCompiler
 					}
 				}
 			}
-			else if (f.getName().equals("new") && f.getArity() >= 2)
+			else if ((f.getName().equals("new") && f.getArity() >= 2) || f.getName().equals("hlground"))
 			{
-				// newアトムで引数が3つ以上のとき
+				// newアトムで引数が3つ以上のとき or hlgroundのとき
 			}
 			else
 			{

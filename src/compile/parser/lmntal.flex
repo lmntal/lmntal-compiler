@@ -40,7 +40,7 @@ LineTerminator = \r|\n|\r\n|\f
 InputCharacter = ([^\r\n\f]|Character)
 WhiteSpace     = {LineTerminator} | [ \t]
 
-LinkName       = [A-Z_][A-Za-z_0-9]*
+LinkName       = [A-Z_][A-Za-z_0-9]* | \![A-Z_][A-Za-z_0-9]*
 
 ////////////////////////////////////////////////////////////////
 //
@@ -49,6 +49,7 @@ LinkName       = [A-Z_][A-Za-z_0-9]*
 AtomName = [a-z][A-Za-z_0-9]* | [0-9]+
 
 // AtomNameに加えて0引数でアトム名となる文字列その１（AtomNameと排他的でなければならない）
+
 NumberName = [0-9]*\.[0-9]+ | [0-9]*\.?[0-9]+ [Ee][+-]?[0-9]+ | 0x[0-9a-fA-F]+
 
 CharCodeLiteral = "#\"" . "\""
