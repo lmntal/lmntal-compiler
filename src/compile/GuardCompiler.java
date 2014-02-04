@@ -865,6 +865,8 @@ class GuardCompiler extends HeadCompiler
 							typedCxtDataTypes.put(def1, desc[0]);
 						}
 						match.add(new Instruction(Instruction.GETATTRATOM, dstatomid, atomid1));
+						int atomid2 = loadUnaryAtom(def2);
+						match.add(new Instruction(Instruction.SAMEFUNC, dstatomid, atomid2));
 					}
 					else if (guardLibrary0.containsKey(func)) // 0入力制約//seiji
 					{
