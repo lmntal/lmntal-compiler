@@ -41,7 +41,6 @@ InputCharacter = ([^\r\n\f]|Character)
 WhiteSpace     = {LineTerminator} | [ \t]
 
 LinkName       = [A-Z_][A-Za-z_0-9]*
-// LinkName       = [A-Z_][A-Za-z_0-9]* | \![A-Z_][A-Za-z_0-9]*
 
 ////////////////////////////////////////////////////////////////
 //

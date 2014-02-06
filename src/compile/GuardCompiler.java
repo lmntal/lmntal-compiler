@@ -830,12 +830,6 @@ class GuardCompiler extends HeadCompiler
 						}
 						newAtomArgAtoms.put(newAtom, newArgAtoms);
 						List<Functor> attrs = getHlgroundAttrs(newArgAtoms);
-						
-						for (Atom c : typeConstraints) {
-							Context pc0 = (Context)c.args[0].buddy.atom;
-							String v0 = tu.getTypeVariable(pc0.def);
-							Functor f = c.functor;														
-						}
 
 						int atomid = varCount++;
 						match.add(new Instruction(Instruction.NEWHLINKWITHATTR, atomid, attrs.get(0)));
@@ -969,7 +963,8 @@ class GuardCompiler extends HeadCompiler
 						}
 					}
 					else if (func.getArity() == 1 && func.isSymbol()) {
-						// newアトムにつくシンボルアトム
+						// new, hlink
+						// bindToFunctor(def1, func);
 					}
 					else
 					{
