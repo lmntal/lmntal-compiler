@@ -1015,7 +1015,11 @@ public class RuleCompiler
 				for (int i = 0; i < def.lhsOcc.args.length; i++)
 				{
 					int linkpath = varcount++;
-					body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
+					if (!def.lhsOcc.args[i].buddy.name.startsWith("!")) {
+						body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));						
+					} else {
+						body.add(new Instruction(Instruction.HYPERGETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
+					}
 					body.add(new Instruction(Instruction.ADDTOLIST,linklistpath,linkpath));
 					groundsrcs.put(def, linklistpath);
 				}
@@ -1056,7 +1060,8 @@ public class RuleCompiler
 				}
 				else if (gc.typedCxtTypes.get(def) == GuardCompiler.HLGROUND_LINK_TYPE)
 				{
-					List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+					Atom[] atoms = this.gc.hlgroundAttrs.get(def); // hlgroundの属性
+					List<Functor> attrs = this.gc.getHlgroundAttrs(atoms);
 					body.add(new Instruction( Instruction.REMOVEHLGROUND,
 							groundToSrcPath(def), lhsmemToPath(pc.mem), attrs ));
 				}				
@@ -1079,7 +1084,8 @@ public class RuleCompiler
 			}
 			else if (gc.typedCxtTypes.get(def) == GuardCompiler.HLGROUND_LINK_TYPE)
 			{
-				List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+				Atom[] atoms = this.gc.hlgroundAttrs.get(def); // hlgroundの属性
+				List<Functor> attrs = this.gc.getHlgroundAttrs(atoms);
 				body.add(new Instruction( Instruction.FREEHLGROUND,groundToSrcPath(def), attrs));
 			}
 		}
@@ -1162,7 +1168,8 @@ public class RuleCompiler
 					int retlistpath = varcount++;
 					//System.out.println("cp");
 					//int mappath = varcount++;
-					List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+					Atom[] atoms = this.gc.hlgroundAttrs.get(def); // hlgroundの属性
+					List<Functor> attrs = this.gc.getHlgroundAttrs(atoms);
 					body.add(new Instruction( Instruction.COPYHLGROUND, retlistpath,
 							groundToSrcPath(pc.def), // groundの場合はリンクの変数番号のリストを指す変数番号
 							rhsmemToPath(pc.mem), attrs));

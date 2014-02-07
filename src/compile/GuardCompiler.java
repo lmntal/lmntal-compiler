@@ -44,7 +44,21 @@ class GuardCompiler extends HeadCompiler
 	/** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
 	 * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
 	List<ContextDef> typedCxtDefs = new ArrayList<ContextDef>();
-
+	/** newアトム -> newアトムの引数の接続先アトム一覧 */
+  	HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<Atom, Atom[]>(); // hlgroundattr@onuma
+	/** hlground型付きプロセス文脈定義(ContextDef) -> hlgroundの属性 */
+	HashMap<ContextDef, Atom[]> hlgroundAttrs = new HashMap<ContextDef, Atom[]>();
+	
+  	public List<Functor> getHlgroundAttrs(Atom[] hlgroundArgAtoms) {
+		List<Functor> attrs = new ArrayList<Functor>(); // hlgroundの属性
+		for (Atom a : hlgroundArgAtoms) {
+			if (a != null) {
+				attrs.add(a.functor);	
+			}
+		}
+		return attrs;
+  	}
+  	
 	private int typedcxtToSrcPath(ContextDef def) {
 		if (!typedCxtSrcs.containsKey(def)) return UNBOUND;
 		return typedCxtSrcs.get(def);
@@ -220,7 +234,11 @@ class GuardCompiler extends HeadCompiler
 			int[] paths = new int[arity];
 			for (int j = 0; j < arity; j++) {
 				paths[j] = varCount;
-				match.add(new Instruction(Instruction.GETLINK, varCount, atompath, j));
+				if (!atom.args[j].name.startsWith("!")) { // hlground hypergetlink
+					match.add(new Instruction(Instruction.GETLINK, varCount, atompath, j));					
+				} else {
+					match.add(new Instruction(Instruction.HYPERGETLINK, varCount, atompath, j));
+				}
 				varCount++;
 			}
 			linkPaths.put(atompath, paths);
@@ -328,10 +346,30 @@ class GuardCompiler extends HeadCompiler
 						if (!identifiedCxtdefs.contains(def1)) continue;
 						checkGroundLink(def1);
 					}
-					else if (func.equals("hlground", 1))
+					else if (func.getName().equals("hlground"))
 					{
 						if (!identifiedCxtdefs.contains(def1)) continue;
-						checkHLGroundLink(def1);						
+						// hlgroundの属性取得
+						Atom hlgroundAtom = cstr;
+						int i = 0;
+						Atom[] attrAtoms = new Atom[hlgroundAtom.args.length-1];
+						for (LinkOccurrence link : hlgroundAtom.args) {
+							if (i != 0) {
+								Atomic linkedAtom = link.buddy.atom;
+								ContextDef d = ((ProcessContext) linkedAtom).def;
+								for (ProcessContext pc : linkedAtom.mem.typedProcessContexts) {
+									if (pc.def == d && pc != linkedAtom) {
+										if (pc.args.length != 0) {
+											attrAtoms[i-1] = (Atom) pc.args[0].buddy.atom;	
+										}
+									}
+								}
+							}
+							i++;
+						}
+						hlgroundAttrs.put(def1, attrAtoms);
+						
+						checkHLGroundLink(def1);
 					}
 					// ガードインライン
 					else if (func.getName().startsWith("custom_"))
@@ -553,6 +591,60 @@ class GuardCompiler extends HeadCompiler
 //						match.add(new Instruction(Instruction.ISHLINK, atomid2));
 //						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
 //					}
+					else if (func.getName().equals("new") && func.getArity() >= 2) // newhlinkwithattr
+					{
+						// newの2番目以降についてアトムを取得しnewAtomArgAtomsに格納する
+						Atom newAtom = cstr;
+						int i = 0;
+						Atom[] newArgAtoms = new Atom[newAtom.args.length];
+						for (LinkOccurrence link : newAtom.args) {
+							if (i != 0) {
+								Atomic linkedAtom = link.buddy.atom;
+								ContextDef d = ((ProcessContext) linkedAtom).def;
+								for (ProcessContext pc : linkedAtom.mem.typedProcessContexts) {
+									if (pc.def == d && pc != linkedAtom) {
+										if (pc.args.length != 0) {
+											newArgAtoms[i] = (Atom) pc.args[0].buddy.atom;	
+										}
+									}
+								}
+							}
+							i++;
+						}
+						newAtomArgAtoms.put(newAtom, newArgAtoms);
+						List<Functor> attrs = getHlgroundAttrs(newArgAtoms);
+
+						int atomid = varCount++;
+						match.add(new Instruction(Instruction.NEWHLINKWITHATTR, atomid, attrs.get(0)));
+						bindToUnaryAtom(def1, atomid);
+						typedCxtDataTypes.put(def1, Instruction.ISINT);
+						if (identifiedCxtdefs.contains(def1))
+						{
+							int funcid2 = varCount++;
+							match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid));
+							int atomid1 = varCount++;
+							match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
+							typedCxtSrcs.put(def1, atomid1);
+							typedCxtDefs.add(def1);
+							identifiedCxtdefs.add(def1);
+							typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
+						}
+					}
+					else if (func.getName().equals("hlink") && func.getArity() >= 2) // getattratom
+					{
+						int[] desc = array(ISHLINK);
+						if (!identifiedCxtdefs.contains(def1)) continue;
+						int atomid1 = loadUnaryAtom(def1);
+						int dstatomid = varCount++;
+						if (desc[0] != 0 && (!typedCxtDataTypes.containsKey(def1) || desc[0] != typedCxtDataTypes.get(def1)))
+						{
+							match.add(new Instruction(desc[0], atomid1));
+							typedCxtDataTypes.put(def1, desc[0]);
+						}
+						match.add(new Instruction(Instruction.GETATTRATOM, dstatomid, atomid1));
+						int atomid2 = loadUnaryAtom(def2);
+						match.add(new Instruction(Instruction.SAMEFUNC, dstatomid, atomid2));
+					}
 					else if (guardLibrary0.containsKey(func)) // 0入力制約//seiji
 					{
 						int[] desc = guardLibrary0.get(func);
@@ -653,6 +745,10 @@ class GuardCompiler extends HeadCompiler
 							typedCxtDataTypes.put(def3, desc[3]);
 						}
 					}
+					else if (func.getArity() == 1 && func.isSymbol()) {
+						// new, hlink
+						// bindToFunctor(def1, func);
+					}
 					else
 					{
 						error("COMPILE ERROR: unrecognized type constraint: " + cstr);
@@ -675,7 +771,7 @@ class GuardCompiler extends HeadCompiler
 		}
 		error("COMPILE ERROR: never proceeding type constraint: " + text);
 	}
-
+	
 	private boolean GROUND_ALLOWED = true;
 	/** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。*/
 	private void processEquivalenceConstraint(ContextDef def1, ContextDef def2) throws CompileException{
@@ -906,7 +1002,7 @@ class GuardCompiler extends HeadCompiler
 	
 	/** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
 	 *  @param def プロセス文脈定義 */
-	// hlground@onuma
+	// hlground型
 	private void checkHLGroundLink(ContextDef def) {
 		if(typedCxtTypes.get(def) != UNARY_ATOM_TYPE && typedCxtTypes.get(def) != GROUND_LINK_TYPE && typedCxtTypes.get(def) != HLGROUND_LINK_TYPE){
 			typedCxtTypes.put(def,HLGROUND_LINK_TYPE);
@@ -953,7 +1049,8 @@ class GuardCompiler extends HeadCompiler
 //			memToLinkListPath.put(def.lhsOcc.mem, srclinklistpath);
 //			}
 //			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
-			List<String> attrs = new ArrayList<String>(); // hlgroundの属性
+			Atom[] atoms = hlgroundAttrs.get(def); // hlgroundの属性
+			List<Functor> attrs = getHlgroundAttrs(atoms);
 			int natom = varCount++;
 			match.add(new Instruction(Instruction.ISHLGROUND, natom, linkids, srclinklistpath, attrs));//,memToPath(def.lhsOcc.mem)));
 			rc.hasISGROUND = false;
