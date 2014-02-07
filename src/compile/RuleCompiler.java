@@ -1147,6 +1147,7 @@ public class RuleCompiler
 							rhsmemToPath(pc.mem),
 							typedcxtToSrcPath(pc.def) ));
 					rhstypedcxtpaths.put(pc, atompath);
+					rhsmappaths.put(pc, atompath);
 				}
 				else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
 				{
