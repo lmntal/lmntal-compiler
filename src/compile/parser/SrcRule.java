@@ -49,7 +49,6 @@ class SrcRule
 	 */
 	public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body)
 	{
-		
 		this.name = name;
 		this.head = head;
 		this.guard = guard;
@@ -89,7 +88,10 @@ class SrcRule
 		this.guard = (guard == null ? new LinkedList() : guard);
 		this.guardNegatives = new LinkedList();
 		this.body = body;
-		if (head2 != null) unSimpagationize(head2);
+		if (head2 != null)
+		{
+			unSimpagationize(head2);
+		}
 		LinkedList head3 = this.head;
 		LinkedList body2 = this.body;
 		addTypeConstraint(head3);
@@ -121,7 +123,7 @@ class SrcRule
 					newl.add(name);
 					headhl.add(name.toString());	
 					SrcAtom newg = new SrcAtom("hlink", newl);
-					this.guard.add(newg);
+					guard.add(newg);
 				}
 				else if (o instanceof SrcAtom)
 				{
@@ -151,7 +153,7 @@ class SrcRule
 						newl.add(name);
 						headhl.add(name.toString());
 						SrcAtom newg = new SrcAtom("new", newl);
-						this.guard.add(newg);
+						guard.add(newg);
 					}
 				}
 				else if (o instanceof SrcAtom)
@@ -175,44 +177,44 @@ class SrcRule
 	 * */
 	public void addTypeConstraint(LinkedList l)
 	{
-		if (l == null) return;
+		if (l == null)
+		{
+			return;
+		}
+
 		for (int i = 0; i < l.size(); i++)
 		{
 			Object o = l.get(i);
 			if (o instanceof SrcLink)
 			{
 				SrcLink sl = (SrcLink)o;
-				if (sl.name.matches("^_I.*"))
+				if (sl.name.matches("^_I.*")) // int
 				{
-					/*int発見*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
-					SrcAtom newg = new SrcAtom("int",newl);
-					this.guard.add(newg);
+					SrcAtom newg = new SrcAtom("int", newl);
+					guard.add(newg);
 				}
-				else if (sl.name.matches("^_G.*"))
+				else if (sl.name.matches("^_G.*")) // ground
 				{
-					/*ground発見*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
-					SrcAtom newg = new SrcAtom("ground",newl);
-					this.guard.add(newg);
+					SrcAtom newg = new SrcAtom("ground", newl);
+					guard.add(newg);
 				}
-				else if (sl.name.matches("^_S.*"))
+				else if (sl.name.matches("^_S.*")) // string
 				{
-					/*string発見*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
-					SrcAtom newg = new SrcAtom("string",newl);
-					this.guard.add(newg);
+					SrcAtom newg = new SrcAtom("string", newl);
+					guard.add(newg);
 				}
-				else if (sl.name.matches("^_U.*"))
+				else if (sl.name.matches("^_U.*")) // unary
 				{
-					/*unary発見*/
 					LinkedList newl = new LinkedList();
 					newl.add(new SrcLink(sl.name));
-					SrcAtom newg = new SrcAtom("unary",newl);
-					this.guard.add(newg);
+					SrcAtom newg = new SrcAtom("unary", newl);
+					guard.add(newg);
 				}
 			}
 			else if (o instanceof SrcAtom)
@@ -249,7 +251,11 @@ class SrcRule
 	private LinkedList copySrcs(List l)
 	{
 		LinkedList ret = new LinkedList(); // List 型だと各所で使っているgetFirstが無い
-		if (l == null) return null;
+		if (l == null)
+		{
+			return null;
+		}
+
 		Iterator it = l.iterator();
 		while (it.hasNext())
 		{
@@ -257,7 +263,7 @@ class SrcRule
 			if (o instanceof SrcAtom)
 			{
 				SrcAtom sa = (SrcAtom)o;
-				ret.add(new SrcAtom(sa.getName(),copySrcs(sa.getProcess())));
+				ret.add(new SrcAtom(sa.getName(), copySrcs(sa.getProcess())));
 			}
 			else if (o instanceof SrcMembrane)
 			{
@@ -274,7 +280,10 @@ class SrcRule
 				SrcProcessContext spc = (SrcProcessContext)o;
 				SrcProcessContext cppc = new SrcProcessContext(spc.getName());
 				cppc.args = copySrcs(spc.args);
-				if(spc.bundle != null)cppc.bundle = new SrcLinkBundle(spc.bundle.getName());
+				if (spc.bundle != null)
+				{
+					cppc.bundle = new SrcLinkBundle(spc.bundle.getName());
+				}
 				ret.add(cppc);
 			}
 			else if (o instanceof SrcContext) // SrcLink, SrcLinkBundle, SrcRuleContext
@@ -303,7 +312,7 @@ class SrcRule
 	 */
 	public LinkedList getHead()
 	{
-		return this.head;
+		return head;
 	}
 
 	/**
@@ -312,7 +321,7 @@ class SrcRule
 	 */
 	public LinkedList getGuard()
 	{
-		return this.guard;
+		return guard;
 	}
 
 	/**
@@ -320,7 +329,7 @@ class SrcRule
 	 */
 	public LinkedList getGuardNegatives()
 	{
-		return this.guardNegatives;
+		return guardNegatives;
 	}
 
 	/**
@@ -329,15 +338,17 @@ class SrcRule
 	 */
 	public LinkedList getBody()
 	{
-		return this.body;
+		return body;
 	}
 
 	public String toString()
 	{
-		return "(rule:"+name+")";
+		return "(rule:" + name + ")";
 	}
 
-	/**LMNtalソース形式のテキスト表現を取得する。*/
+	/**
+	 * LMNtalソース形式のテキスト表現を取得する。
+	 */
 	public String getText()
 	{
 		return text;
