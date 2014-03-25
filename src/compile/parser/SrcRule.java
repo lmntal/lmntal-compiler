@@ -1,6 +1,5 @@
 package compile.parser;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -112,9 +111,8 @@ class SrcRule
 	{
 		if (head != null)
 		{
-			for (int i = 0; i < head.size(); i++)
+			for (Object o : head)
 			{
-				Object o = head.get(i);
 				if (o instanceof SrcHyperLink)
 				{
 					SrcHyperLink shl = (SrcHyperLink)o;
@@ -140,9 +138,8 @@ class SrcRule
  
 		if (body != null)
 		{
-			for (int i = 0; i < body.size(); i++)
+			for (Object o : body)
 			{
-				Object o = body.get(i);
 				if (o instanceof SrcHyperLink)
 				{
 					SrcHyperLink shl = (SrcHyperLink)o;
@@ -182,9 +179,8 @@ class SrcRule
 			return;
 		}
 
-		for (int i = 0; i < l.size(); i++)
+		for (Object o : l)
 		{
-			Object o = l.get(i);
 			if (o instanceof SrcLink)
 			{
 				SrcLink sl = (SrcLink)o;
@@ -250,16 +246,14 @@ class SrcRule
 	 */
 	private LinkedList copySrcs(List l)
 	{
-		LinkedList ret = new LinkedList(); // List 型だと各所で使っているgetFirstが無い
 		if (l == null)
 		{
 			return null;
 		}
 
-		Iterator it = l.iterator();
-		while (it.hasNext())
+		LinkedList ret = new LinkedList(); // List 型だと各所で使っているgetFirstが無い
+		for (Object o : l)
 		{
-			Object o = it.next();
 			if (o instanceof SrcAtom)
 			{
 				SrcAtom sa = (SrcAtom)o;
