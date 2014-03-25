@@ -1,12 +1,9 @@
 /*
  * 作成日: 2003/11/18
- *
  */
 package compile;
 
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import runtime.Env;
@@ -17,8 +14,6 @@ import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;
 
-import compile.parser.LMNParser;
-import compile.parser.ParseException;
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.RuleStructure;
@@ -26,11 +21,10 @@ import compile.structure.RuleStructure;
 /**
  * ルールセットを生成して返す。
  * @author hara
- * 
  */
 public class RulesetCompiler
 {
-	private static boolean recursived = false;
+	private RulesetCompiler() { }
 
 	/**
 	 * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。
@@ -48,37 +42,6 @@ public class RulesetCompiler
 	public static Ruleset compileMembrane(Membrane m)
 	{
 		return compileMembrane(m, InlineUnit.DEFAULT_UNITNAME);
-	}
-
-	/**
-	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
-	 * より正確に言うと、与えられた膜構造の内容に対応するプロセスを1回だけ生成するreactメソッドを
-	 * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。
-	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
-	 * @param m 膜構造
-	 * @param unitName
-	 * @return 生成したルールセットを持つ膜構造
-	 */
-	protected static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName)
-	{
-		Env.c("RulesetGenerator.runStartWithNull");
-
-		// グローバルルート膜
-		Membrane root = new Membrane(null);
-
-		// 初期構造を生成するルール
-		RuleStructure rs = RuleStructure.createInitialRule(root);
-		rs.leftMem  = new Membrane(null);
-		rs.rightMem = m;
-		root.rules.add(rs);
-
-		processMembrane(root, unitName);
-
-		if (Env.fUseSourceLibrary)
-		{
-			Module.resolveModules(root);
-		}
-		return root;
 	}
 
 	/**
@@ -177,5 +140,36 @@ public class RulesetCompiler
 	public static Ruleset compileRuleset(InterpretedRuleset rs)
 	{
 		return rs; //返すルールセットはそのまま。どうするのが良いのだろうか？
+	}
+
+	/**
+	 * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
+	 * より正確に言うと、与えられた膜構造の内容に対応するプロセスを1回だけ生成するreactメソッドを
+	 * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。
+	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
+	 * @param m 膜構造
+	 * @param unitName
+	 * @return 生成したルールセットを持つ膜構造
+	 */
+	private static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName)
+	{
+		Env.c("RulesetGenerator.runStartWithNull");
+
+		// グローバルルート膜
+		Membrane root = new Membrane(null);
+
+		// 初期構造を生成するルール
+		RuleStructure rs = RuleStructure.createInitialRule(root);
+		rs.leftMem  = new Membrane(null);
+		rs.rightMem = m;
+		root.rules.add(rs);
+
+		processMembrane(root, unitName);
+
+		if (Env.fUseSourceLibrary)
+		{
+			Module.resolveModules(root);
+		}
+		return root;
 	}
 }
