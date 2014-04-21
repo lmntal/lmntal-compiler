@@ -1,5 +1,5 @@
 
-lmntal-compiler - LMNtal Compiler
+LMNtal Compiler
 ===============================
 
 LMNtalのコンパイラです。
