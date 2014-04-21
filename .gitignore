@@ -1,3 +1,4 @@
+# files
 bin/
 classes/
 .settings/
@@ -11,4 +12,18 @@ _errors_help_gen.txt
 *.zip
 *.tgz
 
+# misc
+GPATH
+GRTAGS
+GTAGS
+TAGS
+tags
+gtags.conf
 *~
+\#*\#
+
+#mac 
+.DS_Store
+
+#win
+Thumbs.db
