@@ -834,7 +834,7 @@ public class Optimizer {
 				}
 			}
 		}
-		body.addAll(1, tmpInsts);
+		body.addAll(2, tmpInsts); /* 最初のボディ命令はcommit，その直後に入れる */ 
 
 		//TODO removeproxies/insertproxies命令を適切に変更する
 //		tmpInsts = new ArrayList();
