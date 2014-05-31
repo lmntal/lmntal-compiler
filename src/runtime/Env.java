@@ -12,12 +12,12 @@ public final class Env
 	/**
 	 * LMNtal Compiler のバージョン (M.mm)
 	 */
-	public static final String LMNTAL_COMPILER_VERSION = "1.40";
+	public static final String LMNTAL_COMPILER_VERSION = "1.41";
 
 	/**
 	 * このバージョンをリリースした日付 (yyyy-MM-dd)
 	 */
-	public static final String RELEASE_DATE = "2013-11-15";
+	public static final String RELEASE_DATE = "2014-05-31";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
