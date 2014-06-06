@@ -1913,6 +1913,14 @@ public class Instruction implements Cloneable
 	@LMNtalIL public static final int CYCLELINKS = 89;
 	static {setArgType(CYCLELINKS, new ArgType(false, ARG_VARS, ARG_VARS));}
 
+	/**
+	 * clearlink [atom, pos]
+	 * 
+	 * アトム $atom の第 $pos 引数の接続先の情報をNULLにする命令。SLIM専用で、swaplink命令と併用して使われる。(2014/6/5 by aoyama)
+	 */
+	@LMNtalIL public static final int CLEARLINK = 90;
+	static {setArgType(CLEARLINK, new ArgType(false, ARG_ATOM, ARG_INT));}
+	
 	/** 命令の種類を取得する。*/
 	public int getKind() {
 		return kind;

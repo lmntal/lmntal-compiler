@@ -1913,12 +1913,18 @@ public class RuleCompiler
 
 				if (created.contains(a1))
 				{
+					if(Env.slimcode)
+						body.add(new Instruction(
+								Instruction.CLEARLINK, rhsatompath.get(a1),links1[i].pos));
 					body.add(swaplink(
 						rhsatompath.get(a1), links1[i].pos,
 						lhsatompath.get(a2), links1[j].pos));
 				}
 				else if (created.contains(a2))
 				{
+					if(Env.slimcode)
+						body.add(new Instruction(
+								Instruction.CLEARLINK, rhsatompath.get(a2),links2[i].pos));
 					body.add(swaplink(
 						lhsatompath.get(a1), links1[i].pos,
 						rhsatompath.get(a2), links1[j].pos));
