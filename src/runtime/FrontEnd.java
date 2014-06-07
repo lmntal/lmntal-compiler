@@ -498,6 +498,12 @@ public class FrontEnd
 			// リンク操作に cyclelinks 命令を使用する (shinobu)
 			Env.useCycleLinks = true;
 		}
+		else if (opt.equals("--use-atomlistop"))
+		{
+			// アトムリスト操作に必要な中間命令を出力する (aoyama)
+			Env.useSwapLink = true;
+			Env.useAtomListOP = true;
+		}
 		else if (opt.equals("--verbose-linkext"))
 		{
 			// swaplink/cyclelinks使用時において置換過程を出力する開発者用オプション (shinobu)

@@ -62,7 +62,10 @@ public final class Env
 	 * <p>リンク操作に{@code cyclelinks}命令を使用する。</p>
 	 */
 	public static boolean useCycleLinks = false;
-
+	/**
+	 * <p>SLIM内のデータ構造atomlistを動的に変化させて最適化を行う。</p>
+	 */
+	public static boolean useAtomListOP = false;
 	/**
 	 * <p>{@code swaplink/cyclelinks} 命令を使用する場合、コンパイル情報を標準エラー出力に出力する。</p>
 	 */
