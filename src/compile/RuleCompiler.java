@@ -1049,7 +1049,7 @@ public class RuleCompiler
 				if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE)
 				{
 					//dequeueされていなかったので追加(2005/08/27) by mizuno
-					body.add(new Instruction( Instruction.DEQUEUEATOM, typedcxtToSrcPath(def) ));
+					if(!Env.slimcode)body.add(new Instruction( Instruction.DEQUEUEATOM, typedcxtToSrcPath(def) ));
 					body.add(new Instruction( Instruction.REMOVEATOM,
 							typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
@@ -1396,7 +1396,7 @@ public class RuleCompiler
 		for (int i = 0; i < lhsatoms.size(); i++)
 		{
 			Atom atom = (Atom)lhsatoms.get(i);
-			if (atom.functor.isSymbol())
+			if (atom.functor.isSymbol() && !Env.slimcode)
 			{
 				body.add(Instruction.dequeueatom(
 						lhsatomToPath(atom) // ← lhsmems.size() + i に一致する
@@ -2236,7 +2236,7 @@ public class RuleCompiler
 		int index = body.size(); // 末尾再帰最適化の効果を最大化するため、逆順に積む（コードがセコい）
 		for (Atom atom : rhsatoms)
 		{
-			if (atom.functor.isSymbol() && atom.functor.isActive())
+			if (atom.functor.isSymbol() && atom.functor.isActive() && !Env.slimcode)
 			{
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
 			}
@@ -2254,7 +2254,7 @@ public class RuleCompiler
 		for(Atomic a : created)
 		{
 			Atom atom = (Atom)a;
-			if (atom.functor.isSymbol() && atom.functor.isActive())
+			if (atom.functor.isSymbol() && atom.functor.isActive() && !Env.slimcode)
 			{
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(a)));
 			}
@@ -2264,7 +2264,7 @@ public class RuleCompiler
 		for(Atom atom : reused)
 		{
 			if (!lhsatoms.contains(atom)) continue;
-			if (atom.functor.isSymbol() && atom.functor.isActive())
+			if (atom.functor.isSymbol() && atom.functor.isActive() && !Env.slimcode)
 			{
 				body.add(index, new Instruction(Instruction.ENQUEUEATOM, lhsatomToPath(atom)));
 			}
