@@ -659,6 +659,7 @@ public class RuleCompiler
 		 * 非線形型なし$pの場合更に明示的な自由リンクに=/2が挿入され，明示的な自由リンクのリストへのマップが生成されている
 		 * 非線形$pの子膜は再帰的にロックされている
 		 */
+		tailatomlistMake();
 		dequeueLHSAtoms();
 		removeLHSTypedProcesses();
 		if (removeLHSMem(rs.leftMem) >= 2)
@@ -1401,6 +1402,18 @@ public class RuleCompiler
 				body.add(Instruction.dequeueatom(
 						lhsatomToPath(atom) // ← lhsmems.size() + i に一致する
 				));
+			}
+		}
+	}
+	/** 左辺のアトムの情報から、tailatomlist命令を生成する。*/
+	private void tailatomlistMake()
+	{
+		for (int i = lhsatoms.size()-1; i >= 0; i--)
+		{
+			Atom atom = (Atom)lhsatoms.get(i);
+			if (atom.functor.isSymbol() && Env.slimcode && Env.useAtomListOP)
+			{
+				body.add(new Instruction(Instruction.TAILATOMLIST,lhsatomToPath(atom),lhsmemToPath(atom.mem)));
 			}
 		}
 	}
