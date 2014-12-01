@@ -1649,6 +1649,10 @@ public class RuleCompiler
 				if (reused.containsKey(atom))
 				{
 					atomid = lhsatomToPath(reused.get(atom));
+					if(Env.slimcode && Env.useAtomListOP)
+					{
+						body.add(new Instruction(Instruction.HEADATOM,atomid,rhsmemToPath(mem)));
+					}
 				}
 				else
 				{
