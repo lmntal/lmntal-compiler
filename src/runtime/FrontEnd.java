@@ -46,6 +46,10 @@ public class FrontEnd
 		{
 			run(new StringReader(Env.oneLineCode), InlineUnit.DEFAULT_UNITNAME);
 		}
+		else if (Env.stdinLMN)
+		{
+			run(new BufferedReader(new InputStreamReader(System.in)), InlineUnit.DEFAULT_UNITNAME);
+		}
 		else
 		{
 			if (Env.srcs.isEmpty())
