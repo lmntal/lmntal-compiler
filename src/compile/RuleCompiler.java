@@ -2145,7 +2145,7 @@ public class RuleCompiler
 			
 			for (Atom ar : rhsatoms)
 			{
-				if (!ar.functor.isSymbol()) continue;
+				if (!ar.functor.isSymbol()||nomodified.contains(ar)) continue;
 				
 				if (al.getName().equals(ar.getName()) && al.getArity() == ar.getArity())
 				{
