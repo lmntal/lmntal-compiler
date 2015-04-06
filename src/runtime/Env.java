@@ -12,12 +12,12 @@ public final class Env
 	/**
 	 * LMNtal Compiler のバージョン (M.mm)
 	 */
-	public static final String LMNTAL_COMPILER_VERSION = "1.41";
+	public static final String LMNTAL_COMPILER_VERSION = "1.42";
 
 	/**
 	 * このバージョンをリリースした日付 (yyyy-MM-dd)
 	 */
-	public static final String RELEASE_DATE = "2014-05-31";
+	public static final String RELEASE_DATE = "2015-04-06";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
@@ -35,7 +35,7 @@ public final class Env
 
 	/** SLIM用の中間命令列を出力するモード。 */
 	public static boolean slimcode = false;
-	
+
 	/** 履歴つきfindatomを含む中間命令列を出力するモード。 */
 	public static boolean findatom2 = false;
 
