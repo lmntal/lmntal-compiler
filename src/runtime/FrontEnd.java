@@ -624,6 +624,7 @@ public class FrontEnd
 					Env.e("Compilation Failed: no rule");
 					System.exit(1);
 				}
+				System.exit(0);
 			}
 			else
 			{
@@ -648,6 +649,7 @@ public class FrontEnd
 				// インラインコード一覧を出力
 				Inline.initInline();
 				Inline.showInlineList();
+				System.exit(0);
 			}
 		}
 		catch (Exception e)
