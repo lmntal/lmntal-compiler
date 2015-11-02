@@ -46,12 +46,16 @@ public class FrontEnd
 		{
 			run(new StringReader(Env.oneLineCode), InlineUnit.DEFAULT_UNITNAME);
 		}
+		else if (Env.stdinLMN)
+		{
+			run(new BufferedReader(new InputStreamReader(System.in)), InlineUnit.DEFAULT_UNITNAME);
+		}
 		else
 		{
 			if (Env.srcs.isEmpty())
 			{
 				System.err.println("no input file.");
-				System.exit(0);
+				System.exit(1);
 			}
 			run(Env.srcs);
 		}
@@ -73,7 +77,7 @@ public class FrontEnd
 			if (major < 1 || (major == 1 && minor < 4))
 			{
 				Util.errPrintln("use jre 1.4 or higher!!");
-				System.exit(-1);
+				System.exit(1);
 			}
 			Env.majorVersion = major;
 			Env.minorVersion = minor;
@@ -108,7 +112,7 @@ public class FrontEnd
 				if (args[i].length() < 2) // '-'のみの時
 				{
 					Util.errPrintln("不明なオプション:" + args[i]);
-					System.exit(-1);
+					System.exit(1);
 				}
 				else // オプション解釈部
 				{
@@ -177,7 +181,7 @@ public class FrontEnd
 						else
 						{
 							Util.errPrintln("Invalid option: " + args[i]);
-							System.exit(-1);
+							System.exit(1);
 						}
 						break;
 					case 'v':
@@ -227,7 +231,7 @@ public class FrontEnd
 					default:
 						Util.errPrintln("Invalid option: " + args[i]);
 						Util.errPrintln("Use option --help to see a long list of options.");
-						System.exit(-1);
+						System.exit(1);
 					}
 				}
 			}
@@ -485,7 +489,7 @@ public class FrontEnd
 			else
 			{
 				Util.errPrintln("Can't use option " + opt + " without option --slimcode.");
-				System.exit(-1);
+				System.exit(1);
 			}
 		}
 		else if (opt.equals("--use-swaplink"))
@@ -497,6 +501,12 @@ public class FrontEnd
 		{
 			// リンク操作に cyclelinks 命令を使用する (shinobu)
 			Env.useCycleLinks = true;
+		}
+		else if (opt.equals("--use-atomlistop"))
+		{
+			// アトムリスト操作に必要な中間命令を出力する (aoyama)
+			Env.useSwapLink = true;
+			Env.useAtomListOP = true;
 		}
 		else if (opt.equals("--verbose-linkext"))
 		{
@@ -517,7 +527,7 @@ public class FrontEnd
 		{
 			Util.errPrintln("Invalid option: " + opt);
 			Util.errPrintln("Use option --help to see a long list of options.");
-			System.exit(-1);
+			System.exit(1);
 		}
 		return i;
 	}
@@ -543,12 +553,12 @@ public class FrontEnd
 		catch (FileNotFoundException e)
 		{
 			Util.println(e.getMessage());
-			System.exit(-1);
+			System.exit(1);
 		}
 		catch (SecurityException e)
 		{
 			e.printStackTrace();
-			System.exit(-1);
+			System.exit(1);
 		}
 	}
 
@@ -571,7 +581,7 @@ public class FrontEnd
 
 			// 構文解析
 			// 抽象構文木からコンパイル時データ構造を生成する
-			compile.structure.Membrane m;
+			compile.structure.Membrane m = null;
 			try
 			{
 				LMNParser lp = new LMNParser(src);
@@ -581,14 +591,14 @@ public class FrontEnd
 			{
 				Env.p("Compilation Failed");
 				Env.e(e.getMessage());
-				return;
+				System.exit(1);
 			}
 
 			if (Env.fType)
 			{
 				if (!analyseTypes(m))
 				{
-					return;
+					System.exit(1);
 				}
 			}
 
@@ -598,7 +608,7 @@ public class FrontEnd
 			if (Env.getErrorCount() > 0)
 			{
 				Env.e("Compilation Failed");
-				return;
+				System.exit(1);
 			}
 
 			if (Env.compileRule)
@@ -612,8 +622,9 @@ public class FrontEnd
 				catch (Exception e)
 				{
 					Env.e("Compilation Failed: no rule");
+					System.exit(1);
 				}
-				return;
+				System.exit(0);
 			}
 			else
 			{
@@ -638,12 +649,13 @@ public class FrontEnd
 				// インラインコード一覧を出力
 				Inline.initInline();
 				Inline.showInlineList();
-				return;
+				System.exit(0);
 			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 

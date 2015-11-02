@@ -12,12 +12,12 @@ public final class Env
 	/**
 	 * LMNtal Compiler のバージョン (M.mm)
 	 */
-	public static final String LMNTAL_COMPILER_VERSION = "1.41";
+	public static final String LMNTAL_COMPILER_VERSION = "1.43";
 
 	/**
 	 * このバージョンをリリースした日付 (yyyy-MM-dd)
 	 */
-	public static final String RELEASE_DATE = "2014-05-31";
+	public static final String RELEASE_DATE = "2015-10-31";
 
 	/** -dオプション指定時のデフォルトのデバッグレベル */
 	static final int DEBUG_DEFAULT = 1;
@@ -35,7 +35,7 @@ public final class Env
 
 	/** SLIM用の中間命令列を出力するモード。 */
 	public static boolean slimcode = false;
-	
+
 	/** 履歴つきfindatomを含む中間命令列を出力するモード。 */
 	public static boolean findatom2 = false;
 
@@ -62,7 +62,10 @@ public final class Env
 	 * <p>リンク操作に{@code cyclelinks}命令を使用する。</p>
 	 */
 	public static boolean useCycleLinks = false;
-
+	/**
+	 * <p>SLIM内のデータ構造atomlistを動的に変化させて最適化を行う。</p>
+	 */
+	public static boolean useAtomListOP = false;
 	/**
 	 * <p>{@code swaplink/cyclelinks} 命令を使用する場合、コンパイル情報を標準エラー出力に出力する。</p>
 	 */

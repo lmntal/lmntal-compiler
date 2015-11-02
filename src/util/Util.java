@@ -24,7 +24,7 @@ abstract public class Util
 	private Util(){}
 	public static void systemError(String msg) {
 		System.err.println(msg);
-		System.exit(-1);
+		System.exit(1);
 	}
 	
 	public static void errPrint(String msg){

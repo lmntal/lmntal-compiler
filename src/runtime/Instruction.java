@@ -1921,6 +1921,22 @@ public class Instruction implements Cloneable
 	@LMNtalIL public static final int CLEARLINK = 90;
 	static {setArgType(CLEARLINK, new ArgType(false, ARG_ATOM, ARG_INT));}
 	
+	/**
+	 * headatom [atom, mem]
+	 * 
+	 * SLIM専用の最適化命令。$mem 中のアトム $atom をそのファンクタのアトムリストのheadに持ってくる。--use-atomlistopのオプションが必須。(2014/6/8 by aoyama)
+	 */
+	@LMNtalIL public static final int HEADATOM = 91;
+	static {setArgType(HEADATOM, new ArgType(false, ARG_ATOM, ARG_MEM));}
+	
+	/**
+	 * tailatomlist [atom, mem]
+	 * 
+	 * SLIM専用の最適化命令。$mem 中のアトム $atom の前にある部分アトムリストをアトムリストのtailにつなぎ替える。--use-atomlistopのオプションが必須。(2014/6/8 by aoyama)
+	 */
+	@LMNtalIL public static final int TAILATOMLIST = 92;
+	static {setArgType(TAILATOMLIST, new ArgType(false, ARG_ATOM, ARG_MEM));}
+	
 	/** 命令の種類を取得する。*/
 	public int getKind() {
 		return kind;
