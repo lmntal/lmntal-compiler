@@ -457,9 +457,12 @@ public class Optimizer {
 				op = 0; typecheck = 0;
 				arg1 = arg2 = result = resultlink = -1;
 				if(funcarity == 3 &&
-						funcname.equals("+") || funcname.equals("-") || funcname.equals("*") || funcname.equals("/")
-						|| funcname.equals("mod") || funcname.equals("+.") || funcname.equals("-.")
-						|| funcname.equals("*.") || funcname.equals("/.")){
+				   funcname.equals("+") || funcname.equals("-") || funcname.equals("*") || funcname.equals("/")
+				   || funcname.equals("mod")
+				   || funcname.equals("logand") || funcname.equals("logior") || funcname.equals("logxor")
+//				   || funcname.equals("ash")
+				   || funcname.equals("+.") || funcname.equals("-.")
+				   || funcname.equals("*.") || funcname.equals("/.")){
 					if(funcname.equals("+")) {
 						op = Instruction.IADD;
 						typecheck = Instruction.ISINT;
@@ -480,7 +483,23 @@ public class Optimizer {
 						op = Instruction.IMOD;
 						typecheck = Instruction.ISINT;
 					}
-					if(funcname.equals("+.")) {
+					else if(funcname.equals("logand")) {
+						op = Instruction.IAND;
+						typecheck = Instruction.ISINT;
+					}
+					else if(funcname.equals("logior")) {
+						op = Instruction.IOR;
+						typecheck = Instruction.ISINT;
+					}
+					else if(funcname.equals("logxor")) {
+						op = Instruction.IXOR;
+						typecheck = Instruction.ISINT;
+					}
+//					else if(funcname.equals("ash")) {
+//						op = Instruction.IASH;
+//						typecheck = Instruction.ISINT;
+//					}
+					else if(funcname.equals("+.")) {
 						op = Instruction.FADD;
 						typecheck = Instruction.ISFLOAT;
 					}
