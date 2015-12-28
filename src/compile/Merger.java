@@ -391,6 +391,7 @@ public class Merger {
 		systemrules.add(buildUnaryPlusOpRule("+.", Instruction.ISFLOAT));
 		systemrules.add(buildUnaryOpRule("-", Instruction.ISINT, Instruction.INEG));
 		systemrules.add(buildUnaryOpRule("-.", Instruction.ISFLOAT, Instruction.FNEG));
+//		systemrules.add(buildUnaryOpRule("lognot", Instruction.ISINT, Instruction.INOT));
 		systemrules.add(buildUnaryOpRule("int", Instruction.ISFLOAT, Instruction.FLOAT2INT));
 		systemrules.add(buildUnaryOpRule("float", Instruction.ISINT, Instruction.INT2FLOAT));
 		
@@ -403,6 +404,10 @@ public class Merger {
 		systemrules.add(buildBinOpRule("-.", Instruction.ISFLOAT, Instruction.FSUB));
 		systemrules.add(buildBinOpRule("*.", Instruction.ISFLOAT, Instruction.FMUL));
 		systemrules.add(buildBinOpRule("/.", Instruction.ISFLOAT, Instruction.FDIV));
+		systemrules.add(buildBinOpRule("logand", Instruction.ISINT, Instruction.IAND));
+		systemrules.add(buildBinOpRule("logior", Instruction.ISINT, Instruction.IOR));
+		systemrules.add(buildBinOpRule("logxor", Instruction.ISINT, Instruction.IXOR));
+//		systemrules.add(buildBinOpRule("ash", Instruction.ISINT, Instruction.IASH));
 		
 //		Iterator it = (Iterator)systemrules.iterator();
 //		while(it.hasNext()) System.out.println(it.next());

@@ -126,6 +126,11 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	"["					{ return symbol(sym.LBRACKET); }
 	"]"					{ return symbol(sym.RBRACKET); }
 	"mod" 				{ return symbol(sym.MOD); }
+	"logand"			{ return symbol(sym.LOGAND); }//ueda
+	"logior"			{ return symbol(sym.LOGIOR); }//ueda
+	"logxor"			{ return symbol(sym.LOGXOR); }//ueda
+//	"lognot"			{ return symbol(sym.LOGNOT); }//ueda
+//	"ash"				{ return symbol(sym.ASH); }//ueda
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
 	{HyperLinkOp}		{ return symbol(sym.HL, yytext()); }//seiji

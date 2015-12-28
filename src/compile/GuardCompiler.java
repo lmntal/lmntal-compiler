@@ -104,10 +104,15 @@ class GuardCompiler extends HeadCompiler
 		putLibrary("*"    , 3, 2, array(ISINT  , ISINT  , Instruction.IMUL, ISINT));
 		putLibrary("/"    , 3, 2, array(ISINT  , ISINT  , Instruction.IDIV, ISINT));
 		putLibrary("mod"  , 3, 2, array(ISINT  , ISINT  , Instruction.IMOD, ISINT));
+		putLibrary("logand" , 3, 2, array(ISINT  , ISINT  , Instruction.IAND, ISINT));
+		putLibrary("logior" , 3, 2, array(ISINT  , ISINT  , Instruction.IOR, ISINT));
+		putLibrary("logxor" , 3, 2, array(ISINT  , ISINT  , Instruction.IXOR, ISINT));
+//		putLibrary("ash" , 3, 2, array(ISINT  , ISINT  , Instruction.IASH, ISINT));
 		putLibrary("int"  , 1, 1, array(ISINT));
 		putLibrary("float", 1, 1, array(ISFLOAT));
 		putLibrary("+"    , 2, 1, array(ISINT  ,      -1,            ISINT));
 		putLibrary("-"    , 2, 1, array(ISINT  , Instruction.INEG,   ISINT));
+//		putLibrary("lognot"    , 2, 1, array(ISINT  , Instruction.INOT,   ISINT));
 		putLibrary("+."   , 2, 1, array(ISFLOAT,      -1,            ISFLOAT));
 		putLibrary("-."   , 2, 1, array(ISFLOAT, Instruction.FNEG,   ISFLOAT));
 		putLibrary("float", 2, 1, array(ISINT  , Instruction.INT2FLOAT, ISFLOAT));
