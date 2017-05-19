@@ -1363,6 +1363,7 @@ class SyntaxExpander {
 		ListIterator it = srcprocess.listIterator();
 		while (it.hasNext()) {
 			Object obj = it.next();
+			process.add(obj);
 			if (obj instanceof SrcAtom) {
 				expandAtom((SrcAtom)obj, process);
 			}
@@ -1372,7 +1373,6 @@ class SyntaxExpander {
 			else if (obj instanceof LinkedList) {
 				expandAtoms((LinkedList)obj);
 			}
-			process.add(obj);
 		}
 	}
 	/** アトムの各引数に対してアトム展開を行う。
@@ -1391,8 +1391,8 @@ class SyntaxExpander {
 				process.set(i, new SrcLink(newlinkname));
 				subatom.getProcess().add(new SrcLink(newlinkname));
 				//
-				expandAtom(subatom, result);
 				result.add(subatom);
+				expandAtom(subatom, result);
 			}
 			// 膜
 			else if (obj instanceof SrcMembrane) {
@@ -1403,9 +1403,9 @@ class SyntaxExpander {
 				process.set(i, new SrcLink(newlinkname));
 				subatom.getProcess().add(new SrcLink(newlinkname));
 				//
+				result.add(submem);
 				submem.getProcess().add(subatom);
 				expandAtoms(submem.getProcess());
-				result.add(submem);
 			}
 			// 項組（仮）
 			else if (obj instanceof LinkedList) {
@@ -1434,8 +1434,8 @@ class SyntaxExpander {
 					 }
 					 subatom.getProcess().add(new SrcLink(newlinkname));
 					 //
-					 expandAtom(subatom, result);
 					 result.add(subatom);
+					 expandAtom(subatom, result);
 				 }
 			 }
 		}
