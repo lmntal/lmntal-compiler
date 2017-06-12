@@ -826,6 +826,7 @@ public class LMNParser {
 			}
 		}
 		if (mem.ruleContexts.size() > 1) {
+			it = mem.ruleContexts.iterator();
 			while (it.hasNext()) {
 				RuleContext rc = (RuleContext)it.next();
 				if (rc.def.lhsOcc == rc)  rc.def.lhsOcc = null; // 左辺での出現の登録を取り消す
