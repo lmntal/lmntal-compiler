@@ -1,5 +1,6 @@
 /* ----------------------Preliminary Declarations Section--------------------*/
 /* Import the class java_cup.runtime.*  */
+
 package compile.parser;
 
 import java.util.LinkedList;
@@ -29,7 +30,9 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE_UNDERBAR_AT, RBRACE_UNDERBAR_SLASH_AT,
 				RBRACE_ASTERISK,
 				COLON, PERIOD, BACKSLASH, GUARD, PROCVAR, RULEVAR, 
-				LBRACKET, RBRACKET, NEGATIVE, MOD, HAT, TILDE, ASTERISK_ASTERISK,
+				LBRACKET, RBRACKET, NEGATIVE, MOD, 
+				LOGAND, LOGIOR, LOGXOR, /*LOGNOT, ASH,*/ //ueda
+				HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
 				ASTERISK, SLASH, PLUS, MINUS, EXCLA, RULENAMESEP;
 terminal Integer	RULE;
@@ -99,6 +102,16 @@ FuncName ::=
       {: RESULT = new SrcName(name); :}
   | MOD
       {: RESULT = new SrcName("mod"); :}
+  | LOGAND
+      {: RESULT = new SrcName("logand"); :}
+  | LOGIOR
+      {: RESULT = new SrcName("logior"); :}
+  | LOGXOR
+      {: RESULT = new SrcName("logxor"); :}
+//  | LOGNOT
+//      {: RESULT = new SrcName("lognot"); :}
+//  | ASH
+//      {: RESULT = new SrcName("ash"); :}
   | QUOTED_STRING:name
       {: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
   | SYMBOL_NAME:name
@@ -115,6 +128,16 @@ AtomName ::=
       {: RESULT = name.toString(); :}
   | MOD
       {: RESULT = "mod"; :}
+  | LOGAND
+      {: RESULT = "logand"; :}
+  | LOGIOR
+      {: RESULT = "logior"; :}
+  | LOGXOR
+      {: RESULT = "logxor"; :}
+//  | LOGNOT
+//      {: RESULT = "lognot"; :}
+//  | ASH
+//      {: RESULT = "ash"; :}
 ;
 
 RuleName ::=
@@ -200,6 +223,10 @@ UnaryOpAtom ::=
       {: LinkedList list = new LinkedList();
          list.add(atom);
          RESULT = new SrcAtom("-.", list); :}
+//  | LOGNOT UnitAtom:atom
+//      {: LinkedList list = new LinkedList();
+//         list.add(atom);
+//         RESULT = new SrcAtom("lognot", list); :}
 ;
 
 Atom200 ::=
@@ -243,6 +270,14 @@ Atom400 ::=
       {: LinkedList list = new LinkedList();
          list.add(atom1); list.add(atom2);
          RESULT = new SrcAtom("/", list); :}
+  | Atom400:atom1 LOGAND Atom300:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("logand", list); :}
+//  | Atom400:atom1 ASH Atom300:atom2
+//      {: LinkedList list = new LinkedList();
+//         list.add(atom1); list.add(atom2);
+//         RESULT = new SrcAtom("ash", list); :}
 ;
 
 Atom500 ::=
@@ -264,6 +299,14 @@ Atom500 ::=
       {: LinkedList list = new LinkedList();
          list.add(atom1); list.add(atom2);
          RESULT = new SrcAtom("+", list); :}
+  | Atom500:atom1 LOGIOR Atom400:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("logior", list); :}
+  | Atom500:atom1 LOGXOR Atom400:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("logxor", list); :}
 ;
 
 Atom700 ::=
