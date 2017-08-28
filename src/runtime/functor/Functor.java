@@ -144,12 +144,16 @@ public abstract class Functor
 	 */
 	public static Functor build(String name, int arity, int nametype) {
 		String path = null;
+
+		if (nametype == SrcName.FUNCTOR) {
+			return new LiteralFunctor(name, arity, path);
+		}
+
 		if (nametype == SrcName.PATHED) {
 			int pos = name.indexOf('.');
 			path = name.substring(0, pos);
 			name = name.substring(pos + 1);
-		}
-		if (arity == 1 && path == null) {
+		} else if (arity == 1) {
 			if (nametype == SrcName.PLAIN || nametype == SrcName.SYMBOL) {
 				try {
 					int radix = 10;
@@ -222,6 +226,10 @@ public abstract class Functor
 	 * @return String 型のアトムなら true
 	 */
 	public abstract boolean isString();
+
+	public boolean isLiteral() {
+		return false;
+	}
 	
 	/**
 	 * このファンクタの値を返す

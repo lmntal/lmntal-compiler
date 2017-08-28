@@ -63,6 +63,8 @@ PathedAtomName = [a-z][A-Za-z_0-9]* [\.] [a-z0-9][A-Za-z_0-9]*
 // 仮
 SymbolName = "'" [^'\r\n]+ "'" | "'" [^'\r\n]* ("''" [^'\r\n]*)+ "'"
 
+FunctorName = "'" [^'\r\n]+ "'_" [0-9]+
+
 // ↓Stringは<STRING>に移管したため廃止
 // String = "\"" ("\\\"" | [^\"\r\n]* | "\\"[\r]?"\n" )* "\""
 // ↓Inlineは<QUOTEd>に移管したため廃止
@@ -139,6 +141,7 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	{LinkName}			{ return symbol(sym.LINK_NAME,			yytext(), yytext(), yyline, yycolumn); }
 	{NumberName}		{ return symbol(sym.NUMBER_NAME,		yytext()); }
 	{CharCodeLiteral}	{ return symbol(sym.CHAR_CODE_LITERAL,	yytext()); }
+	{FunctorName}       { return symbol(sym.FUNCTOR_NAME,		yytext()); }
 	{SymbolName}		{ return symbol(sym.SYMBOL_NAME,		yytext()); }
 	{PathedAtomName}	{ return symbol(sym.PATHED_ATOM_NAME,	yytext()); }
 	{AtomName}			{ return symbol(sym.ATOM_NAME,			yytext()); }
