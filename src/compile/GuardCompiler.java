@@ -48,6 +48,8 @@ class GuardCompiler extends HeadCompiler
   	HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<Atom, Atom[]>(); // hlgroundattr@onuma
 	/** hlground型付きプロセス文脈定義(ContextDef) -> hlgroundの属性 */
 	HashMap<ContextDef, Atom[]> hlgroundAttrs = new HashMap<ContextDef, Atom[]>();
+	/** 特定されたContextDef -> Functor (functor比較の時に使う) bindToFunctorを覚えておく */
+	HashMap<ContextDef, Functor> cxtDefToFunc = new HashMap<ContextDef, Functor>();
 	
   	public List<Functor> getHlgroundAttrs(Atom[] hlgroundArgAtoms) {
 		List<Functor> attrs = new ArrayList<Functor>(); // hlgroundの属性
@@ -76,6 +78,7 @@ class GuardCompiler extends HeadCompiler
 //	private static final int ISNAME    = Instruction.ISNAME;   	// 〃 name型 (SLIM専用) //seiji
 //	private static final int ISCONAME  = Instruction.ISCONAME; 	// 〃 coname型 (SLIM専用) //seiji
 	private static final int ISHLINK   = Instruction.ISHLINK; 	// 〃 hlink型 (SLIM専用) //seiji
+	private static final int ISFUNCTOR = -1;                    // functorのリテラル（チェックする中間命令がないため）
 	private static Map<Functor, int[]> guardLibrary0 = new HashMap<Functor, int[]>(); // 0入力ガード型制約名//seiji
 	private static Map<Functor, int[]> guardLibrary1 = new HashMap<Functor, int[]>(); // 1入力ガード型制約名
 	private static Map<Functor, int[]> guardLibrary2 = new HashMap<Functor, int[]>(); // 2入力ガード型制約名
@@ -459,6 +462,39 @@ class GuardCompiler extends HeadCompiler
 						}
 						rc.theRule.hasUniq = true;
 					}
+					else if (func.equals("eqfunc", 2))
+					{
+						if (!identifiedCxtdefs.contains(def1)) continue;
+						if (!identifiedCxtdefs.contains(def2)) continue;
+
+						int t1 = typedCxtDataTypes.containsKey(def1) ? typedCxtDataTypes.get(def1) : 0;
+						int t2 = typedCxtDataTypes.containsKey(def2) ? typedCxtDataTypes.get(def2) : 0;
+
+						if (t1 != ISFUNCTOR && t2 == ISFUNCTOR) {
+							bindToFunctor(def1, cxtDefToFunc.get(def2));
+						} else if (t1 == ISFUNCTOR && t2 != ISFUNCTOR) {
+							bindToFunctor(def2, cxtDefToFunc.get(def1));
+						} else if (t1 == ISFUNCTOR && t2 == ISFUNCTOR) {
+							int funcid1 = varCount++;
+							int funcid2 = varCount++;
+							match.add(new Instruction(Instruction.LOADFUNC, funcid1, cxtDefToFunc.get(def1)));
+							match.add(new Instruction(Instruction.LOADFUNC, funcid2, cxtDefToFunc.get(def2)));
+							match.add(new Instruction(Instruction.EQFUNC, funcid1, funcid2));
+						} else {
+							if (!typedCxtSrcs.containsKey(def1) || !typedCxtSrcs.containsKey(def2)) {
+								error("COMPILE ERROR: eqfunc does not support comparing two process contexts.");
+							}
+							int atomid1 = typedCxtSrcs.get(def1);
+							int atomid2 = typedCxtSrcs.get(def2);
+							int funcid1 = varCount++;
+							int funcid2 = varCount++;
+							System.out.println("" + atomid1 + ", " + def2);
+							match.add(new Instruction(Instruction.GETFUNC, funcid1, atomid1));
+							match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
+							match.add(new Instruction(Instruction.EQFUNC, funcid1, funcid2));
+						}
+
+					}
 					else if (func.equals("\\=", 2))
 					{
 						// NSAMEFUNC を作るか？
@@ -532,6 +568,22 @@ class GuardCompiler extends HeadCompiler
 					{
 						bindToFunctor(def1, func);
 						typedCxtDataTypes.put(def1, ISSTRING);
+					}
+					else if (func.isLiteral())
+					{
+						String name = func.getName();
+						int pos = name.indexOf('_');
+						int arity = 0;
+						try {
+							arity = Integer.parseInt(name.substring(pos+1));
+						} catch (NumberFormatException e) {
+							// cannot be here
+						}
+						name = name.substring(1, pos - 1);
+
+						identifiedCxtdefs.add(def1);
+						cxtDefToFunc.put(def1, new SymbolFunctor(name, arity, null));
+						typedCxtDataTypes.put(def1, ISFUNCTOR);
 					}
 //					else if (func instanceof runtime.ObjectFunctor
 //					&& ((runtime.ObjectFunctor)func).getObject() instanceof String) {
@@ -863,6 +915,7 @@ class GuardCompiler extends HeadCompiler
 				match.add(new Instruction(Instruction.FUNC, atomid, func));
 			}
 		}
+		cxtDefToFunc.put(def, func);
 		typedCxtTypes.put(def, UNARY_ATOM_TYPE);
 	}
 

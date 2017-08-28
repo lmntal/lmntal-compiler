@@ -28,6 +28,7 @@ public class SrcName
 	public static final int STRING = 2; // "aaa" "AAA" "12" "-12" "3.14" "-3.14e-1"
 	public static final int QUOTED = 3; // [:aaa:] [:AAA:] [:12:] [:-12:] [:3.14:] [:-3.14e-1:]
 	public static final int PATHED = 4; // module.p module:p
+	public static final int FUNCTOR = 5; // 'aaa'_0 'AAA'_1
 
 	/**
 	 * 標準の名前トークンの表現を生成する。

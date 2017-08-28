@@ -39,7 +39,7 @@ terminal Integer	RULE;
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
 terminal String HL;//seiji
-terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
+terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME, FUNCTOR_NAME;
 terminal String CHAR_CODE_LITERAL;
 
 non terminal SrcLink			Link;
@@ -114,6 +114,8 @@ FuncName ::=
 //      {: RESULT = new SrcName("ash"); :}
   | QUOTED_STRING:name
       {: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
+  | FUNCTOR_NAME:name
+      {: RESULT = new SrcName(name.toString(), SrcName.FUNCTOR); :}
   | SYMBOL_NAME:name
       {: RESULT = new SrcName(name.replaceAll("^'|'$","").replaceAll("''","'"), SrcName.SYMBOL); :}
   | STRING:name
