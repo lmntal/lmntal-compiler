@@ -34,7 +34,8 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				LOGAND, LOGIOR, LOGXOR, /*LOGNOT, ASH,*/ //ueda
 				HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
-				ASTERISK, SLASH, PLUS, MINUS, EXCLA, RULENAMESEP;
+				ASTERISK, SLASH, PLUS, MINUS, EXCLA, RULENAMESEP,
+				IN;
 terminal Integer	RULE;
 terminal		QUOTED_STRING;
 terminal String RELOP, STRING;
@@ -81,6 +82,8 @@ non terminal LinkedList			LinkList;
 non terminal LinkedList			NonemptyLinkList;
 non terminal SrcLinkBundle		Bundle;
 non terminal SrcAtom			Aggregate;
+non terminal LinkedList			NegationList;
+non terminal LinkedList			NonexistenceList;
 
 start with WorldProcessList;
 
@@ -445,9 +448,9 @@ Rule ::=
       {: RESULT = new SrcRule(null, head, head2, null, body, lineno.intValue()); :}
   | RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body
       {: RESULT = new SrcRule(name, head, head2, null, body, lineno.intValue()); :}
-  | ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
+  | ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno NegationList:guard GUARD ProcessList:body
       {: RESULT = new SrcRule(null, head, head2, guard, body, lineno.intValue()); :}
-  | RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
+  | RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno NegationList:guard GUARD ProcessList:body
       {: RESULT = new SrcRule(name, head, head2, guard, body, lineno.intValue()); :}
 ;
 
@@ -580,4 +583,24 @@ NonemptyWorldProcessList ::=
       {: list.add(p); RESULT = list; :}
   | NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
       {: list.addAll(p); RESULT = list; :}
+;
+
+NegationList ::=
+    /* epsilon */
+      {: RESULT = new LinkedList(); :}
+  | EXCLA LBRACKET NonexistenceList:list RBRACKET
+      {: RESULT = new LinkedList(list); :}
+  | EXCLA LBRACKET NegationList:list RBRACKET
+      {: RESULT = new LinkedList(list); :}
+  | NegationList:list COMMA EXCLA LBRACKET NonexistenceList:list2 RBRACKET
+      {: list.add(list); RESULT = list; :}
+  | NegationList:list COMMA EXCLA LBRACKET NegationList:list2 RBRACKET
+      {: list.add(list); RESULT = list; :}
+;
+
+NonexistenceList ::=
+    NonemptyProcessList:list IN ProcessContext:pcxt
+      {: SrcNonexistence nex = new SrcNonExistence(list, pcxt); RESULT = new LinkedList(nex); :}
+  | NonexistenceList:nexList COMMA NonemptyProcessList:pList IN ProcessContext:pcxt
+      {: nexList.add(new SrcNonExistence(pList, pcxt)); RESULT = nexList; :}
 ;

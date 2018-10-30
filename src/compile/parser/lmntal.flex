@@ -133,6 +133,7 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 //	"ash"				{ return symbol(sym.ASH); }//ueda
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
+        "\\in"				{ return symbol(sym.IN); }
 	{HyperLinkOp}		{ return symbol(sym.HL, yytext()); }//seiji
 	"[:" 				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(QUOTED); }
 	"\""				{ string.setLength(0); token.setLength(0); token.append(yytext()); startline = yyline; startcol = yycolumn; yybegin(STRING); }

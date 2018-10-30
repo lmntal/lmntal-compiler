@@ -12,8 +12,7 @@ class SrcRule
 	public int lineno;	//行番号 2006.1.22 by inui
 	public LinkedList head;			// ヘッドプロセス
 	public LinkedList body;			// ボディプロセス
-	public LinkedList guard;			// ガードプロセス
-	public LinkedList guardNegatives;	// ガード否定条件構文のリスト
+	public LinkedList guard;			// ガード条件リスト
 
 	private String text; //ルールのテキスト表現
 
@@ -51,7 +50,6 @@ class SrcRule
 		this.name = name;
 		this.head = head;
 		this.guard = guard;
-		this.guardNegatives = new LinkedList();
 		this.body = body;
 		addHyperLinkConstraint(head, body);
 	}
@@ -85,7 +83,6 @@ class SrcRule
 		this.name = name;
 		this.head = head;
 		this.guard = (guard == null ? new LinkedList() : guard);
-		this.guardNegatives = new LinkedList();
 		this.body = body;
 		if (head2 != null)
 		{
@@ -316,14 +313,6 @@ class SrcRule
 	public LinkedList getGuard()
 	{
 		return guard;
-	}
-
-	/**
-	 * ガード否定条件を取得する
-	 */
-	public LinkedList getGuardNegatives()
-	{
-		return guardNegatives;
 	}
 
 	/**
