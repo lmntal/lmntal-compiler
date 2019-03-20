@@ -750,10 +750,10 @@ class GuardCompiler extends HeadCompiler
 							typedCxtDataTypes.put(def3, desc[3]);
 						}
 					}
-					else if (func.getArity() == 1 && func.isSymbol()) {
-						// new, hlink
-						// bindToFunctor(def1, func);
-					}
+//					else if (func.getArity() == 1 && func.isSymbol()) {
+//						// new, hlink
+//						// bindToFunctor(def1, func);
+//					}
 					else
 					{
 						error("COMPILE ERROR: unrecognized type constraint: " + cstr);
