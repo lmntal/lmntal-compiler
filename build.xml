@@ -7,7 +7,7 @@
 	<property name="docs" location="doc"/>
 	<property name="classpath"  value="" />
 	<property name="lmntal_lib" location="lib"/>
-	<property name="java_ver" value="1.6"/>
+	<property name="java_ver" value="1.8"/>
 
 	<!-- tool properties -->
 	<property name="flex"  location="${lib}/JFlex.jar"/>
