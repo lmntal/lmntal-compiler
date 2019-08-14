@@ -27,19 +27,19 @@ public class Merger {
 	/** ファンクタ⇒命令列のマップ */
 	HashMap<Functor, List<Instruction>> instsMap;
 	/** 変数番号⇒ファンクタのマップ*/
-	HashMap var2funcMap;
+	// HashMap var2funcMap;
 	int maxLocals;
 	
 	public Merger(){
 		maxLocals = 0;
 		instsMap = new HashMap<Functor, List<Instruction>>();
-		var2funcMap = new HashMap();
+		// var2funcMap = new HashMap();
 	}
 	
 	public void clear(){
 		maxLocals = 0;
 		instsMap.clear();
-		var2funcMap.clear();
+		// var2funcMap.clear();
 	}
 	/**
 	 * 各ルール中のアトム主導テスト部に出現するbranch命令を編み上げ、
