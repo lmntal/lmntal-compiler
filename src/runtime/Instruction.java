@@ -2072,14 +2072,14 @@ public class Instruction implements Cloneable
 		i.add(varargs);
 		return i;
 	}
-	/** @deprecated */
-	public static Instruction findatom(int dstatom, List srcmem, Functor func) {
-		Instruction i = new Instruction(FINDATOM);
-		i.add(dstatom);
-		i.add(srcmem);
-		i.add(func);
-		return i;
-	}
+	// /** @deprecated */
+	// public static Instruction findatom(int dstatom, List srcmem, Functor func) {
+	// 	Instruction i = new Instruction(FINDATOM);
+	// 	i.add(dstatom);
+	// 	i.add(srcmem);
+	// 	i.add(func);
+	// 	return i;
+	// }
 
 	/** findatom 命令を生成する */
 	public static Instruction findatom(int dstatom, int srcmem, Functor func) {
