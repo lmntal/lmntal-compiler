@@ -113,7 +113,7 @@ public class RulesetCompiler
 			}
 			ruleset.branchmap = mbm;
 			ruleset.systemrulemap = systemmbm;
-			Ruleset compiledRuleset = compileRuleset(ruleset);
+			// Ruleset compiledRuleset = compileRuleset(ruleset);
 			mem.rulesets.add(ruleset);
 		}
 		// 必要ならシステムルールセットに登録

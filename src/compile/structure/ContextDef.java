@@ -35,7 +35,7 @@ public class ContextDef
 	/**
 	 * 右辺でのコンテキスト出現 (Context) のリスト
 	 */
-	public List rhsOccs = new ArrayList();
+	public List<Context> rhsOccs = new ArrayList<Context>();
 
 	/**
 	 * コンストラクタ

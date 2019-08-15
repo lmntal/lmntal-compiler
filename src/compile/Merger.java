@@ -450,7 +450,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
 		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
-		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList<Object>()));
 		rule.atomMatch = insts;
 		return rule;
 	}
@@ -487,7 +487,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
 		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
-		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList<Object>()));
 		rule.atomMatch = insts;
 		return rule;
 	}
@@ -527,7 +527,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
 		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
-		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList<Object>()));
 		rule.atomMatch = insts;
 		return rule;
 	}	

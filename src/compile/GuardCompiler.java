@@ -72,7 +72,7 @@ class GuardCompiler extends HeadCompiler
 	private static final int ISINT    = Instruction.ISINT;		// 型制約の引数が整数型であることを表す
 	private static final int ISFLOAT  = Instruction.ISFLOAT;	// 〃 浮動小数点数型
 	private static final int ISSTRING = Instruction.ISSTRING;	// 〃 文字列型
-	private static final int ISMEM    = Instruction.ANYMEM;		// 〃 膜（getRuntime専用）
+	// private static final int ISMEM    = Instruction.ANYMEM;		// 〃 膜（getRuntime専用）
 //	private static final int ISNAME    = Instruction.ISNAME;   	// 〃 name型 (SLIM専用) //seiji
 //	private static final int ISCONAME  = Instruction.ISCONAME; 	// 〃 coname型 (SLIM専用) //seiji
 	private static final int ISHLINK   = Instruction.ISHLINK; 	// 〃 hlink型 (SLIM専用) //seiji
@@ -185,23 +185,23 @@ class GuardCompiler extends HeadCompiler
 	/** initNormalizedCompiler呼び出し後に呼ばれる。
 	 * 左辺関係型付き$pに対して、ガード用の仮引数番号を
 	 * 変数番号として左辺関係型付き$pのマッチングを取り終わった内部状態を持つようにする。*/
-	private final void initNormalizedGuardCompiler(GuardCompiler gc) {
-		identifiedCxtdefs = (HashSet)gc.identifiedCxtdefs.clone();
-		typedCxtDataTypes = (HashMap)gc.typedCxtDataTypes.clone();
-		typedCxtDefs = (ArrayList)((ArrayList)gc.typedCxtDefs).clone();
-		typedCxtSrcs = (HashMap)gc.typedCxtSrcs.clone();
-		typedCxtTypes = (HashMap)gc.typedCxtTypes.clone();
-		varCount = gc.varCount;	// 重複
-	}
+	// private final void initNormalizedGuardCompiler(GuardCompiler gc) {
+	// 	identifiedCxtdefs = (HashSet<ContextDef>)gc.identifiedCxtdefs.clone();
+	// 	typedCxtDataTypes = (HashMap<ContextDef, Integer>)gc.typedCxtDataTypes.clone();
+	// 	typedCxtDefs = (ArrayList<ContextDef>)((ArrayList<ContextDef>)gc.typedCxtDefs).clone();
+	// 	typedCxtSrcs = (HashMap<ContextDef, Integer>)gc.typedCxtSrcs.clone();
+	// 	typedCxtTypes = (HashMap<ContextDef, Object>)gc.typedCxtTypes.clone();
+	// 	varCount = gc.varCount;	// 重複
+	// }
 
 	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたGuardCompilerを作成して返す。
 	 * 正規化とは、左辺の全てのアトム/膜および左辺関係型付き$pに対して、ガード/ボディ用の仮引数番号を
 	 * 変数番号として左辺と左辺関係型制約のマッチングを取り終わった内部状態を持つようにすることを意味する。*/
-	private final GuardCompiler getNormalizedGuardCompiler() {
-		GuardCompiler gc = new GuardCompiler(rc,this);
-		gc.initNormalizedGuardCompiler(this);
-		return gc;
-	}
+	// private final GuardCompiler getNormalizedGuardCompiler() {
+	// 	GuardCompiler gc = new GuardCompiler(rc,this);
+	// 	gc.initNormalizedGuardCompiler(this);
+	// 	return gc;
+	// }
 	//
 
 	/**

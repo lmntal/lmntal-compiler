@@ -86,7 +86,7 @@ public class RuleCompiler
 	private int rhsmemToPath(Membrane mem) { return rhsmempath.get(mem); }
 	private int lhsatomToPath(Atomic atom) { return lhsatompath.get(atom); }
 	private int rhsatomToPath(Atomic atom) { return rhsatompath.get(atom); }
-	private int lhslinkToPath(Atomic atom, int pos) { return lhslinkToPath(atom.args[pos]); }
+	// private int lhslinkToPath(Atomic atom, int pos) { return lhslinkToPath(atom.args[pos]); }
 	private int lhslinkToPath(LinkOccurrence link) { return lhslinkpath.get(link); }
 
 	private String unitName;
@@ -125,15 +125,10 @@ public class RuleCompiler
 		hc2.enumFormals(rs.leftMem);
 		//とりあえず常にガードコンパイラを呼ぶ事にしてしまう by mizuno
 		//if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty())
-		if (true)
-		{
+		// if (true) {
 			theRule.guardLabel = new InstructionList();
 			guard = theRule.guardLabel.insts;
-		}
-		else
-		{
-			guard = null;
-		}
+		// } else { guard = null; }
 		theRule.bodyLabel = new InstructionList();
 		body = theRule.bodyLabel.insts;
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
@@ -351,7 +346,7 @@ public class RuleCompiler
 			// jump命令群の生成
 			List<Integer> memActuals  = hc.getMemActuals();
 			List<Integer> atomActuals = hc.getAtomActuals();
-			List varActuals  = hc.getVarActuals();
+			List<Object> varActuals  = hc.getVarActuals();
 			// - コード#1
 			hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
 			hc.tempMatch.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
@@ -427,7 +422,7 @@ public class RuleCompiler
 
 		for (ContextDef def : rs.processContexts.values())
 		{
-			Iterator it2 = def.rhsOccs.iterator();
+			Iterator<Context> it2 = def.rhsOccs.iterator();
 			while (it2.hasNext())
 			{
 				ProcessContext atom = (ProcessContext)it2.next();
@@ -967,7 +962,7 @@ public class RuleCompiler
 	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkのリストを指す)変数番号 */
 	private HashMap<ProcessContext, Integer> rhsgroundpaths = new HashMap<ProcessContext, Integer>();
 	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkを指す)変数番号のリスト */
-	private HashMap rhsgroundlinkpaths = new HashMap();
+	// private HashMap rhsgroundlinkpaths = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */
 	private HashMap<ContextDef, Integer> typedcxtsrcs  = new HashMap<ContextDef, Integer>();
 	/** ground型付きプロセス文脈定義(ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時）のリストの変数番号 */
@@ -1120,16 +1115,16 @@ public class RuleCompiler
 	/** 非線形プロセス文脈の左辺出現膜を再帰的にロック解放する */
 	private void recursiveUnlockLHSNonlinearProcessContextMems()
 	{
-		for (ContextDef def : rs.processContexts.values())
-		{
-			if (def.rhsOccs.size() != 1)
-			{
-				if (false) { // 再利用したときのみ recursiveunlock する
-					body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
-							lhsmemToPath(def.lhsOcc.mem) ));
-				}
-			}
-		}
+		// for (ContextDef def : rs.processContexts.values())
+		// {
+		// 	if (def.rhsOccs.size() != 1)
+		// 	{
+		// 		if (false) { // 再利用したときのみ recursiveunlock する
+		// 			body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
+		// 					lhsmemToPath(def.lhsOcc.mem) ));
+		// 		}
+		// 	}
+		// }
 	}
 
 	/** 右辺の型付きプロセス文脈を構築する */
@@ -1137,7 +1132,7 @@ public class RuleCompiler
 	{
 		for (ContextDef def : rs.typedProcessContexts.values())
 		{
-			Iterator it2 = def.rhsOccs.iterator();
+			Iterator<Context> it2 = def.rhsOccs.iterator();
 			while (it2.hasNext())
 			{
 				ProcessContext pc = (ProcessContext)it2.next();
@@ -1766,7 +1761,7 @@ public class RuleCompiler
 		 */
 		for (ContextDef def : rs.processContexts.values())
 		{
-			Iterator it2 = def.rhsOccs.iterator();
+			Iterator<Context> it2 = def.rhsOccs.iterator();
 			if (def.rhsOccs.size() < 2)continue;
 			while (it2.hasNext())
 			{
@@ -1786,7 +1781,7 @@ public class RuleCompiler
 		{
 			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
 			{
-				Iterator it2 = def.rhsOccs.iterator();
+				Iterator<Context> it2 = def.rhsOccs.iterator();
 				while (it2.hasNext())
 				{
 					ProcessContext pc = (ProcessContext)it2.next();
@@ -2438,26 +2433,26 @@ public class RuleCompiler
 	}
 
 	/** デバッグ用表示 */
-	private void showInstructions()
-	{
-		Env.d("--atomMatches:");
-		for (Instruction inst : atomMatch)
-		{
-			Env.d(inst);
-		}
+	// private void showInstructions()
+	// {
+	// 	Env.d("--atomMatches:");
+	// 	for (Instruction inst : atomMatch)
+	// 	{
+	// 		Env.d(inst);
+	// 	}
 
-		Env.d("--memMatch:");
-		for (Instruction inst : memMatch)
-		{
-			Env.d(inst);
-		}
+	// 	Env.d("--memMatch:");
+	// 	for (Instruction inst : memMatch)
+	// 	{
+	// 		Env.d(inst);
+	// 	}
 
-		Env.d("--body:");
-		for (Instruction inst : body)
-		{
-			Env.d(inst);
-		}
-	}
+	// 	Env.d("--body:");
+	// 	for (Instruction inst : body)
+	// 	{
+	// 		Env.d(inst);
+	// 	}
+	// }
 
 	////////////////////////////////////////////////////////////////
 
