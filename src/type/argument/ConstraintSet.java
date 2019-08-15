@@ -193,9 +193,9 @@ public class ConstraintSet /* implements Set */{
 
 	public void printReceiveConstraints() {
 		Env.p("-----ReceiveConstarints : ");
-		Iterator it = receivePassiveConstraintsMap.values().iterator();
+		Iterator<Set<ReceiveConstraint>> it = receivePassiveConstraintsMap.values().iterator();
 		while (it.hasNext()) {
-			Iterator it2 = ((Set) it.next()).iterator();
+			Iterator<ReceiveConstraint> it2 = it.next().iterator();
 			while (it2.hasNext()) {
 				Env.p(it2.next());
 			}
@@ -204,7 +204,7 @@ public class ConstraintSet /* implements Set */{
 
 	public void printUnifyConstraints() {
 		Env.p("-----UnifyConstraints : ");
-		Iterator it = unifyConstraints.iterator();
+		Iterator<UnifyConstraint> it = unifyConstraints.iterator();
 		while (it.hasNext())
 			Env.p(it.next());
 	}
