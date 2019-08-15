@@ -1,6 +1,5 @@
 package util;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -79,34 +78,33 @@ public final class GlobalSystemRulesetGenerator {
 		//
 		// 当分の間、このタイミングで組み込みモジュールをロードさせてもらう。
 		
-		if (true) { // ガード最適化器が完成するまではこちらを使う
+		// if (true) { // ガード最適化器が完成するまではこちらを使う
 			loadBuiltInRules(ruleset);
-		}
-		else {
-			String text = "";
-			text += " Res=X+Y      :- Z=X+Y      | Res=Z.    \n";
-			text += " Res=X-Y      :- Z=X-Y      | Res=Z.    \n";
-			text += " Res=X*Y      :- Z=X*Y      | Res=Z.    \n";
-			text += " Res=X/Y      :- Z=X/Y      | Res=Z.    \n";
-			text += " Res=X mod Y  :- Z=X mod Y  | Res=Z.    \n";
-			text += " Res=X+.Y     :- Z=X+.Y     | Res=Z.    \n";
-			text += " Res=X-.Y     :- Z=X-.Y     | Res=Z.    \n";
-			text += " Res=X*.Y     :- Z=X*.Y     | Res=Z.    \n";
-			text += " Res=X/.Y     :- Z=X/.Y     | Res=Z.    \n";
-			text += " Res=+X       :- int(X)     | Res=X.    \n";
-			text += " Res=-X       :- Z=-X       | Res=Z.    \n";
-			text += " Res=+.X      :- float(X)   | Res=X.    \n";
-			text += " Res=-.X      :- Z=-.X      | Res=Z.    \n";
-			text += " Res=int(X)   :- Z=int(X)   | Res=Z.    \n";
-			text += " Res=float(X) :- Z=float(X) | Res=Z.    \n";
+		// } else {
+			// String text = "";
+			// text += " Res=X+Y      :- Z=X+Y      | Res=Z.    \n";
+			// text += " Res=X-Y      :- Z=X-Y      | Res=Z.    \n";
+			// text += " Res=X*Y      :- Z=X*Y      | Res=Z.    \n";
+			// text += " Res=X/Y      :- Z=X/Y      | Res=Z.    \n";
+			// text += " Res=X mod Y  :- Z=X mod Y  | Res=Z.    \n";
+			// text += " Res=X+.Y     :- Z=X+.Y     | Res=Z.    \n";
+			// text += " Res=X-.Y     :- Z=X-.Y     | Res=Z.    \n";
+			// text += " Res=X*.Y     :- Z=X*.Y     | Res=Z.    \n";
+			// text += " Res=X/.Y     :- Z=X/.Y     | Res=Z.    \n";
+			// text += " Res=+X       :- int(X)     | Res=X.    \n";
+			// text += " Res=-X       :- Z=-X       | Res=Z.    \n";
+			// text += " Res=+.X      :- float(X)   | Res=X.    \n";
+			// text += " Res=-.X      :- Z=-.X      | Res=Z.    \n";
+			// text += " Res=int(X)   :- Z=int(X)   | Res=Z.    \n";
+			// text += " Res=float(X) :- Z=float(X) | Res=Z.    \n";
 //			text += " cp(X,Y,Z)    :- unary(X)   | Y=X, Z=X. \n";
-			compileAndLoadRules(ruleset,text);
-		}
-		if (false) {
+			// compileAndLoadRules(ruleset,text);
+		// }
+		// if (false) {
 			String text = "";
 			text += generateUnaryFloatingFunctionRuleText("sin");
 			compileAndLoadRules(ruleset,text);
-		}
+		// }
 	}
 	static String generateUnaryFloatingFunctionRuleText(String func) {
 		String text = " Res=" + func + "(X) :- float(X) | [[/*inline*/";

@@ -192,24 +192,24 @@ public class TypeChecker {
 		return true;
 	}
 	
-	private void printTypeDefinitions(){
-		for(String memname : memCounts.keySet()){
-			Env.p(memname + "{");
-			Map<String, IntervalCount> mtof = memCounts.get(memname);
-			for(String child : mtof.keySet()){
-				Env.p("\t" + child + " = " + mtof.get(child));
-			}
-			Env.p("}");
-		}
-		for(String memname : functorCounts.keySet()){
-			Env.p(memname + "{");
-			Map<Functor, IntervalCount> ftof = functorCounts.get(memname);
-			for(Functor f : ftof.keySet()){
-				Env.p("\t" + f + " = " + ftof.get(f));
-			}
-			Env.p("}");
-		}
-	}
+	// private void printTypeDefinitions(){
+	// 	for(String memname : memCounts.keySet()){
+	// 		Env.p(memname + "{");
+	// 		Map<String, IntervalCount> mtof = memCounts.get(memname);
+	// 		for(String child : mtof.keySet()){
+	// 			Env.p("\t" + child + " = " + mtof.get(child));
+	// 		}
+	// 		Env.p("}");
+	// 	}
+	// 	for(String memname : functorCounts.keySet()){
+	// 		Env.p(memname + "{");
+	// 		Map<Functor, IntervalCount> ftof = functorCounts.get(memname);
+	// 		for(Functor f : ftof.keySet()){
+	// 			Env.p("\t" + f + " = " + ftof.get(f));
+	// 		}
+	// 		Env.p("}");
+	// 	}
+	// }
 	
 	private void constrainActiveAtomArgument(String memname, Atom atom)throws TypeParseException{
 		List<ModedType> types = new ArrayList<ModedType>(atom.getArity()-1);
