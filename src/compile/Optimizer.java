@@ -946,7 +946,7 @@ public class Optimizer {
 			}
 		}
 
-		if (reuseMap.containsKey(mem)) {
+		if (reuseMap.containsKey(mem) && !Env.slimcode) {
 			lit.add(new Instruction(Instruction.UNLOCKMEM, mem));
 		}
 	}
