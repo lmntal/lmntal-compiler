@@ -1107,12 +1107,15 @@ public class RuleCompiler
 	/** 非線形プロセス文脈の左辺出現膜を再帰的にロックする */
 	private void recursiveLockLHSNonlinearProcessContextMems()
 	{
-		for (ContextDef def : rs.processContexts.values())
+		if(!Env.slimcode)
 		{
-			if (def.rhsOccs.size() != 1)
+			for (ContextDef def : rs.processContexts.values())
 			{
-				body.add(new Instruction( Instruction.RECURSIVELOCK,
-						lhsmemToPath(def.lhsOcc.mem) ));
+				if (def.rhsOccs.size() != 1)
+				{
+					body.add(new Instruction( Instruction.RECURSIVELOCK,
+							lhsmemToPath(def.lhsOcc.mem) ));
+				}
 			}
 		}
 	}
@@ -1120,13 +1123,16 @@ public class RuleCompiler
 	/** 非線形プロセス文脈の左辺出現膜を再帰的にロック解放する */
 	private void recursiveUnlockLHSNonlinearProcessContextMems()
 	{
-		for (ContextDef def : rs.processContexts.values())
+		if(!Env.slimcode)
 		{
-			if (def.rhsOccs.size() != 1)
+			for (ContextDef def : rs.processContexts.values())
 			{
-				if (false) { // 再利用したときのみ recursiveunlock する
-					body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
-							lhsmemToPath(def.lhsOcc.mem) ));
+				if (def.rhsOccs.size() != 1)
+				{
+					if (false) { // 再利用したときのみ recursiveunlock する
+						body.add(new Instruction( Instruction.RECURSIVEUNLOCK,
+								lhsmemToPath(def.lhsOcc.mem) ));
+					}
 				}
 			}
 		}
@@ -2391,13 +2397,16 @@ public class RuleCompiler
 	 */
 	private void unlockReusedOrNewRootMem(Membrane mem)
 	{
-		for (Membrane submem : mem.mems)
+		if(!Env.slimcode)
 		{
-			unlockReusedOrNewRootMem(submem);
-		}
-		if (mem.pragmaAtHost != null) // 右辺で＠指定されている場合
-		{
-			body.add(new Instruction(Instruction.UNLOCKMEM, rhsmemToPath(mem)));
+			for (Membrane submem : mem.mems)
+			{
+				unlockReusedOrNewRootMem(submem);
+			}
+			if (mem.pragmaAtHost != null) // 右辺で＠指定されている場合
+			{
+				body.add(new Instruction(Instruction.UNLOCKMEM, rhsmemToPath(mem)));
+			}
 		}
 	}
 
