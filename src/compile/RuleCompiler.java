@@ -1784,8 +1784,7 @@ public class RuleCompiler
 		 */
 		for (ContextDef def : rs.typedProcessContexts.values())
 		{
-			if (def.lhsOcc.args.length < 2) continue;
-			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
+			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE && def.lhsOcc.args.length >= 2)
 			{
 				Iterator it2 = def.rhsOccs.iterator();
 				while (it2.hasNext())
