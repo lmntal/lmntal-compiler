@@ -1710,7 +1710,7 @@ public class RuleCompiler
 	{
 		for (ContextDef def : rs.processContexts.values())
 		{
-			if (def.rhsOccs.size() < 2) continue;
+			if (def.rhsOccs.size() < 2 || def.lhsOcc.args.length < 2) continue;
 			List<Integer> linklist = new ArrayList<Integer>();
 			int setpath = varcount++;
 			for (int i = 0; i < def.lhsOcc.args.length; i++)
@@ -1732,7 +1732,7 @@ public class RuleCompiler
 		}
 		for (ContextDef def : rs.typedProcessContexts.values())
 		{
-			if (gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE) continue;
+			if (gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE || def.lhsOcc.args.length < 2) continue;
 			List<Integer> linklist = new ArrayList<Integer>();
 			int setpath = varcount++;
 			for (int i = 0; i < def.lhsOcc.args.length; i++)
@@ -1767,7 +1767,7 @@ public class RuleCompiler
 		for (ContextDef def : rs.processContexts.values())
 		{
 			Iterator it2 = def.rhsOccs.iterator();
-			if (def.rhsOccs.size() < 2)continue;
+			if (def.rhsOccs.size() < 2 || def.lhsOcc.args.length < 2) continue;
 			while (it2.hasNext())
 			{
 				ProcessContext pc = (ProcessContext)it2.next();
@@ -1784,6 +1784,7 @@ public class RuleCompiler
 		 */
 		for (ContextDef def : rs.typedProcessContexts.values())
 		{
+			if (def.lhsOcc.args.length < 2) continue;
 			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
 			{
 				Iterator it2 = def.rhsOccs.iterator();
