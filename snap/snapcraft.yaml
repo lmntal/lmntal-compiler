@@ -34,3 +34,4 @@
   apps:
     lmntal-compiler:
       command: lmntal
+      plugs: [home]

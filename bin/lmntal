@@ -24,11 +24,6 @@ do
     fi
 done
 
-echo "pwd: $(pwd)"
-echo "args: $@"
-echo "LMNTAL_HOME: $LMNTAL_HOME"
-echo "CLASSPATH: $CLASSPATH"
-
 optlibpath=$LMNTAL_HOME/lib/slimoptimizer
 if [ $slimoptimizer = true -a $slimcode = true ]; then
     
