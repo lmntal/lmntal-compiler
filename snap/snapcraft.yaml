@@ -33,4 +33,4 @@
   
   apps:
     lmntal-compiler:
-      command: bin/lmntal
+      command: lmntal
