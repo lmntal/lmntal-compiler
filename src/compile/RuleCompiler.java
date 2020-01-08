@@ -545,7 +545,7 @@ public class RuleCompiler
 		insertconnectors();
 
 		// insertconnectorsの後でなければうまくいかないので再発行 ( 2006/09/15 kudo)
-		getGroundLinkPaths();
+//		getGroundLinkPaths();
 
 		// 右辺の構造と$pの内容，を再帰的に生成する
 		// $pの明示的でないリンクをはる
@@ -675,7 +675,7 @@ public class RuleCompiler
 		insertconnectors();
 
 		// insertconnectorsの後でなければうまくいかないので再発行 ( 2006/09/15 kudo)
-		getGroundLinkPaths();
+//		getGroundLinkPaths();
 
 		// 右辺の構造と$pの内容，を再帰的に生成する
 		// $pの明示的でないリンクをはる
@@ -1757,6 +1757,18 @@ public class RuleCompiler
 			body.add(new Instruction(Instruction.INSERTCONNECTORSINNULL,
 					setpath,linklist));//,lhsmemToPath(def.lhsOcc.mem)));
 			cxtlinksetpaths.put(def, setpath);
+
+			// insertconnectorsinnull後はGroundで使うリンク列を作りなおす。=アトムが挿入されている可能性があるため。
+			int linklistpath = varcount++;
+			body.add(new Instruction(Instruction.NEWLIST,linklistpath));
+			for (int i = 0; i < def.lhsOcc.args.length; i++)
+			{
+				int linkpath = varcount++;
+				body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
+				lhslinkpath.put(def.lhsOcc.args[i], linkpath);
+				body.add(new Instruction(Instruction.ADDTOLIST,linklistpath,linkpath));
+				groundsrcs.put(def, linklistpath);
+			}
 		}
 	}
 
