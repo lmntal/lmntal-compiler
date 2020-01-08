@@ -1738,7 +1738,7 @@ public class RuleCompiler
 		}
 		for (ContextDef def : rs.typedProcessContexts.values())
 		{
-			if (gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE || def.lhsOcc.args.length < 2) continue;
+			if (gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE || def.rhsOccs.size() == 0 || def.lhsOcc.args.length < 2) continue;
 			List<Integer> linklist = new ArrayList<Integer>();
 			int setpath = varcount++;
 			for (int i = 0; i < def.lhsOcc.args.length; i++)
@@ -1790,17 +1790,15 @@ public class RuleCompiler
 		 */
 		for (ContextDef def : rs.typedProcessContexts.values())
 		{
-			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE && def.lhsOcc.args.length >= 2)
+			Iterator it2 = def.rhsOccs.iterator();
+			if (gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE || def.lhsOcc.args.length < 2) continue;
+			while (it2.hasNext())
 			{
-				Iterator it2 = def.rhsOccs.iterator();
-				while (it2.hasNext())
-				{
-					ProcessContext pc = (ProcessContext)it2.next();
-					body.add(new Instruction(Instruction.DELETECONNECTORS,
-							cxtlinksetpaths.get(def).intValue(),
-							rhspcToMapPath(pc)));
+				ProcessContext pc = (ProcessContext)it2.next();
+				body.add(new Instruction(Instruction.DELETECONNECTORS,
+						cxtlinksetpaths.get(def).intValue(),
+						rhspcToMapPath(pc)));
 //					rhsmemToPath(pc.mem)));
-				}
 			}
 		}
 	}
