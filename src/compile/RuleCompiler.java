@@ -1017,7 +1017,8 @@ public class RuleCompiler
 				{
 					int linkpath = varcount++;
 					if (!def.lhsOcc.args[i].buddy.name.startsWith("!")) {
-						body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));						
+						body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
+						lhslinkpath.put(def.lhsOcc.args[i], linkpath);
 					} else {
 						body.add(new Instruction(Instruction.HYPERGETLINK,linkpath,lhsatomToPath(def.lhsOcc.args[i].buddy.atom),def.lhsOcc.args[i].buddy.pos));
 					}
