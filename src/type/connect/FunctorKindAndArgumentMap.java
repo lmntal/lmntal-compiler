@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import runtime.functor.FloatingFunctor;
-import runtime.functor.Functor;
 import runtime.functor.IntegerFunctor;
 import runtime.functor.StringFunctor;
 

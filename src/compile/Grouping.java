@@ -19,15 +19,15 @@ public class Grouping {
 	/** 変数番号⇒変数番号を定義した命令のマップ */
 	private HashMap var2DefInst;
 	/** 命令⇒グループ識別番号のマップ */
-	private HashMap Inst2GroupId;
+	private HashMap<Instruction,Integer> Inst2GroupId;
 	/** グループ命令内の計算コスト*/
-	private HashMap group2Cost;
+	private HashMap<Instruction,Cost> group2Cost;
 	
 	Instruction spec;
 	Grouping(){
 		var2DefInst = new HashMap();
-		Inst2GroupId = new HashMap();
-		group2Cost = new HashMap();
+		Inst2GroupId = new HashMap<Instruction,Integer>();
+		group2Cost = new HashMap<Instruction,Cost>();
 		spec = null;
 	}
 	
@@ -44,7 +44,7 @@ public class Grouping {
 	 *  @atom アトム主導テスト部の命令列
 	 *  @param 膜主導テスト部の命令列
 	 * */
-	public void grouping(List atom, List mem){
+	public void grouping(List<Instruction> atom, List<Instruction> mem){
 		//アトム主導テスト部
 		if(!Optimizer.fMerging) groupingInstsForAtomMatch(atom);
 		//膜主導テスト部
@@ -116,8 +116,8 @@ public class Grouping {
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.COMMIT
 				|| inst.getKind() == Instruction.JUMP) break;
-			Object group = null;
-			Object changegroup = null;
+			Integer group = null;
+			Integer changegroup = null;
 			ArrayList list = inst.getVarArgs(new HashMap());
 			if(list.isEmpty()) continue;
 			for (int j = 0; j < list.size(); j++) {
@@ -132,8 +132,8 @@ public class Grouping {
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.COMMIT
 				|| inst.getKind() == Instruction.JUMP) break;
-			Object group = null;
-			Object changegroup = null;
+			Integer group = null;
+			Integer changegroup = null;
 			boolean norules = false;
 			boolean meminsttype = false; //anymem -> true  lockmem -> false
 			int natoms = -1;
@@ -281,13 +281,13 @@ public class Grouping {
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.GROUP){
 				Cost cost1 = null;
-				if(group2Cost.containsKey(inst)) cost1 = (Cost)group2Cost.get(inst);
+				if(group2Cost.containsKey(inst)) cost1 = group2Cost.get(inst);
 				else break;
 				for(int j=i-1; j>0; j--){
 					Instruction inst2 = insts.get(j);
 					if (inst2.getKind() == Instruction.GROUP){
 						Cost cost2 = null;
-						if(group2Cost.containsKey(inst2)) cost2 = (Cost)group2Cost.get(inst2);
+						if(group2Cost.containsKey(inst2)) cost2 = group2Cost.get(inst2);
 						else break;
 						if(cost2.igtCost(cost1)){
 							insts.add(j--, inst);
@@ -309,10 +309,10 @@ public class Grouping {
 	 * @param group2 書き換え後の値
 	 * */
 	//Inst2GroupIdの内, 値group1をもつ全てのキーに対し, 値group2へマップを張り替える.
-	public void changeMap(Object group1, Object group2){
-		Iterator it = Inst2GroupId.keySet().iterator();
+	public void changeMap(Integer group1, Integer group2){
+		Iterator<Instruction> it = Inst2GroupId.keySet().iterator();
 		while (it.hasNext()) {
-			Object key = it.next();
+			Instruction key = it.next();
 			if (group1.equals(Inst2GroupId.get(key))) {
 				Inst2GroupId.put(key, group2);
 			}
@@ -322,10 +322,10 @@ public class Grouping {
 	//生成されたマップの確認 デバッグ用
 	public void viewMap(){
 		Set set1 = var2DefInst.entrySet();
-		Set set2 = Inst2GroupId.entrySet();
+		Set<Map.Entry<Instruction, Integer>> set2 = Inst2GroupId.entrySet();
 
 		Iterator it1 = set1.iterator();
-		Iterator it2 = set2.iterator();
+		Iterator<Map.Entry<Instruction, Integer>> it2 = set2.iterator();
 	
 		Util.println("var2DefInst :- ");
 		while(it1.hasNext()){
@@ -334,7 +334,7 @@ public class Grouping {
 		}
 			Util.println("Inst2GroupId :- ");
 		while(it2.hasNext()){
-			Map.Entry mapentry = (Map.Entry)it2.next();
+			Map.Entry<Instruction, Integer> mapentry = it2.next();
 			Util.println(mapentry.getKey() + "/" + mapentry.getValue());
 		}	
 	}

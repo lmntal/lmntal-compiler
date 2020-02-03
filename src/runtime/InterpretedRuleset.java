@@ -23,7 +23,7 @@ public final class InterpretedRuleset extends Ruleset
 	/** 現在実行中のルール */
 	public Rule currentRule;
 	
-	private int backtracks, lockfailure;
+	// private int backtracks, lockfailure;
 
 	/**
 	 * RuleCompiler では、まず生成してからデータを入れ込む。
@@ -38,7 +38,7 @@ public final class InterpretedRuleset extends Ruleset
 	}
 
 	/** グローバルルールセットID（未定義の場合はnull）*/
-	private String globalRulesetID;
+	// private String globalRulesetID;
 
 	/**このルールセットのローカルIDを取得する。*/
 	public int getId()

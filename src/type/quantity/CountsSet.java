@@ -31,7 +31,7 @@ public class CountsSet {
 //	Map<Membrane,FixedCounts> memToInhFixedCounts;
 	private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<String, FixedCounts>();
 	/** 膜名 -> 量解析結果(継続膜) */
-	private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
+	// private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
 
 	public CountsSet(){
 	}

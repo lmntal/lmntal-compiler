@@ -23,7 +23,7 @@ public class StreamClassLoader extends ClassLoader {
 	 * @return Class
 	 * @throws ClassNotFoundException
 	 */
-	public Class findClass(String name, InputStream in)
+	public Class<?> findClass(String name, InputStream in)
 			throws ClassNotFoundException {
 		byte[] classData = getClassData(name, in);
 		return defineClass("translated." + name, classData, 0, classData.length);
