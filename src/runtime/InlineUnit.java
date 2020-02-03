@@ -86,7 +86,7 @@ public class InlineUnit {
 		switch(type) {
 		case EXEC:
 			if(Env.debug>=Env.DEBUG_TRACE) Env.d("Register inlineCode to "+name+" : "+code);
-			codes.put(code, new Integer(codeCount));
+			codes.put(code, codeCount);
 			code_of_id.add(code);
 			codeCount++;
 			break;

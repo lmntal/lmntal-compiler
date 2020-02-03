@@ -159,12 +159,12 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(typechecker,             3));
 		insts.add(new Instruction(op,                    4,2,3));
 		ArrayList<Integer> mems = new ArrayList<Integer>();
-		mems.add(new Integer(0));
+		mems.add(0);
 		ArrayList<Integer> atoms = new ArrayList<Integer>();
-		atoms.add(new Integer(1));
-		atoms.add(new Integer(2));
-		atoms.add(new Integer(3));
-		atoms.add(new Integer(4));
+		atoms.add(1);
+		atoms.add(2);
+		atoms.add(3);
+		atoms.add(4);
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        5,5));
@@ -212,11 +212,11 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
 
 		ArrayList<Integer> mems = new ArrayList<Integer>();
-		mems.add(new Integer(0));
+		mems.add(0);
 		ArrayList<Integer> atoms = new ArrayList<Integer>();
-		atoms.add(new Integer(1));
-		atoms.add(new Integer(2));
-		atoms.add(new Integer(3));
+		atoms.add(1);
+		atoms.add(2);
+		atoms.add(3);
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
@@ -250,11 +250,11 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(op,                    3,2));
 
 		ArrayList<Integer> mems = new ArrayList<Integer>();
-		mems.add(new Integer(0));
+		mems.add(0);
 		ArrayList<Integer> atoms = new ArrayList<Integer>();
-		atoms.add(new Integer(1));
-		atoms.add(new Integer(2));
-		atoms.add(new Integer(3));
+		atoms.add(1);
+		atoms.add(2);
+		atoms.add(3);
 		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));

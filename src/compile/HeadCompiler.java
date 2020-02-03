@@ -81,7 +81,7 @@ class HeadCompiler
 		return memPaths.get(mem);
 	}
 	protected final int linkToPath(int atomid, int pos) { // todo HeadCompilerの仕様に合わせる？GuardCompilerも。
-		if (!linkPaths.containsKey(new Integer(atomid))) return UNBOUND;
+		if (!linkPaths.containsKey(atomid)) return UNBOUND;
 		return linkPaths.get(atomid)[pos];
 	}
 
@@ -166,7 +166,7 @@ class HeadCompiler
 			insts.add(new Instruction(Instruction.GETLINK, varCount, atompath, i));
 			varCount++;
 		}
-		linkPaths.put(new Integer(atompath), paths);
+		final int[] put = linkPaths.put(new Integer(atompath), paths);
 	}
 	private void searchLinkedGroup(Atom startatom, HashSet<Atom> qatoms, Atom firstatom, Membrane firstmem) {
 		LinkedList<Membrane> newmemlist = new LinkedList<Membrane>();
@@ -260,7 +260,7 @@ class HeadCompiler
 
 				// リンク先のアトムを変数に取得する
 
-				atomPaths.put(buddyatom, new Integer(buddyatompath));
+				atomPaths.put(buddyatom, buddyatompath);
 				if(buddyatom.mem == firstmem){
 					qatoms.add(buddyatom);
 					firstmem.connect(firstatom, buddyatom);
@@ -274,7 +274,7 @@ class HeadCompiler
 					int buddymempath = memToPath(buddyatom.mem);
 					if (buddymempath == UNBOUND) {
 						buddymempath = varCount++;
-						memPaths.put(buddymem, new Integer(buddymempath));
+						memPaths.put(buddymem, buddymempath);
 						newmemlist.add(buddymem);
 						connectAtomMem(firstatom, buddymem);
 					}
@@ -478,7 +478,7 @@ class HeadCompiler
 
 				// リンク先のアトムを変数に取得する
 
-				atomPaths.put(buddyatom, new Integer(buddyatompath));
+				atomPaths.put(buddyatom, buddyatompath);
 				//qatoms.add(buddyatom);
 //				if(ratoms!=null)ratoms.add(buddyatom);
 				atomqueue.addLast( buddyatom );
@@ -494,7 +494,7 @@ class HeadCompiler
 					}
 					else {
 						buddymempath = varCount++;
-						memPaths.put(buddymem, new Integer(buddymempath));
+						memPaths.put(buddymem, buddymempath);
 						insts.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath, buddyatom.mem.name ));
 						newmemlist.add(buddymem);
 						if(Env.slimcode){
@@ -567,7 +567,7 @@ class HeadCompiler
 //				
 			// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
 			emitNeqAtoms(mem, atom, atompath, insts);
-			atomPaths.put(atom, new Integer(atompath));
+			atomPaths.put(atom, atompath);
 			//リンクの一括取得(RISC化) by mizuno
 			getLinks(atompath, atom.functor.getArity(), insts);
 			compileLinkedGroup(atom, list);
@@ -592,7 +592,7 @@ class HeadCompiler
 						insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
 					}
 				}
-				memPaths.put(submem, new Integer(submempath));
+				memPaths.put(submem, submempath);
 			}
 			
 			
