@@ -67,7 +67,7 @@ public class Grouping {
 			if(inst.getKind() == Instruction.COMMIT) continue;
 			if (inst.getKind() == Instruction.JUMP) continue;
 			//グループ番号を割り振る	  
-			Inst2GroupId.put(inst, new Integer(i));
+			Inst2GroupId.put(inst, i);
 			//変数番号→命令にマップを張る
 			//System.out.println("instruction = "+inst);
 			if(inst.getOutputType() != -1)
@@ -78,7 +78,7 @@ public class Grouping {
 			for(int i=1; i<insts.size(); i++){
 				Instruction inst = insts.get(i);
 				if(inst.getKind() == Instruction.FUNC){
-					Inst2GroupId.put(inst, new Integer(last));
+					Inst2GroupId.put(inst, last);
 					var2DefInst.put(inst.getArg1(), inst);
 					break;
 				}
@@ -121,7 +121,7 @@ public class Grouping {
 			ArrayList list = inst.getVarArgs(new HashMap());
 			if(list.isEmpty()) continue;
 			for (int j = 0; j < list.size(); j++) {
-				if (list.get(j).equals(new Integer(0))) continue;
+				if (list.get(j).equals(0)) continue;
 				//if (list.get(j).equals(new Integer(1)) && isAtomMatch) continue;
 				group = Inst2GroupId.get(var2DefInst.get(list.get(j)));
 				changegroup = Inst2GroupId.get(inst);
@@ -360,13 +360,13 @@ class Cost {
 			Instruction inst = insts.get(i);
 			switch(inst.getKind()){
 			case Instruction.FINDATOM:
-				costvalueN.add(n++, new Integer(vn));
-				costvalueM.add(new Integer(vm));
+				costvalueN.add(n++, vn);
+				costvalueM.add(vm);
 				vn = 1;
 				break;
 			case Instruction.ANYMEM:
-				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
-				else costvalueN.set(n, new Integer(++vn));
+				if(costvalueN.size() <= n) costvalueN.add(++vn);
+				else costvalueN.set(n, ++vn);
 				for(int j=insts.size()-1; j>i; j--) {
 					Instruction inst2 = insts.get(j);
 					switch(inst2.getKind()){
@@ -386,15 +386,15 @@ class Cost {
 						break;
 					}
 				}
-				if(costvalueM.size() <= n) costvalueM.add(new Integer(++vm));
-				else costvalueM.set(n, new Integer(++vm));
+				if(costvalueM.size() <= n) costvalueM.add(++vm);
+				else costvalueM.set(n, ++vm);
 				break;
 			case Instruction.NATOMS:
 			case Instruction.NMEMS:
 			case Instruction.NORULES:
 				if(Optimizer.fGuardMove) {vn++; break;}
-				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
-				else costvalueN.set(n, new Integer(++vn));
+				if(costvalueN.size() <= n) costvalueN.add(++vn);
+				else costvalueN.set(n, ++vn);
 				if(memend.containsValue(inst)){
 //					while(costvalueM.size() <=n) costvalueM.add(new Integer(vm));
 //						costvalueM.set(n, new Integer(vm--));
@@ -409,8 +409,8 @@ class Cost {
 				}
 				break;
 			default:
-				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
-				else costvalueN.set(n, new Integer(++vn));
+				if(costvalueN.size() <= n) costvalueN.add(++vn);
+				else costvalueN.set(n, ++vn);
 				
 				break;
 			}

@@ -103,7 +103,7 @@ public abstract class Functor
 	/**
 	 * 指定された文字列を表すシンボルリテラルのテキスト表現を取得する。 例えば a'b を渡すと 'a\'b' が返る。
 	 */
-	static final String quoteName(String text) {
+	static String quoteName(String text) {
 		return Util.quoteString(text, '\'');
 	}
 

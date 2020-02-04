@@ -27,3 +27,7 @@ gtags.conf
 
 #win
 Thumbs.db
+
+#idea
+.idea
+LMNtal Compiler.iml

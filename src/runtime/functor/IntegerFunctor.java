@@ -14,7 +14,7 @@ public class IntegerFunctor extends DataFunctor
 
 	public int hashCode() { return value; }
 	public int intValue() { return value; }
-	public Object getValue() { return new Integer(value); }
+	public Object getValue() { return value; }
 	public boolean equals(Object o) {
 		return (o instanceof IntegerFunctor) && ((IntegerFunctor)o).value == value;
 	}

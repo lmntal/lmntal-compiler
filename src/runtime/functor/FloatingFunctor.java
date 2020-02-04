@@ -11,7 +11,7 @@ public class FloatingFunctor extends DataFunctor {
 	public String toString() { return getName() + "_1"; }
 	public int hashCode() { return (int)(Double.doubleToLongBits(value) >> 32); }
 	public double floatValue() { return value; }
-	public Object getValue() { return new Float(value); }
+	public Object getValue() { return (float) value; }
 	public boolean equals(Object o) {
 		return (o instanceof FloatingFunctor) && ((FloatingFunctor)o).value == value;
 	}

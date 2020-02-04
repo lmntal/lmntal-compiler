@@ -1485,7 +1485,7 @@ public class Instruction implements Cloneable
 	 * $listからpos番目の要素を$dstに取得する
 	 */
 	@LMNtalIL public static final int GETFROMLIST = 244;
-	static {setArgType(GETFROMLIST, new ArgType(true, ARG_VAR, ARG_VAR, ARG_INT));};
+	static {setArgType(GETFROMLIST, new ArgType(true, ARG_VAR, ARG_VAR, ARG_INT));}
 
 	///////////////////////////////////////////////////////////////////////
 
@@ -1496,7 +1496,7 @@ public class Instruction implements Cloneable
 	 * 新たなhyperlinkを生成し, link先に接続することを示す
 	 */
 	@LMNtalIL public static final int NEWHLINK = 250;
-	static {setArgType(NEWHLINK, new ArgType(true, ARG_VAR));};
+	static {setArgType(NEWHLINK, new ArgType(true, ARG_VAR));}
 
 	/**
 	 * makehlink [ID, link]
@@ -1505,7 +1505,7 @@ public class Instruction implements Cloneable
 	 * （未実装、hyperlinkへの値の代入などに使用できるかも？）
 	 */
 	@LMNtalIL public static final int MAKEHLINK = 251;
-	static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));};
+	static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));}
 
 //	public static final int ISNAME = 255;
 //	static {setArgType(ISNAME, new ArgType(false, ARG_VAR));};
@@ -1518,7 +1518,7 @@ public class Instruction implements Cloneable
 	 * link先に接続する構造がhyperlinkであることをチェックすることを示す
 	 */
 	@LMNtalIL public static final int ISHLINK = 257;
-	static {setArgType(ISHLINK, new ArgType(false, ARG_VAR));};
+	static {setArgType(ISHLINK, new ArgType(false, ARG_VAR));}
 
 //	public static final int SETCONAME = 258;
 //	static {setArgType(SETCONAME, new ArgType(true, ARG_VAR, ARG_VAR));};
@@ -1539,7 +1539,7 @@ public class Instruction implements Cloneable
 	 * hyperlinkの要素数をatomに返すことを示す
 	 */
 	@LMNtalIL public static final int GETNUM = 264;
-	static {setArgType(GETNUM, new ArgType(true, ARG_VAR, ARG_VAR));};
+	static {setArgType(GETNUM, new ArgType(true, ARG_VAR, ARG_VAR));}
 
 //	public static final int UNIFYHLINK = 265;
 //	static {setArgType(UNIFYHLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));};
@@ -1554,7 +1554,7 @@ public class Instruction implements Cloneable
 	 * 膜memにあるunify_atom"><"に対してhyperlinkの併合操作を行なうことを示す
 	 */
 	@LMNtalIL public static final int UNIFYHLINKS = 268;
-	static {setArgType(UNIFYHLINKS, new ArgType(false, ARG_VAR, ARG_VAR));};
+	static {setArgType(UNIFYHLINKS, new ArgType(false, ARG_VAR, ARG_VAR));}
 
 //	public static final int UNIFYNAMECONAME = 269;
 //	public static final int UNIFYCONAMENAME = 270;
@@ -1569,7 +1569,7 @@ public class Instruction implements Cloneable
 	 * 必ず(atom1,arg1)がオリジナル、(atom2,arg2)が新たに生成された名前になるよう配置されている
 	 */
 	@LMNtalIL public static final int FINDPROCCXT= 300;
-	static {setArgType(FINDPROCCXT, new ArgType(false, ARG_ATOM, ARG_INT,  ARG_INT, ARG_ATOM, ARG_INT, ARG_INT));};
+	static {setArgType(FINDPROCCXT, new ArgType(false, ARG_ATOM, ARG_INT,  ARG_INT, ARG_ATOM, ARG_INT, ARG_INT));}
 
 	
 	
@@ -1622,7 +1622,7 @@ public class Instruction implements Cloneable
 	 * 新たな属性付きhyperlinkを生成し, link先に接続することを示す。
 	 */
 	@LMNtalIL public static final int NEWHLINKWITHATTR = 284;
-	static {setArgType(NEWHLINKWITHATTR, new ArgType(true, ARG_VAR, ARG_OBJ));};
+	static {setArgType(NEWHLINKWITHATTR, new ArgType(true, ARG_VAR, ARG_OBJ));}
 
 	/**
 	 * getattratom [dstatom, atom]
@@ -1630,7 +1630,7 @@ public class Instruction implements Cloneable
 	 * ハイパーリンクの属性を取得する
 	 */
 	@LMNtalIL public static final int GETATTRATOM = 285;
-	static {setArgType(GETATTRATOM, new ArgType(false, ARG_VAR, ARG_VAR));};
+	static {setArgType(GETATTRATOM, new ArgType(false, ARG_VAR, ARG_VAR));}
 	
 	/**
 	 * hypergetlink [link, atom, pos]
