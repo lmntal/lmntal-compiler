@@ -74,8 +74,8 @@ public class TypeInferer {
 		// 引数制約を推論する
 		if(Env.flgArgumentInference){
 			ai.infer();
-			if(false)
-				ai.printAll();
+			// if(false)
+				// ai.printAll();
 		}
 		
 		// 型定義が与えられていたら整合性をチェックする

@@ -45,6 +45,7 @@ public class FileClassLoader extends ClassLoader {
 				FileInputStream fi = new FileInputStream( filename );
 				byte[] buf = new byte[fi.available()];
 				int len = fi.read(buf);
+				fi.close();
 				//Env.p("FileClassLoader : "+buf);
 				return defineClass(InlineUnit.className(className), buf, 0, len);
 			} catch (Exception e) {

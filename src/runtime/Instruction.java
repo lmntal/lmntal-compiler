@@ -1962,31 +1962,6 @@ public class Instruction implements Cloneable
 	public Object getArg5() { return getArg(4); }
 	public Object getArg6() { return getArg(5); }
 
-	/**@deprecated*/
-	public void setArg(int pos, Object arg) {
-		data.set(pos,arg);
-	}
-	/**@deprecated*/
-	public void setArg1(Object arg) {
-		data.set(0,arg);
-	}
-	/**@deprecated*/
-	public void setArg2(Object arg) {
-		data.set(1,arg);
-	}
-	/**@deprecated*/
-	public void setArg3(Object arg) {
-		data.set(2,arg);
-	}
-	/**@deprecated*/
-	public void setArg4(Object arg) {
-		data.set(3,arg);
-	}
-	/**@deprecated*/
-	public void setArg5(Object arg) {
-		data.set(4,arg);
-	}
-
 	////////////////////////////////////////////////////////////////
 
 	/**
@@ -2097,14 +2072,14 @@ public class Instruction implements Cloneable
 		i.add(varargs);
 		return i;
 	}
-	/** @deprecated */
-	public static Instruction findatom(int dstatom, List srcmem, Functor func) {
-		Instruction i = new Instruction(FINDATOM);
-		i.add(dstatom);
-		i.add(srcmem);
-		i.add(func);
-		return i;
-	}
+	// /** @deprecated */
+	// public static Instruction findatom(int dstatom, List srcmem, Functor func) {
+	// 	Instruction i = new Instruction(FINDATOM);
+	// 	i.add(dstatom);
+	// 	i.add(srcmem);
+	// 	i.add(func);
+	// 	return i;
+	// }
 
 	/** findatom 命令を生成する */
 	public static Instruction findatom(int dstatom, int srcmem, Functor func) {
