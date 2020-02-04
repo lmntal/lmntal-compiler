@@ -261,11 +261,16 @@ public class FrontEnd
 		if (opt.equals("--compileonly"))
 		{
 			// コンパイル後の中間命令列を出力するモード
+			//@ --compileonly
+			//@ Output compiled intermediate instruction sequence only.
+			//@ Compiler will not translate to Java or execute the program.
 			Env.compileonly = true;
 		}
 		else if (opt.equals("--slimcode"))
 		{
 			// コンパイル後の中間命令列を出力するモード
+			//@ --slimcode
+			//@ Output intermediate instruction sequence to be executed by SLIM.
 			Env.compileonly = true;
 			Env.slimcode = true;
 		}
@@ -290,6 +295,8 @@ public class FrontEnd
 				System.exit(1);
 			}
 		}
+		//@ --use-findatom2
+		//@ Use findatom2 instruction (findatom with history).
 		else if (opt.equals("--use-findatom2"))
 		{
 			// Env.compileonly = true;
@@ -299,6 +306,8 @@ public class FrontEnd
 		}
 		else if (opt.equals("--memtest-only"))
 		{
+			//@ --memtest-only
+			//@ Use membrane test only.
 			Env.memtestonly = true;
 		}
 		else if (opt.equals("--help"))
@@ -469,6 +478,8 @@ public class FrontEnd
 		}
 		else if (opt.equals("--hl") || opt.equals("--hl-opt")) //seiji
 		{
+			//@ --hl, --hl-opt
+			//@ Use hyperlinks (HyperLMNtal).
 			boolean slimcode = false;
 			for (String arg : args)
 			{
@@ -495,22 +506,31 @@ public class FrontEnd
 		else if (opt.equals("--use-swaplink"))
 		{
 			// リンク操作に swaplink 命令を使用する (shinobu)
+			//@ --use-swaplink
+			//@ Use swaplink instruction to manipulate links.
 			Env.useSwapLink = true;
 		}
 		else if (opt.equals("--use-cyclelinks"))
 		{
 			// リンク操作に cyclelinks 命令を使用する (shinobu)
+			//@ --use-cyclelinks
+			//@ Use cyclelinks instruction to manipulate links.
 			Env.useCycleLinks = true;
 		}
 		else if (opt.equals("--use-atomlistop"))
 		{
 			// アトムリスト操作に必要な中間命令を出力する (aoyama)
+			//@ --use-atomlistop
+			//@ Output intermediate instructions to optimize execution by SLIM
+			//@ by dynamically modifying atomlist (a data structure in SLIM).
 			Env.useSwapLink = true;
 			Env.useAtomListOP = true;
 		}
 		else if (opt.equals("--verbose-linkext"))
 		{
 			// swaplink/cyclelinks使用時において置換過程を出力する開発者用オプション (shinobu)
+			//@ --verbose-linkext
+			//@ (For developers) Output process of permutation by swaplink/cyclelinks.
 			Env.verboseLinkExt = true;
 		}
 		else if (opt.equals("--Wempty-head"))
