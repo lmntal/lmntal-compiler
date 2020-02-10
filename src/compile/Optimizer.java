@@ -945,10 +945,6 @@ public class Optimizer {
 				addUnlockInst(lit, reuseMap, it.next(), children);
 			}
 		}
-
-		if (reuseMap.containsKey(mem) && !Env.slimcode) {
-			lit.add(new Instruction(Instruction.UNLOCKMEM, mem));
-		}
 	}
 
 	/**

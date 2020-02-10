@@ -1144,7 +1144,7 @@ class SyntaxExpander {
 		// 左辺に2回以上$pが出現した場合に、新しい名前$qにして $p=$qを型制約に追加する
 		// todo 実装する
 		// // 実装しました。便宜上、"同名型付きプロセス文脈の分離"と呼んでいます
-		// // 現状では、SLIMでのみ(--slimcodeと-hl系を併用した場合のみ)使用可能 (10/09/29 seiji)
+		// // 現状では、-hl系を指定した場合のみ使用可能 (10/09/29 seiji)
 		HashMap ruleProcNameMap = new HashMap();
 		if (Env.hyperLink) 
   		sameTypedProcessContext(sRule.getHead(), typeConstraints, ruleProcNameMap);
