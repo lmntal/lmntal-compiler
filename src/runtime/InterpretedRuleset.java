@@ -124,6 +124,6 @@ public final class InterpretedRuleset extends Ruleset
 		{
 		    rule.showDetail();
 		}
-	    if (Env.slimcode) Env.p("");
+	    Env.p("");
 	}
 }
