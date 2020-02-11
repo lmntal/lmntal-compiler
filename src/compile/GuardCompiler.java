@@ -117,7 +117,7 @@ class GuardCompiler extends HeadCompiler
 		putLibrary("-."   , 2, 1, array(ISFLOAT, Instruction.FNEG,   ISFLOAT));
 		putLibrary("float", 2, 1, array(ISINT  , Instruction.INT2FLOAT, ISFLOAT));
 		putLibrary("int",   2, 1, array(ISFLOAT, Instruction.FLOAT2INT, ISINT));
-		if (Env.slimcode && Env.hyperLink)
+		if (Env.hyperLink)
 		{
 			putLibrary("new"       , 1, 0, array(Instruction.NEWHLINK, ISINT));
 			putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
