@@ -104,7 +104,6 @@ public final class Rule
 	 */
 	public void showDetail()
 	{
-		if (Env.debug == 0 && !Env.compileonly) return;
 
 		if (hasUniq && Env.slimcode)
 		{
@@ -146,8 +145,8 @@ public final class Rule
 
 	public String toString()
 	{
-		if (Env.compileonly) return "";
-		return name != null && !name.equals("") ? name : text;
+	    return "";
+		//return name != null && !name.equals("") ? name : text;
 	}
 
 	/**

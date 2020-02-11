@@ -125,9 +125,9 @@ public abstract class Functor
 	}
 
 	public String toString() {
-		if (Env.compileonly)
-			return Util.quoteString(getName(), '\'') + "_" + getArity();
-		return getQuotedFunctorName() + "_" + getArity();
+	    //if (Env.compileonly)
+	    return Util.quoteString(getName(), '\'') + "_" + getArity();
+		//return getQuotedFunctorName() + "_" + getArity();
 	}
 
 	/**

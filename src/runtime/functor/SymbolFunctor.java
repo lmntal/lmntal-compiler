@@ -114,9 +114,9 @@ public class SymbolFunctor extends Functor
 	}
 	
 	public String toString() {
-		if (Env.compileonly)
-			return (path == null ? "" : Util.quoteString(path, '\'') + ".") + Util.quoteString(name, '\'') + "_" + getArity();
-		return getQuotedFunctorName() + "_" + getArity();
+	    //if (Env.compileonly)
+	    return (path == null ? "" : Util.quoteString(path, '\'') + ".") + Util.quoteString(name, '\'') + "_" + getArity();
+		//return getQuotedFunctorName() + "_" + getArity();
 	}
 	
 	/**
