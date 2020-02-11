@@ -87,8 +87,8 @@
 
 	<target name="clean" description="clean up">
 		<!-- Delete the ${build} and ${dist} directory trees -->
-		<delete>
-			<fileset dir="${build}" includes="**"/>
+		<delete includeemptydirs="true">
+			<fileset dir="${build}/"/>
 			<fileset file="${bin}/lmntal.jar"/>
 			<fileset file="lmntal.tgz"/>
 			<fileset file="${src}/runtime/Help.java"/>
