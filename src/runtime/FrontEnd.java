@@ -248,7 +248,7 @@ public class FrontEnd
 			}
 		}
 
-		if (Env.slimcode && !Optimizer.forceReuseAtom)
+		if (!Optimizer.forceReuseAtom)
 		{
 			Optimizer.fReuseAtom = false;
 			// Env.findatom2 = true;
@@ -261,13 +261,19 @@ public class FrontEnd
 		if (opt.equals("--compileonly"))
 		{
 			// コンパイル後の中間命令列を出力するモード
+			//@ --compileonly
+			//@ Output compiled intermediate instruction sequence only.
+			//@ Compiler will not translate to Java or execute the program.
 			Env.compileonly = true;
 		}
 		else if (opt.equals("--slimcode"))
 		{
-			// コンパイル後の中間命令列を出力するモード
+			// SLIM用の中間命令列を出力するモード
+			// v1.46以降はオプションがなくても強制的にオンになる
+			// （互換性のため分岐を残している）
+			//@ --slimcode
+			//@ Output intermediate instruction sequence to be executed by SLIM.
 			Env.compileonly = true;
-			Env.slimcode = true;
 		}
 		else if (opt.equals("--charset"))
 		{
@@ -290,15 +296,18 @@ public class FrontEnd
 				System.exit(1);
 			}
 		}
+		//@ --use-findatom2
+		//@ Use findatom2 instruction (findatom with history).
 		else if (opt.equals("--use-findatom2"))
 		{
 			// Env.compileonly = true;
-			Env.slimcode = true;
 			Env.findatom2 = true;
 			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
 		}
 		else if (opt.equals("--memtest-only"))
 		{
+			//@ --memtest-only
+			//@ Use membrane test only.
 			Env.memtestonly = true;
 		}
 		else if (opt.equals("--help"))
@@ -469,48 +478,42 @@ public class FrontEnd
 		}
 		else if (opt.equals("--hl") || opt.equals("--hl-opt")) //seiji
 		{
-			boolean slimcode = false;
-			for (String arg : args)
+			//@ --hl, --hl-opt
+			//@ Use hyperlinks (HyperLMNtal).
+			Env.hyperLink = true;
+			if (opt.equals("--hl-opt"))
 			{
-				if (arg.equals("--slimcode"))
-				{
-					slimcode = true;
-					break;
-				}
-			}
-			if (slimcode)
-			{
-				Env.hyperLink = true;
-				if (opt.equals("--hl-opt"))
-				{
-					Env.hyperLinkOpt = true;
-				}
-			}
-			else
-			{
-				Util.errPrintln("Can't use option " + opt + " without option --slimcode.");
-				System.exit(1);
+				Env.hyperLinkOpt = true;
 			}
 		}
 		else if (opt.equals("--use-swaplink"))
 		{
 			// リンク操作に swaplink 命令を使用する (shinobu)
+			//@ --use-swaplink
+			//@ Use swaplink instruction to manipulate links.
 			Env.useSwapLink = true;
 		}
 		else if (opt.equals("--use-cyclelinks"))
 		{
 			// リンク操作に cyclelinks 命令を使用する (shinobu)
+			//@ --use-cyclelinks
+			//@ Use cyclelinks instruction to manipulate links.
 			Env.useCycleLinks = true;
 		}
 		else if (opt.equals("--use-atomlistop"))
 		{
 			// アトムリスト操作に必要な中間命令を出力する (aoyama)
+			//@ --use-atomlistop
+			//@ Output intermediate instructions to optimize execution by SLIM
+			//@ by dynamically modifying atomlist (a data structure in SLIM).
 			Env.useSwapLink = true;
 			Env.useAtomListOP = true;
 		}
 		else if (opt.equals("--verbose-linkext"))
 		{
 			// swaplink/cyclelinks使用時において置換過程を出力する開発者用オプション (shinobu)
+			//@ --verbose-linkext
+			//@ (For developers) Output process of permutation by swaplink/cyclelinks.
 			Env.verboseLinkExt = true;
 		}
 		else if (opt.equals("--Wempty-head"))

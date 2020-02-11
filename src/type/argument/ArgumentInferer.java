@@ -11,6 +11,7 @@ import util.Util;
 
 import compile.structure.Atom;
 import compile.structure.ContextDef;
+import compile.structure.Context;
 import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
@@ -79,9 +80,9 @@ public class ArgumentInferer {
 	 */
 	private void processLinksOfProcessContexts()throws TypeException{
 		for(ContextDef def : defs)
-			for(ProcessContext rhsOcc : (List<ProcessContext>)def.rhsOccs)
+			for(Context rhsOcc : def.rhsOccs)
 				if( def.lhsOcc != null)
-					processExplicitLinks((ProcessContext)def.lhsOcc, rhsOcc);
+					processExplicitLinks((ProcessContext)def.lhsOcc, (ProcessContext)rhsOcc);
 	}
 
 	/**

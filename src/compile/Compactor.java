@@ -355,9 +355,9 @@ public class Compactor {
 	 * @param begin
 	 */
 	static void renumberLocalsSub2(int isrc, int locals, int varcount, List<Instruction> insts, int begin) {
-		Integer src = new Integer(isrc);
-		Integer dst = new Integer(locals);
-		Integer tmp = new Integer(varcount);
+		Integer src = isrc;
+		Integer dst = locals;
+		Integer tmp = varcount;
 		HashMap<Integer, Integer> map1 = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> map2 = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> map3 = new HashMap<Integer, Integer>();

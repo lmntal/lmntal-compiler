@@ -1,6 +1,6 @@
 package runtime;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
 import runtime.functor.Functor;
@@ -17,9 +17,9 @@ public class MergedBranchMap {
 	/**
 	 * アクティブアトムのファンクタ⇒それに続く命令列のマップ
 	 */
-	public HashMap branchMap;
+	public HashMap<Functor, List<Instruction>> branchMap;
 	
-	public MergedBranchMap(HashMap bm){
+	public MergedBranchMap(HashMap<Functor, List<Instruction>> bm){
 		branchMap = bm;
 	}
 	
@@ -28,8 +28,8 @@ public class MergedBranchMap {
 	 * @param func アクティブアトムのファンクタ
 	 * @return　命令列
 	 */
-	public ArrayList getInsts(Functor func){
-		return (ArrayList)branchMap.get(func);
+	public List<Instruction> getInsts(Functor func){
+		return branchMap.get(func);
 	}
 	
 	/**

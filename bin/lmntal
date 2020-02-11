@@ -1,6 +1,11 @@
 #!/bin/bash
 
-source "`dirname "$0"`/set_cp.sh"
+if [ -L "$0" ]; then
+    source "$(dirname $(readlink "$0"))/set_cp.sh"
+else 
+    source "$(dirname "$0")/set_cp.sh"
+fi
+
 if [ -x /usr/bin/cygpath ]; then
 	CLASSPATH=`cygpath -wp "$CLASSPATH"`
 	LMNTAL_HOME=`cygpath -wp "$LMNTAL_HOME"`
@@ -23,8 +28,6 @@ do
 	lmntal_syntax_il=${lmnfile}_lmntal_syntax_il.lmn
     fi
 done
-
-
 
 optlibpath=$LMNTAL_HOME/lib/slimoptimizer
 if [ $slimoptimizer = true -a $slimcode = true ]; then

@@ -27,19 +27,19 @@ public class Merger {
 	/** ファンクタ⇒命令列のマップ */
 	HashMap<Functor, List<Instruction>> instsMap;
 	/** 変数番号⇒ファンクタのマップ*/
-	HashMap var2funcMap;
+	// HashMap var2funcMap;
 	int maxLocals;
 	
 	public Merger(){
 		maxLocals = 0;
 		instsMap = new HashMap<Functor, List<Instruction>>();
-		var2funcMap = new HashMap();
+		// var2funcMap = new HashMap();
 	}
 	
 	public void clear(){
 		maxLocals = 0;
 		instsMap.clear();
-		var2funcMap.clear();
+		// var2funcMap.clear();
 	}
 	/**
 	 * 各ルール中のアトム主導テスト部に出現するbranch命令を編み上げ、
@@ -432,11 +432,11 @@ public class Merger {
 		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
 
 		ArrayList<Integer> mems = new ArrayList<Integer>();
-		mems.add(new Integer(0));
+		mems.add(0);
 		ArrayList<Integer> atoms = new ArrayList<Integer>();
-		atoms.add(new Integer(1));
-		atoms.add(new Integer(2));
-		atoms.add(new Integer(3));
+		atoms.add(1);
+		atoms.add(2);
+		atoms.add(3);
 
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
 		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
@@ -450,7 +450,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
 		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
-		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList<Object>()));
 		rule.atomMatch = insts;
 		return rule;
 	}
@@ -469,11 +469,11 @@ public class Merger {
 		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
 
 		ArrayList<Integer> mems = new ArrayList<Integer>();
-		mems.add(new Integer(0));
+		mems.add(0);
 		ArrayList<Integer> atoms = new ArrayList<Integer>();
-		atoms.add(new Integer(1));
-		atoms.add(new Integer(2));
-		atoms.add(new Integer(3));
+		atoms.add(1);
+		atoms.add(2);
+		atoms.add(3);
 		
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
 		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
@@ -487,7 +487,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
 		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
-		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList<Object>()));
 		rule.atomMatch = insts;
 		return rule;
 	}
@@ -506,12 +506,12 @@ public class Merger {
 		insts.add(new Instruction(typechecker,             3));
 		insts.add(new Instruction(op,                    4,2,3));
 		ArrayList<Integer> mems = new ArrayList<Integer>();
-		mems.add(new Integer(0));
+		mems.add(0);
 		ArrayList<Integer> atoms = new ArrayList<Integer>();
-		atoms.add(new Integer(1));
-		atoms.add(new Integer(2));
-		atoms.add(new Integer(3));
-		atoms.add(new Integer(4));
+		atoms.add(1);
+		atoms.add(2);
+		atoms.add(3);
+		atoms.add(4);
 		
 		insts2.add(new Instruction(Instruction.SPEC,        5,5));
 		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
@@ -527,7 +527,7 @@ public class Merger {
 		insts2.add(new Instruction(Instruction.PROCEED));
 		
 		rule.bodyLabel = new InstructionList(insts2); rule.body = rule.bodyLabel.insts;
-		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList()));
+		insts.add(Instruction.jump(rule.bodyLabel, mems, atoms, new ArrayList<Object>()));
 		rule.atomMatch = insts;
 		return rule;
 	}	

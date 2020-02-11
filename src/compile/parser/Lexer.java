@@ -838,7 +838,7 @@ class Lexer implements java_cup.runtime.Scanner {
           { token.append(yytext()); string.append("\f"); }
         case 118: break;
         case 36: 
-          { return symbol(sym.RULE, new Integer(yyline+1)); }
+          { return symbol(sym.RULE, yyline + 1); }
         case 119: break;
         case 2: 
           { throw new Error("Illegal character <"+yytext()+"> at line "+(yyline+1)); }

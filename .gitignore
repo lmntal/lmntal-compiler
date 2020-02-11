@@ -4,6 +4,8 @@ classes/
 .settings/
 sample-input/
 
+src/runtime/Help.java
+
 _errors_help_gen.txt
 
 *.class
@@ -27,3 +29,7 @@ gtags.conf
 
 #win
 Thumbs.db
+
+#idea
+.idea
+*.iml

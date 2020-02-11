@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import runtime.Env;
 import type.TypeEnv;
 
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
+import compile.structure.Context;
 import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
 
@@ -176,10 +176,11 @@ public class QuantityInferer {
 	/**
 	 * わたされた文脈列のいずれかがこの膜に出現することを確かめる
 	 * いずれも出現していない場合、falseを返す
+	 * todo ProcessContextをContextに変更したが問題ないか？
 	 */
-	public boolean checkOccurrence(List<ProcessContext> rhsOccs, Membrane rhs){
+	public boolean checkOccurrence(List<Context> rhsOccs, Membrane rhs){
 		boolean okflg = false;
-		for(ProcessContext pcRhsOcc : rhsOccs){
+		for(Context pcRhsOcc : rhsOccs){
 			if(pcRhsOcc.mem == rhs){
 				okflg = true;
 				break;
@@ -196,12 +197,12 @@ public class QuantityInferer {
 			if(TypeEnv.dataTypeOfContextDef(rhsOcc.def)!=null)continue;
 			Membrane lhsmem = ((ProcessContext)rhsOcc.def.lhsOcc).mem;
 			if(lhsmem.processContexts.size() > 0){
-				boolean ok = checkOccurrence((List<ProcessContext>)((ProcessContext)lhsmem.processContexts.get(0)).def.rhsOccs, rhs);
+				boolean ok = checkOccurrence(lhsmem.processContexts.get(0).def.rhsOccs, rhs);
 				if(!ok)return false;
 			}
 			boolean okflg = true;
 			for(ProcessContext lhsOcc : ((List<ProcessContext>)lhsmem.typedProcessContexts)){
-				boolean ok = checkOccurrence((List<ProcessContext>)lhsOcc.def.rhsOccs, rhs);
+				boolean ok = checkOccurrence(lhsOcc.def.rhsOccs, rhs);
 				if(!ok){
 					okflg = false;
 					break;
