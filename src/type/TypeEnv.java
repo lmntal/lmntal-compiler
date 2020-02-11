@@ -58,7 +58,7 @@ public final class TypeEnv {
 		if (f instanceof ObjectFunctor)
 			return 0;
 		if (functorToOut.containsKey(f))
-			return ((Integer)functorToOut.get(f)).intValue();
+			return (Integer) functorToOut.get(f);
 		return ACTIVE;
 	}
 

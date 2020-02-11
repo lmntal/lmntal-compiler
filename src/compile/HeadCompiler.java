@@ -166,7 +166,7 @@ class HeadCompiler
 			insts.add(new Instruction(Instruction.GETLINK, varCount, atompath, i));
 			varCount++;
 		}
-		final int[] put = linkPaths.put(new Integer(atompath), paths);
+		final int[] put = linkPaths.put(atompath, paths);
 	}
 	private void searchLinkedGroup(Atom startatom, HashSet<Atom> qatoms, Atom firstatom, Membrane firstmem) {
 		LinkedList<Membrane> newmemlist = new LinkedList<Membrane>();

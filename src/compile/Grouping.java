@@ -426,11 +426,11 @@ class Cost {
 		else {
 			for(int i=costvalueN.size()-1, j=costvalueM.size()-1; i>=0 && j>=0; i--, j--){
 				if(costvalueM.size() > j && costsm.size() > j){
-					if(costvalueM.get(j).intValue() > costsm.get(j).intValue()) return true;
-					else if(costvalueM.get(j).intValue() < costsm.get(j).intValue())return false;
+					if(costvalueM.get(j) > costsm.get(j)) return true;
+					else if(costvalueM.get(j) < costsm.get(j))return false;
 				}
-				if(costvalueN.get(i).intValue() > costsn.get(i).intValue()) return true;
-				else if(costvalueN.get(i).intValue() < costsn.get(i).intValue()) return false;
+				if(costvalueN.get(i) > costsn.get(i)) return true;
+				else if(costvalueN.get(i) < costsn.get(i)) return false;
 				else continue;
 			}
 			return false;
