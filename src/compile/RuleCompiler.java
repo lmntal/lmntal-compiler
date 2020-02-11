@@ -1231,7 +1231,7 @@ public class RuleCompiler
 	 */
 	private void simplify() throws CompileException
 	{
-		staticUnify(rs.leftMem);
+	        staticUnify(rs.leftMem);
 		checkExplicitFreeLinks(rs.leftMem);
 		staticUnify(rs.rightMem);
 		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
@@ -1293,19 +1293,13 @@ public class RuleCompiler
 				LinkOccurrence link2 = atom.args[1].buddy;
 
 				// 単一化アトムのリンク先が両方とも他の膜につながっている場合
-				if (link1.atom.mem != mem && link2.atom.mem != mem)
+				if (link1.atom.mem != mem && link2.atom.mem != mem && mem != rs.leftMem)
 				{
-					if (mem == rs.leftMem)
-					{
-						// ( X=Y :- p(X,Y) ) は ( :- p(X,X) ) になる
-					}
-					else
-					{
 						// ( p(X,Y) :- X=Y ) はUNIFYボディ命令を出力するのでここでは何もしない
 						continue;
-					}
 				}
-
+				// link1.atom.mem != mem && link2.atom.mem != mem && mem == rs.leftMemなら
+				//( X=Y :- p(X,Y) ) は ( :- p(X,X) ) になる
 				link1.buddy = link2;
 				link2.buddy = link1;
 				link2.name = link1.name;
