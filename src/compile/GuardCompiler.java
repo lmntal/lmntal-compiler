@@ -66,7 +66,7 @@ class GuardCompiler extends HeadCompiler
 
 	private int groundToSrcPath(ContextDef def) {
 		if (!groundSrcs.containsKey(def)) return UNBOUND;
-		return groundSrcs.get(def).intValue();
+		return groundSrcs.get(def);
 	}
 
 	private static final int ISINT    = Instruction.ISINT;		// 型制約の引数が整数型であることを表す
@@ -1098,7 +1098,7 @@ class GuardCompiler extends HeadCompiler
 			//各groundについて、isground命令で貰ってきたground構成アトム数を足していく
 			int allfunc = ausfunc;	
 			for(ContextDef def : gmap.keySet()){
-				int natomfp = gmap.get(def).intValue();
+				int natomfp = gmap.get(def);
 				int newfunc = varCount++;
 				match.add(new Instruction(Instruction.IADDFUNC,newfunc,allfunc,natomfp));
 				allfunc = newfunc;

@@ -35,8 +35,8 @@ public class SomeInlineCodetimer implements InlineCode {
 			mem1.removeAtom(me);
 			mem1.removeAtom(me.getArg(0).getAtom());
 			mem1.removeAtom(me.getArg(1).getAtom());
-			long time1 = ((Long)((ObjectFunctor)me.getArg(0).getAtom().getFunctor()).getObject()).longValue();
-			long time2 = ((Long)((ObjectFunctor)me.getArg(1).getAtom().getFunctor()).getObject()).longValue();
+			long time1 = (Long) ((ObjectFunctor) me.getArg(0).getAtom().getFunctor()).getObject();
+			long time2 = (Long) ((ObjectFunctor) me.getArg(1).getAtom().getFunctor()).getObject();
 			double res = (time1 - time2) / 1000.0;
 			Atom resatom = mem1.newAtom(new FloatingFunctor(res));
 			mem1.relinkAtomArgs(resatom,0,me,2);
@@ -47,7 +47,7 @@ public class SomeInlineCodetimer implements InlineCode {
 			break; }
 		case 1: {
 			/*inline*/me.getMem().alterAtomFunctor( me,
-			new ObjectFunctor(new Long(System.currentTimeMillis())) );
+			new ObjectFunctor(System.currentTimeMillis()) );
 			break; }
 		}
 	}

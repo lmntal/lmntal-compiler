@@ -1336,7 +1336,7 @@ public class RuleCompiler
 	private int rhspcToMapPath(ProcessContext pc)
 	{
 		if (!rhsmappaths.containsKey(pc)) return NOTCOPIED;
-		return rhsmappaths.get(pc).intValue();
+		return rhsmappaths.get(pc);
 	}
 
 	//

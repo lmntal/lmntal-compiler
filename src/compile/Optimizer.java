@@ -871,7 +871,7 @@ public class Optimizer {
 				if (reuseMap.containsKey(arg1)) {
 					lit.remove();
 					//addmem・enqueuemem命令に変更
-					int m = ((Integer)reuseMap.get(arg1)).intValue();
+					int m = (Integer) reuseMap.get(arg1);
 					if (!set.contains(arg1)) {
 						lit.add(new Instruction(Instruction.ADDMEM, inst.getIntArg2(), m)); 
 					}
@@ -1281,8 +1281,8 @@ public class Optimizer {
 				Integer a1 = reuseMap.get(inst.getArg1());
 				Integer a2 = reuseMap.get(inst.getArg3());
 				if (a1 != null && a2 != null) {
-					Link l1 = new Link(a1.intValue(), inst.getIntArg2());
-					Link l2 = new Link(a2.intValue(), inst.getIntArg4());
+					Link l1 = new Link(a1, inst.getIntArg2());
+					Link l2 = new Link(a2, inst.getIntArg4());
 					if (l2.equals(links.get(l1))) {
 						lit.remove();
 					}
@@ -1836,8 +1836,8 @@ public class Optimizer {
 //				Link l = (Link)links.get(new Link(((Integer)reverseAtomVarMap.get(inst.getArg2())).intValue(), inst.getIntArg3()));
 				if (atomVarMap2.containsKey(inst.getArg2())) {
 					Integer a = (Integer)atomVarMap2.get(inst.getArg2());
-					if (a.intValue() < memvars.size() + atomvars.size()) {
-						Link l = links.get(new Link(((Integer)atomvars.get(a.intValue() - memvars.size())).intValue(), inst.getIntArg3()));
+					if (a < memvars.size() + atomvars.size()) {
+						Link l = links.get(new Link((Integer) atomvars.get(a - memvars.size()), inst.getIntArg3()));
 						if (l != null) {
 							if (l.pos == inst.getIntArg4()) {
 								//						atomVarMap2.put(inst.getArg1(), new Integer(l.atom));
@@ -1857,9 +1857,9 @@ public class Optimizer {
 //				begin
 //				Integer beforeAtom = (Integer)atomVarMap.get(atomvars.get(((Integer)beforeVar.get(inst.getArg2())).intValue() - memvars.size()));
 				Integer atom = (Integer)atomVarMap2.get(inst.getArg2());
-				if (atom != null && atom.intValue() < memvars.size() + atomvars.size()) {
-					Integer out = (Integer)atomvars.get(atom.intValue() - memvars.size());
-					Link t = new Link(out.intValue(), inst.getIntArg3());
+				if (atom != null && atom < memvars.size() + atomvars.size()) {
+					Integer out = (Integer)atomvars.get(atom - memvars.size());
+					Link t = new Link(out, inst.getIntArg3());
 					if (inherit.containsKey(t)) { 
 						Integer beforeAtom = (Integer)atomVarMap.get(out);
 //						end
@@ -1881,7 +1881,7 @@ public class Optimizer {
 				if (atomVarMap2.containsKey(inst.getArg1())) {
 //					begin
 //					Integer atom = (Integer)atomVarMap2.get(inst.getArg1());
-					int afterchange = ((Integer)atomVarMap2.get(inst.getArg1())).intValue();
+					int afterchange = (Integer) atomVarMap2.get(inst.getArg1());
 					if (afterchange < memvars.size() + atomvars.size()) {
 						atom = (Integer)atomvars.get(afterchange - memvars.size());
 //						end
@@ -1916,13 +1916,13 @@ public class Optimizer {
 				if (atomVarMap2.containsKey(atom)) {
 					atom = (Integer)atomVarMap2.get(inst.getArg2()); //変数置き換え後
 //					baseAtom = (Integer)reverseAtomVarMap2.get(atom); //前回ループ
-					if (atom.intValue() < memvars.size() + atomvars.size()) {
-						Integer baseAtom = (Integer)atomvars.get(atom.intValue() - memvars.size()); //ループ外変数
+					if (atom < memvars.size() + atomvars.size()) {
+						Integer baseAtom = (Integer)atomvars.get(atom - memvars.size()); //ループ外変数
 						//					} else {
 						//						baseAtom = null;//(Integer)atomVarMap.get(atom);
 						//					}
 						//					if (baseAtom != null) {
-						Link l = links.get(new Link(baseAtom.intValue(), inst.getIntArg3()));
+						Link l = links.get(new Link(baseAtom, inst.getIntArg3()));
 						if (l != null) { //前回のループのnewlinkによってリンク先が特定できる場合
 							//							Integer baseAtom2 = new Integer(l.atom);
 							Integer atom2 = atomVarMap.get(l.atom);
@@ -1941,13 +1941,13 @@ public class Optimizer {
 
 						//inheritlinkを最後に移動する事に伴うgetlinkの処理
 						//						if (baseAtom.equals(atomVarMap2.get(reverseAtomVarMap.get(baseAtom)))) {
-						if (atom.intValue() < memvars.size() + atomvars.size()) {
-							Integer beforeOutVar = (Integer)atomvars.get(atom.intValue() - memvars.size());
+						if (atom < memvars.size() + atomvars.size()) {
+							Integer beforeOutVar = (Integer)atomvars.get(atom - memvars.size());
 							Integer beforeAtom = atomVarMap.get(beforeOutVar);
 							if (beforeVar.get(beforeAtom).equals(atomVarMap2.get(beforeAtom))) {
 								loopIterator.remove();
 								//							changeLink.put(beforeAtom, inst.getArg1());
-								otherVarMap2.put(inst.getArg1(), outToBeforeVar.get(inherit.get(new Link(beforeOutVar.intValue(), inst.getIntArg3()))));
+								otherVarMap2.put(inst.getArg1(), outToBeforeVar.get(inherit.get(new Link(beforeOutVar, inst.getIntArg3()))));
 							}
 						}
 					}
@@ -2005,9 +2005,9 @@ public class Optimizer {
 			case Instruction.DEQUEUEATOM:
 				if (atomVarMap2.containsKey(inst.getArg1())) {
 					atom = (Integer)atomVarMap2.get(inst.getArg1());
-					if (atom.intValue() < memvars.size() + atomvars.size()) {
+					if (atom < memvars.size() + atomvars.size()) {
 						loopIterator.remove();
-						movableEnqueue.add(atomVarMap.get(atomvars.get(atom.intValue() - memvars.size())));
+						movableEnqueue.add(atomVarMap.get(atomvars.get(atom - memvars.size())));
 					}
 				}
 				break;
