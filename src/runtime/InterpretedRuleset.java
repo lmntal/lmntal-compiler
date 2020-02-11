@@ -112,7 +112,7 @@ public final class InterpretedRuleset extends Ruleset
 
 	public void showDetail()
 	{
-		if (Env.compileonly)
+	    if (Env.compileonly)
 		{
 			if (isSystemRuleset)
 			{
@@ -122,7 +122,7 @@ public final class InterpretedRuleset extends Ruleset
 			{
 				Env.p("Compiled Ruleset @" + id + dumpRules());
 			}
-		}
+			}
 		for (Rule rule : rules)
 		{
 			rule.showDetail();

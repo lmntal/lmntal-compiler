@@ -2892,10 +2892,10 @@ public class Instruction implements Cloneable
 		{
 			spaces -= 2;
 		}
-		if (!Env.compileonly)
+		/*if (!Env.compileonly)
 		{
 			instName = shorten(instName, spaces - 1);
-		}
+			}*/
 		buffer.append(instName);
 		spaces -= instName.length();
 		while (spaces > 0)
