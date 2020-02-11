@@ -31,7 +31,7 @@ public final class Env
 	////////////////////////////////////////////////////////////////
 
 	/** 中間命令列を出力するモード。Java への変換や実行は行わない。 */
-	public static boolean compileonly = true;
+	//public static boolean compileonly = true;
 
 	/** SLIM用の中間命令列を出力するモード。 */
 	public static boolean slimcode = false;

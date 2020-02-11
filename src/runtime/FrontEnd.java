@@ -258,20 +258,20 @@ public class FrontEnd
 	private static int processLongOptions(String[] args, int i)
 	{
 		String opt = args[i];
-		/*if (opt.equals("--compileonly"))
+		if (opt.equals("--compileonly"))
 		{
 			// コンパイル後の中間命令列を出力するモード
 			//@ --compileonly
 			//@ Output compiled intermediate instruction sequence only.
 			//@ Compiler will not translate to Java or execute the program.
-			Env.compileonly = true;
-			}*/
+			//Env.compileonly = true;
+			}
 		if (opt.equals("--slimcode"))
 		{
 			// コンパイル後の中間命令列を出力するモード
 			//@ --slimcode
 			//@ Output intermediate instruction sequence to be executed by SLIM.
-			Env.compileonly = true;
+			//Env.compileonly = true;
 			Env.slimcode = true;
 		}
 		else if (opt.equals("--charset"))
@@ -474,7 +474,7 @@ public class FrontEnd
 			// -- --compile-rule
 			// compile one rule (for SLIM model checking mode)
 			Env.compileRule = true;
-			Env.compileonly = true;
+			//Env.compileonly = true;
 		}
 		else if (opt.equals("--hl") || opt.equals("--hl-opt")) //seiji
 		{
@@ -652,28 +652,28 @@ public class FrontEnd
 				showIL((InterpretedRuleset)rs, m);
 			}
 
-			if (Env.compileonly)
-			{
-				// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
-				for (String libName : Module.loaded)
-				{
-					compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
-					.get(libName);
-					for (Ruleset r : mem.rulesets)
-					{
-						((InterpretedRuleset)r).showDetail();
-					}
-				}
-				// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
-				Module.showModuleList();
-				// インラインコード一覧を出力
-				Inline.initInline();
-				Inline.showInlineList();
-				System.exit(0);
-			}
+
+			
+			// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
+			for (String libName : Module.loaded)
+			    {
+				compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
+				    .get(libName);
+				for (Ruleset r : mem.rulesets)
+				    {
+					((InterpretedRuleset)r).showDetail();
+				    }
+			    }
+			// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
+			Module.showModuleList();
+			// インラインコード一覧を出力
+			Inline.initInline();
+			Inline.showInlineList();
+			System.exit(0);
+			
 		}
 		catch (Exception e)
-		{
+		    {
 			e.printStackTrace();
 			System.exit(1);
 		}

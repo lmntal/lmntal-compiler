@@ -2944,14 +2944,12 @@ public class Instruction implements Cloneable
 			}
 			else
 			{
-				if (Env.compileonly)
-				{
+
+				
 					buffer.append("[[\n");
-				}
-				else
-				{
-					buffer.append("[\n");
-				}
+			      
+			
+					//buffer.append("[\n");
 				
 				int i;
 				for (i = 0; i < insts.size() - 1; i++)
@@ -2966,8 +2964,8 @@ public class Instruction implements Cloneable
 						buffer.append("  ");
 					buffer.append(insts.get(i));
 					//TODO 出力引数だったらインデントを下げる.
-					if (Env.compileonly) buffer.append("\n");
-					else buffer.append(", \n");
+					buffer.append("\n");
+					//else buffer.append(", \n");
 				}
 				buffer.append("                ");
 				for (int j = 0; j < depth; j++)
@@ -2992,7 +2990,7 @@ public class Instruction implements Cloneable
 			if (i != 0) buffer.append(", ");
 			Object o = data.get(i);
 			String str = (o == null ? "null" : o.toString());
-			if (o instanceof String || (Env.compileonly && o instanceof Rule))
+			if (o instanceof String || (o instanceof Rule))
 			{
 				str = Util.quoteString(str, '"');
 			}
