@@ -606,6 +606,9 @@ public class FrontEnd
 			{
 				LMNParser lp = new LMNParser(src);
 				m = lp.parse();
+				System.out.println("!");
+				System.out.println(m.toString());
+				System.out.println("?");
 			}
 			catch (ParseException e)
 			{

@@ -71,6 +71,11 @@ public class RulesetCompiler
 		List<Rule> rules = new ArrayList<Rule>();
 
 		// この膜にあるルール構造をルールオブジェクトにコンパイルする
+		System.out.println("---mem---");
+		System.out.println(mem.toString());
+		System.out.println("---rules.size()---");
+		System.out.println(mem.rules.size());
+		System.out.println("---------");
 		for (RuleStructure rs : mem.rules)
 		{
 			// ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
@@ -82,6 +87,7 @@ public class RulesetCompiler
 			{
 				rc = new RuleCompiler(rs, unitName);
 				rc.compile();
+				System.out.println(rs.toString());
 				//2006.1.22 Ruleに行番号を渡す by inui
 				rc.theRule.lineno = rs.lineno;
 			}
@@ -98,6 +104,7 @@ public class RulesetCompiler
 		MergedBranchMap systemmbm = null;
 		if (Optimizer.fMerging)
 		{
+		        System.out.println("In Optimizer.fMerging");
 			mbm = merger.Merging(rules, false);
 			merger.clear();
 			systemmbm = merger.createSystemRulesetsMap();
@@ -106,6 +113,7 @@ public class RulesetCompiler
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		if (!rules.isEmpty())
 		{
+		        System.out.println("In !rules.isEmpty()");
 			InterpretedRuleset ruleset = new InterpretedRuleset();
 			for (Rule r : rules)
 			{
@@ -163,8 +171,18 @@ public class RulesetCompiler
 		rs.leftMem  = new Membrane(null);
 		rs.rightMem = m;
 		root.rules.add(rs);
-
+		//-------------------
+		System.out.println("!!");
+		System.out.println(m.toString());
+		System.out.println(root.toString());
+		System.out.println("!!!");
+		//-------------------
 		processMembrane(root, unitName);
+		//-------------------
+		System.out.println("!");
+		root.showAllRules();
+		System.out.println("?");
+		//-------------------		    
 
 		if (Env.fUseSourceLibrary)
 		{

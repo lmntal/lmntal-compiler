@@ -1231,7 +1231,7 @@ public class RuleCompiler
 	 */
 	private void simplify() throws CompileException
 	{
-		staticUnify(rs.leftMem);
+	        staticUnify(rs.leftMem);
 		checkExplicitFreeLinks(rs.leftMem);
 		staticUnify(rs.rightMem);
 		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
