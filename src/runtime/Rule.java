@@ -105,7 +105,7 @@ public final class Rule
 	public void showDetail()
 	{
 
-		if (hasUniq && Env.slimcode)
+		if (hasUniq)
 		{
 			Env.p("Compiled Uniq Rule " + this);
 		}

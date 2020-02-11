@@ -248,7 +248,7 @@ public class FrontEnd
 			}
 		}
 
-		if (Env.slimcode && !Optimizer.forceReuseAtom)
+		if (!Optimizer.forceReuseAtom)
 		{
 			Optimizer.fReuseAtom = false;
 			// Env.findatom2 = true;
@@ -268,11 +268,11 @@ public class FrontEnd
 			}
 		if (opt.equals("--slimcode"))
 		{
-			// コンパイル後の中間命令列を出力するモード
+			// SLIM用の中間命令列を出力するモード
+			// v1.46以降はオプションがなくても強制的にオンになる
+			// （互換性のため分岐を残している）
 			//@ --slimcode
 			//@ Output intermediate instruction sequence to be executed by SLIM.
-			//Env.compileonly = true;
-			Env.slimcode = true;
 		}
 		else if (opt.equals("--charset"))
 		{
@@ -300,7 +300,6 @@ public class FrontEnd
 		else if (opt.equals("--use-findatom2"))
 		{
 			// Env.compileonly = true;
-			Env.slimcode = true;
 			Env.findatom2 = true;
 			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
 		}
@@ -480,27 +479,10 @@ public class FrontEnd
 		{
 			//@ --hl, --hl-opt
 			//@ Use hyperlinks (HyperLMNtal).
-			boolean slimcode = false;
-			for (String arg : args)
+			Env.hyperLink = true;
+			if (opt.equals("--hl-opt"))
 			{
-				if (arg.equals("--slimcode"))
-				{
-					slimcode = true;
-					break;
-				}
-			}
-			if (slimcode)
-			{
-				Env.hyperLink = true;
-				if (opt.equals("--hl-opt"))
-				{
-					Env.hyperLinkOpt = true;
-				}
-			}
-			else
-			{
-				Util.errPrintln("Can't use option " + opt + " without option --slimcode.");
-				System.exit(1);
+				Env.hyperLinkOpt = true;
 			}
 		}
 		else if (opt.equals("--use-swaplink"))
@@ -571,15 +553,15 @@ public class FrontEnd
 			run(new BufferedReader(new InputStreamReader(is, sourceCharset)), unitName);
 		}
 		catch (FileNotFoundException e)
-		{
+		    {
 			Util.println(e.getMessage());
 			System.exit(1);
-		}
+		    }
 		catch (SecurityException e)
-		{
+		    {
 			e.printStackTrace();
 			System.exit(1);
-		}
+		    }
 	}
 
 	/**
@@ -588,126 +570,125 @@ public class FrontEnd
 	 * @param src Reader型で表されたソース
 	 * @param unitName ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
 	 */
-	private static void run(Reader src, String unitName)
-	{
-		if (Env.preProcess0)
-		{
-			src = preProcess0(src);
-		}
-
+    private static void run(Reader src, String unitName)
+    {
+	if (Env.preProcess0)
+	    {
+		src = preProcess0(src);
+	    }
+	
+	try
+	    {
+		Env.clearErrors();
+		
+		// 構文解析
+		// 抽象構文木からコンパイル時データ構造を生成する
+		compile.structure.Membrane m = null;
 		try
-		{
-			Env.clearErrors();
-
-			// 構文解析
-			// 抽象構文木からコンパイル時データ構造を生成する
-			compile.structure.Membrane m = null;
-			try
-			{
-				LMNParser lp = new LMNParser(src);
-				m = lp.parse();
-			}
-			catch (ParseException e)
-			{
-				Env.p("Compilation Failed");
-				Env.e(e.getMessage());
-				System.exit(1);
-			}
-
-			if (Env.fType)
-			{
-				if (!analyseTypes(m))
-				{
-					System.exit(1);
-				}
-			}
-
-			// コンパイル、コード生成
-			// コンパイル時データ構造からルールセットの中間命令列を生成する
-			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
-			if (Env.getErrorCount() > 0)
-			{
-				Env.e("Compilation Failed");
-				System.exit(1);
-			}
-
-			if (Env.compileRule)
-			{
-				try
-				{
-					List<Ruleset> rulesets = m.rulesets;
-					InterpretedRuleset r = (InterpretedRuleset)rulesets.get(0);
-					r.rules.get(0).showDetail();
-				}
-				catch (Exception e)
-				{
-					Env.e("Compilation Failed: no rule");
-					System.exit(1);
-				}
-				System.exit(0);
-			}
-			else
-			{
-				// 通常はこっち？
-				showIL((InterpretedRuleset)rs, m);
-			}
-
-
-			
-			// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
-			for (String libName : Module.loaded)
-			    {
-				compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
-				    .get(libName);
-				for (Ruleset r : mem.rulesets)
-				    {
-					((InterpretedRuleset)r).showDetail();
-				    }
-			    }
-			// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
-			Module.showModuleList();
-			// インラインコード一覧を出力
-			Inline.initInline();
-			Inline.showInlineList();
-			System.exit(0);
-			
-		}
-		catch (Exception e)
 		    {
-			e.printStackTrace();
+			LMNParser lp = new LMNParser(src);
+			m = lp.parse();
+		    }
+		catch (ParseException e)
+		    {
+			Env.p("Compilation Failed");
+			Env.e(e.getMessage());
 			System.exit(1);
-		}
-	}
-
-	private static boolean analyseTypes(compile.structure.Membrane m)
-	{
-		try
-		{
-			TypeInferer tci = new TypeInferer(m);
-			tci.infer();
-			// tci.printAllConstraints();
-			return true;
-		}
-		catch (TypeException e)
-		{
-			Env.p("Type Inference Failed");
-			Env.e("TYPE ERROR: " + e.getMessage());
-			// tci.printAllConstraints();
-		}
-		return false;
-	}
-
-	/**
-	 * 中間命令列を出力する
-	 * @param rs 初期化ルールのみを含むルールセット
-	 * @param m グローバル膜
-	 */
-	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)
-	{
-		rs.showDetail();
-		m.showAllRules();
-	}
-
+		    }
+		
+		if (Env.fType)
+		    {
+			if (!analyseTypes(m))
+			    {
+				System.exit(1);
+			    }
+		    }
+		
+		// コンパイル、コード生成
+		// コンパイル時データ構造からルールセットの中間命令列を生成する
+		Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
+		if (Env.getErrorCount() > 0)
+		    {
+			Env.e("Compilation Failed");
+			System.exit(1);
+		    }
+		
+		if (Env.compileRule)
+		    {
+			try
+			    {
+				List<Ruleset> rulesets = m.rulesets;
+				InterpretedRuleset r = (InterpretedRuleset)rulesets.get(0);
+				r.rules.get(0).showDetail();
+			    }
+			catch (Exception e)
+			    {
+				Env.e("Compilation Failed: no rule");
+				System.exit(1);
+			    }
+			System.exit(0);
+		    }
+		else
+		    {
+			// 通常はこっち？
+			showIL((InterpretedRuleset)rs, m);
+		    }
+		
+		
+		
+		// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
+		for (String libName : Module.loaded)
+		    {
+			compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
+			    .get(libName);
+			for (Ruleset r : mem.rulesets)
+			    {
+				((InterpretedRuleset)r).showDetail();
+			    }
+		    }
+		// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
+		Module.showModuleList();
+		// インラインコード一覧を出力
+		Inline.initInline();
+		Inline.showInlineList();
+		System.exit(0);
+	    }
+	catch (Exception e)
+	    {
+		e.printStackTrace();
+		System.exit(1);
+	    }
+    }
+    
+    private static boolean analyseTypes(compile.structure.Membrane m)
+    {
+	try
+	    {
+		TypeInferer tci = new TypeInferer(m);
+		tci.infer();
+		// tci.printAllConstraints();
+		return true;
+	    }
+	catch (TypeException e)
+	    {
+		Env.p("Type Inference Failed");
+		Env.e("TYPE ERROR: " + e.getMessage());
+		// tci.printAllConstraints();
+	    }
+	return false;
+    }
+    
+    /**
+     * 中間命令列を出力する
+     * @param rs 初期化ルールのみを含むルールセット
+     * @param m グローバル膜
+     */
+    private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)
+    {
+	rs.showDetail();
+	m.showAllRules();
+    }
+    
 	/**
 	 * プリプロセッサ0
 	 * 

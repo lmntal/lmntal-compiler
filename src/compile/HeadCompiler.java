@@ -166,7 +166,7 @@ class HeadCompiler
 			insts.add(new Instruction(Instruction.GETLINK, varCount, atompath, i));
 			varCount++;
 		}
-		final int[] put = linkPaths.put(new Integer(atompath), paths);
+		final int[] put = linkPaths.put(atompath, paths);
 	}
 	private void searchLinkedGroup(Atom startatom, HashSet<Atom> qatoms, Atom firstatom, Membrane firstmem) {
 		LinkedList<Membrane> newmemlist = new LinkedList<Membrane>();
@@ -497,13 +497,11 @@ class HeadCompiler
 						memPaths.put(buddymem, buddymempath);
 						insts.add(new Instruction( Instruction.LOCKMEM, buddymempath, buddyatompath, buddyatom.mem.name ));
 						newmemlist.add(buddymem);
-						if(Env.slimcode){
-							// GETMEM時代のコード
-							for(Membrane othermem : buddymem.parent.mems){
-								if (othermem != buddymem && memToPath(othermem) != UNBOUND) {
-									insts.add(new Instruction( Instruction.NEQMEM,	buddymempath, memToPath(othermem) ));
-									buddymem.parent.connect(buddymem, othermem);
-								}
+						// GETMEM時代のコード
+						for(Membrane othermem : buddymem.parent.mems){
+							if (othermem != buddymem && memToPath(othermem) != UNBOUND) {
+								insts.add(new Instruction( Instruction.NEQMEM,	buddymempath, memToPath(othermem) ));
+								buddymem.parent.connect(buddymem, othermem);
 							}
 						}
 					}
@@ -583,14 +581,12 @@ class HeadCompiler
 				// 子膜を変数に取得する
 				submempath = varCount++;
 				insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-				if(Env.slimcode){
-					// NEQMEM は不要になっているが、参考のためにコードは残しておく。
-					for(Membrane othermem : mem.mems){
-						int other = memToPath(othermem);
-						if (other == UNBOUND) continue;
-						//if (othermem == submem) continue;
-						insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
-					}
+				// NEQMEM は不要になっているが、参考のためにコードは残しておく。
+				for(Membrane othermem : mem.mems){
+					int other = memToPath(othermem);
+					if (other == UNBOUND) continue;
+					//if (othermem == submem) continue;
+					insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
 				}
 				memPaths.put(submem, submempath);
 			}
@@ -795,15 +791,13 @@ class HeadCompiler
 						// anyMemCount++;
 					} else
 						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-					if(Env.slimcode){
-						// NEQMEM は不要になっているが、参考のためにコードは残しておく。
-						for(Membrane othermem : mem.mems){
-							int other = memToPath(othermem);
-							if (other == UNBOUND) continue;
-							//if (othermem == submem) continue;
-							insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
-							mem.connect(submem, othermem);
-						}
+					// NEQMEM は不要になっているが、参考のためにコードは残しておく。
+					for(Membrane othermem : mem.mems){
+						int other = memToPath(othermem);
+						if (other == UNBOUND) continue;
+						//if (othermem == submem) continue;
+						insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
+						mem.connect(submem, othermem);
 					}
 					memPaths.put(submem, submempath);
 				}
@@ -947,14 +941,12 @@ class HeadCompiler
 						// anyMemCount++;
 					} else
 						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-					if(Env.slimcode){
-						// NEQMEM は不要になっているが、参考のためにコードは残しておく。
-						for(Membrane othermem : mem.mems){
-							int other = memToPath(othermem);
-							if (other == UNBOUND) continue;
-							//if (othermem == submem) continue;
-							insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
-						}
+					// NEQMEM は不要になっているが、参考のためにコードは残しておく。
+					for(Membrane othermem : mem.mems){
+						int other = memToPath(othermem);
+						if (other == UNBOUND) continue;
+						//if (othermem == submem) continue;
+						insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
 					}
 					memPaths.put(submem, submempath);
 				}

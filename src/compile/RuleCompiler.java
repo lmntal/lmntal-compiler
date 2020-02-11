@@ -231,49 +231,7 @@ public class RuleCompiler
 		{
 			hc.prepare(); // 変数番号を初期化
 			hc2.prepare();
-			if (firstid < hc.atoms.size())
-			{
-				if (Env.slimcode || Env.memtestonly) continue;
-				// Env.SHUFFLE_DEFAULT ならば、ルールの反応確率を優先するためアトム主導テストは行わない
-
-				Atom atom = (Atom)hc.atoms.get(firstid);
-				if (!atom.functor.isActive()) continue;
-
-				// アトム主導
-				InstructionList tmplabel = new InstructionList();
-				tmplabel.insts = hc.match;
-				atomMatch.add(new Instruction(Instruction.BRANCH, tmplabel));
-
-				hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
-				hc.atomPaths.put(atom, 1);		// 主導するアトムの変数番号は 1
-				hc.varCount = 2;
-				hc.match.add(new Instruction(Instruction.FUNC, 1, atom.functor));
-				Membrane mem = atom.mem;
-				if (mem == rs.leftMem)
-				{
-					hc.match.add(new Instruction(Instruction.TESTMEM, 0, 1));
-				}
-				else
-				{
-					hc.match.add(new Instruction(Instruction.GETMEM, hc.varCount, 1, mem.kind, mem.name));
-					hc.match.add(new Instruction(Instruction.LOCK,   hc.varCount));
-					hc.memPaths.put(mem, hc.varCount++);
-					mem = mem.parent;
-					while (mem != rs.leftMem)
-					{
-						hc.match.add(new Instruction(Instruction.GETPARENT,hc.varCount,hc.varCount-1));
-						hc.match.add(new Instruction(Instruction.LOCK,     hc.varCount));
-						hc.memPaths.put(mem, hc.varCount++);
-						mem = mem.parent;
-					}
-					hc.match.add(new Instruction(Instruction.GETPARENT,hc.varCount,hc.varCount-1));
-					hc.match.add(new Instruction(Instruction.EQMEM, 0, hc.varCount++));
-				}
-				hc.getLinks(1, atom.functor.getArity(), hc.match); //リンクの一括取得(RISC化) by mizuno
-				Atom firstatom = (Atom)hc.atoms.get(firstid);
-				hc.compileLinkedGroup(firstatom, hc.matchLabel);
-				hc.compileMembrane(firstatom.mem, hc.matchLabel);
-			}
+			if (firstid < hc.atoms.size()) continue;
 			else
 			{
 				// 膜主導
@@ -524,19 +482,10 @@ public class RuleCompiler
 		 * 非線形型なし$pの場合更に明示的な自由リンクに=/2が挿入され，明示的な自由リンクのリストへのマップが生成されている
 		 * 非線形$pの子膜は再帰的にロックされている
 		 */
-		dequeueLHSAtoms();
 		removeLHSAtoms();
 		removeLHSTypedProcesses();
-		if (removeLHSMem(rs.leftMem) >= 2)
-		{
-			//2011/01/23 slimでは必要なくなったので挿入しないように修正 by meguro
-			if (!Env.slimcode)
-			{
-				body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
-			}
-		}
+		removeLHSMem(rs.leftMem);
 
-		recursiveLockLHSNonlinearProcessContextMems();
 		insertconnectors();
 
 		// insertconnectorsの後でなければうまくいかないので再発行 ( 2006/09/15 kudo)
@@ -563,19 +512,13 @@ public class RuleCompiler
 		updateLinks();
 		deleteconnectors();
 
-		//右辺のアトムを実行アトムスタックに積む
-		enqueueRHSAtoms();
-
 		//次の2つは右辺の構造の生成以降ならいつでもよい
 		addInline();
-		if (Env.slimcode)
+		if (Env.hyperLink)
 		{
-			if (Env.hyperLink)
-			{
-				addHyperlink();//seiji
-			}
-			addCallback();
+			addHyperlink();//seiji
 		}
+		addCallback();
 		addRegAndLoadModules();
 
 		// 左辺の残ったプロセスを解放する
@@ -588,7 +531,6 @@ public class RuleCompiler
 		// 膜をunlockする
 
 		recursiveUnlockLHSNonlinearProcessContextMems();
-		unlockReusedOrNewRootMem(rs.rightMem);
 		//
 		body.add(0, Instruction.spec(formals, varcount));
 
@@ -655,18 +597,9 @@ public class RuleCompiler
 		 * 非線形$pの子膜は再帰的にロックされている
 		 */
 		tailatomlistMake();
-		dequeueLHSAtoms();
 		removeLHSTypedProcesses();
-		if (removeLHSMem(rs.leftMem) >= 2)
-		{
-			//2011/01/23 slimでは必要なくなったので挿入しないように修正 by meguro
-			if (!Env.slimcode)
-			{
-				body.add(new Instruction(Instruction.REMOVETOPLEVELPROXIES, toplevelmemid));
-			}
-		}
+		removeLHSMem(rs.leftMem);
 
-		recursiveLockLHSNonlinearProcessContextMems();
 		insertconnectors();
 
 		// insertconnectorsの後でなければうまくいかないので再発行 ( 2006/09/15 kudo)
@@ -738,15 +671,10 @@ public class RuleCompiler
 
 		deleteconnectors();
 
-		//右辺のアトムを実行アトムスタックに積む
-		enqueueRHSAtoms_swaplink(created, reusable.keySet());
-
 		//次の2つは右辺の構造の生成以降ならいつでもよい
 		addInline();
-		if (Env.slimcode) {
-			if (Env.hyperLink) addHyperlink();//seiji
-			addCallback();
-		}
+		if (Env.hyperLink) addHyperlink();//seiji
+		addCallback();
 		addRegAndLoadModules();
 
 		// 左辺の残ったプロセスを解放する
@@ -758,7 +686,6 @@ public class RuleCompiler
 		// 膜をunlockする
 
 		recursiveUnlockLHSNonlinearProcessContextMems();
-		unlockReusedOrNewRootMem(rs.rightMem);
 		body.add(0, Instruction.spec(formals, varcount));
 
 		body.add(new Instruction(Instruction.PROCEED));
@@ -1045,8 +972,6 @@ public class RuleCompiler
 			if (pc != null) { // ヘッドのときのみ除去する
 				if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE)
 				{
-					//dequeueされていなかったので追加(2005/08/27) by mizuno
-					if(!Env.slimcode)body.add(new Instruction( Instruction.DEQUEUEATOM, typedcxtToSrcPath(def) ));
 					body.add(new Instruction( Instruction.REMOVEATOM,
 							typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
@@ -1096,22 +1021,6 @@ public class RuleCompiler
 			if (def.rhsOccs.size() != 1) { // 非線型のとき1つだけ再利用するようにしたら size == 0 に直せる -> 再利用は最適化に任せることにしたので不要
 				body.add(new Instruction( Instruction.DROPMEM,
 						lhsmemToPath(def.lhsOcc.mem) ));
-			}
-		}
-	}
-
-	/** 非線形プロセス文脈の左辺出現膜を再帰的にロックする */
-	private void recursiveLockLHSNonlinearProcessContextMems()
-	{
-		if(!Env.slimcode)
-		{
-			for (ContextDef def : rs.processContexts.values())
-			{
-				if (def.rhsOccs.size() != 1)
-				{
-					body.add(new Instruction( Instruction.RECURSIVELOCK,
-							lhsmemToPath(def.lhsOcc.mem) ));
-				}
 			}
 		}
 	}
@@ -1390,27 +1299,13 @@ public class RuleCompiler
 		}
 	}
 
-	/** 左辺のアトムを実行アトムスタックから除去する。*/
-	private void dequeueLHSAtoms()
-	{
-		for (int i = 0; i < lhsatoms.size(); i++)
-		{
-			Atom atom = (Atom)lhsatoms.get(i);
-			if (atom.functor.isSymbol() && !Env.slimcode)
-			{
-				body.add(Instruction.dequeueatom(
-						lhsatomToPath(atom) // ← lhsmems.size() + i に一致する
-				));
-			}
-		}
-	}
 	/** 左辺のアトムの情報から、tailatomlist命令を生成する。*/
 	private void tailatomlistMake()
 	{
 		for (int i = lhsatoms.size()-1; i >= 0; i--)
 		{
 			Atom atom = (Atom)lhsatoms.get(i);
-			if (atom.functor.isSymbol() && Env.slimcode && Env.useAtomListOP)
+			if (atom.functor.isSymbol() && Env.useAtomListOP)
 			{
 				body.add(new Instruction(Instruction.TAILATOMLIST,lhsatomToPath(atom),lhsmemToPath(atom.mem)));
 			}
@@ -1441,7 +1336,7 @@ public class RuleCompiler
 	private int rhspcToMapPath(ProcessContext pc)
 	{
 		if (!rhsmappaths.containsKey(pc)) return NOTCOPIED;
-		return rhsmappaths.get(pc).intValue();
+		return rhsmappaths.get(pc);
 	}
 
 	//
@@ -1648,7 +1543,7 @@ public class RuleCompiler
 				if (reused.containsKey(atom))
 				{
 					atomid = lhsatomToPath(reused.get(atom));
-					if(Env.slimcode && Env.useAtomListOP)
+					if(Env.useAtomListOP)
 					{
 						body.add(new Instruction(Instruction.HEADATOM,atomid,rhsmemToPath(mem)));
 					}
@@ -1939,18 +1834,16 @@ public class RuleCompiler
 
 				if (created.contains(a1))
 				{
-					if(Env.slimcode)
-						body.add(new Instruction(
-								Instruction.CLEARLINK, rhsatompath.get(a1),links1[i].pos));
+					body.add(new Instruction(
+							Instruction.CLEARLINK, rhsatompath.get(a1),links1[i].pos));
 					body.add(swaplink(
 						rhsatompath.get(a1), links1[i].pos,
 						lhsatompath.get(a2), links1[j].pos));
 				}
 				else if (created.contains(a2))
 				{
-					if(Env.slimcode)
-						body.add(new Instruction(
-								Instruction.CLEARLINK, rhsatompath.get(a2),links2[i].pos));
+					body.add(new Instruction(
+							Instruction.CLEARLINK, rhsatompath.get(a2),links2[i].pos));
 					body.add(swaplink(
 						lhsatompath.get(a1), links1[i].pos,
 						rhsatompath.get(a2), links1[j].pos));
@@ -2255,49 +2148,6 @@ public class RuleCompiler
 	}
 
 	/**
-	 * 右辺のアトムを実行アトムスタックに積む
-	 */
-	private void enqueueRHSAtoms()
-	{
-		int index = body.size(); // 末尾再帰最適化の効果を最大化するため、逆順に積む（コードがセコい）
-		for (Atom atom : rhsatoms)
-		{
-			if (atom.functor.isSymbol() && atom.functor.isActive() && !Env.slimcode)
-			{
-				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(atom)));
-			}
-		}
-	}
-
-	/**
-	 * 右辺のアトムを実行アトムスタックに積む(swaplink版)
-	 */
-	private void enqueueRHSAtoms_swaplink(Set<Atomic> created, Set<Atom> reused)
-	{
-		int index = body.size();
-
-		// 生成されたアトム
-		for(Atomic a : created)
-		{
-			Atom atom = (Atom)a;
-			if (atom.functor.isSymbol() && atom.functor.isActive() && !Env.slimcode)
-			{
-				body.add(index, new Instruction(Instruction.ENQUEUEATOM, rhsatomToPath(a)));
-			}
-		}
-
-		// 再利用されたアトム
-		for(Atom atom : reused)
-		{
-			if (!lhsatoms.contains(atom)) continue;
-			if (atom.functor.isSymbol() && atom.functor.isActive() && !Env.slimcode)
-			{
-				body.add(index, new Instruction(Instruction.ENQUEUEATOM, lhsatomToPath(atom)));
-			}
-		}
-	}
-
-	/**
 	 * hyperlink関連の命令列を生成する
 	 * @author Seiji Ogawa
 	 */
@@ -2390,25 +2240,6 @@ public class RuleCompiler
 			{
 				// この時点では解決できないモジュールがあるので名前にしておく
 				body.add(new Instruction(Instruction.LOADMODULE, rhsmemToPath(atom.mem), path));
-			}
-		}
-	}
-
-	/**
-	 * （再利用された膜または）新しいルート膜に対して、子孫膜から順番にUNLOCKMEMを発行する。
-	 * ただし現在の実装では、この時点ではまだ膜は再利用されていない。
-	 */
-	private void unlockReusedOrNewRootMem(Membrane mem)
-	{
-		if(!Env.slimcode)
-		{
-			for (Membrane submem : mem.mems)
-			{
-				unlockReusedOrNewRootMem(submem);
-			}
-			if (mem.pragmaAtHost != null) // 右辺で＠指定されている場合
-			{
-				body.add(new Instruction(Instruction.UNLOCKMEM, rhsmemToPath(mem)));
 			}
 		}
 	}

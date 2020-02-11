@@ -2881,126 +2881,120 @@ public class Instruction implements Cloneable
 	}
 
 	public String toString()
-	{
-		depth++;
-		//nakajima版2004-01-21
-		StringBuilder buffer = new StringBuilder();
-		String instName = getInstructionString(kind);
-		int spaces = 15;
-		ArgType argtype = argTypeTable.get(kind);
-		if (argtype.output)
-		{
-			spaces -= 2;
-		}
-		/*if (!Env.compileonly)
-		{
-			instName = shorten(instName, spaces - 1);
-			}*/
-		buffer.append(instName);
-		spaces -= instName.length();
-		while (spaces > 0)
-		{
-			buffer.append(' ');
-			spaces--;
-		}
-		
-		if (data.size() == 1 && data.get(0) instanceof ArrayList)
-		{
-			ArrayList arg1 = (ArrayList)data.get(0);
-			if (arg1.size() == 1 && arg1.get(0) instanceof ArrayList)
-			{
-				ArrayList insts = (ArrayList)arg1.get(0);
-				if (insts.size() == 0)
-				{
-					buffer.append("[[]]");
-				}
-				else
-				{
-					buffer.append("[[\n");
-					for (int i = 0; i < insts.size(); i++)
-					{
-						buffer.append("                  ");
-						buffer.append(insts.get(i));
-						if (i + 1 < insts.size())
-						{
-							buffer.append(", \n");
-						}
-						else
-						{
-							buffer.append(" ]]");
-						}
-					}
-					return buffer.toString();
-				}
-			}
-		}
-
-		if (kind != Instruction.JUMP && data.size() >= 1 && data.get(0) instanceof InstructionList)
-		{
-			List insts = ((InstructionList)data.get(0)).insts;
+    {
+	depth++;
+	//nakajima版2004-01-21
+	StringBuilder buffer = new StringBuilder();
+	String instName = getInstructionString(kind);
+	int spaces = 15;
+	ArgType argtype = argTypeTable.get(kind);
+	if (argtype.output)
+	    {
+		spaces -= 2;
+	    }
+	/*if (!Env.compileonly)
+	  {
+	  instName = shorten(instName, spaces - 1);
+	  }*/
+	buffer.append(instName);
+	spaces -= instName.length();
+	while (spaces > 0)
+	    {
+		buffer.append(' ');
+		spaces--;
+	    }
+	
+	if (data.size() == 1 && data.get(0) instanceof ArrayList)
+	    {
+		ArrayList arg1 = (ArrayList)data.get(0);
+		if (arg1.size() == 1 && arg1.get(0) instanceof ArrayList)
+		    {
+			ArrayList insts = (ArrayList)arg1.get(0);
 			if (insts.size() == 0)
-			{
-				buffer.append("[]");
-			}
+			    {
+				buffer.append("[[]]");
+			    }
 			else
-			{
-
-				
-					buffer.append("[[\n");
-			      
-			
-					//buffer.append("[\n");
-				
-				int i;
-				for (i = 0; i < insts.size() - 1; i++)
-				{
-					//アトム主導テストの命令列を見やすく(?)する sakurai
-//					if(((Instruction)insts.get(i)).getKind() == Instruction.GROUP
-//						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
-//						buffer.append("\n");
-//					}
-					buffer.append("                ");
-					for (int j = 0; j < depth; j++)
-						buffer.append("  ");
+			    {
+				buffer.append("[[\n");
+				for (int i = 0; i < insts.size(); i++)
+				    {
+					buffer.append("                  ");
 					buffer.append(insts.get(i));
-					//TODO 出力引数だったらインデントを下げる.
-					buffer.append("\n");
-					//else buffer.append(", \n");
-				}
+					if (i + 1 < insts.size())
+					    {
+						buffer.append(", \n");
+					    }
+					else
+					    {
+						buffer.append(" ]]");
+					    }
+				    }
+				return buffer.toString();
+			    }
+		    }
+	    }
+	
+	if (kind != Instruction.JUMP && data.size() >= 1 && data.get(0) instanceof InstructionList)
+	    {
+		List insts = ((InstructionList)data.get(0)).insts;
+		if (insts.size() == 0)
+		    {
+			buffer.append("[]");
+		    }
+		else
+		    {
+			buffer.append("[[\n");
+			int i;
+			for (i = 0; i < insts.size() - 1; i++)
+			    {
+				//アトム主導テストの命令列を見やすく(?)する sakurai
+				//					if(((Instruction)insts.get(i)).getKind() == Instruction.GROUP
+				//						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
+				//						buffer.append("\n");
+				//					}
 				buffer.append("                ");
 				for (int j = 0; j < depth; j++)
-					buffer.append("  ");
+				    buffer.append("  ");
 				buffer.append(insts.get(i));
-				for (int j = 1; j < data.size(); j++)
-				{
-					buffer.append("                  ");
-					buffer.append("     ");
-					buffer.append(", " + data.get(j));
-				}
-				buffer.append(" ]]");
-				depth--;
-				return buffer.toString();
-			}
-		}
-
-		buffer.append("[");
-		//パーズできるようにエスケープ by mizuno
-		for (int i = 0; i < data.size(); i++)
-		{
-			if (i != 0) buffer.append(", ");
-			Object o = data.get(i);
-			String str = (o == null ? "null" : o.toString());
-			if (o instanceof String || (o instanceof Rule))
-			{
-				str = Util.quoteString(str, '"');
-			}
-			buffer.append(str);
-		}
-		buffer.append("]");
-		depth--;
-		return buffer.toString();
-	}
-
+				//TODO 出力引数だったらインデントを下げる.
+				buffer.append("\n");
+				
+			    }
+			buffer.append("                ");
+			for (int j = 0; j < depth; j++)
+			    buffer.append("  ");
+			buffer.append(insts.get(i));
+			for (int j = 1; j < data.size(); j++)
+			    {
+				buffer.append("                  ");
+				buffer.append("     ");
+				buffer.append(", " + data.get(j));
+			    }
+			buffer.append(" ]]");
+			depth--;
+			return buffer.toString();
+		    }
+	    }
+	
+	buffer.append("[");
+	//パーズできるようにエスケープ by mizuno
+	for (int i = 0; i < data.size(); i++)
+	    {
+		if (i != 0) buffer.append(", ");
+		Object o = data.get(i);
+		String str = (o == null ? "null" : o.toString());
+		if (o instanceof String || (o instanceof Rule))
+		    {
+			str = Util.quoteString(str, '"');
+		    }
+		buffer.append(str);
+	    }
+	buffer.append("]");
+	depth--;
+	return buffer.toString();
+    }
+    
 	/** spec命令の引数値を新しい値に更新する（暫定的措置）*/
 	public void updateSpec(int formals, int locals)
 	{
