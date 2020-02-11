@@ -2150,8 +2150,12 @@ public class Instruction implements Cloneable
 		return new Instruction(REMOVEATOM,atom);
 	}
 	/** removeatom 命令を生成する*/
+	public static Instruction removeatom(int atom, int mem) {
+		return new Instruction(REMOVEATOM,atom,mem);
+	}
+	/** removeatom 命令を生成する*/
 	public static Instruction removeatom(int atom, int mem, Functor func) {
-		return new Instruction(REMOVEATOM,atom,mem,func);
+		return new Instruction(REMOVEATOM,atom,mem);
 	}
 	/** dequeueatom 命令を生成する*/
 	public static Instruction dequeueatom(int atom) {
