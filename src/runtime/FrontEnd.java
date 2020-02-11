@@ -258,15 +258,15 @@ public class FrontEnd
 	private static int processLongOptions(String[] args, int i)
 	{
 		String opt = args[i];
-		if (opt.equals("--compileonly"))
+		/*if (opt.equals("--compileonly"))
 		{
 			// コンパイル後の中間命令列を出力するモード
 			//@ --compileonly
 			//@ Output compiled intermediate instruction sequence only.
 			//@ Compiler will not translate to Java or execute the program.
 			Env.compileonly = true;
-		}
-		else if (opt.equals("--slimcode"))
+			}*/
+		if (opt.equals("--slimcode"))
 		{
 			// コンパイル後の中間命令列を出力するモード
 			//@ --slimcode
