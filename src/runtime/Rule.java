@@ -106,7 +106,7 @@ public final class Rule
 	{
 		if (Env.debug == 0 && !Env.compileonly) return;
 
-		if (hasUniq && Env.slimcode)
+		if (hasUniq)
 		{
 			Env.p("Compiled Uniq Rule " + this);
 		}

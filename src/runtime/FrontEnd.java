@@ -248,7 +248,7 @@ public class FrontEnd
 			}
 		}
 
-		if (Env.slimcode && !Optimizer.forceReuseAtom)
+		if (!Optimizer.forceReuseAtom)
 		{
 			Optimizer.fReuseAtom = false;
 			// Env.findatom2 = true;
@@ -268,11 +268,12 @@ public class FrontEnd
 		}
 		else if (opt.equals("--slimcode"))
 		{
-			// コンパイル後の中間命令列を出力するモード
+			// SLIM用の中間命令列を出力するモード
+			// v1.46以降はオプションがなくても強制的にオンになる
+			// （互換性のため分岐を残している）
 			//@ --slimcode
 			//@ Output intermediate instruction sequence to be executed by SLIM.
 			Env.compileonly = true;
-			Env.slimcode = true;
 		}
 		else if (opt.equals("--charset"))
 		{
@@ -300,7 +301,6 @@ public class FrontEnd
 		else if (opt.equals("--use-findatom2"))
 		{
 			// Env.compileonly = true;
-			Env.slimcode = true;
 			Env.findatom2 = true;
 			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
 		}
@@ -480,27 +480,10 @@ public class FrontEnd
 		{
 			//@ --hl, --hl-opt
 			//@ Use hyperlinks (HyperLMNtal).
-			boolean slimcode = false;
-			for (String arg : args)
+			Env.hyperLink = true;
+			if (opt.equals("--hl-opt"))
 			{
-				if (arg.equals("--slimcode"))
-				{
-					slimcode = true;
-					break;
-				}
-			}
-			if (slimcode)
-			{
-				Env.hyperLink = true;
-				if (opt.equals("--hl-opt"))
-				{
-					Env.hyperLinkOpt = true;
-				}
-			}
-			else
-			{
-				Util.errPrintln("Can't use option " + opt + " without option --slimcode.");
-				System.exit(1);
+				Env.hyperLinkOpt = true;
 			}
 		}
 		else if (opt.equals("--use-swaplink"))
