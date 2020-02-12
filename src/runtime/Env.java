@@ -113,9 +113,6 @@ public final class Env
 	/** 標準入力から LMNtal プログラムを読み込むオプション 2006.07.11 inui */
 	public static boolean stdinLMN = false;
 
-	public static int majorVersion = 0;
-	public static int minorVersion = 0;
-
 	/**
 	 * ルール左辺に出現する、スレッド数の上限を設定
 	 */

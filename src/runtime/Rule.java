@@ -407,7 +407,6 @@ class Benchmark {
 	public long lockfailure = 0;
 
 	Benchmark(Thread thread) {
-		this.threadid = (Env.majorVersion == 1 && Env.minorVersion > 4) 
-		? thread.getId() : thread.hashCode();
+		thread.getId();
 	}
 }
