@@ -665,12 +665,11 @@ class HeadCompiler
 			// $p等式トップレベルのアトムのときは、$pがヘッド出現する膜とも比較する
 			testmems = new Membrane[]{ mem, proccxteqMap.get(mem).def.lhsOcc.mem };
 		}
-		for (int i = 0; i < testmems.length; i++) {
-			for(Atom otheratom : testmems[i].atoms){
+		for (Membrane m : testmems) {
+			for(Atom otheratom : m.atoms){
 				int other = atomToPath(otheratom);
 				if (other == UNBOUND) continue;
 				if (!otheratom.functor.equals(atom.functor)) continue;
-				//if (otheratom == atom) continue;
 				insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
 				/* NEQATOMがある場合、同ファンクタのアトムにマッチされるが、branchで両方のアトムを起点とする命令列が出力されるため、connectは不要
 				  testmems[i].connect(otheratom, atom);
