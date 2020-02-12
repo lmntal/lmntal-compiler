@@ -196,8 +196,6 @@ abstract public class Util
 	}
 	
 	public static long getTime(){
-		if(Env.majorVersion==1 &&Env.minorVersion>4)
-	        return System.nanoTime();
-		return System.currentTimeMillis();
+		return System.nanoTime();
 	}
 }
