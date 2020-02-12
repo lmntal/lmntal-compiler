@@ -70,7 +70,7 @@ class HeadCompiler extends BaseCompiler
 
 	HeadCompiler(Membrane mem)
 	{
-	    enumFormals(mem);
+	    pushMembrane(mem);
 	}
 
 	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたHeadCompilerを作成して返す。
@@ -84,9 +84,9 @@ class HeadCompiler extends BaseCompiler
 	}
 	/** 膜memの子孫の全てのアトムと膜を、それぞれリストatomsとmemsに追加する。
 	 * リスト内の追加された位置がそのアトムおよび膜の仮引数IDになる。*/
-	void enumFormals(Membrane mem)
+	void pushMembrane(Membrane mem)
 	{
-		Env.c("enumFormals");
+		Env.c("pushMembrane");
 		for (Atom atom : mem.atoms)
 		{
 			// 左辺に出現したアトムを登録する
@@ -96,7 +96,7 @@ class HeadCompiler extends BaseCompiler
 		mems.add(mem);	// 本膜はmems[0]
 		for (Membrane m : mem.mems)
 		{
-			enumFormals(m);
+			pushMembrane(m);
 		}
 	}
 
@@ -980,7 +980,7 @@ class HeadCompiler extends BaseCompiler
 		//int formals = varcount;
 		//matchLabel.setFormals(formals);
 		for(ProcessContextEquation eq : eqs){
-			enumFormals(eq.mem);
+			pushMembrane(eq.mem);
 			memPaths.put(eq.mem, memPaths.get(eq.def.lhsOcc.mem));
 			proccxteqMap.put(eq.mem, eq);
 		}
