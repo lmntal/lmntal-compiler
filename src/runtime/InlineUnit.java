@@ -66,7 +66,7 @@ public class InlineUnit {
 	 * @return
 	 */
 	public int getCodeID(String codeStr) {
-		return codes.containsKey(codeStr) ? ((Integer)codes.get(codeStr)).intValue() : -1;
+		return codes.containsKey(codeStr) ? (Integer) codes.get(codeStr) : -1;
 	}
 	
 	/**
@@ -201,7 +201,7 @@ public class InlineUnit {
 		i = codes.keySet().iterator();
 		while(i.hasNext()) {
 			String s = (String)i.next();
-			int codeID = ((Integer)(codes.get(s))).intValue();
+			int codeID = (Integer) (codes.get(s));
 			p.println("\t\tcase "+codeID+": {");
 			//p.println("\t\t\t/*"+s.replaceAll("\\*\\/", "* /").replaceAll("\\/\\*", "/ *")+"*/");
 			p.println("\t\t\t"+s);
