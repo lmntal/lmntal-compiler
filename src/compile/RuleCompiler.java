@@ -115,6 +115,8 @@ public class RuleCompiler
 	{
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
+		checkExplicitFreeLinks(rs.leftMem);
+		sortGuardAtoms();
 		//theRule = new Rule(rs.toString());
 		theRule = new Rule(rs.leftMem.getFirstAtomName(),rs.toString());
 		theRule.name = rs.name;
@@ -1134,21 +1136,9 @@ public class RuleCompiler
 		mem.atoms.addAll(atomlist);
 	}
 
-	/**
-	 * ルールの左辺と右辺に対してstaticUnifyを呼ぶ
-	 */
-	private void simplify() throws CompileException
+	// ガードをunary =/== ground の順番に並べ替える
+	private void sortGuardAtoms()
 	{
-		staticUnify(rs.leftMem);
-		checkExplicitFreeLinks(rs.leftMem);
-		staticUnify(rs.rightMem);
-		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
-		{
-			Env.warning("Warning: rule with empty head: " + rs);
-		}
-
-		// ガード膜に関する操作（ここでいいのか？）
-		// その他 unary =/== ground の順番に並べ替える
 		List<Atom> typeConstraints = rs.guardMem.atoms;
 		List<Atom> unaryList = new ArrayList<>();
 		List<Atom> unifyList = new ArrayList<>();
@@ -1178,6 +1168,18 @@ public class RuleCompiler
 		typeConstraints.addAll(unaryList);
 		typeConstraints.addAll(unifyList);
 		typeConstraints.addAll(groundList);
+	}
+	/**
+	 * ルールの左辺と右辺に対してstaticUnifyを呼ぶ
+	 */
+	private void simplify() throws CompileException
+	{
+		staticUnify(rs.leftMem);
+		staticUnify(rs.rightMem);
+		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
+		{
+			Env.warning("Warning: rule with empty head: " + rs);
+		}
 	}
 
 	/**
