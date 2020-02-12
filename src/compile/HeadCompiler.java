@@ -68,6 +68,11 @@ class HeadCompiler extends BaseCompiler
 	{
 	}
 
+	HeadCompiler(Membrane mem)
+	{
+	    enumFormals(mem);
+	}
+
 	/** ガード否定条件のコンパイルで使うためにthisに対する正規化されたHeadCompilerを作成して返す。
 	 * 正規化とは、左辺の全てのアトムおよび膜に対して、ガード/ボディ用の仮引数番号を
 	 * 変数番号として左辺のマッチングを取り終わった内部状態を持つようにすることを意味する。*/

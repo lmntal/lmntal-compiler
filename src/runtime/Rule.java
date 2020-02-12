@@ -116,7 +116,7 @@ public final class Rule
 		}
 
 		Env.p("--atommatch:", 1);
-		printInstructions(atomMatch);
+//		printInstructions(atomMatch);
 
 		Env.p("--memmatch:", 1);
 		printInstructions(memMatch);
