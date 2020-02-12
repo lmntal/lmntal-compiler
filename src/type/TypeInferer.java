@@ -36,7 +36,7 @@ public class TypeInferer {
 		
 		// ユーザ定義情報を取得する
 		boolean typeDefined = false;
-		List<Membrane> typedefmems = new ArrayList<Membrane>();
+		List<Membrane> typedefmems = new ArrayList<>();
 		for(Membrane topmem : root.mems)
 			if(TypeEnv.getMemName(topmem).equals("typedef")){
 				typedefmems.add(topmem);

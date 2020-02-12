@@ -60,7 +60,7 @@ abstract public class Util
 		return vs;
 	}
 	public static Object[] arrayOfList(Link link) {
-		List<Object> l = new ArrayList<Object>();
+		List<Object> l = new ArrayList<>();
 		while(true) {
 			Atom a = link.getAtom();
 			if(!a.getFunctor().equals(DOT)) break;

@@ -108,7 +108,7 @@ public class QuantityInferer {
 	 */
 	private void inferRHSMembrane(Membrane rhs){
 		
-		Set<Membrane> lhss = new HashSet<Membrane>();
+		Set<Membrane> lhss = new HashSet<>();
 		/* プロセス文脈、型付きプロセス文脈について左辺出現膜の集合を得る */
 		for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.processContexts)){
 			ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;

@@ -39,10 +39,10 @@ class TypePrinter {
 
 	TypePrinter(ArgumentInferer ai, QuantityInferer qi, ConnectInferer ci) {
 
-		sortedMemNames = new TreeSet<String>();
-		sortedFunctors = new TreeSet<Functor>(new FunctorComparator());
+		sortedMemNames = new TreeSet<>();
+		sortedFunctors = new TreeSet<>(new FunctorComparator());
 
-		memnameToFunctorTypes = new HashMap<String, Map<Functor, TypeVarConstraint[]>>();
+		memnameToFunctorTypes = new HashMap<>();
 		if (ai != null) {
 
 			// まず引数の型情報を集約する
@@ -58,7 +58,7 @@ class TypePrinter {
 				sortedMemNames.add(memname);
 				if (!memnameToFunctorTypes.containsKey(memname))
 					memnameToFunctorTypes.put(memname,
-							new HashMap<Functor, TypeVarConstraint[]>());
+							new HashMap<>());
 				Map<Functor, TypeVarConstraint[]> functorToArgumentTypes = memnameToFunctorTypes
 						.get(memname);
 				Functor f = aap.getFunctor();
@@ -83,7 +83,7 @@ class TypePrinter {
 				}
 			}
 		} else {
-			memnameToCounts = new HashMap<String, FixedCounts>();
+			memnameToCounts = new HashMap<>();
 		}
 		
 		if (ci != null) {

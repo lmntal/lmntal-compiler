@@ -15,7 +15,7 @@ public class ModeVarSet {
 	private Set<ModeVar> modes;
 	
 	public ModeVarSet(){
-		modes = new HashSet<ModeVar>();
+		modes = new HashSet<>();
 	}
 	
 	/**

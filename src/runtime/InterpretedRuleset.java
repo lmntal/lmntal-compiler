@@ -31,7 +31,7 @@ public final class InterpretedRuleset extends Ruleset
 	 */
 	public InterpretedRuleset()
 	{
-		rules = new ArrayList<Rule>();
+		rules = new ArrayList<>();
 		id = ++lastId;
 		branchmap = null;
 		systemrulemap = null;

@@ -17,9 +17,9 @@ public class OccurrenceInferrer {
 	
 	private Membrane root;
 
-	private Map<String, Set<AtomOccurrence>> atomOccurrenceConstraintsMap = new HashMap<String, Set<AtomOccurrence>>();
+	private Map<String, Set<AtomOccurrence>> atomOccurrenceConstraintsMap = new HashMap<>();
 
-	private Map<String, Set<MembraneOccurrence>> membraneOccurrenceConstraintsMap = new HashMap<String, Set<MembraneOccurrence>>();
+	private Map<String, Set<MembraneOccurrence>> membraneOccurrenceConstraintsMap = new HashMap<>();
 
 	/**
 	 * ルート膜を指定し、出現制約を推論
@@ -84,14 +84,14 @@ public class OccurrenceInferrer {
 	public void addAtomOccurrence(AtomOccurrence ao){
 		if (!atomOccurrenceConstraintsMap.containsKey(ao.getMemname())) {
 			atomOccurrenceConstraintsMap.put(ao.getMemname(),
-					new HashSet<AtomOccurrence>());
+					new HashSet<>());
 		}
 		atomOccurrenceConstraintsMap.get(ao.getMemname()).add(ao);
 	}
 	public void addMembraneOccurrence(MembraneOccurrence mo){
 		if (!membraneOccurrenceConstraintsMap.containsKey(mo.getParentName())) {
 			membraneOccurrenceConstraintsMap.put(mo.getParentName(),
-					new HashSet<MembraneOccurrence>());
+					new HashSet<>());
 		}
 		membraneOccurrenceConstraintsMap.get(mo.getParentName()).add(mo);
 	}

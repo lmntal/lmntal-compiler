@@ -26,8 +26,8 @@ public class Grouping {
 	Instruction spec;
 	Grouping(){
 		var2DefInst = new HashMap();
-		Inst2GroupId = new HashMap<Instruction,Integer>();
-		group2Cost = new HashMap<Instruction,Cost>();
+		Inst2GroupId = new HashMap<>();
+		group2Cost = new HashMap<>();
 		spec = null;
 	}
 	
@@ -347,8 +347,8 @@ class Cost {
 	int n;
 	
 	Cost(){
-		costvalueN = new ArrayList<Integer>();
-		costvalueM = new ArrayList<Integer>();
+		costvalueN = new ArrayList<>();
+		costvalueM = new ArrayList<>();
 		memend = new HashMap();
 		n = 0;
 	}

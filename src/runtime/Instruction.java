@@ -58,7 +58,7 @@ import util.Util;
 public class Instruction implements Cloneable
 {
 	/** 命令毎の引数情報を入れるテーブル */
-	private static Map<Integer, ArgType> argTypeTable = new HashMap<Integer, ArgType>();
+	private static Map<Integer, ArgType> argTypeTable = new HashMap<>();
 	/**アトム*/
 	public static final int ARG_ATOM = 0;
 	/**膜*/
@@ -86,7 +86,7 @@ public class Instruction implements Cloneable
 	 * 命令の引数を保持する。
 	 * 命令の種類によって引数の型が決まっている。
 	 */
-	public List<Object> data = new ArrayList<Object>();
+	public List<Object> data = new ArrayList<>();
 	
 	//////////
 	// 定数
@@ -2745,7 +2745,7 @@ public class Instruction implements Cloneable
 
 	/** Integerでラップされた命令番号から命令名へのハッシュ。
 	 * <p>処理系開発が収束した頃に、もっと効率のよい別の構造で置き換えてもよい。 */
-	private static HashMap<Integer, String> instructionTable = new HashMap<Integer, String>();
+	private static HashMap<Integer, String> instructionTable = new HashMap<>();
 	
 	//インスタンス生成時にスタックオーバーフローを起こしたので修正しました。 by Mizuno
 	//ExceptionInInitializerError がおきてたので修正 by hara
@@ -2787,8 +2787,8 @@ public class Instruction implements Cloneable
 	// CSV形式で出力される
 	public static void main(String[] args)
 	{
-		SortedMap<Integer, String> idToName = new TreeMap<Integer, String>();
-		SortedMap<String, Integer> nameToId = new TreeMap<String, Integer>();
+		SortedMap<Integer, String> idToName = new TreeMap<>();
+		SortedMap<String, Integer> nameToId = new TreeMap<>();
 		try
 		{
 			Field[] fields = Instruction.class.getDeclaredFields();

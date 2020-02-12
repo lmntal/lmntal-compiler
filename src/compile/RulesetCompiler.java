@@ -68,7 +68,7 @@ public class RulesetCompiler
 			processMembrane(submem, unitName);
 		}
 
-		List<Rule> rules = new ArrayList<Rule>();
+		List<Rule> rules = new ArrayList<>();
 
 		// この膜にあるルール構造をルールオブジェクトにコンパイルする
 		for (RuleStructure rs : mem.rules)

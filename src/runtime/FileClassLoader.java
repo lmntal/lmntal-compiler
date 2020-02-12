@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class FileClassLoader extends ClassLoader {
 	// 読み込むパス : File -> null   重複をなくしたいのでこうした。
-	static Map<File, Object> path = new HashMap<File, Object>();
+	static Map<File, Object> path = new HashMap<>();
 	static {
 		path.put(new File("."), null);
 	}

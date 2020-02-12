@@ -22,12 +22,12 @@ public class InlineUnit {
 	public CustomGuard customGuard;
 	
 	/** Hash { インラインコード文字列 => 一意な連番 } */
-	public Map<String, Integer> codes = new HashMap<String, Integer>(); 
+	public Map<String, Integer> codes = new HashMap<>();
 	/** codes の逆 */
-	public List<String> code_of_id = new ArrayList<String>(); 
+	public List<String> code_of_id = new ArrayList<>();
 	
 	/** List インライン宣言コード文字列 */
-	public List<String> defs = new ArrayList<String>(); 
+	public List<String> defs = new ArrayList<>();
 	
 	/** 一意な連番。インラインコード文字列と1対1 */
 	int codeCount = 0;
