@@ -77,7 +77,7 @@ public class RuleCompiler
 	private List<Membrane> lhsmems;
 	private Map<Atomic, Integer>  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
 	private Map<Membrane, Integer>  lhsmempath;		// 左辺の膜 (Membrane) -> 変数番号 (Integer)
-	private Map<LinkOccurrence, Integer>  lhslinkpath = new HashMap<LinkOccurrence, Integer>();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
+	private Map<LinkOccurrence, Integer>  lhslinkpath = new HashMap<>();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
 	// ＜左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])　＞から変更
 
 	private HeadCompiler hc, hc2;
@@ -115,6 +115,8 @@ public class RuleCompiler
 	{
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
+		checkExplicitFreeLinks(rs.leftMem);
+		sortGuardAtoms();
 		//theRule = new Rule(rs.toString());
 		theRule = new Rule(rs.leftMem.getFirstAtomName(),rs.toString());
 		theRule.name = rs.name;
@@ -325,8 +327,8 @@ public class RuleCompiler
 	 */
 	private List<LinkOccurrence> computeRHSLinks()
 	{
-		List<LinkOccurrence> rhslinks = new ArrayList<LinkOccurrence>();
-		rhslinkpath = new HashMap<LinkOccurrence, Integer>();
+		List<LinkOccurrence> rhslinks = new ArrayList<>();
+		rhslinkpath = new HashMap<>();
 		int rhslinkindex = 0;
 		// アトムの引数のリンク出現
 		for (Atom atom : rhsatoms)
@@ -456,9 +458,9 @@ public class RuleCompiler
 		//body.add( Instruction.commit(theRule) );
 		inc_guard();
 
-		rhsatoms    = new ArrayList<Atom>();
-		rhsatompath = new HashMap<Atom, Integer>();
-		rhsmempath  = new HashMap<Membrane, Integer>();
+		rhsatoms    = new ArrayList<>();
+		rhsatompath = new HashMap<>();
+		rhsmempath  = new HashMap<>();
 		int toplevelmemid = lhsmemToPath(rs.leftMem);
 		rhsmempath.put(rs.rightMem, toplevelmemid);
 
@@ -547,12 +549,12 @@ public class RuleCompiler
 		inc_guard();
 
 		if (rhsatoms == null)
-			rhsatoms = new ArrayList<Atom>();
+			rhsatoms = new ArrayList<>();
 		else
 			rhsatoms.clear();
 
 		if (rhsatompath == null)
-			rhsatompath = new HashMap<Atom, Integer>();
+			rhsatompath = new HashMap<>();
 		else
 			rhsatompath.clear();
 
@@ -569,7 +571,7 @@ public class RuleCompiler
 		*/
 
 		if (rhsmempath == null)
-			rhsmempath = new HashMap<Membrane, Integer>();
+			rhsmempath = new HashMap<>();
 		else
 			rhsmempath.clear();
 
@@ -697,8 +699,8 @@ public class RuleCompiler
 	 */
 	private static Set<LinkOccurrence> getInternalLinks(Membrane mem)
 	{
-		Set<LinkOccurrence> occurredLinks = new HashSet<LinkOccurrence>();
-		Set<LinkOccurrence> internalLinks = new HashSet<LinkOccurrence>();
+		Set<LinkOccurrence> occurredLinks = new HashSet<>();
+		Set<LinkOccurrence> internalLinks = new HashSet<>();
 		for (Atomic a : Collector.collectAllAtomsAndTypedPCs(mem))
 		{
 			for (LinkOccurrence l : a.args)
@@ -750,8 +752,8 @@ public class RuleCompiler
 	/** ヘッドの膜とアトムに対して、仮引数番号を登録する */
 	private void genLHSPaths()
 	{
-		lhsatompath = new HashMap<Atomic, Integer>();
-		lhsmempath  = new HashMap<Membrane, Integer>();
+		lhsatompath = new HashMap<>();
+		lhsmempath  = new HashMap<>();
 		varcount = 0;
 		for (int i = 0; i < lhsmems.size(); i++)
 		{
@@ -825,7 +827,7 @@ public class RuleCompiler
 	private void fixUniqOrder()
 	{
 		boolean found = guard.contains(Instruction.UNIQ);
-		List<Integer> vars = new ArrayList<Integer>();
+		List<Integer> vars = new ArrayList<>();
 		for (Iterator<Instruction> it = guard.iterator(); it.hasNext(); )
 		{
 			Instruction inst = it.next();
@@ -882,15 +884,15 @@ public class RuleCompiler
 
 	private GuardCompiler gc;
 	/** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
-	private HashMap<ProcessContext, Integer> rhstypedcxtpaths = new HashMap<ProcessContext, Integer>();
+	private HashMap<ProcessContext, Integer> rhstypedcxtpaths = new HashMap<>();
 	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkのリストを指す)変数番号 */
-	private HashMap<ProcessContext, Integer> rhsgroundpaths = new HashMap<ProcessContext, Integer>();
+	private HashMap<ProcessContext, Integer> rhsgroundpaths = new HashMap<>();
 	/** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkを指す)変数番号のリスト */
 	// private HashMap rhsgroundlinkpaths = new HashMap();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */
-	private HashMap<ContextDef, Integer> typedcxtsrcs  = new HashMap<ContextDef, Integer>();
+	private HashMap<ContextDef, Integer> typedcxtsrcs  = new HashMap<>();
 	/** ground型付きプロセス文脈定義(ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時）のリストの変数番号 */
-	private HashMap<ContextDef, Integer> groundsrcs = new HashMap<ContextDef, Integer>();
+	private HashMap<ContextDef, Integer> groundsrcs = new HashMap<>();
 	/** Body実行時なので、UNBOUNDにはならない */
 	private int typedcxtToSrcPath(ContextDef def) {
 		return typedcxtsrcs.get(def);
@@ -923,7 +925,7 @@ public class RuleCompiler
 	/** ground型付きプロセス文脈定義について、根となるリンクのリストを取得する */
 	private void getGroundLinkPaths()
 	{
-		groundsrcs = new HashMap<ContextDef, Integer>();
+		groundsrcs = new HashMap<>();
 		for (ContextDef def : gc.groundSrcs.keySet())
 		{
 			if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE || gc.typedCxtTypes.get(def) == GuardCompiler.HLGROUND_LINK_TYPE)
@@ -1103,7 +1105,7 @@ public class RuleCompiler
 		{
 			liftupActiveAtoms(submem);
 		}
-		List<Atom> atomlist = new LinkedList<Atom>();
+		List<Atom> atomlist = new LinkedList<>();
 		for (Atom atom : mem.atoms)
 		{
 			atomlist.add(atom);
@@ -1131,25 +1133,13 @@ public class RuleCompiler
 		mem.atoms.addAll(atomlist);
 	}
 
-	/**
-	 * ルールの左辺と右辺に対してstaticUnifyを呼ぶ
-	 */
-	private void simplify() throws CompileException
+	// ガードをunary =/== ground の順番に並べ替える
+	private void sortGuardAtoms()
 	{
-		staticUnify(rs.leftMem);
-		checkExplicitFreeLinks(rs.leftMem);
-		staticUnify(rs.rightMem);
-		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
-		{
-			Env.warning("Warning: rule with empty head: " + rs);
-		}
-
-		// ガード膜に関する操作（ここでいいのか？）
-		// その他 unary =/== ground の順番に並べ替える
 		List<Atom> typeConstraints = rs.guardMem.atoms;
-		List<Atom> unaryList = new ArrayList<Atom>();
-		List<Atom> unifyList = new ArrayList<Atom>();
-		List<Atom> groundList = new ArrayList<Atom>();
+		List<Atom> unaryList = new ArrayList<>();
+		List<Atom> unifyList = new ArrayList<>();
+		List<Atom> groundList = new ArrayList<>();
 		for (Iterator<Atom> it = typeConstraints.iterator(); it.hasNext(); )
 		{
 			Atom cstr = it.next();
@@ -1175,6 +1165,18 @@ public class RuleCompiler
 		typeConstraints.addAll(unaryList);
 		typeConstraints.addAll(unifyList);
 		typeConstraints.addAll(groundList);
+	}
+	/**
+	 * ルールの左辺と右辺に対してstaticUnifyを呼ぶ
+	 */
+	private void simplify() throws CompileException
+	{
+		staticUnify(rs.leftMem);
+		staticUnify(rs.rightMem);
+		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
+		{
+			Env.warning("Warning: rule with empty head: " + rs);
+		}
 	}
 
 	/**
@@ -1232,16 +1234,12 @@ public class RuleCompiler
 		{
 			if (pc.def.isTyped()) continue;
 
-			Set<String> occurredNames = new HashSet<String>();
+			Set<String> occurredNames = new HashSet<>();
 			for (LinkOccurrence link : pc.args)
 			{
-				if (occurredNames.contains(link.name))
+				if (!occurredNames.add(link.name))
 				{
 					systemError("Syntax Error: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
-				}
-				else
-				{
-					occurredNames.add(link.name);
 				}
 			}
 		}
@@ -1321,7 +1319,7 @@ public class RuleCompiler
 
 	//
 
-	private Map<ProcessContext, Integer> rhsmappaths = new HashMap<ProcessContext, Integer>();	// 右辺の非線型$p出現(ProcessContext) -> mapの変数番号(Integer)
+	private Map<ProcessContext, Integer> rhsmappaths = new HashMap<>();	// 右辺の非線型$p出現(ProcessContext) -> mapの変数番号(Integer)
 	private static final int NOTCOPIED = -1;		// rhsmappaths未登録時の値
 	private int rhspcToMapPath(ProcessContext pc)
 	{
@@ -1557,7 +1555,7 @@ public class RuleCompiler
 	 */
 	private Set<LinkOccurrence> getFreeLinkOccurrence()
 	{
-		Set<LinkOccurrence> freeLinks = new HashSet<LinkOccurrence>();
+		Set<LinkOccurrence> freeLinks = new HashSet<>();
 		for (Atomic a1 : lhsatoms)
 		{
 			for (Atomic a2 : rhsatoms)
@@ -1580,7 +1578,7 @@ public class RuleCompiler
 	}
 
 	/** プロセス文脈定義->setの変数番号 */
-	private Map<ContextDef, Integer> cxtlinksetpaths = new HashMap<ContextDef, Integer>();
+	private Map<ContextDef, Integer> cxtlinksetpaths = new HashMap<>();
 
 	/** コピーする$pについて、そのリンクオブジェクトへの参照を取得し、
 	 * そのリストを引数にinsertconnectors命令を発行する。
@@ -1595,7 +1593,7 @@ public class RuleCompiler
 		for (ContextDef def : rs.processContexts.values())
 		{
 			if (def.rhsOccs.size() < 2 || def.lhsOcc.args.length < 2) continue;
-			List<Integer> linklist = new ArrayList<Integer>();
+			List<Integer> linklist = new ArrayList<>();
 			int setpath = varcount++;
 			for (int i = 0; i < def.lhsOcc.args.length; i++)
 			{
@@ -1617,7 +1615,7 @@ public class RuleCompiler
 		for (ContextDef def : rs.typedProcessContexts.values())
 		{
 			if (gc.typedCxtTypes.get(def) != GuardCompiler.GROUND_LINK_TYPE || def.rhsOccs.size() == 0 || def.lhsOcc.args.length < 2) continue;
-			List<Integer> linklist = new ArrayList<Integer>();
+			List<Integer> linklist = new ArrayList<>();
 			int setpath = varcount++;
 			for (int i = 0; i < def.lhsOcc.args.length; i++)
 			{
@@ -1740,7 +1738,7 @@ public class RuleCompiler
 			+ countLinkOccurrence(created);
 
 		// リンク名 -> 順序数
-		Map<LinkOccurrence, Integer> order = new HashMap<LinkOccurrence, Integer>();
+		Map<LinkOccurrence, Integer> order = new HashMap<>();
 		LinkOccurrence[] links1 = new LinkOccurrence[linkCount];
 		LinkOccurrence[] links2 = new LinkOccurrence[linkCount];
 		int id = 0;
@@ -1880,7 +1878,7 @@ public class RuleCompiler
 			+ countLinkOccurrence(created);
 
 		// リンク名 -> 順序数
-		Map<LinkOccurrence, Integer> order = new HashMap<LinkOccurrence, Integer>();
+		Map<LinkOccurrence, Integer> order = new HashMap<>();
 		LinkOccurrence[] links1 = new LinkOccurrence[linkCount];
 		LinkOccurrence[] links2 = new LinkOccurrence[linkCount];
 		int id = 0;
@@ -1952,8 +1950,8 @@ public class RuleCompiler
 		{
 			if (links1[i].name.equals(".") || links1[i].buddy == links2[i] || checked[i]) continue;
 
-			List<Integer> alist = new ArrayList<Integer>();
-			List<Integer> plist = new ArrayList<Integer>();
+			List<Integer> alist = new ArrayList<>();
+			List<Integer> plist = new ArrayList<>();
 
 			int j = i;
 			do
@@ -2030,7 +2028,7 @@ public class RuleCompiler
 	 */
 	private Set<Atomic> getInvariantAtomics()
 	{
-		Set<Atomic> nomodified = new HashSet<Atomic>();
+		Set<Atomic> nomodified = new HashSet<>();
 		for (Atomic al : lhsatoms)
 		{
 			if (!(al instanceof Atom) || !((Atom)al).functor.isSymbol()) continue;
@@ -2074,7 +2072,7 @@ public class RuleCompiler
 	 */
 	private Map<Atom, Atom> getReusableAtomics(Set<Atomic> noModified)
 	{
-		Map<Atom, Atom> reusable = new HashMap<Atom, Atom>();
+		Map<Atom, Atom> reusable = new HashMap<>();
 		for (Atomic al : lhsatoms)
 		{
 			//if (!(al instanceof Atom) || !((Atom)al).functor.isSymbol() || noModified.contains(al)) continue;
@@ -2116,7 +2114,7 @@ public class RuleCompiler
 
 	private Set<Atomic> getChangedAtomics(List<? extends Atomic> atoms, Set<Atomic> noModified, Map<Atom, Atom> reused)
 	{
-		Set<Atomic> set = new HashSet<Atomic>();
+		Set<Atomic> set = new HashSet<>();
 		for (Atomic a : atoms)
 		{
 			if (!noModified.contains(a) && !reused.containsKey(a))

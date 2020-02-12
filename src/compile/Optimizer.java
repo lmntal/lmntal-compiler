@@ -430,18 +430,18 @@ public class Optimizer {
 		if(spec.getKind() != Instruction.SPEC) return;
 		int locals = spec.getIntArg2();
 		HashMap getlinkmap = new HashMap();
-		HashSet<Instruction> removelinks = new HashSet<Instruction>();
+		HashSet<Instruction> removelinks = new HashSet<>();
 		InstructionList inline1;
 		InstructionList inline2;
-		HashSet<Instruction> newlink = new HashSet<Instruction>();
+		HashSet<Instruction> newlink = new HashSet<>();
 		HashSet<Instruction> newlinks2;
 		HashSet<Instruction> enqueueatoms;
-		HashMap<Integer, Integer> old2new = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> old2new = new HashMap<>();
 		for(int i=1; i<body.size(); i++){
 			inline1 = new InstructionList();
 			inline2 = new InstructionList();
-			newlinks2 = new HashSet<Instruction>();
-			enqueueatoms = new HashSet<Instruction>();
+			newlinks2 = new HashSet<>();
+			enqueueatoms = new HashSet<>();
 			Instruction inst = body.get(i);
 			if(inst.getKind() == Instruction.GETLINK){
 				if(!getlinkmap.containsKey(inst.getArg1())) getlinkmap.put(inst.getArg1(), inst);
@@ -722,17 +722,17 @@ public class Optimizer {
 				return;
 		}
 
-		HashMap<Integer, Integer> reuseMap = new HashMap<Integer, Integer>();
-		HashSet<Integer> reuseMems = new HashSet<Integer>(); // 再利用される膜のIDの集合
+		HashMap<Integer, Integer> reuseMap = new HashMap<>();
+		HashSet<Integer> reuseMems = new HashSet<>(); // 再利用される膜のIDの集合
 		HashMap parent = new HashMap();
-		HashMap<Integer, List<Integer>> removedChildren = new HashMap<Integer, List<Integer>>(); // map -> list of children
-		HashMap<Integer, List<Integer>> createdChildren = new HashMap<Integer, List<Integer>>(); // map -> list of children
-		HashMap<Integer, List<Integer>> pourMap = new HashMap<Integer, List<Integer>>();
+		HashMap<Integer, List<Integer>> removedChildren = new HashMap<>(); // map -> list of children
+		HashMap<Integer, List<Integer>> createdChildren = new HashMap<>(); // map -> list of children
+		HashMap<Integer, List<Integer>> pourMap = new HashMap<>();
 		HashSet pourMems = new HashSet(); // pour命令の第２引数に含まれる膜
-		HashMap<Integer, List<Integer>> copyRulesMap = new HashMap<Integer, List<Integer>>();
+		HashMap<Integer, List<Integer>> copyRulesMap = new HashMap<>();
 		
-		HashMap<Integer, String> headMemName = new HashMap<Integer, String>(); // head に関する膜から膜名への map
-		HashMap<Integer, String> bodyMemName = new HashMap<Integer, String>(); // body に関する膜から膜名への map
+		HashMap<Integer, String> headMemName = new HashMap<>(); // head に関する膜から膜名への map
+		HashMap<Integer, String> bodyMemName = new HashMap<>(); // body に関する膜から膜名への map
 
 		//再利用する膜の組み合わせを決定する
 		for(Instruction inst : body){
@@ -787,7 +787,7 @@ public class Optimizer {
 
 		//命令列を書き換える
 		//その際、冗長なremovemem/addmem命令を除去する
-		HashSet<Integer> set = new HashSet<Integer>(); //removemem/addmem命令の不要な膜再利用に関わる膜
+		HashSet<Integer> set = new HashSet<>(); //removemem/addmem命令の不要な膜再利用に関わる膜
 		for(Iterator<Integer> it = reuseMap.keySet().iterator(); it.hasNext();){
 			Integer i1 = it.next();
 			Integer i2 = reuseMap.get(i1);
@@ -803,8 +803,8 @@ public class Optimizer {
 		}
 
 		//ルールの退避
-		HashMap<Integer, Integer> ruleMem = new HashMap<Integer, Integer>(); //ルールを退避した膜
-		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ヘッドでの変数名→ボディでの変数名
+		HashMap<Integer, Integer> ruleMem = new HashMap<>(); //ルールを退避した膜
+		HashMap<Integer, Integer> varInBody = new HashMap<>(); // ヘッドでの変数名→ボディでの変数名
 
 		Instruction react = head.get(head.size() - 1);
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
@@ -824,7 +824,7 @@ public class Optimizer {
 			}
 		}
 		//退避する命令の生成
-		ArrayList<Instruction> tmpInsts = new ArrayList<Instruction>();
+		ArrayList<Instruction> tmpInsts = new ArrayList<>();
 		int nextArg = spec.getIntArg2();
 		for(Iterator<Integer> it = varInBody.keySet().iterator(); it.hasNext();){
 			Integer memInHead = it.next();
@@ -1062,7 +1062,7 @@ public class Optimizer {
 		}
 		int nextId = spec.getIntArg2();
 
-		List<Instruction> moveInsts = new ArrayList<Instruction>();
+		List<Instruction> moveInsts = new ArrayList<>();
 		for(ListIterator<Instruction> it = list.listIterator(1); it.hasNext();){
 			Instruction inst = it.next();
 			switch (inst.getKind()) {
@@ -1094,7 +1094,7 @@ public class Optimizer {
 	 */
 	private static class AtomSet {
 		HashMap<Integer, HashMap<Functor, HashSet<Integer>>> map 
-		= new HashMap<Integer, HashMap<Functor, HashSet<Integer>>>(); // mem -> (functor -> atoms)
+		= new HashMap<>(); // mem -> (functor -> atoms)
 		/**
 		 * アトムを追加する
 		 * @param mem アトムが所属する膜
@@ -1104,12 +1104,12 @@ public class Optimizer {
 		void add(Integer mem, Functor functor, Integer atom) {
 			HashMap<Functor, HashSet<Integer>> map2 = map.get(mem);
 			if (map2 == null) {
-				map2 = new HashMap<Functor, HashSet<Integer>>();
+				map2 = new HashMap<>();
 				map.put(mem, map2);
 			}
 			HashSet<Integer> atoms = map2.get(functor);
 			if (atoms == null) {
-				atoms = new HashSet<Integer>();
+				atoms = new HashSet<>();
 				map2.put(functor, atoms);
 			}
 			atoms.add(atom);
@@ -1192,9 +1192,9 @@ public class Optimizer {
 		//再利用するアトムの組み合わせを決定
 
 		//再利用前のアトムID -> 再利用後のアトムID
-		HashMap<Integer, Integer> reuseMap = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> reuseMap = new HashMap<>();
 		//再利用されるアトムのID（reuseMapの値に設定されているIDの集合）
-		HashSet<Integer> reuseAtoms = new HashSet<Integer>(); 
+		HashSet<Integer> reuseAtoms = new HashSet<>();
 
 		//同じ膜にある、同じ名前のアトムを再利用する
 		for(Iterator<Integer> memIterator = removedAtoms.memIterator(); memIterator.hasNext();){
@@ -1228,7 +1228,7 @@ public class Optimizer {
 		//
 
 		//情報取得
-		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ヘッドでの変数名→ボディでの変数名
+		HashMap<Integer, Integer> varInBody = new HashMap<>(); // ヘッドでの変数名→ボディでの変数名
 
 		Instruction react = head.get(head.size() - 1);
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP) {
@@ -1240,7 +1240,7 @@ public class Optimizer {
 			varInBody.put(it.next(), i++);
 		}
 
-		HashMap<Link, Link> links = new HashMap<Link, Link>();
+		HashMap<Link, Link> links = new HashMap<>();
 		for(Instruction inst : head){
 			if (inst.getKind() == Instruction.DEREF) {
 				if (!varInBody.containsKey(inst.getArg2()) || !varInBody.containsKey(inst.getArg1())) {
@@ -1301,8 +1301,8 @@ public class Optimizer {
 	// ========================================================================
 	private static void reuseAtom2(List<Instruction> head, List<Instruction> body)
 	{
-		List<Instruction> getlinks = new ArrayList<Instruction>();
-		List<Instruction> inhlinks = new ArrayList<Instruction>();
+		List<Instruction> getlinks = new ArrayList<>();
+		List<Instruction> inhlinks = new ArrayList<>();
 		for (int i = 0; i < body.size(); i++)
 		{
 			Instruction inst = body.get(i);
@@ -1334,8 +1334,8 @@ public class Optimizer {
 			}
 			public int hashCode() { return 17 * atom * link; }
 		}
-		HashMap<GLPair, GLPair> gl = new HashMap<GLPair, GLPair>();
-		TreeMap<Integer, Integer> rewriteMap = new TreeMap<Integer, Integer>();
+		HashMap<GLPair, GLPair> gl = new HashMap<>();
+		TreeMap<Integer, Integer> rewriteMap = new TreeMap<>();
 		for (int i = 0; i < getlinks.size(); i++)
 		{
 			Instruction ins = getlinks.get(i);
@@ -1413,9 +1413,9 @@ public class Optimizer {
 		//再利用するアトムの組み合わせを決定
 
 		//再利用前のアトムID -> 再利用後のアトムID
-		HashMap<Integer, Integer> reuseMap = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> reuseMap = new HashMap<>();
 		//再利用されるアトムのID（reuseMapの値に設定されているIDの集合）
-		HashSet<Integer> reuseAtoms = new HashSet<Integer>(); 
+		HashSet<Integer> reuseAtoms = new HashSet<>();
 
 		//同じ膜にある、同じ名前のアトムを再利用する
 		for (Iterator<Integer> memIterator = removedAtoms.memIterator(); memIterator.hasNext(); )
@@ -1458,7 +1458,7 @@ public class Optimizer {
 		//
 
 		//情報取得
-		HashMap<Integer, Integer> varInBody = new HashMap<Integer, Integer>(); // ヘッドでの変数名→ボディでの変数名
+		HashMap<Integer, Integer> varInBody = new HashMap<>(); // ヘッドでの変数名→ボディでの変数名
 
 		Instruction react = head.get(head.size() - 1);
 		if (react.getKind() != Instruction.REACT && react.getKind() != Instruction.JUMP)
@@ -1472,7 +1472,7 @@ public class Optimizer {
 			varInBody.put(it.next(), i++);
 		}
 
-		HashMap<Link, Link> links = new HashMap<Link, Link>();
+		HashMap<Link, Link> links = new HashMap<>();
 		for (Instruction inst : head)
 		{
 			if (inst.getKind() == Instruction.DEREF)
@@ -1547,7 +1547,7 @@ public class Optimizer {
 	 */
 	private static void removeUnnecessaryRelink(List<Instruction> list) {
 		HashMap getlinkInsts = new HashMap(); // linkId -> getlink instruction
-		List<Instruction> remove = new ArrayList<Instruction>();
+		List<Instruction> remove = new ArrayList<>();
 		for(Instruction inst : list){
 			switch (inst.getKind()) {
 			case Instruction.GETLINK:
@@ -1624,7 +1624,7 @@ public class Optimizer {
 		Integer firstAtom = (Integer)inst.getArg1();
 
 		//条件に合致するか検査＋情報収集
-		HashMap<Link, Link> links = new HashMap<Link, Link>(); //newlink命令で生成したリンクの情報
+		HashMap<Link, Link> links = new HashMap<>(); //newlink命令で生成したリンクの情報
 		HashMap linkGetFrom = new HashMap(); //リンク -> getlinkした(atom,pos)
 		HashMap functor = new HashMap(); // atom -> functor
 		HashMap inherit = new HashMap(); // (atom,pos) -> inheritするリンク
@@ -1732,7 +1732,7 @@ public class Optimizer {
 		//まずはコピーして変数番号付け替え
 		Instruction spec = body.get(0);
 
-		List<Instruction> loop = new ArrayList<Instruction>(); //ループ内の命令列
+		List<Instruction> loop = new ArrayList<>(); //ループ内の命令列
 		//マッチング命令列
 		for(ListIterator<Instruction> lit = head.subList(2, head.size()-1).listIterator(); lit.hasNext();){ //spec,findatom,react/jumpを除去
 			loop.add((Instruction)lit.next().clone());
@@ -1751,11 +1751,11 @@ public class Optimizer {
 		//ループ内変数の付け替え
 
 		//もともとの変数→ループ内で、再定義する場合の変数
-		HashMap<Integer, Integer> memVarMap = new HashMap<Integer, Integer>();
-		HashMap<Integer, Integer> atomVarMap = new HashMap<Integer, Integer>();
-		HashMap<Integer, Integer> otherVarMap = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> memVarMap = new HashMap<>();
+		HashMap<Integer, Integer> atomVarMap = new HashMap<>();
+		HashMap<Integer, Integer> otherVarMap = new HashMap<>();
 		//ループ内で再定義している変数→もともとの変数
-		HashMap<Integer, Integer> reverseAtomVarMap = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> reverseAtomVarMap = new HashMap<>();
 		int base = atomvars.size() + memvars.size() + othervars.size(); //ループ内命令列で使用する変数の開始値 
 		int nextArg = base;
 		//膜
@@ -1790,7 +1790,7 @@ public class Optimizer {
 		Instruction resetVars = Instruction.resetvars(memvars, atomvars, othervars);
 
 		//ループ中の、変数->前回時データの入った変数
-		HashMap<Integer, Integer> beforeVar = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> beforeVar = new HashMap<>();
 		//ループ外の変数->ループ内での前回時データが入った変数
 		HashMap outToBeforeVar = new HashMap();
 		for (int i = 0; i < memvars.size(); i++) {
@@ -1822,9 +1822,9 @@ public class Optimizer {
 //		reverseAtomVarMap2.put(firstAtom, firstAtom);
 
 		//dereflink命令から、すでにリンクしている事がわかっている(atom,pos) -> (atom,pos) (一方向)
-		HashMap<Link, Link> alreadyLinked = new HashMap<Link, Link>();
+		HashMap<Link, Link> alreadyLinked = new HashMap<>();
 
-		ArrayList<Instruction> moveInsts = new ArrayList<Instruction>();
+		ArrayList<Instruction> moveInsts = new ArrayList<>();
 		ListIterator<Instruction> baseIterator = head.subList(2, head.size() - 1).listIterator(); //１回目用命令列
 		ListIterator<Instruction> loopIterator = loop.listIterator(); //ループ内命令列
 		while (baseIterator.hasNext()) {

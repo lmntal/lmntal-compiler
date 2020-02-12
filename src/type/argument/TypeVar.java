@@ -24,7 +24,7 @@ public class TypeVar {
 	private Set<Functor> passiveFunctors;
 	
 	public void addPassiveFunctor(Functor f){
-		if(self().passiveFunctors == null)self().passiveFunctors = new HashSet<Functor>();
+		if(self().passiveFunctors == null)self().passiveFunctors = new HashSet<>();
 		self().passiveFunctors.add(f);
 		passiveFunctors = self().passiveFunctors;
 	}
@@ -72,7 +72,7 @@ public class TypeVar {
 		String ret = "";
 		Iterator<Functor> itf = self().passiveFunctors.iterator();
 		if(!showDetailOfDataFunctor){
-			Set<String> dataTypes = new HashSet<String>();
+			Set<String> dataTypes = new HashSet<>();
 			dataTypes.add(typeNameOfFunctor(itf.next()));
 			while(itf.hasNext()){
 				String tn = typeNameOfFunctor(itf.next());
@@ -97,9 +97,9 @@ public class TypeVar {
 	private Set<String> typenames;// = new HashSet<String>();
 	public Set<String> getTypeName(){//throws TypeException{
 		if(typenames == null){
-			typenames = new HashSet<String>();
+			typenames = new HashSet<>();
 			if(self().passiveFunctors == null){
-				return new HashSet<String>();
+				return new HashSet<>();
 			}
 			for(Functor f : self().passiveFunctors){
 				String tn = typeNameOfFunctor(f);

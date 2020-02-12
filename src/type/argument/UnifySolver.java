@@ -26,7 +26,7 @@ public class UnifySolver {
 	private final ModeVarSet modeVarSet;
 
 	public UnifySolver() {
-		this.pathToTV = new HashMap<Path,TypeVar>();
+		this.pathToTV = new HashMap<>();
 		this.modeVarSet = new ModeVarSet();
 	}
 
@@ -79,7 +79,7 @@ public class UnifySolver {
 	}
 
 	public Set<TypeVarConstraint> getTypeVarConstraints() throws TypeException{
-		Set<TypeVarConstraint> typeVarConstraints = new HashSet<TypeVarConstraint>();
+		Set<TypeVarConstraint> typeVarConstraints = new HashSet<>();
 		for(Path p : pathToTV.keySet()){
 			typeVarConstraints.add(new TypeVarConstraint(p, getTypeVar(p), modeVarSet.getModeVar(p)));
 		}

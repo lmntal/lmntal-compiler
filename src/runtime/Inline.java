@@ -43,13 +43,13 @@ import util.Util;
  */
 public class Inline {
 	// InlineUnit.name -> InlineUnit
-	public static Map<String, InlineUnit> inlineSet = new HashMap<String, InlineUnit>();
+	public static Map<String, InlineUnit> inlineSet = new HashMap<>();
 
 	/** コンパイルプロセス。 */
 	static Process cp;
 
 	/** LMntal ライブラリを探すパス */
-	static List<File> classPath = new ArrayList<File>();
+	static List<File> classPath = new ArrayList<>();
 	static {
 		classPath.add(new File(System.getProperty("java.class.path")));
 //		classPath.add(new File("."));
@@ -60,7 +60,7 @@ public class Inline {
 	 * ほかにコンパイルすべきファイル。
 	 * //# 行により別ファイルに出力されたjavaファイルがこれに入る。
 	 */
-	public static ArrayList<String> othersToCompile = new ArrayList<String>();
+	public static ArrayList<String> othersToCompile = new ArrayList<>();
 
 	/****** コンパイル時に使う ******/
 
@@ -147,7 +147,7 @@ public class Inline {
 		return iu.getCode(codeID);
 	}
 
-	static List<String> compileCommand = new ArrayList<String>();
+	static List<String> compileCommand = new ArrayList<>();
 	/**
 	 * 必要に応じてコードの生成とコンパイルを行う。
 	 */

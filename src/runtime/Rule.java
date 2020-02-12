@@ -79,7 +79,7 @@ public final class Rule
 		memMatchLabel = new InstructionList();
 		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
-		bench = new HashMap<Thread, Benchmark>();
+		bench = new HashMap<>();
 	}
 
 	/**
@@ -104,7 +104,7 @@ public final class Rule
 	 */
 	public void showDetail()
 	{
-		if (Env.debug == 0 && !Env.compileonly) return;
+		
 
 		if (hasUniq)
 		{
@@ -146,8 +146,7 @@ public final class Rule
 
 	public String toString()
 	{
-		if (Env.compileonly) return "";
-		return name != null && !name.equals("") ? name : text;
+		return "";
 	}
 
 	/**

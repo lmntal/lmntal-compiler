@@ -97,7 +97,7 @@ public class Compactor {
 	//（テスト命令列生成用） for f(X,Y):-X=Y
 	static void genTest(Rule rule) {		
 		if (rule.body.size() > 6) {
-			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+			HashMap<Integer, Integer> map = new HashMap<>();
 			map.put(2, 4);
 			Instruction.applyVarRewriteMap(rule.body, map);
 			map.clear();
@@ -358,9 +358,9 @@ public class Compactor {
 		Integer src = isrc;
 		Integer dst = locals;
 		Integer tmp = varcount;
-		HashMap<Integer, Integer> map1 = new HashMap<Integer, Integer>();
-		HashMap<Integer, Integer> map2 = new HashMap<Integer, Integer>();
-		HashMap<Integer, Integer> map3 = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> map1 = new HashMap<>();
+		HashMap<Integer, Integer> map2 = new HashMap<>();
+		HashMap<Integer, Integer> map3 = new HashMap<>();
 		map1.put(src, tmp);
 		map2.put(dst, src);
 		map3.put(tmp, dst);
@@ -444,7 +444,7 @@ public class Compactor {
 						break;
 					}
 					if (sameTypeAndSameInputArgs(inst1, inst2, true)) {
-						Map<Integer, Integer> varChangeMap = new HashMap<Integer, Integer>();
+						Map<Integer, Integer> varChangeMap = new HashMap<>();
 						varChangeMap.put((Integer)inst2.getArg1(), (Integer)inst1.getArg1());
 						insts.remove(i2);
 						i2--;

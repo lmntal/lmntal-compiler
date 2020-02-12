@@ -29,8 +29,8 @@ public class StaticCounts{
 	public StaticCounts(Membrane mem){
 		this.mem = mem;
 
-		functorToCount = new HashMap<Functor, Count>();
-		memnameToCount = new HashMap<String, Count>();
+		functorToCount = new HashMap<>();
+		memnameToCount = new HashMap<>();
 	}
 	
 	/**
