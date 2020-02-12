@@ -91,6 +91,11 @@ class HeadCompiler
 	{
 	}
 
+	HeadCompiler(Membrane mem)
+	{
+	    enumFormals(mem);
+	}
+
 	/** ガード否定条件およびボディのコンパイルで使うために、
 	 * thisを指定されたhcに対する正規化されたHeadCompilerとする。
 	 * 正規化とは、左辺の全てのアトムおよび膜に対して、ガード/ボディ用の仮引数番号を

@@ -119,10 +119,10 @@ public class RuleCompiler
 		theRule = new Rule(rs.leftMem.getFirstAtomName(),rs.toString());
 		theRule.name = rs.name;
 
-		hc = new HeadCompiler();//rs.leftMem;
-		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
-		hc2 = new HeadCompiler();
-		hc2.enumFormals(rs.leftMem);
+		hc = new HeadCompiler(rs.leftMem);//rs.leftMem;
+		//		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
+		hc2 = new HeadCompiler(rs.leftMem);
+		//		hc2.enumFormals(rs.leftMem);
 		//とりあえず常にガードコンパイラを呼ぶ事にしてしまう by mizuno
 		//if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty())
 		// if (true) {
@@ -139,8 +139,8 @@ public class RuleCompiler
 		// ガードのコンパイル
 		compile_g();
 
-		hc = new HeadCompiler();//rs.leftMem;
-		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
+		hc = new HeadCompiler(rs.leftMem);//rs.leftMem;
+		//		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
 		hc.firsttime = false;
 		theRule.guardLabel = new InstructionList();
 		guard = theRule.guardLabel.insts;
