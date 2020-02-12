@@ -127,7 +127,7 @@ public class Optimizer {
 		if (fReuseMem) {
 			reuseMem(head, body);
 			if(Env.useSwapLink){ //swaplinkと膜再利用を両方実行すると冗長な命令列ができる場合があるので消す
-
+				removeUnnecessaryInsts(head, body);
 			}
 		}
 		if (fReuseAtom) {
@@ -937,6 +937,9 @@ public class Optimizer {
 		spec.updateSpec(spec.getIntArg1(), nextArg);
 
 		Instruction.changeMemVar(body, reuseMap);
+	}
+	public static void removeUnnecessaryInsts(List<Instruction> head, List<Instruction> body) {
+
 	}
 	private static void addUnlockInst(ListIterator<Instruction> lit, HashMap<Integer, Integer> reuseMap,
 			Integer mem, HashMap<Integer, List<Integer>> children) {
