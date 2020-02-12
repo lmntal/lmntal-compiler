@@ -1239,13 +1239,9 @@ public class RuleCompiler
 			Set<String> occurredNames = new HashSet<String>();
 			for (LinkOccurrence link : pc.args)
 			{
-				if (occurredNames.contains(link.name))
+				if (!occurredNames.add(link.name))
 				{
 					systemError("Syntax Error: explicit arguments of a process context in head must be pairwise disjoint: " + pc.def);
-				}
-				else
-				{
-					occurredNames.add(link.name);
 				}
 			}
 		}
