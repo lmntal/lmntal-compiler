@@ -12,6 +12,7 @@
 	<!-- tool properties -->
 	<property name="flex"  location="${lib}/JFlex.jar"/>
 	<property name="bison"  location="${lib}/java_cup.jar"/>
+	<property name="bison_runtime" location="${lib}/java_cup-runtime.jar"/>
 	<property name="jpp" location="${lib}/jpplib-0.6.jar"/>
 
 	<!-- properties -->
@@ -45,7 +46,7 @@
 	<!-- java compile -->
 	<target name="compile" depends="mkdir,help" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp}"
+		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp};${bison_runtime}"
 				encoding="${encoding}" target="${java_ver}" source="${java_ver}" includeantruntime="false" />
 	</target>
 
