@@ -217,12 +217,6 @@ public class FrontEnd
 				}
 			}
 		}
-
-		if (!Optimizer.forceReuseAtom)
-		{
-			Optimizer.fReuseAtom = false;
-			// Env.findatom2 = true;
-		}
 	}
 
 	private static int processLongOptions(String[] args, int i)
@@ -335,7 +329,6 @@ public class FrontEnd
 			//@ --optimize-reuse-atom
 			//@ Reuse atoms.
 			Optimizer.fReuseAtom = true;
-			Optimizer.forceReuseAtom = true;
 		}
 		else if (opt.equals("--optimize-reuse-mem"))
 		{
