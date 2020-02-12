@@ -126,6 +126,9 @@ public class Optimizer {
 	public static void optimize(List<Instruction> head, List<Instruction> body) {
 		if (fReuseMem) {
 			reuseMem(head, body);
+			if(Env.useSwapLink){ //swaplinkと膜再利用を両方実行すると冗長な命令列ができる場合があるので消す
+
+			}
 		}
 		if (fReuseAtom) {
 			if (changeOrder(body)) {
