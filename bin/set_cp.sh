@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -L "$0" ]; then
-    CWD="$(dirname "$0")/$(dirname $(readlink "$0"))"
+    CWD="$(cd $(dirname "$0") && cd $(dirname $(readlink "$0")) && pwd)"
 else
     CWD="$(dirname "$0")"
 fi
