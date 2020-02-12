@@ -1,11 +1,6 @@
 #!/bin/bash
 
-if [ -L "$0" ]; then
-    CWD="$(cd $(dirname "$0") && cd $(dirname $(readlink "$0")) && pwd)"
-else 
-    CWD="$(dirname "$0")"
-fi
-source "$(cd "$CWD" && pwd)/set_cp.sh"
+source "$(cd "$(dirname "$0")" && pwd)/set_cp.sh"
 
 if [ -x /usr/bin/cygpath ]; then
 	CLASSPATH=`cygpath -wp "$CLASSPATH"`
