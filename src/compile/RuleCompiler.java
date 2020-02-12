@@ -972,8 +972,7 @@ public class RuleCompiler
 			if (pc != null) { // ヘッドのときのみ除去する
 				if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE)
 				{
-					body.add(new Instruction( Instruction.REMOVEATOM,
-							typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
+					body.add(Instruction.removeatom( typedcxtToSrcPath(def), lhsmemToPath(pc.mem) ));
 				}
 				else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
 				{
@@ -1278,7 +1277,7 @@ public class RuleCompiler
 			Atom atom = (Atom)lhsatoms.get(i);
 			body.add( Instruction.removeatom(
 					lhsatomToPath(atom), // ← lhsmems.size() + i に一致する
-					lhsmemToPath(atom.mem), atom.functor ));
+					lhsmemToPath(atom.mem)));
 		}
 	}
 
@@ -1289,7 +1288,7 @@ public class RuleCompiler
 			if (!(a instanceof Atom)) continue;
 			body.add(Instruction.removeatom(
 				lhsatomToPath(a),
-				lhsmemToPath(a.mem), ((Atom)a).functor));
+				lhsmemToPath(a.mem)));
 		}
 	}
 
@@ -2060,7 +2059,7 @@ public class RuleCompiler
 						int m2 = rhsmemToPath(ar.mem);
 						if (m1 != m2)
 						{
-							body.add(Instruction.removeatom(lhsatomToPath(al), m1, ((Atom)al).functor));
+							body.add(Instruction.removeatom(lhsatomToPath(al), m1));
 							body.add(new Instruction(Instruction.ADDATOM, m2, lhsatomToPath(al)));
 						}
 						nomodified.add(al);
@@ -2096,7 +2095,7 @@ public class RuleCompiler
 					if (m1 != m2)
 					{
 						// TODO: moveatom命令を実装し、ここで生成
-						body.add(new Instruction(Instruction.REMOVEATOM, lhsatomToPath(al), m1, ((Atom)al).functor));
+						body.add(Instruction.removeatom(lhsatomToPath(al), m1));
 						body.add(new Instruction(Instruction.ADDATOM, m2, lhsatomToPath(al)));
 					}
 					reusable.put((Atom)al, ar);
