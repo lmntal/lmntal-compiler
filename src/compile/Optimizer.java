@@ -127,7 +127,7 @@ public class Optimizer {
 		if (fReuseMem) {
 			reuseMem(head, body);
 			if(Env.useSwapLink){ //swaplinkと膜再利用を両方実行すると冗長な命令列ができる場合があるので消す
-				removeUnnecessaryInsts(head, body);
+				removeUnnecessaryInsts(body);
 			}
 		}
 		if (fReuseAtom) {
@@ -938,8 +938,28 @@ public class Optimizer {
 
 		Instruction.changeMemVar(body, reuseMap);
 	}
-	public static void removeUnnecessaryInsts(List<Instruction> head, List<Instruction> body) {
+	/*
+		removeatom [X, Y]	
+		addatom   [Y, X]
+		となっている場合これらの命令列は冗長なので消す
+	*/
+	public static void removeUnnecessaryInsts(List<Instruction> body) {
+		ListIterator<Instruction> lit = body.listIterator();
+		while(lit.hasNext()){
+			Instruction inst = lit.next();
+			if(inst.getKind()==Instruction.REMOVEATOM && lit.hasNext()){
+				Instruction inst2 = lit.next();
+				if(inst2.getKind()==Instruction.ADDATOM){
+					if(inst.getArg1()==inst2.getArg2() && inst.getArg2()==inst2.getArg1()){
+						//同じ膜から同じアトムをremoveしてaddしていたら
+						lit.remove();
+						lit.previous();
+						lit.remove();
+					}
+				}
+			}
 
+		}
 	}
 	private static void addUnlockInst(ListIterator<Instruction> lit, HashMap<Integer, Integer> reuseMap,
 			Integer mem, HashMap<Integer, List<Integer>> children) {
