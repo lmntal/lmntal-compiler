@@ -1,18 +1,18 @@
 package compile.parser;
 
 import java.util.LinkedList;
-import java.util.List;
+import java.util.AbstractMap.SimpleEntry;
 
 /**
  * ソース中のルールを表します
  */
-class SrcRule
+class SrcRule extends SrcAbstract
 {
 	public String name; // ルール名
 	public int lineno;	//行番号 2006.1.22 by inui
-	public LinkedList head;			// ヘッドプロセス
-	public LinkedList body;			// ボディプロセス
-	public LinkedList guard;			// ガードプロセス
+	public LinkedList<SrcAbstract> head;			// ヘッドプロセス
+	public LinkedList<SrcAbstract> body;			// ボディプロセス
+	public LinkedList<SrcAbstract> guard;			// ガードプロセス
 	public LinkedList guardNegatives;	// ガード否定条件構文のリスト
 
 	private String text; //ルールのテキスト表現
@@ -22,9 +22,9 @@ class SrcRule
 	 * @param head ヘッドのリスト
 	 * @param body ボディのリスト
 	 */
-	public SrcRule(String name, LinkedList head, LinkedList body)
+	public SrcRule(String name, LinkedList<SrcAbstract> head, LinkedList<SrcAbstract> body)
 	{
-		this(name, head, new LinkedList(), body);
+		this(name, head, new LinkedList<>(), body);
 	}
 
 	//2006.1.22 by inui
@@ -34,9 +34,9 @@ class SrcRule
 	 * @param body ボディのリスト
 	 * @param lineno 行番号
 	 */
-	public SrcRule(String name, LinkedList head, LinkedList body, int lineno)
+	public SrcRule(String name, LinkedList<SrcAbstract> head, LinkedList<SrcAbstract> body, int lineno)
 	{
-		this(name, head, new LinkedList(), body);
+		this(name, head, new LinkedList<>(), body);
 		this.lineno = lineno;
 	}
 
@@ -46,12 +46,12 @@ class SrcRule
 	 * @param gurad ガードのリスト
 	 * @param body ボディのリスト
 	 */
-	public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body)
+	public SrcRule(String name, LinkedList<SrcAbstract> head, LinkedList<SrcAbstract> guard, LinkedList<SrcAbstract> body)
 	{
 		this.name = name;
 		this.head = head;
 		this.guard = guard;
-		this.guardNegatives = new LinkedList();
+		this.guardNegatives = new LinkedList<>();
 		this.body = body;
 		addHyperLinkConstraint(head, body);
 	}
@@ -64,7 +64,7 @@ class SrcRule
 	 * @param body ボディのリスト
 	 * @param lineno 行番号
 	 */
-	public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body, int lineno)
+	public SrcRule(String name, LinkedList<SrcAbstract> head, LinkedList<SrcAbstract> guard, LinkedList<SrcAbstract> body, int lineno)
 	{
 		this(name, head, guard, body);
 		this.lineno = lineno;
@@ -80,19 +80,19 @@ class SrcRule
 	 * @param body ボディのリスト
 	 * @param lineno 行番号
 	 */
-	public SrcRule(String name, LinkedList head, List head2, LinkedList guard, LinkedList body, int lineno)
+	public SrcRule(String name, LinkedList<SrcAbstract> head, LinkedList<SrcAbstract> head2, LinkedList<SrcAbstract> guard, LinkedList<SrcAbstract> body, int lineno)
 	{
 		this.name = name;
 		this.head = head;
-		this.guard = (guard == null ? new LinkedList() : guard);
-		this.guardNegatives = new LinkedList();
+		this.guard = (guard == null ? new LinkedList<>() : guard);
+		this.guardNegatives = new LinkedList<>();
 		this.body = body;
 		if (head2 != null)
 		{
 			unSimpagationize(head2);
 		}
-		LinkedList head3 = this.head;
-		LinkedList body2 = this.body;
+		LinkedList<SrcAbstract> head3 = this.head;
+		LinkedList<SrcAbstract> body2 = this.body;
 		addTypeConstraint(head3);
 		addHyperLinkConstraint(head3, body2);
 	}
@@ -101,22 +101,21 @@ class SrcRule
 	 *	 Head部, Body部に!Xが出現した場合，Guard部にhlink(X)もしくはnew(X)を追加する.
 	 *	 meguro
 	 */	
-	public void addHyperLinkConstraint(LinkedList head, LinkedList body)
+	public void addHyperLinkConstraint(LinkedList<SrcAbstract> head, LinkedList<SrcAbstract> body)
 	{
-		LinkedList headhl = new LinkedList();
-		addHyperLinkConstraintSub(head, body, headhl);	
+		addHyperLinkConstraintSub(head, body, new LinkedList<>());	
 	}
 
-	private LinkedList addHyperLinkConstraintSub(LinkedList head, LinkedList body, LinkedList headhl)
+	private LinkedList<String> addHyperLinkConstraintSub(LinkedList<SrcAbstract> head, LinkedList<SrcAbstract> body, LinkedList<String> headhl)
 	{
 		if (head != null)
 		{
-			for (Object o : head)
+			for (SrcAbstract o : head)
 			{
 				if (o instanceof SrcHyperLink)
 				{
 					SrcHyperLink shl = (SrcHyperLink)o;
-					LinkedList newl = new LinkedList();
+					LinkedList<SrcAbstract> newl = new LinkedList<>();
 					SrcLink name = new SrcLink(shl.name);
 					newl.add(name);
 					headhl.add(name.toString());	
@@ -138,7 +137,7 @@ class SrcRule
  
 		if (body != null)
 		{
-			for (Object o : body)
+			for (SrcAbstract o : body)
 			{
 				if (o instanceof SrcHyperLink)
 				{
@@ -146,7 +145,7 @@ class SrcRule
 					SrcLink name = new SrcLink(shl.name);
 					if (!headhl.contains(name.toString()))
 					{
-						LinkedList newl = new LinkedList();
+						LinkedList<SrcAbstract> newl = new LinkedList<>();
 						newl.add(name);
 						headhl.add(name.toString());
 						SrcAtom newg = new SrcAtom("new", newl);
@@ -172,42 +171,42 @@ class SrcRule
 	 * リンク名が_IXなど、頭に_Iがつくと自動でガードにint(_IX)を加える.
 	 * hara. nakano.
 	 * */
-	public void addTypeConstraint(LinkedList l)
+	public void addTypeConstraint(LinkedList<SrcAbstract> l)
 	{
 		if (l == null)
 		{
 			return;
 		}
 
-		for (Object o : l)
+		for (SrcAbstract o : l)
 		{
 			if (o instanceof SrcLink)
 			{
 				SrcLink sl = (SrcLink)o;
 				if (sl.name.matches("^_I.*")) // int
 				{
-					LinkedList newl = new LinkedList();
+					LinkedList<SrcAbstract> newl = new LinkedList<>();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("int", newl);
 					guard.add(newg);
 				}
 				else if (sl.name.matches("^_G.*")) // ground
 				{
-					LinkedList newl = new LinkedList();
+					LinkedList<SrcAbstract> newl = new LinkedList<>();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("ground", newl);
 					guard.add(newg);
 				}
 				else if (sl.name.matches("^_S.*")) // string
 				{
-					LinkedList newl = new LinkedList();
+					LinkedList<SrcAbstract> newl = new LinkedList<>();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("string", newl);
 					guard.add(newg);
 				}
 				else if (sl.name.matches("^_U.*")) // unary
 				{
-					LinkedList newl = new LinkedList();
+					LinkedList<SrcAbstract> newl = new LinkedList<>();
 					newl.add(new SrcLink(sl.name));
 					SrcAtom newg = new SrcAtom("unary", newl);
 					guard.add(newg);
@@ -231,7 +230,7 @@ class SrcRule
 	 * simpagation rule を、通常のルールの形に直す。コンストラクタから呼ばれる。
 	 * @param head2 ヘッドの'\'の後ろ部分のリスト
 	 */
-	private void unSimpagationize(List head2)
+	private void unSimpagationize(LinkedList<SrcAbstract> head2)
 	{
 		// head を全てbodyへコピー (前に追加のほうが再利用の上でも都合がいい？)
 		body.addAll(copySrcs(head));
@@ -244,15 +243,15 @@ class SrcRule
 	 * @param l
 	 * @return
 	 */
-	private LinkedList copySrcs(List l)
+	private LinkedList<SrcAbstract> copySrcs(LinkedList<SrcAbstract> l)
 	{
 		if (l == null)
 		{
 			return null;
 		}
 
-		LinkedList ret = new LinkedList(); // List 型だと各所で使っているgetFirstが無い
-		for (Object o : l)
+		LinkedList<SrcAbstract> ret = new LinkedList<>(); // List 型だと各所で使っているgetFirstが無い
+		for (SrcAbstract o : l)
 		{
 			if (o instanceof SrcAtom)
 			{
@@ -295,7 +294,7 @@ class SrcRule
 	/**
 	 * ヘッドを設定する
 	 */
-	public void setHead(LinkedList head)
+	public void setHead(LinkedList<SrcAbstract> head)
 	{
 		this.head = head;
 	}
@@ -304,7 +303,7 @@ class SrcRule
 	 * ルールのヘッドを取得します
 	 * @return ヘッドのリスト
 	 */
-	public LinkedList getHead()
+	public LinkedList<SrcAbstract> getHead()
 	{
 		return head;
 	}
@@ -313,7 +312,7 @@ class SrcRule
 	 * ルールのガードを得ます
 	 * @return ガードのリスト
 	 */
-	public LinkedList getGuard()
+	public LinkedList<SrcAbstract> getGuard()
 	{
 		return guard;
 	}
@@ -330,7 +329,7 @@ class SrcRule
 	 * ルールのボディを取得します
 	 * @return ボディのリスト
 	 */
-	public LinkedList getBody()
+	public LinkedList<SrcAbstract> getBody()
 	{
 		return body;
 	}

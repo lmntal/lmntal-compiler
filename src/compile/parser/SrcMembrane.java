@@ -5,10 +5,10 @@ import java.util.LinkedList;
 /**
  * ソースファイル中の膜表現
  */
-class SrcMembrane
+class SrcMembrane extends SrcAbstract
 {
 	/** 膜の内容プロセスの表現 */
-	LinkedList process = null;
+	LinkedList<SrcAbstract> process = null;
 
 	/** 終了フラグの有無 */
 	public boolean stable = false;
@@ -27,14 +27,14 @@ class SrcMembrane
 	 */
 	public SrcMembrane()
 	{
-		this(new LinkedList());
+		this(new LinkedList<SrcAbstract>());
 	}
 
 	/**
 	 * 指定された子プロセスを持つ膜を作成します
 	 * @param process 膜に含まれる子プロセス
 	 */
-	public SrcMembrane(LinkedList process)
+	public SrcMembrane(LinkedList<SrcAbstract> process)
 	{
 		this.process = process;
 	}
@@ -43,7 +43,7 @@ class SrcMembrane
 	 * 子プロセスを取得します
 	 * @return 子プロセスのリスト
 	 */
-	public LinkedList getProcess()
+	public LinkedList<SrcAbstract> getProcess()
 	{
 		return process;
 	}

@@ -47,40 +47,40 @@ non terminal SrcHyperLink       HyperLink;
 non terminal SrcName			FuncName;
 non terminal String				AtomName;
 non terminal String				RuleName;
-non terminal Object				QuotedOperatorAtom;
-non terminal Object				UnitAtom;
-non terminal Object				UnaryOpAtom;
-non terminal Object				Atom200;
-non terminal Object				Atom300;
-non terminal Object				Atom400;
-non terminal Object				Atom500;
-non terminal Object				Atom700;
-non terminal Object				Atom800;
-non terminal Object				Atom;
+non terminal SrcAtom			QuotedOperatorAtom;
+non terminal SrcAbstract		UnitAtom;
+non terminal SrcAbstract	    UnaryOpAtom;
+non terminal SrcAbstract   		Atom200;
+non terminal SrcAbstract		Atom300;
+non terminal SrcAbstract		Atom400;
+non terminal SrcAbstract		Atom500;
+non terminal SrcAbstract		Atom700;
+non terminal SrcAbstract		Atom800;
+non terminal SrcAbstract		Atom;
 
 // 現状: (a,b)と(a,b:-c)で衝突するため、項内でのAtomListの採用が保留となっている。
-non terminal Object				AtomList;
-non terminal Object				AtomListRest;
+// non terminal Object				AtomList;
+// non terminal Object				AtomListRest;
 
-non terminal SrcMembrane		Membrane;
-non terminal SrcMembrane		UnnamedMembrane;
-non terminal SrcRule			Rule;
-non terminal SrcProcessContext	ProcessContext;
-non terminal SrcRuleContext		RuleContext;
-non terminal SrcContext			Context;
-non terminal Object				Process;
-non terminal SrcRule			ProcessListContinuation;
-non terminal LinkedList			ProcessList;
-non terminal LinkedList			NonemptyProcessList;
-non terminal LinkedList			WorldProcessList;
-non terminal LinkedList			NonemptyWorldProcessList;
-non terminal Object				List;
-non terminal Object				ListCdr;
-non terminal LinkedList			BundleList;
-non terminal LinkedList			LinkList;
-non terminal LinkedList			NonemptyLinkList;
-non terminal SrcLinkBundle		Bundle;
-non terminal SrcAtom			Aggregate;
+non terminal SrcMembrane				Membrane;
+non terminal SrcMembrane				UnnamedMembrane;
+non terminal SrcRule					Rule;
+non terminal SrcProcessContext			ProcessContext;
+non terminal SrcRuleContext				RuleContext;
+non terminal SrcContext					Context;
+non terminal SrcAbstract				Process;
+non terminal SrcRule					ProcessListContinuation;
+non terminal LinkedList<SrcAbstract>	ProcessList;
+non terminal LinkedList<SrcAbstract>	NonemptyProcessList;
+non terminal LinkedList<SrcAbstract>	WorldProcessList;
+non terminal LinkedList<SrcAbstract>	NonemptyWorldProcessList;
+non terminal SrcAtom					List;
+non terminal SrcAbstract				ListCdr;
+non terminal LinkedList<SrcAbstract>	BundleList;
+non terminal LinkedList<SrcLink>		LinkList;
+non terminal LinkedList<SrcLink>		NonemptyLinkList;
+non terminal SrcLinkBundle				Bundle;
+non terminal SrcAtom					Aggregate;
 
 start with WorldProcessList;
 
@@ -162,13 +162,13 @@ UnitAtom ::=
 //				| LPAREN Rule:rule RPAREN
 //					{: RESULT = rule; :}
   | LPAREN RuleName:name RULENAMESEP ProcessList:list ProcessListContinuation:rule
-      {: rule.name = name;
+      {: rule.name = name; // todo ここでruleがnullの場合NullPointerExceptionになっているハズ
          if (rule == null) {
            if (list.size() == 1) {
              RESULT = list.getFirst();
            }
            else {
-             RESULT = list;
+             RESULT = new SrcProcessList(list);
            }
          }
          else {
@@ -182,7 +182,7 @@ UnitAtom ::=
              RESULT = list.getFirst();
            }
            else {
-             RESULT = list;
+             RESULT = new SrcProcessList(list);
            }
          }
          else {
@@ -358,6 +358,7 @@ QuotedOperatorAtom ::=
   | ASTERISK_ASTERISK {: RESULT = new SrcAtom("**"); :}
 ;
 
+// これはリストのCarの意味であって、出力はリストでなくSrcAtom
 List ::=
     LBRACKET RBRACKET
       {: RESULT = new SrcAtom("[]"); :}
@@ -375,23 +376,23 @@ ListCdr ::=
 ;
 
 // Atomをカンマで区切った列。現在未使用
-AtomList ::=
-    Atom:atom AtomList:atomlist
-      {: if (atomlist == null) { RESULT = atom; }
-         else {
-           LinkedList list = new LinkedList();
-           list.add(atom); list.add(atomlist);
-           RESULT = new SrcAtom(",", list);
-         }
-      :}
-;
+// AtomList ::=
+//     Atom:atom AtomList:atomlist
+//       {: if (atomlist == null) { RESULT = atom; }
+//          else {
+//            LinkedList list = new LinkedList();
+//            list.add(atom); list.add(atomlist);
+//            RESULT = new SrcAtom(",", list);
+//          }
+//       :}
+// ;
 
-AtomListRest ::=
-    RPAREN
-     {: RESULT = null; :}
-  | COMMA Atom:atom AtomListRest:atomlist
-     {: LinkedList list = new LinkedList(); list.add(atom); list.add(atomlist); RESULT = new SrcAtom(",", list); :}
-;
+// AtomListRest ::=
+//     RPAREN
+//      {: RESULT = null; :}
+//   | COMMA Atom:atom AtomListRest:atomlist
+//      {: LinkedList list = new LinkedList(); list.add(atom); list.add(atomlist); RESULT = new SrcAtom(",", list); :}
+// ;
 
 Membrane ::=
     UnnamedMembrane:mem
