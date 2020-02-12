@@ -123,12 +123,8 @@ public class RuleCompiler
 		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
 		hc2 = new HeadCompiler();
 		hc2.enumFormals(rs.leftMem);
-		//とりあえず常にガードコンパイラを呼ぶ事にしてしまう by mizuno
-		//if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty())
-		// if (true) {
-			theRule.guardLabel = new InstructionList();
-			guard = theRule.guardLabel.insts;
-		// } else { guard = null; }
+		theRule.guardLabel = new InstructionList();
+		guard = theRule.guardLabel.insts;
 		theRule.bodyLabel = new InstructionList();
 		body = theRule.bodyLabel.insts;
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
@@ -137,17 +133,6 @@ public class RuleCompiler
 		compile_l();
 
 		// ガードのコンパイル
-		compile_g();
-
-		hc = new HeadCompiler();//rs.leftMem;
-		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
-		hc.firsttime = false;
-		theRule.guardLabel = new InstructionList();
-		guard = theRule.guardLabel.insts;
-		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
-
-		compile_l();
-
 		compile_g();
 
 		// 右辺膜のコンパイル
