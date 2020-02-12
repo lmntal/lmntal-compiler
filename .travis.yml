@@ -27,4 +27,4 @@ install:
 
 script:
   - export slim_CHECK_ND=yes
-  - make check
+  - make -j check
