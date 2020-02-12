@@ -158,9 +158,9 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.DEREFATOM, 3,1,1));
 		insts.add(new Instruction(typechecker,             3));
 		insts.add(new Instruction(op,                    4,2,3));
-		ArrayList<Integer> mems = new ArrayList<Integer>();
+		ArrayList<Integer> mems = new ArrayList<>();
 		mems.add(0);
-		ArrayList<Integer> atoms = new ArrayList<Integer>();
+		ArrayList<Integer> atoms = new ArrayList<>();
 		atoms.add(1);
 		atoms.add(2);
 		atoms.add(3);
@@ -211,9 +211,9 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.GETFUNC,   4,2));
 		insts.add(new Instruction(Instruction.ALLOCATOMINDIRECT, 3,4));
 
-		ArrayList<Integer> mems = new ArrayList<Integer>();
+		ArrayList<Integer> mems = new ArrayList<>();
 		mems.add(0);
-		ArrayList<Integer> atoms = new ArrayList<Integer>();
+		ArrayList<Integer> atoms = new ArrayList<>();
 		atoms.add(1);
 		atoms.add(2);
 		atoms.add(3);
@@ -249,9 +249,9 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(typechecker,             2));
 		insts.add(new Instruction(op,                    3,2));
 
-		ArrayList<Integer> mems = new ArrayList<Integer>();
+		ArrayList<Integer> mems = new ArrayList<>();
 		mems.add(0);
-		ArrayList<Integer> atoms = new ArrayList<Integer>();
+		ArrayList<Integer> atoms = new ArrayList<>();
 		atoms.add(1);
 		atoms.add(2);
 		atoms.add(3);

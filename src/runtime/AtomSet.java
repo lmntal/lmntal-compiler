@@ -83,8 +83,8 @@ public final class AtomSet implements Iterable<Atom>
 	@SuppressWarnings("unchecked")
 	public Iterator<Atom> iterator() {
 		return new NestedIterator<Atom>(new Iterator[] {getDataAtoms().iterator(),
-				new MultiMapIterator<Atom>(getOuts()),
-				new MultiMapIterator<Atom>(getAtoms())});
+				new MultiMapIterator<>(getOuts()),
+				new MultiMapIterator<>(getAtoms())});
 		 
 	}
 	
@@ -104,7 +104,7 @@ public final class AtomSet implements Iterable<Atom>
 	}
 	/** OUTSIDE_PROXYの反復氏を返す */
 	public Iterator<Atom> iteratorOfOUTSIDE_PROXY() {
-		return new MultiMapIterator<Atom>(getOuts());
+		return new MultiMapIterator<>(getOuts());
 	}
 	/** 
 	 * アクティブアトムのFunctorの反復子を返す。
@@ -163,7 +163,7 @@ public final class AtomSet implements Iterable<Atom>
 			Map<Functor, List<Atom>> map = f.isOutsideProxy() ? getOuts() : getAtoms();
 			l = map.get(f);
 			if (l == null) {
-				l = new ArrayList<Atom>();
+				l = new ArrayList<>();
 				map.put(f, l);
 			}
 		} else {
@@ -306,11 +306,11 @@ public final class AtomSet implements Iterable<Atom>
 			}
 		};
 		//比較のための準備
-		List<Functor> funcs = new ArrayList<Functor>();
+		List<Functor> funcs = new ArrayList<>();
 		funcs.addAll(getAtoms().keySet());
 		Collections.sort(funcs, sizeComparator);
-		HashSet<Atom> checked = new HashSet<Atom>();
-		startAtoms = new ArrayList<Atom>();
+		HashSet<Atom> checked = new HashSet<>();
+		startAtoms = new ArrayList<>();
 		for (int i = 0; i < funcs.size(); i++) {
 			searchAtomGroup(atoms.get(funcs.get(i)), checked);
 		}
@@ -342,8 +342,8 @@ public final class AtomSet implements Iterable<Atom>
 		if (getAtoms().size() != s.atoms.size()) return false;
 		if (getDataAtoms().size() != s.dataAtoms.size()) return false;
 
-		HashSet<Atom> checked2 = new HashSet<Atom>();
-		HashMap<Atom, Atom> map = new HashMap<Atom, Atom>();
+		HashSet<Atom> checked2 = new HashSet<>();
+		HashMap<Atom, Atom> map = new HashMap<>();
 		for (int i = 0; i < startAtoms.size(); i++) {
 			Atom a1 = (Atom)startAtoms.get(i);
 			Functor f = a1.getFunctor();
@@ -404,15 +404,15 @@ public final class AtomSet implements Iterable<Atom>
 		return hashCode;
 	}
 	private Map<Functor, List<Atom>> getOuts() {
-		if(null == outs){ outs = new HashMap<Functor, List<Atom>>(); }
+		if(null == outs){ outs = new HashMap<>(); }
 		return outs;
 	}
 	private Map<Functor, List<Atom>> getAtoms() {
-		if(null == atoms){ atoms = new HashMap<Functor, List<Atom>>(); }
+		if(null == atoms){ atoms = new HashMap<>(); }
 		return atoms;
 	}
 	private List<Atom> getDataAtoms() {
-		if(null == dataAtoms){ dataAtoms = new ArrayList<Atom>(); }
+		if(null == dataAtoms){ dataAtoms = new ArrayList<>(); }
 		return dataAtoms;
 	}
 }

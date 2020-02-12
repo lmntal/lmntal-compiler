@@ -35,7 +35,7 @@ public final class Membrane extends QueuedEntity
 //	/** このセルの自由リンクの数 */
 //	protected int freeLinkCount = 0;
 	/** ルールセットの集合。 */
-	protected List<Ruleset> rulesets = new ArrayList<Ruleset>();
+	protected List<Ruleset> rulesets = new ArrayList<>();
 	/** 膜のタイプ */
 	protected int kind = 0;
 	public static final int KIND_ND = 2;
@@ -84,7 +84,7 @@ public final class Membrane extends QueuedEntity
 
 	/** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
 	private Membrane(Membrane parent) {
-		mems = new HashSet<Membrane>();
+		mems = new HashSet<>();
 
 		this.parent = parent;
 		id = nextId++;
@@ -203,12 +203,12 @@ public final class Membrane extends QueuedEntity
 	/** 06/07/27 */
 	/** ルールセットのコピーを取得 */
 	public ArrayList<Ruleset> getRuleset() {
-		ArrayList<Ruleset> al = new ArrayList<Ruleset>(rulesets);
+		ArrayList<Ruleset> al = new ArrayList<>(rulesets);
 		return al;
 	}
 	/** 子膜のコピーを取得 */
 	public HashSet<Membrane> getMemCopy() {
-		return new HashSet<Membrane>(mems);
+		return new HashSet<>(mems);
 		//RandomSet s = new RandomSet();
 		//s.addAll(mems);
 		//return s;
@@ -268,7 +268,7 @@ public final class Membrane extends QueuedEntity
 
 	/* 膜のハッシュコードを返す */
 	static int calculate(Membrane m) {
-		return calculate(m, new HashMap<Membrane, Integer>());
+		return calculate(m, new HashMap<>());
 	}
 
 	/*
@@ -296,9 +296,9 @@ public final class Membrane extends QueuedEntity
 		 * toCalculate:現在計算中の分子内の未処理アトムまたは子膜の集合
 		 * calculated:現在計算中の分子内の処理済アトムまたは子膜の集合
 		 */
-		Set<QueuedEntity> contents = new HashSet<QueuedEntity>(), 
-		toCalculate = new HashSet<QueuedEntity>(), 
-		calculated = new HashSet<QueuedEntity>();
+		Set<QueuedEntity> contents = new HashSet<>(),
+		toCalculate = new HashSet<>(),
+		calculated = new HashSet<>();
 
 		for (Iterator<Atom> i = m.atomIterator(); i.hasNext(); ) {
 			a = i.next();

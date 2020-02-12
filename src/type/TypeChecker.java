@@ -33,15 +33,15 @@ import compile.structure.Membrane;
 public class TypeChecker {
 	
 	//膜名ごとに、子膜およびアクティブアトムの個数を管理する
-	private final Map<String, Map<String, IntervalCount>> memCounts = new HashMap<String, Map<String, IntervalCount>>();
-	private final Map<String, Map<Functor,IntervalCount>> functorCounts = new HashMap<String, Map<Functor, IntervalCount>>();
+	private final Map<String, Map<String, IntervalCount>> memCounts = new HashMap<>();
+	private final Map<String, Map<Functor,IntervalCount>> functorCounts = new HashMap<>();
 	
 	// アクティブアトムの型情報
-	private final Map<String, Map<Functor, List<ModedType>>> activeAtomTypes = new HashMap<String, Map<Functor, List<ModedType>>>();
+	private final Map<String, Map<Functor, List<ModedType>>> activeAtomTypes = new HashMap<>();
 	// データアトムの型情報 (?)
-	private final Map<Functor, List<ModedType>> dataAtomTypes = new HashMap<Functor, List<ModedType>>();
+	private final Map<Functor, List<ModedType>> dataAtomTypes = new HashMap<>();
 	
-	private final Set<String> nomores = new HashSet<String>();
+	private final Set<String> nomores = new HashSet<>();
 	
 	/**
 	 * データ型宣言をパーズする
@@ -62,7 +62,7 @@ public class TypeChecker {
 				throw new TypeParseException("context appearing in type definition.");
 			Atom dataatom = (Atom)dataatomic;
 
-			List<ModedType> types = new ArrayList<ModedType>(dataatom.getArity()-1);
+			List<ModedType> types = new ArrayList<>(dataatom.getArity() - 1);
 			boolean flgRegistered = false;
 			for(int j=0;j<dataatom.getArity()-1;j++){
 				Atomic signatomic = TypeEnv.getRealBuddy(dataatom.args[j]).atom;
@@ -70,7 +70,7 @@ public class TypeChecker {
 					throw new TypeParseException("context appearing in type definition.");
 				Atom signatom = (Atom)signatomic;
 				if(signatom.getName().equals("+")){
-					Set<String> datanames = new HashSet<String>();
+					Set<String> datanames = new HashSet<>();
 					for(int k=0;k<signatom.getArity()-1;k++){
 						Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[k]).atom;
 						String dataname = signedatomic.getName();
@@ -88,7 +88,7 @@ public class TypeChecker {
 //					types.add(i, new ModedType(datanames, -1));
 //				}
 				else if(signatom.getName().equals("*")){
-					Set<String> datanames = new HashSet<String>();
+					Set<String> datanames = new HashSet<>();
 					for(int k=0;k<signatom.getArity()-1;k++){
 						Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[k]).atom;
 						String dataname = signedatomic.getName();
@@ -212,14 +212,14 @@ public class TypeChecker {
 	// }
 	
 	private void constrainActiveAtomArgument(String memname, Atom atom)throws TypeParseException{
-		List<ModedType> types = new ArrayList<ModedType>(atom.getArity()-1);
+		List<ModedType> types = new ArrayList<>(atom.getArity() - 1);
 		for(int i=0;i<atom.getArity()-1;i++){
 			Atomic signatomic = atom.args[i].buddy.atom;
 			if(!(signatomic instanceof Atom))
 				throw new TypeParseException("context appearing in type definition.");
 			Atom signatom = (Atom)signatomic;
 			if(signatom.getName().equals("+")){
-				Set<String> datanames = new HashSet<String>();
+				Set<String> datanames = new HashSet<>();
 				for(int j=0;j<signatom.getArity()-1;j++){
 					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[j]).atom;
 					String dataname = signedatomic.getName();
@@ -228,7 +228,7 @@ public class TypeChecker {
 				types.add(i, new ModedType(datanames, 1));
 			}
 			else if(signatom.getName().equals("-")){
-				Set<String> datanames = new HashSet<String>();
+				Set<String> datanames = new HashSet<>();
 				for(int j=0;j<signatom.getArity()-1;j++){
 					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[j]).atom;
 					String dataname = signedatomic.getName();
@@ -237,7 +237,7 @@ public class TypeChecker {
 				types.add(i, new ModedType(datanames, -1));
 			}
 			else if(signatom.getName().equals("*")){
-				Set<String> datanames = new HashSet<String>();
+				Set<String> datanames = new HashSet<>();
 				for(int j=0;j<signatom.getArity()-1;j++){
 					Atomic signedatomic = TypeEnv.getRealBuddy(signatom.args[j]).atom;
 					String dataname = signedatomic.getName();
@@ -287,7 +287,7 @@ public class TypeChecker {
 	
 	private void addActiveAtomType(String memname, Functor functor, List<ModedType> types)throws TypeParseException{
 		if(!activeAtomTypes.containsKey(memname))
-			activeAtomTypes.put(memname, new HashMap<Functor, List<ModedType>>());
+			activeAtomTypes.put(memname, new HashMap<>());
 		Map<Functor, List<ModedType>> functorToTypes = activeAtomTypes.get(memname);
 		if(!functorToTypes.containsKey(functor))
 			functorToTypes.put(functor, types);
@@ -313,7 +313,7 @@ public class TypeChecker {
 	 */
 	private void addChildCount(String parentname, String childname, IntervalCount fc)throws TypeParseException{
 		if(!memCounts.containsKey(parentname))
-			memCounts.put(parentname, new HashMap<String, IntervalCount>());
+			memCounts.put(parentname, new HashMap<>());
 		Map<String, IntervalCount> counts = memCounts.get(parentname);
 		if(!counts.containsKey(childname))
 			counts.put(childname, fc);
@@ -331,7 +331,7 @@ public class TypeChecker {
 	 */
 	private void addFunctorCount(String parentname, Functor functor, IntervalCount fc)throws TypeParseException{
 		if(!functorCounts.containsKey(parentname))
-			functorCounts.put(parentname, new HashMap<Functor, IntervalCount>());
+			functorCounts.put(parentname, new HashMap<>());
 		Map<Functor, IntervalCount> counts = functorCounts.get(parentname);
 		if(!counts.containsKey(functor))
 			counts.put(functor, fc);

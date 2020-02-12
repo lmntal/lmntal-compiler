@@ -53,22 +53,22 @@ public final class RuleStructure
 	/**
 	 * ガード否定条件（ProcessContextEquationのLinkedList）のリスト
 	 */
-	public List<List<ProcessContextEquation>> guardNegatives = new LinkedList<List<ProcessContextEquation>>();
+	public List<List<ProcessContextEquation>> guardNegatives = new LinkedList<>();
 
 	/**
 	 * プロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef)
 	 */
-	public Map<String, ContextDef> processContexts = new HashMap<String, ContextDef>();
+	public Map<String, ContextDef> processContexts = new HashMap<>();
 
 	/**
 	 * ルール文脈の限定名 ("@p"などのString) -> 文脈の定義 (ContextDef)
 	 */
-	public Map<String, ContextDef> ruleContexts = new HashMap<String, ContextDef>();
+	public Map<String, ContextDef> ruleContexts = new HashMap<>();
 
 	/**
 	 * 型付きプロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef)
 	 */
-	public Map<String, ContextDef> typedProcessContexts = new HashMap<String, ContextDef>();
+	public Map<String, ContextDef> typedProcessContexts = new HashMap<>();
 
 	/**
 	 * 行番号 2006.1.22 by inui

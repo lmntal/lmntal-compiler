@@ -10,7 +10,7 @@ public class Multimap <T, U> {
 	Map<T, Set<U>> map;
 	
 	Multimap(){
-		map = new HashMap<T, Set<U>>();
+		map = new HashMap<>();
 	}
 	
 	void add(T t, U u) {
@@ -18,7 +18,7 @@ public class Multimap <T, U> {
 			map.get(t).add(u);
 		}
 		else {
-			Set<U> set = new HashSet<U>();
+			Set<U> set = new HashSet<>();
 			set.add(u);
 			map.put(t, set);
 		}
@@ -28,7 +28,7 @@ public class Multimap <T, U> {
 			map.get(t).addAll(su);
 		}
 		else {
-			Set<U> set = new HashSet<U>();
+			Set<U> set = new HashSet<>();
 			set.addAll(su);
 			map.put(t, set);
 		}

@@ -43,36 +43,36 @@ public final class Membrane
 	public String name;
 
 	/** アトム(compile.structure.Atom)のリスト */
-	public List<Atom> atoms = new LinkedList<Atom>();
+	public List<Atom> atoms = new LinkedList<>();
 
 	/** 子膜(compile.structure.Membrane)のリスト */
-	public List<Membrane> mems = new LinkedList<Membrane>();
+	public List<Membrane> mems = new LinkedList<>();
 
 	/** ルール(compile.structure.RuleStructure)のリスト */
-	public List<RuleStructure> rules = new LinkedList<RuleStructure>();
+	public List<RuleStructure> rules = new LinkedList<>();
 
 	////////////////////////////////////////////////////////////////
 
 	/** アトム集団(compile.structure.Atom)のリスト */
-	public List<Atom> aggregates = new LinkedList<Atom>();
+	public List<Atom> aggregates = new LinkedList<>();
 
 	/** プロセス文脈出現(compile.structure.ProcessContext)のリスト */
-	public List<ProcessContext> processContexts = new LinkedList<ProcessContext>();
+	public List<ProcessContext> processContexts = new LinkedList<>();
 
 	/** ルール文脈出現(compile.structure.RuleContext)のリスト */
-	public List<RuleContext> ruleContexts = new LinkedList<RuleContext>();
+	public List<RuleContext> ruleContexts = new LinkedList<>();
 
 	/** 型付きプロセス文脈出現(compile.structure.ProcessContext)のリスト */
-	public List<ProcessContext> typedProcessContexts = new LinkedList<ProcessContext>();
+	public List<ProcessContext> typedProcessContexts = new LinkedList<>();
 
 	////////////////////////////////////////////////////////////////
 
 	/** 膜の自由リンク名(String)からそのリンク出現(compile.structure.LinkOccurrence)への写像 */
-	public HashMap<String, LinkOccurrence> freeLinks = new HashMap<String, LinkOccurrence>();
+	public HashMap<String, LinkOccurrence> freeLinks = new HashMap<>();
 
 	/** ルールセット。生成されたルールオブジェクトは逐次ここに追加されていく。*/
 //	public runtime.Ruleset ruleset = new InterpretedRuleset();
-	public List<Ruleset> rulesets = new LinkedList<Ruleset>();
+	public List<Ruleset> rulesets = new LinkedList<>();
 
 	////////////////////////////////////////////////////////////////
 
@@ -119,7 +119,7 @@ public final class Membrane
 	 */
 	public String toStringWithoutBrace()
 	{
-		List<Object> list = new LinkedList<Object>();
+		List<Object> list = new LinkedList<>();
 		list.addAll(atoms);
 		list.addAll(mems);
 		list.addAll(rules);
@@ -304,9 +304,9 @@ class RependenceGraph {
 
 	private static class UnionFind
 	{
-		private Map<Object, Object> lnk = new HashMap<Object, Object>();
-		private Map<Object, Integer> lnkSiz = new HashMap<Object, Integer>();
-		private Map<Object, List<Object>> lists = new HashMap<Object, List<Object>>();
+		private Map<Object, Object> lnk = new HashMap<>();
+		private Map<Object, Integer> lnkSiz = new HashMap<>();
+		private Map<Object, List<Object>> lists = new HashMap<>();
 
 		private void union(Object x, Object y)
 		{
@@ -340,7 +340,7 @@ class RependenceGraph {
 			if (!lnkSiz.containsKey(x))
 			{
 				lnkSiz.put(x, 1);
-				List<Object> list = new LinkedList<Object>();
+				List<Object> list = new LinkedList<>();
 				list.add(x);
 				lists.put(x, list);
 			}

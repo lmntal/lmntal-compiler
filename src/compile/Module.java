@@ -42,9 +42,9 @@ import compile.structure.RuleStructure;
  *
  */
 public class Module {
-	public static List<String> libPath = new ArrayList<String>();
-	public static Map<String, Membrane> memNameTable = new HashMap<String, Membrane>();
-	public static Set<String> loaded = new HashSet<String>();
+	public static List<String> libPath = new ArrayList<>();
+	public static Map<String, Membrane> memNameTable = new HashMap<>();
+	public static Set<String> loaded = new HashSet<>();
 	
 	static {
 		String home = System.getProperty("LMNTAL_HOME");
@@ -103,7 +103,7 @@ public class Module {
 	 * @param m
 	 */
 	public static void resolveModules(Membrane m) {
-		List<String> need = new ArrayList<String>();
+		List<String> need = new ArrayList<>();
 		getNeedModules(m, need);
 		for(String s : need){
 			loadModule(m, s);

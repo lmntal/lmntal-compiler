@@ -95,12 +95,12 @@ public final class Env
 	/**
 	 * プログラムに与える引数
 	 */
-	public static List<String> argv = new ArrayList<String>();
+	public static List<String> argv = new ArrayList<>();
 
 	/**
 	 * ソースファイル
 	 */
-	public static List<String> srcs = new ArrayList<String>();
+	public static List<String> srcs = new ArrayList<>();
 
 	/**
 	 * 未コンパイルライブラリを利用する
@@ -251,7 +251,7 @@ public final class Env
 	/**
 	 * 拡張コマンドライン引数をこれに格納する
 	 */
-	public static Map<String, String> extendedOption = new HashMap<String, String>();
+	public static Map<String, String> extendedOption = new HashMap<>();
 	public static String getExtendedOption(String key) {
 		if(!extendedOption.containsKey(key)) return "";
 		return extendedOption.get(key);

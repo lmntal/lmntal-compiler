@@ -79,7 +79,7 @@ public final class Rule
 		memMatchLabel = new InstructionList();
 		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
-		bench = new HashMap<Thread, Benchmark>();
+		bench = new HashMap<>();
 	}
 
 	/**

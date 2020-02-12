@@ -15,7 +15,7 @@ public class Count {
 	public final  Map<VarCount, Integer> varToMultiple;
 	
 	public Count(VarCount vc){
-		this(new HashMap<VarCount, Integer>());
+		this(new HashMap<>());
 		add(1, vc);
 	}
 	
@@ -45,10 +45,10 @@ public class Count {
 			varToMultiple.put(vc,varToMultiple.get(vc)+multiple);
 	}
 	public static Count sum(Count sc1, Count sc2){
-		Set<VarCount> vs = new HashSet<VarCount>();
+		Set<VarCount> vs = new HashSet<>();
 		vs.addAll(sc1.varToMultiple.keySet());
 		vs.addAll(sc2.varToMultiple.keySet());
-		Map<VarCount, Integer> newmap = new HashMap<VarCount, Integer>();
+		Map<VarCount, Integer> newmap = new HashMap<>();
 		for(VarCount v : vs){
 			Integer i1 = sc1.varToMultiple.get(v);
 			Integer i2 = sc2.varToMultiple.get(v);
@@ -60,7 +60,7 @@ public class Count {
 	}
 	
 	public static Count mul(int m, Count sc){
-		Map<VarCount, Integer> newmap = new HashMap<VarCount, Integer>();
+		Map<VarCount, Integer> newmap = new HashMap<>();
 		for(VarCount vc : sc.varToMultiple.keySet()){
 			newmap.put(vc,sc.varToMultiple.get(vc)*m);
 		}
@@ -80,7 +80,7 @@ public class Count {
 	}
 	
 	public Count clone(VarCount oldvar, VarCount newvar){
-		Count cloned = new Count(new HashMap<VarCount, Integer>());
+		Count cloned = new Count(new HashMap<>());
 		for(VarCount vc : varToMultiple.keySet()){
 			if(vc == oldvar){
 				cloned.add(varToMultiple.get(vc), newvar);
@@ -93,7 +93,7 @@ public class Count {
 	// 合計値が0以上だということを利用して求める
 	public boolean constraintOverZero(){
 		int min = 0; // 最小値
-		Set<VarCount> vars = new HashSet<VarCount>();
+		Set<VarCount> vars = new HashSet<>();
 		for(VarCount vc : varToMultiple.keySet()){
 			int m = varToMultiple.get(vc);
 			if(m == 0) continue;

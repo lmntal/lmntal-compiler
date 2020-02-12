@@ -29,28 +29,28 @@ class GuardCompiler extends HeadCompiler
 //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
 	
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
-	HashMap<ContextDef, Integer> typedCxtDataTypes = new HashMap<ContextDef, Integer>();
+	HashMap<ContextDef, Integer> typedCxtDataTypes = new HashMap<>();
 	/** 型付きプロセス文脈定義 (ContextDef) -> データ型のパターンを表す定数オブジェクト */
-	HashMap<ContextDef, Object> typedCxtTypes = new HashMap<ContextDef, Object>();
+	HashMap<ContextDef, Object> typedCxtTypes = new HashMap<>();
 	/** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号 */
-	HashMap<ContextDef, Integer> typedCxtSrcs  = new HashMap<ContextDef, Integer>();
+	HashMap<ContextDef, Integer> typedCxtSrcs  = new HashMap<>();
 	/** ground型付きプロセス文脈定義(ContextDef) -> リンクのソース出現（コピー元とする出現）のリストの変数番号 */
-	HashMap<ContextDef, Integer> groundSrcs = new HashMap<ContextDef, Integer>();
+	HashMap<ContextDef, Integer> groundSrcs = new HashMap<>();
 	/** 膜(Membrane) -> (その膜に存在するground型付きプロセス文脈定義(ContextDef) -> 構成アトム数)というマップ */
-	HashMap<Membrane, HashMap<ContextDef, Integer>> memToGroundSizes = new HashMap<Membrane, HashMap<ContextDef, Integer>>();
+	HashMap<Membrane, HashMap<ContextDef, Integer>> memToGroundSizes = new HashMap<>();
 	/** ソース出現が特定された型付きプロセス文脈定義のセット
 	 * <p>identifiedCxtdefs.contains(x) は、左辺に出現するかまたはloadedであることを表す。*/
-	HashSet<ContextDef> identifiedCxtdefs = new HashSet<ContextDef>(); 
+	HashSet<ContextDef> identifiedCxtdefs = new HashSet<>();
 	/** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
 	 * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
-	List<ContextDef> typedCxtDefs = new ArrayList<ContextDef>();
+	List<ContextDef> typedCxtDefs = new ArrayList<>();
 	/** newアトム -> newアトムの引数の接続先アトム一覧 */
-  	HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<Atom, Atom[]>(); // hlgroundattr@onuma
+  	HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<>(); // hlgroundattr@onuma
 	/** hlground型付きプロセス文脈定義(ContextDef) -> hlgroundの属性 */
-	HashMap<ContextDef, Atom[]> hlgroundAttrs = new HashMap<ContextDef, Atom[]>();
+	HashMap<ContextDef, Atom[]> hlgroundAttrs = new HashMap<>();
 	
   	public List<Functor> getHlgroundAttrs(Atom[] hlgroundArgAtoms) {
-		List<Functor> attrs = new ArrayList<Functor>(); // hlgroundの属性
+		List<Functor> attrs = new ArrayList<>(); // hlgroundの属性
 		for (Atom a : hlgroundArgAtoms) {
 			if (a != null) {
 				attrs.add(a.functor);	
@@ -76,9 +76,9 @@ class GuardCompiler extends HeadCompiler
 //	private static final int ISNAME    = Instruction.ISNAME;   	// 〃 name型 (SLIM専用) //seiji
 //	private static final int ISCONAME  = Instruction.ISCONAME; 	// 〃 coname型 (SLIM専用) //seiji
 	private static final int ISHLINK   = Instruction.ISHLINK; 	// 〃 hlink型 (SLIM専用) //seiji
-	private static Map<Functor, int[]> guardLibrary0 = new HashMap<Functor, int[]>(); // 0入力ガード型制約名//seiji
-	private static Map<Functor, int[]> guardLibrary1 = new HashMap<Functor, int[]>(); // 1入力ガード型制約名
-	private static Map<Functor, int[]> guardLibrary2 = new HashMap<Functor, int[]>(); // 2入力ガード型制約名
+	private static Map<Functor, int[]> guardLibrary0 = new HashMap<>(); // 0入力ガード型制約名//seiji
+	private static Map<Functor, int[]> guardLibrary1 = new HashMap<>(); // 1入力ガード型制約名
+	private static Map<Functor, int[]> guardLibrary2 = new HashMap<>(); // 2入力ガード型制約名
 
 	static
 	{
@@ -257,7 +257,7 @@ class GuardCompiler extends HeadCompiler
 	void fixTypedProcesses() throws CompileException
 	{
 		// STEP 1 - 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
-		identifiedCxtdefs = new HashSet<ContextDef>();
+		identifiedCxtdefs = new HashSet<>();
 		for (ContextDef def : typedProcessContexts.values())
 		{
 			if (def.lhsOcc != null)
@@ -296,12 +296,12 @@ class GuardCompiler extends HeadCompiler
 		}
 
 		// STEP 2 - 全ての型付きプロセス文脈が特定され、型が決定するまで繰り返す
-		List<Atom> cstrs = new LinkedList<Atom>(typeConstraints);
+		List<Atom> cstrs = new LinkedList<>(typeConstraints);
 
 		{
 			// uniq, not_uniq を最初に（少なくともint, unary などの前に）処理する
-			List<Atom> tmpFirst = new LinkedList<Atom>();
-			List<Atom> tmpLast = new LinkedList<Atom>();
+			List<Atom> tmpFirst = new LinkedList<>();
+			List<Atom> tmpLast = new LinkedList<>();
 			for (Iterator<Atom> it = cstrs.iterator(); it.hasNext();)
 			{
 				Atom a = it.next();
@@ -397,8 +397,8 @@ class GuardCompiler extends HeadCompiler
 						}
 
 						String guardID = func.getName().substring(7+func.getArity()+1);
-						List<Integer> vars = new ArrayList<Integer>();
-						List<Integer> out = new ArrayList<Integer>(); // 出力引数
+						List<Integer> vars = new ArrayList<>();
+						List<Integer> out = new ArrayList<>(); // 出力引数
 						for(int k=0;k<cstr.args.length;k++) {
 							ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
 							// 入力引数が未束縛なら延期
@@ -433,7 +433,7 @@ class GuardCompiler extends HeadCompiler
 					}
 					else if (func.getName().equals("uniq") || func.getName().equals("not_uniq"))
 					{
-						List<Integer> uniqVars = new ArrayList<Integer>();
+						List<Integer> uniqVars = new ArrayList<>();
 						for (int k = 0; k < cstr.args.length; k++)
 						{
 							ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
@@ -998,7 +998,7 @@ class GuardCompiler extends HeadCompiler
 			int natom = varCount++;
 			match.add(new Instruction(Instruction.ISGROUND, natom, linkids, srclinklistpath));//,memToPath(def.lhsOcc.mem)));
 			rc.hasISGROUND = false;
-			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem,new HashMap<ContextDef, Integer>());
+			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem, new HashMap<>());
 			memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
 			
 		}
@@ -1059,7 +1059,7 @@ class GuardCompiler extends HeadCompiler
 			int natom = varCount++;
 			match.add(new Instruction(Instruction.ISHLGROUND, natom, linkids, srclinklistpath, attrs));//,memToPath(def.lhsOcc.mem)));
 			rc.hasISGROUND = false;
-			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem,new HashMap<ContextDef, Integer>());
+			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem, new HashMap<>());
 			memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
 			
 		}
@@ -1114,7 +1114,7 @@ class GuardCompiler extends HeadCompiler
 	 * GuardCompilerは現状では、atomsに対応する変数番号のリストの後に、
 	 * typedcxtdefsのうちUNARY_ATOM_TYPEであるようなものの変数番号のリストをつなげたArrayListを返す。*/
 	List<Integer> getAtomActuals() {
-		List<Integer> args = new ArrayList<Integer>();		
+		List<Integer> args = new ArrayList<>();
 		for (int i = 0; i < atoms.size(); i++) {
 			args.add( atomPaths.get(atoms.get(i)) );
 		}

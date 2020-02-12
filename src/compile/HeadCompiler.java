@@ -48,15 +48,15 @@ class HeadCompiler
 	/** matchLabel.insts */
 	List<Instruction> match, tempMatch;
 
-	List<Membrane> mems	= new ArrayList<Membrane>();	// 出現する膜のリスト。[0]がm
-	List<Atomic> atoms = new ArrayList<Atomic>();	// 出現するアトムのリスト	
-	HashMap<Membrane, Integer> memPaths	= new HashMap<Membrane, Integer>();	// Membrane -> 変数番号
-	HashMap<Atomic, Integer>  atomPaths	= new HashMap<Atomic, Integer>();	// Atomic -> 変数番号
-	Map<Integer, int[]> linkPaths = new HashMap<Integer, int[]>();	// Atomの変数番号 -> リンクの変数番号の配列
+	List<Membrane> mems	= new ArrayList<>();	// 出現する膜のリスト。[0]がm
+	List<Atomic> atoms = new ArrayList<>();	// 出現するアトムのリスト
+	HashMap<Membrane, Integer> memPaths	= new HashMap<>();	// Membrane -> 変数番号
+	HashMap<Atomic, Integer>  atomPaths	= new HashMap<>();	// Atomic -> 変数番号
+	Map<Integer, int[]> linkPaths = new HashMap<>();	// Atomの変数番号 -> リンクの変数番号の配列
 
-	private Map<Atom, Integer> atomIds	= new HashMap<Atom, Integer>();	// Atom -> atoms内のindex（廃止の方向で検討する）
-	private HashSet<Atom> visited = new HashSet<Atom>();	// Atom -> boolean, マッチング命令を生成したかどうか
-	private HashSet<Membrane> memVisited = new HashSet<Membrane>();	// Membrane -> boolean, compileMembraneを呼んだかどうか
+	private Map<Atom, Integer> atomIds	= new HashMap<>();	// Atom -> atoms内のindex（廃止の方向で検討する）
+	private HashSet<Atom> visited = new HashSet<>();	// Atom -> boolean, マッチング命令を生成したかどうか
+	private HashSet<Membrane> memVisited = new HashSet<>();	// Membrane -> boolean, compileMembraneを呼んだかどうか
 
 	boolean fFindDataAtoms;						// データアトムをfindatomしてよいかどうか
 	private final boolean UNTYPED_COMPILE	= false;			// fFindDataAtomsの初期値
@@ -67,7 +67,7 @@ class HeadCompiler
 	private static int findAtomCount = 0;
 	// private static int anyMemCount = 0;
 
-	private HashMap<Membrane, ProcessContextEquation> proccxteqMap = new HashMap<Membrane, ProcessContextEquation>(); // Membrane -> ProcessContextEquation
+	private HashMap<Membrane, ProcessContextEquation> proccxteqMap = new HashMap<>(); // Membrane -> ProcessContextEquation
 
 	final boolean isAtomLoaded(Atomic atom) { return atomPaths.containsKey(atom); }
 	final boolean isMemLoaded(Membrane mem) { return memPaths.containsKey(mem); }
@@ -169,8 +169,8 @@ class HeadCompiler
 		final int[] put = linkPaths.put(atompath, paths);
 	}
 	private void searchLinkedGroup(Atom startatom, HashSet<Atom> qatoms, Atom firstatom, Membrane firstmem) {
-		LinkedList<Membrane> newmemlist = new LinkedList<Membrane>();
-		LinkedList<Atom> atomqueue = new LinkedList<Atom>();
+		LinkedList<Membrane> newmemlist = new LinkedList<>();
+		LinkedList<Atom> atomqueue = new LinkedList<>();
 		atomqueue.add(startatom);
 		while( ! atomqueue.isEmpty() ) {
 			Atom atom = atomqueue.removeFirst();			
@@ -227,8 +227,8 @@ class HeadCompiler
 					// このルールのガードの意味:
 					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) にはマッチしない
 					//
-					LinkedList<Membrane> atomSupermems  = new LinkedList<Membrane>(); // atomの広義先祖膜列（親膜側が先頭）
-					LinkedList<Membrane> buddySupermems = new LinkedList<Membrane>(); // buddyの広義先祖膜列（親膜側が先頭）
+					LinkedList<Membrane> atomSupermems  = new LinkedList<>(); // atomの広義先祖膜列（親膜側が先頭）
+					LinkedList<Membrane> buddySupermems = new LinkedList<>(); // buddyの広義先祖膜列（親膜側が先頭）
 					// 広義先祖膜列の計算
 					// atomSupermems = {0,1}; buddySupermems = {0,1,2}
 					Membrane mem = proccxteqMap.get(buddyatom.mem).def.lhsOcc.mem;
@@ -333,8 +333,8 @@ class HeadCompiler
 		Env.c("compileLinkedGroup");
 		//if(debug2)Util.println("compileLinkedGroup called ; startatom :" + startatom + " list :" + list.insts);
 		List<Instruction> insts = list.insts;
-		LinkedList<Membrane> newmemlist = new LinkedList<Membrane>();
-		LinkedList<Atom> atomqueue = new LinkedList<Atom>();
+		LinkedList<Membrane> newmemlist = new LinkedList<>();
+		LinkedList<Atom> atomqueue = new LinkedList<>();
 		if(debug)Util.println("start "+startatom);
 		atomqueue.add(startatom);
 		while( ! atomqueue.isEmpty() ) {
@@ -390,8 +390,8 @@ class HeadCompiler
 					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) にはマッチしない
 					int firstindex = insts.size() - 1; // atomからのDEREF命令を指す
 					//
-					LinkedList<Membrane> atomSupermems  = new LinkedList<Membrane>(); // atomの広義先祖膜列（親膜側が先頭）
-					LinkedList<Membrane> buddySupermems = new LinkedList<Membrane>(); // buddyの広義先祖膜列（親膜側が先頭）
+					LinkedList<Membrane> atomSupermems  = new LinkedList<>(); // atomの広義先祖膜列（親膜側が先頭）
+					LinkedList<Membrane> buddySupermems = new LinkedList<>(); // buddyの広義先祖膜列（親膜側が先頭）
 					// 広義先祖膜列の計算
 					// atomSupermems = {0,1}; buddySupermems = {0,1,2}
 					Membrane mem = proccxteqMap.get(buddyatom.mem).def.lhsOcc.mem;
@@ -619,8 +619,8 @@ class HeadCompiler
 	/* 同名型付きプロセス文脈の分離に伴い、中間命令findproccxtを追加する */
 	void compileSameProcessContext(Membrane mem, InstructionList list) {//seiji
 		// List<Instruction> insts = list.insts;
-		HashMap<String, String> sameNameMap = new HashMap<String, String>();
-		HashMap<String, Atom> linkNameToAtomMap = new HashMap<String, Atom>();
+		HashMap<String, String> sameNameMap = new HashMap<>();
+		HashMap<String, Atom> linkNameToAtomMap = new HashMap<>();
 		makeSameNameMap(mem, sameNameMap, linkNameToAtomMap);
 
 		sameProcessContext(mem, list, sameNameMap, linkNameToAtomMap);
@@ -704,7 +704,7 @@ class HeadCompiler
 				if(debug)Util.println("start from " + atom);
 				if (atomToPath(atom) == UNBOUND) {
 					//HashSet ratoms = new HashSet();
-					HashSet<Atom> qatoms = new HashSet<Atom>();
+					HashSet<Atom> qatoms = new HashSet<>();
 					int restvarcount = varCount;
 					int diffvarcount = 0;
 					qatoms.clear();
@@ -837,7 +837,7 @@ class HeadCompiler
 				nextgroupinst = new InstructionList(list);
 				if (!atom.functor.isActive() && !fFindDataAtoms) continue;
 				if (atomToPath(atom) == UNBOUND) {
-					HashSet<Atom> qatoms = new HashSet<Atom>();
+					HashSet<Atom> qatoms = new HashSet<>();
 					int restvarcount = varCount;
 					int diffvarcount = 0;
 					if(!rireki){
@@ -997,7 +997,7 @@ class HeadCompiler
 	/** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜引数列を返す。
 	 * 具体的にはmemsに対応する変数番号のリストを格納したArrayListを返す。*/
 	List<Integer> getMemActuals() {
-		List<Integer> args = new ArrayList<Integer>();		
+		List<Integer> args = new ArrayList<>();
 		for (int i = 0; i < mems.size(); i++) {
 			if(memPaths.get(mems.get(i)) != null)args.add( memPaths.get(mems.get(i)) );
 		}
@@ -1006,7 +1006,7 @@ class HeadCompiler
 	/** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）へのアトム引数列を返す。
 	 * 具体的にはHeadCompilerはatomsに対応する変数番号のリストを格納したArrayListを返す。*/
 	List<Integer> getAtomActuals() {
-		List<Integer> args = new ArrayList<Integer>();		
+		List<Integer> args = new ArrayList<>();
 		for (int i = 0; i < atoms.size(); i++) {
 			if(atomPaths.get(atoms.get(i)) != null)args.add( atomPaths.get(atoms.get(i)) );
 		}
@@ -1015,11 +1015,11 @@ class HeadCompiler
 	/** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜やアトム以外の引数列を返す。
 	 * 具体的にはHeadCompilerは空のArrayListを返す。*/
 	List<Object> getVarActuals() {
-		return new ArrayList<Object>();
+		return new ArrayList<>();
 	}
 
 	private void resetAtomActuals(){
-		HashMap<Atomic, Integer> newatompaths = new HashMap<Atomic, Integer>();
+		HashMap<Atomic, Integer> newatompaths = new HashMap<>();
 		for (int i = 0; i < atoms.size(); i++) {
 			if(atomPaths.get(atoms.get(i)) != null){
 				newatompaths.put( atoms.get(i), varCount);
@@ -1029,7 +1029,7 @@ class HeadCompiler
 		atomPaths = newatompaths;
 	}
 	private void resetMemActuals(){
-		HashMap<Membrane, Integer> newmempaths = new HashMap<Membrane, Integer>();
+		HashMap<Membrane, Integer> newmempaths = new HashMap<>();
 		varCount = 0;
 		for (int i = 0; i < mems.size(); i++) {
 			if(memPaths.get(mems.get(i)) != null){
