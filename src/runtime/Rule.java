@@ -407,6 +407,6 @@ class Benchmark {
 	public long lockfailure = 0;
 
 	Benchmark(Thread thread) {
-		thread.getId();
+		this.threadid = thread.getId();
 	}
 }
