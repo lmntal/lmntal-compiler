@@ -80,7 +80,7 @@ public class RuleCompiler
 	private Map<LinkOccurrence, Integer>  lhslinkpath = new HashMap<LinkOccurrence, Integer>();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
 	// ＜左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])　＞から変更
 
-	private HeadCompiler hc, hc2;
+	private HeadCompiler hc;
 
 	private int lhsmemToPath(Membrane mem) { return lhsmempath.get(mem); }
 	private int rhsmemToPath(Membrane mem) { return rhsmempath.get(mem); }
@@ -121,8 +121,6 @@ public class RuleCompiler
 
 		hc = new HeadCompiler();//rs.leftMem;
 		hc.enumFormals(rs.leftMem);	// 左辺に対する仮引数リストを作る
-		hc2 = new HeadCompiler();
-		hc2.enumFormals(rs.leftMem);
 		theRule.guardLabel = new InstructionList();
 		guard = theRule.guardLabel.insts;
 		theRule.bodyLabel = new InstructionList();
@@ -215,7 +213,6 @@ public class RuleCompiler
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++)
 		{
 			hc.prepare(); // 変数番号を初期化
-			hc2.prepare();
 			if (firstid < hc.atoms.size()) continue;
 			else
 			{
@@ -231,12 +228,10 @@ public class RuleCompiler
 					memMatch = hc.match;
 				}
 				hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
-				hc2.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
 			}
 			if (Env.findatom2)
 			{
 				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
-				hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 			}
 			else
 			{
@@ -262,7 +257,6 @@ public class RuleCompiler
 				if (Env.findatom2)
 				{
 					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
-					hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 				}
 				else
 				{
