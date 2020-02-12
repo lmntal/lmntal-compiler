@@ -112,19 +112,18 @@ public final class InterpretedRuleset extends Ruleset
 
 	public void showDetail()
     {
-	if (isSystemRuleset)
-	    {
-		Env.p("Compiled SystemRuleset @" + id + dumpRules());
+		if (isSystemRuleset)
+		{
+			Env.p("Compiled SystemRuleset @" + id + dumpRules());
 	    }
-	else
+		else
 	    {
-		Env.p("Compiled Ruleset @" + id + dumpRules());
+			Env.p("Compiled Ruleset @" + id + dumpRules());
 	    }
-	for (Rule rule : rules)
+		for (Rule rule : rules)
 	    {
-		rule.showDetail();
+			rule.showDetail();
 	    }
-	Env.p("");
-	
-    }
+		Env.p("");
+	}
 }

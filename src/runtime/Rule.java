@@ -104,7 +104,6 @@ public final class Rule
 	 */
 	public void showDetail()
 	{
-
 		if (hasUniq)
 		{
 			Env.p("Compiled Uniq Rule " + this);
@@ -145,8 +144,7 @@ public final class Rule
 
 	public String toString()
 	{
-	    return "";
-		//return name != null && !name.equals("") ? name : text;
+		return "";
 	}
 
 	/**

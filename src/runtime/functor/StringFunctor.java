@@ -21,10 +21,8 @@ public class StringFunctor extends ObjectFunctor {
 	public String stringValue() {return getName();}
 
   public String toString() {
-      //if (Env.compileonly)
-      return Util.quoteString(getName(), '\"') + "_" + getArity();
-		//return getQuotedFunctorName() + "_" + getArity();
-  }
+		return Util.quoteString(getName(), '\"') + "_" + getArity();
+	}
 	
 	// 2006/06/28 by kudo
 	public boolean equals(Object o){
