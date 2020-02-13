@@ -80,7 +80,7 @@ public class RuleCompiler
 	private Map<LinkOccurrence, Integer>  lhslinkpath = new HashMap<>();		// 左辺のアトムのリンク出現 (LinkOccurrence) -> 変数番号(Integer)
 	// ＜左辺のアトムの変数番号 (Integer) -> リンクの変数番号の配列 (int[])　＞から変更
 
-	private HeadCompiler hc, hc2;
+	private HeadCompiler hc;
 
 	private int lhsmemToPath(Membrane mem) { return lhsmempath.get(mem); }
 	private int rhsmemToPath(Membrane mem) { return rhsmempath.get(mem); }
@@ -122,13 +122,8 @@ public class RuleCompiler
 		theRule.name = rs.name;
 
 		hc = new HeadCompiler(rs.leftMem);
-		hc2 = new HeadCompiler(rs.leftMem);
-		//とりあえず常にガードコンパイラを呼ぶ事にしてしまう by mizuno
-		//if (!rs.typedProcessContexts.isEmpty() || !rs.guardNegatives.isEmpty())
-		// if (true) {
-			theRule.guardLabel = new InstructionList();
-			guard = theRule.guardLabel.insts;
-		// } else { guard = null; }
+		theRule.guardLabel = new InstructionList();
+		guard = theRule.guardLabel.insts;
 		theRule.bodyLabel = new InstructionList();
 		body = theRule.bodyLabel.insts;
 		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
@@ -137,16 +132,6 @@ public class RuleCompiler
 		compile_l();
 
 		// ガードのコンパイル
-		compile_g();
-
-		hc = new HeadCompiler(rs.leftMem);
-		hc.firsttime = false;
-		theRule.guardLabel = new InstructionList();
-		guard = theRule.guardLabel.insts;
-		contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
-
-		compile_l();
-
 		compile_g();
 
 		// 右辺膜のコンパイル
@@ -229,7 +214,6 @@ public class RuleCompiler
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++)
 		{
 			hc.prepare(); // 変数番号を初期化
-			hc2.prepare();
 			if (firstid < hc.atoms.size()) continue;
 			else
 			{
@@ -245,12 +229,10 @@ public class RuleCompiler
 					memMatch = hc.match;
 				}
 				hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
-				hc2.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
 			}
 			if (Env.findatom2)
 			{
 				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
-				hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 			}
 			else
 			{
@@ -276,7 +258,6 @@ public class RuleCompiler
 				if (Env.findatom2)
 				{
 					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
-					hc2.compileMembrane(rs.leftMem, hc.tempLabel);
 				}
 				else
 				{
