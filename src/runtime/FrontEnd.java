@@ -30,8 +30,6 @@ public class FrontEnd
 
 	public static void main(String[] args)
 	{
-		checkVersion();
-
 		Runtime.getRuntime().addShutdownHook(new Thread()
 		{
 			public void run()
@@ -58,34 +56,6 @@ public class FrontEnd
 				System.exit(1);
 			}
 			run(Env.srcs);
-		}
-	}
-
-	/**
-	 * <p>Javaのバージョンをチェックする。</p>
-	 * <p>Java1.4以上を使っていないとエラーを出力して終了する。</p>
-	 */
-	private static void checkVersion()
-	{
-		// バージョンチェック by 水野
-		try
-		{
-			String ver = System.getProperty("java.version");
-			StringTokenizer tokenizer = new StringTokenizer(ver, ".");
-			int major = Integer.parseInt(tokenizer.nextToken());
-			int minor = Integer.parseInt(tokenizer.nextToken());
-			if (major < 1 || (major == 1 && minor < 4))
-			{
-				Util.errPrintln("use jre 1.4 or higher!!");
-				System.exit(1);
-			}
-			Env.majorVersion = major;
-			Env.minorVersion = minor;
-			// うまくいかなかった場合は無視する
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
 		}
 	}
 
@@ -247,12 +217,6 @@ public class FrontEnd
 				}
 			}
 		}
-
-		if (!Optimizer.forceReuseAtom)
-		{
-			Optimizer.fReuseAtom = false;
-			// Env.findatom2 = true;
-		}
 	}
 
 	private static int processLongOptions(String[] args, int i)
@@ -264,7 +228,7 @@ public class FrontEnd
 			//@ --compileonly
 			//@ Output compiled intermediate instruction sequence only.
 			//@ Compiler will not translate to Java or execute the program.
-			Env.compileonly = true;
+			//Env.compileonly = true;
 		}
 		else if (opt.equals("--slimcode"))
 		{
@@ -273,7 +237,7 @@ public class FrontEnd
 			// （互換性のため分岐を残している）
 			//@ --slimcode
 			//@ Output intermediate instruction sequence to be executed by SLIM.
-			Env.compileonly = true;
+			//Env.compileonly = true;
 		}
 		else if (opt.equals("--charset"))
 		{
@@ -365,7 +329,6 @@ public class FrontEnd
 			//@ --optimize-reuse-atom
 			//@ Reuse atoms.
 			Optimizer.fReuseAtom = true;
-			Optimizer.forceReuseAtom = true;
 		}
 		else if (opt.equals("--optimize-reuse-mem"))
 		{
@@ -474,7 +437,7 @@ public class FrontEnd
 			// -- --compile-rule
 			// compile one rule (for SLIM model checking mode)
 			Env.compileRule = true;
-			Env.compileonly = true;
+			//Env.compileonly = true;
 		}
 		else if (opt.equals("--hl") || opt.equals("--hl-opt")) //seiji
 		{
@@ -635,25 +598,24 @@ public class FrontEnd
 				showIL((InterpretedRuleset)rs, m);
 			}
 
-			if (Env.compileonly)
+			
+			
+			// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
+			for (String libName : Module.loaded)
 			{
-				// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
-				for (String libName : Module.loaded)
+				compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
+				.get(libName);
+				for (Ruleset r : mem.rulesets)
 				{
-					compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
-					.get(libName);
-					for (Ruleset r : mem.rulesets)
-					{
-						((InterpretedRuleset)r).showDetail();
-					}
+					((InterpretedRuleset)r).showDetail();
 				}
-				// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
-				Module.showModuleList();
-				// インラインコード一覧を出力
-				Inline.initInline();
-				Inline.showInlineList();
-				System.exit(0);
 			}
+			// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
+			Module.showModuleList();
+			// インラインコード一覧を出力
+			Inline.initInline();
+			Inline.showInlineList();
+			System.exit(0);
 		}
 		catch (Exception e)
 		{

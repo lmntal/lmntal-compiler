@@ -411,7 +411,7 @@ public class LMNParser {
 	 *  @param names 左辺およびガード型制約に出現した$p（と*X）からその定義（と出現）へのマップ[in] */
 	private void addGuardNegatives(LinkedList<List> sNegatives, RuleStructure rule, HashMap names) throws ParseException {
 		for(List<List> list1 : sNegatives){
-			List<ProcessContextEquation> neg = new LinkedList<ProcessContextEquation>();
+			List<ProcessContextEquation> neg = new LinkedList<>();
 			ListIterator it2 = list1.listIterator();
 			while(it2.hasNext()){
 				LinkedList sPair = (LinkedList)it2.next();
@@ -443,7 +443,7 @@ public class LMNParser {
 	/** 子膜に対して再帰的にプロキシを追加する。
 	 * @return この膜の更新された自由リンクマップ mem.freeLinks */
 	private HashMap addProxies(Membrane mem) {
-		HashSet<String> proxyLinkNames = new HashSet<String>();	// memとその子膜の間に作成した膜間リンク名の集合
+		HashSet<String> proxyLinkNames = new HashSet<>();	// memとその子膜の間に作成した膜間リンク名の集合
 		for(Membrane submem : mem.mems){
 			HashMap freeLinks = addProxies(submem);
 			// 子膜の自由リンクに対してプロキシを追加する
@@ -1071,7 +1071,7 @@ public class LMNParser {
 
 class SyntaxExpander {
 	private LMNParser parser;
-	private HashSet<String> TopAtomNameSet = new HashSet<String>();
+	private HashSet<String> TopAtomNameSet = new HashSet<>();
 	SyntaxExpander(LMNParser parser) {
 		this.parser = parser;
 	}	

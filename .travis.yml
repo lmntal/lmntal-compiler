@@ -1,21 +1,10 @@
+dist: bionic
 language: java
 
-matrix:
-  include:
-    - os: linux
-      dist: bionic
-      before_install:
-        - sudo apt-get -qq update
-        - sudo apt-get install -y ant re2c
-    - os: osx
-      osx_image: xcode11.3
-      before_install:
-        - export HOMEBREW_NO_INSTALL_CLEANUP=1
-        - brew update > /dev/null
-        - brew install automake autoconf re2c bison ant
-        - brew link bison --force
-        - export PATH="/usr/local/opt/bison/bin:$PATH"
-    
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y ant re2c
+ 
 install:
   - ant
   - export LMNTAL_HOME=`pwd`
@@ -27,4 +16,4 @@ install:
 
 script:
   - export slim_CHECK_ND=yes
-  - make check
+  - make -j check

@@ -34,7 +34,7 @@ public class InstructionList implements Cloneable
 	/**
 	 * 命令列 (InstructionのList)
 	 */
-	public List<Instruction> insts = new ArrayList<Instruction>();
+	public List<Instruction> insts = new ArrayList<>();
 
 	/**
 	 * 親命令列またはnull
@@ -120,7 +120,7 @@ public class InstructionList implements Cloneable
 	 */
 	public static List<Instruction> cloneInstructions(List<Instruction> insts)
 	{
-		List<Instruction> ret = new ArrayList<Instruction>();
+		List<Instruction> ret = new ArrayList<>();
 		for (Instruction inst : insts)
 		{
 			ret.add((Instruction)inst.clone());

@@ -31,7 +31,7 @@ public class ModeVar {
 	public int value = 0;
 
 	public ModeVar(String name, int sign) {
-		pathes = new HashSet<Path>();
+		pathes = new HashSet<>();
 		this.name = name;
 		this.sign = sign;
 	}	

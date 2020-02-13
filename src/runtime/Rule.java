@@ -79,7 +79,7 @@ public final class Rule
 		memMatchLabel = new InstructionList();
 		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
-		bench = new HashMap<Thread, Benchmark>();
+		bench = new HashMap<>();
 	}
 
 	/**
@@ -104,7 +104,7 @@ public final class Rule
 	 */
 	public void showDetail()
 	{
-		if (Env.debug == 0 && !Env.compileonly) return;
+		
 
 		if (hasUniq)
 		{
@@ -116,7 +116,7 @@ public final class Rule
 		}
 
 		Env.p("--atommatch:", 1);
-		printInstructions(atomMatch);
+//		printInstructions(atomMatch);
 
 		Env.p("--memmatch:", 1);
 		printInstructions(memMatch);
@@ -146,8 +146,7 @@ public final class Rule
 
 	public String toString()
 	{
-		if (Env.compileonly) return "";
-		return name != null && !name.equals("") ? name : text;
+		return "";
 	}
 
 	/**
@@ -407,7 +406,6 @@ class Benchmark {
 	public long lockfailure = 0;
 
 	Benchmark(Thread thread) {
-		this.threadid = (Env.majorVersion == 1 && Env.minorVersion > 4) 
-		? thread.getId() : thread.hashCode();
+		this.threadid = thread.getId();
 	}
 }

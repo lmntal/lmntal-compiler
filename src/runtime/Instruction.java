@@ -58,7 +58,7 @@ import util.Util;
 public class Instruction implements Cloneable
 {
 	/** 命令毎の引数情報を入れるテーブル */
-	private static Map<Integer, ArgType> argTypeTable = new HashMap<Integer, ArgType>();
+	private static Map<Integer, ArgType> argTypeTable = new HashMap<>();
 	/**アトム*/
 	public static final int ARG_ATOM = 0;
 	/**膜*/
@@ -86,7 +86,7 @@ public class Instruction implements Cloneable
 	 * 命令の引数を保持する。
 	 * 命令の種類によって引数の型が決まっている。
 	 */
-	public List<Object> data = new ArrayList<Object>();
+	public List<Object> data = new ArrayList<>();
 	
 	//////////
 	// 定数
@@ -2150,6 +2150,10 @@ public class Instruction implements Cloneable
 		return new Instruction(REMOVEATOM,atom);
 	}
 	/** removeatom 命令を生成する*/
+	public static Instruction removeatom(int atom, int mem) {
+		return new Instruction(REMOVEATOM,atom,mem);
+	}
+	/** removeatom 命令を生成する @deprecated*/
 	public static Instruction removeatom(int atom, int mem, Functor func) {
 		return new Instruction(REMOVEATOM,atom,mem,func);
 	}
@@ -2741,7 +2745,7 @@ public class Instruction implements Cloneable
 
 	/** Integerでラップされた命令番号から命令名へのハッシュ。
 	 * <p>処理系開発が収束した頃に、もっと効率のよい別の構造で置き換えてもよい。 */
-	private static HashMap<Integer, String> instructionTable = new HashMap<Integer, String>();
+	private static HashMap<Integer, String> instructionTable = new HashMap<>();
 	
 	//インスタンス生成時にスタックオーバーフローを起こしたので修正しました。 by Mizuno
 	//ExceptionInInitializerError がおきてたので修正 by hara
@@ -2783,8 +2787,8 @@ public class Instruction implements Cloneable
 	// CSV形式で出力される
 	public static void main(String[] args)
 	{
-		SortedMap<Integer, String> idToName = new TreeMap<Integer, String>();
-		SortedMap<String, Integer> nameToId = new TreeMap<String, Integer>();
+		SortedMap<Integer, String> idToName = new TreeMap<>();
+		SortedMap<String, Integer> nameToId = new TreeMap<>();
 		try
 		{
 			Field[] fields = Instruction.class.getDeclaredFields();
@@ -2892,10 +2896,6 @@ public class Instruction implements Cloneable
 		{
 			spaces -= 2;
 		}
-		if (!Env.compileonly)
-		{
-			instName = shorten(instName, spaces - 1);
-		}
 		buffer.append(instName);
 		spaces -= instName.length();
 		while (spaces > 0)
@@ -2944,15 +2944,7 @@ public class Instruction implements Cloneable
 			}
 			else
 			{
-				if (Env.compileonly)
-				{
-					buffer.append("[[\n");
-				}
-				else
-				{
-					buffer.append("[\n");
-				}
-				
+				buffer.append("[[\n");
 				int i;
 				for (i = 0; i < insts.size() - 1; i++)
 				{
@@ -2966,8 +2958,7 @@ public class Instruction implements Cloneable
 						buffer.append("  ");
 					buffer.append(insts.get(i));
 					//TODO 出力引数だったらインデントを下げる.
-					if (Env.compileonly) buffer.append("\n");
-					else buffer.append(", \n");
+					buffer.append("\n");
 				}
 				buffer.append("                ");
 				for (int j = 0; j < depth; j++)
@@ -2992,7 +2983,7 @@ public class Instruction implements Cloneable
 			if (i != 0) buffer.append(", ");
 			Object o = data.get(i);
 			String str = (o == null ? "null" : o.toString());
-			if (o instanceof String || (Env.compileonly && o instanceof Rule))
+			if (o instanceof String || (o instanceof Rule))
 			{
 				str = Util.quoteString(str, '"');
 			}
