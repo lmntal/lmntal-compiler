@@ -29,8 +29,6 @@ public class Optimizer {
 	public static boolean fReuseMem;
 	/** アトムの再利用を行う */
 	public static boolean fReuseAtom;
-	/** {@code --slimcode} オプションにかかわらず、アトム再利用最適化を有効化する */
-	public static boolean forceReuseAtom;
 	/** 命令列のループ化を行う */
 	public static boolean fLoop;
 	/** 命令列の並び替えを行う */
@@ -58,8 +56,10 @@ public class Optimizer {
 	 */
 	public static void setLevel(int level) {
 		if (level >= 1) {
-			fReuseAtom = fReuseMem = true;
+			fReuseMem = true;
 			fGuardMove = true;
+			//アトム再利用最適化はバグがいるので実行しない(代わりにswaplinkを使う)
+			//fReuseAtom = true;
 		}
 		if (level >= 2) {
 //			ループ化はまだバグがいるので、個別に指定しない限り実行しない
