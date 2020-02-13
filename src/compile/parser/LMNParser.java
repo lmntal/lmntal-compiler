@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.AbstractMap.SimpleEntry;
 
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.Scanner;
@@ -97,7 +96,7 @@ public class LMNParser {
 		@throws ParseException 
 	*/
 	protected LinkedList<SrcAbstract> parseSrc() throws ParseException {
-		parser p = new parser(lex, new ComplexSymbolFactory());
+		parser p = new parser(lex);
 		LinkedList<SrcAbstract> result = null;
 		try {
 			result = (LinkedList<SrcAbstract>)p.parse().value;
@@ -1089,7 +1088,7 @@ class SyntaxExpander {
 
 		// ガードを型制約と否定条件に分類する
 		flatten(sRule.getGuard());
-		ListIterator lit = sRule.getGuard().listIterator();
+		ListIterator<SrcAbstract> lit = sRule.getGuard().listIterator();
 		while (lit.hasNext()) {
 			Object obj = lit.next();
 			if (obj instanceof SrcAtom) {
