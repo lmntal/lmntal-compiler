@@ -17,7 +17,7 @@ class SrcProcessContext extends SrcContext
 	public SrcLinkBundle bundle = null;
 
 	/** 分離した同名型付きプロセス文脈の名前を格納 */
-	public LinkedList sameNameList = null;
+	public LinkedList<String> sameNameList = null;
 
 	/** リンク名 */
 	public String linkName = null;
@@ -51,7 +51,7 @@ class SrcProcessContext extends SrcContext
 		return "$" + name;
 	}
 
-	public LinkedList getSameNameList()
+	public LinkedList<String> getSameNameList()
 	{
 		return sameNameList;
 	}

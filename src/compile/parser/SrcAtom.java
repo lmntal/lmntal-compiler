@@ -3,9 +3,9 @@ package compile.parser;
 import java.util.LinkedList;
 
 /** ソースファイル中のアトム表現 */
-class SrcAtom
+class SrcAtom extends SrcAbstract
 {
-	protected LinkedList process = null;
+	protected LinkedList<SrcAbstract> process = null;
 
 	/** 名前トークン */
 	protected SrcName srcname;
@@ -37,7 +37,7 @@ class SrcAtom
 	 */
 	public SrcAtom(SrcName srcname)
 	{
-		this(srcname, new LinkedList(), -1,-1);
+		this(srcname, new LinkedList<>(), -1,-1);
 	}
 
 	/**
@@ -45,7 +45,7 @@ class SrcAtom
 	 * @param name アトム名
 	 * @param process 子供プロセス
 	 */
-	public SrcAtom(String name, LinkedList process)
+	public SrcAtom(String name, LinkedList<SrcAbstract> process)
 	{
 		this(new SrcName(name), process, -1,-1);
 	}
@@ -59,7 +59,7 @@ class SrcAtom
 	 */
 	public SrcAtom(SrcName srcname, int line, int column)
 	{
-		this(srcname, new LinkedList(), line, column);
+		this(srcname, new LinkedList<>(), line, column);
 	}	
 
 	/**
@@ -70,7 +70,7 @@ class SrcAtom
 	 * @param line ソースコード上での出現位置(行)
 	 * @param column ソースコード上での出現位置(桁)
 	 */
-	public SrcAtom(SrcName nametoken, LinkedList process, int line, int column)
+	public SrcAtom(SrcName nametoken, LinkedList<SrcAbstract> process, int line, int column)
 	{
 		this.srcname = nametoken;
 		this.process = process;
@@ -111,7 +111,7 @@ class SrcAtom
 	 * このアトムの子プロセスを得ます
 	 * @return 子プロセスのリスト
 	 */
-	public LinkedList getProcess()
+	public LinkedList<SrcAbstract> getProcess()
 	{
 		return process;
 	}

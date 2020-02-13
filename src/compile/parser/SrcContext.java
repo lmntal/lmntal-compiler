@@ -4,7 +4,7 @@ package compile.parser;
  * ソースファイル中のリンク・リンク束・プロセスコンテキスト・ルールコンテキストの抽象親クラス
  * <p>プロセス文脈名およびルール文脈名には '...' や [[...]] が使えないようにした。
  */
-abstract class SrcContext
+abstract class SrcContext extends SrcAbstract
 {
 	protected String name = null;
 	protected int lineno = -1;

@@ -849,7 +849,7 @@ public class RuleCompiler
 	/** 否定条件をコンパイルする */
 	void compileNegatives() throws CompileException
 	{
-		Iterator<List<ProcessContextEquation>> it = rs.guardNegatives.iterator();
+		Iterator<LinkedList<ProcessContextEquation>> it = rs.guardNegatives.iterator();
 		while (it.hasNext())
 		{
 			List<ProcessContextEquation> eqs = it.next();
