@@ -300,6 +300,7 @@ class HeadCompiler extends BaseCompiler
 				if(debug)Util.println("proc1 " + atom);
 				if(debug)Util.println("proc1 " + buddyatom);
 				if (atomToPath(buddyatom) != UNBOUND) {
+					if(debug2) System.out.println("buddyatom is BOUNDED");
 					// リンク先のアトムをすでに取得している場合。
 					// - リンク先のアトムbuddyatomと以前に取得したアトムの同一性を検査する。
 					//   ただし検査は変数番号および引数番号の組に基づいた片方向のみでよい。
@@ -332,9 +333,11 @@ class HeadCompiler extends BaseCompiler
 				// また*AのDEREFの第4引数およびbuddyatompathを訂正する。
 				if (proccxteqMap.containsKey(atom.mem)
 						&& proccxteqMap.containsKey(buddyatom.mem) && buddyatom.mem != atom.mem) {				
+					if(debug)Util.println("proc6 " + atom);
 					// ( 0: 1:{$p[|*X],2:{$q[|*Y]}} :- \+($p=(atom(L),$pp),$q=(buddy(L),$qq)) | ... )
 					// このルールのガードの意味:
 					// ( 0: 1:{atom(L),$pp[|*XX],2:{buddy(L),$qq[|*YY]}} :- ... ) にはマッチしない
+
 					int firstindex = insts.size() - 1; // atomからのDEREF命令を指す
 					//
 					LinkedList<Membrane> atomSupermems  = new LinkedList<>(); // atomの広義先祖膜列（親膜側が先頭）
@@ -396,6 +399,7 @@ class HeadCompiler extends BaseCompiler
 				}
 
 				if (atomToPath(buddyatom) != UNBOUND) {
+					if(debug)Util.println("proc7 " + atom);
 					// リンク先のアトムをすでに取得している場合
 					// lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
 					insts.add( new Instruction(Instruction.EQATOM,
@@ -433,6 +437,7 @@ class HeadCompiler extends BaseCompiler
 
 				// リンク先の膜の特定
 				if (atom.functor.isOutsideProxy() && pos == 0) {
+					if(debug)Util.println("proc8 " + atom);
 					// 子膜へのリンクの場合、子膜の同一性を検査しなければならない
 					Membrane buddymem = buddyatom.mem;								
 					int buddymempath = memToPath(buddyatom.mem);
