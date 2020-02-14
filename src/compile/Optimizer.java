@@ -35,8 +35,6 @@ public class Optimizer {
 	public static boolean fGuardMove;
 	/** 命令列のグループ化を行う */
 	public static boolean fGrouping;
-	/** 命令列の編み上げを行う */
-	public static boolean fMerging;
 	/** システムルールセットのインライン展開 */
 	public static boolean fSystemRulesetsInlining;
 
@@ -45,7 +43,7 @@ public class Optimizer {
 	 */
 	public static void clearFlag() {
 		fInlining = fReuseMem = fReuseAtom = fLoop = false;
-		fGuardMove = fGrouping = fMerging = fSystemRulesetsInlining = false;
+		fGuardMove = fGrouping = fSystemRulesetsInlining = false;
 	}
 	/**
 	 * 最適化レベルを設定する。
@@ -85,28 +83,23 @@ public class Optimizer {
 		if (fInlining || fGuardMove || fGrouping || fReuseMem || fReuseAtom || fLoop) {
 			//head と guard をくっつける
 			inlineExpandTailJump(rule.memMatch);
-			//現状ではアトム主導テストのインライン展開には対応していない -> 一応対応(sakurai)
-			inlineExpandTailJump(rule.atomMatch);
 			rule.guardLabel = null;
 			rule.guard = null;
 		}
 		optimize(rule.memMatch, rule.body);
-		if(fGuardMove && !fMerging) {
-			guardMove(rule.atomMatch);
+		if(fGuardMove) {
 			guardMove(rule.memMatch);
-			allocMove(rule.atomMatch);
 			allocMove(rule.memMatch);
 		}
-		if(fGrouping && !fMerging) {
+		if(fGrouping) {
 			Grouping g = new Grouping();
-			g.grouping(rule.atomMatch, rule.memMatch);
+			g.grouping(rule.memMatch);
 		} 
 		if (Env.hyperLinkOpt) findproccxtMove(rule.memMatch);//seiji
 		if(fSystemRulesetsInlining) inlineExpandSystemRuleSets(rule.body);
 		if (fInlining) {
 			// head(+guard) と body をくっつける
 			inlineExpandTailJump(rule.memMatch);
-			inlineExpandTailJump(rule.atomMatch);
 
 			rule.bodyLabel = null; 
 			rule.body = null;

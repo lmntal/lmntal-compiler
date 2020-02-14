@@ -40,22 +40,17 @@ public class Grouping {
 	}
 	
 	/** 命令列のグループ化
-	 *  アトム主導テスト部と膜主導テスト部で操作を分ける。
-	 *  @atom アトム主導テスト部の命令列
-	 *  @param 膜主導テスト部の命令列
+	 *  @param mem 膜主導テスト部の命令列
 	 * */
-	public void grouping(List<Instruction> atom, List<Instruction> mem){
-		//アトム主導テスト部
-		if(!Optimizer.fMerging) groupingInstsForAtomMatch(atom);
+	public void grouping(List<Instruction> mem){
 		//膜主導テスト部
-		groupingInsts(mem, false);
+		groupingInsts(mem);
 	}
 	
 	/** 命令列のグループ化 
 	 * @param insts グループ化する命令列
-	 * @param isAtomMatch instsがアトム主導テスト部かどうかのフラグ
 	 * */
-	public void groupingInsts(List<Instruction> insts, boolean isAtomMatch){
+	public void groupingInsts(List<Instruction> insts){
 		if(insts.get(0).getKind() != Instruction.SPEC) return;
 		spec = insts.get(0);
 		int last = -1;
@@ -74,43 +69,18 @@ public class Grouping {
 				var2DefInst.put(inst.getArg1(), inst);
 			last = i+1;
 		}
-		if(isAtomMatch){
-			for(int i=1; i<insts.size(); i++){
-				Instruction inst = insts.get(i);
-				if(inst.getKind() == Instruction.FUNC){
-					Inst2GroupId.put(inst, last);
-					var2DefInst.put(inst.getArg1(), inst);
-					break;
-				}
-			}
-		}
 		//viewMap();
-		createGroup(insts, isAtomMatch);
+		createGroup(insts);
 		initMap();
 	}
-	
-	/** 命令列のグループ化 アトム主導テスト用 
-	 * @param insts グループ化するアトム主導テスト部の命令列
-	 * */
-	public void groupingInstsForAtomMatch(List<Instruction> insts){
-		if(insts.get(0).getKind() != Instruction.SPEC) return;
-		for(int i=1; i<insts.size(); i++){
-			Instruction branch = insts.get(i);
-			//if(branch.getKind() == Instruction.COMMIT) break;
-			if(branch.getKind() == Instruction.BRANCH){
-				InstructionList subinsts = (InstructionList)branch.getArg1();
-				groupingInsts(subinsts.insts, true);
-			}
-		}	
-	}	
+
 
 	/**
 	 * マップに基づいてグループを生成する。
 	 * var2DefInstを参照し、グループ識別番号が同じ命令を同じグループとする。 
 	 * @param insts 命令列
-	 * @param isAtomMatch instsがアトム主導テスト部かどうかのフラグ
 	 * */
-	private void createGroup(List<Instruction> insts, boolean isAtomMatch){
+	private void createGroup(List<Instruction> insts){
 		//マップの書き換え
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
@@ -268,15 +238,6 @@ public class Grouping {
 //		Group命令の並び替え
 		//アトム主導テストでは最初のfunc命令を含むグループの位置は先頭のままとする
 		int groupstart = 0;
-		if(isAtomMatch){
-			for(int i=0; i<insts.size(); i++){
-				Instruction inst = insts.get(i);
-				if(inst.getKind() == Instruction.GROUP){
-					groupstart = i+1;
-					break;
-				}
-			}
-		}
 		for(int i=groupstart; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.GROUP){

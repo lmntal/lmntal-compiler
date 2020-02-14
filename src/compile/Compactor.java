@@ -24,36 +24,16 @@ import runtime.Rule;
  */
 public class Compactor {
 	/** ルールオブジェクトを最適化する（予定） */
-	public static void compactRule(Rule rule) {		
-		// todo compactInstructionList(rule.atomMatchLabel);
-		List<Instruction> atomMatch = rule.atomMatch;
-		for(int i=1; i<atomMatch.size(); i++){
-			Instruction inst = atomMatch.get(i);
-			if(inst.getKind() == Instruction.BRANCH)
-				compactInstructionList(((InstructionList)inst.getArg1()).insts);
-			else continue;
-		}
+	public static void compactRule(Rule rule) {
 		compactInstructionList(rule.memMatch);
 		compactInstructionList(rule.guard);
 		compactInstructionList(rule.body);
-	}
-	private static void compactInsts(List<Instruction> insts) {		
-		// todo compactInstructionList(rule.atomMatchLabel);
-		compactInstructionListForSlimCode(insts);
-		for(int i=0; i<insts.size(); i++){
-			Instruction inst = insts.get(i);
-			if(inst.getKind() == Instruction.BRANCH)
-				compactInsts(((InstructionList)inst.getArg1()).insts);
-			else if(inst.getKind() == Instruction.GROUP)
-				compactInsts(((InstructionList)inst.getArg1()).insts);
-			else continue;
-		}
 	}
 	/** 命令列を最適化する（予定）*/
 	public static void compactInstructionList(List<Instruction> insts) {
 		//if (true) return;
 		//List insts = label.insts;
-		Instruction spec = (Instruction)insts.get(0);
+		Instruction spec = insts.get(0);
 		int formals = spec.getIntArg1();
 		int varcount = spec.getIntArg2();
 		varcount = expandBody(insts, varcount);	// 展開（RISC化）
@@ -68,42 +48,6 @@ public class Compactor {
 		varcount = compactBody(insts, varcount);	// 圧縮 (CISC化）
 		varcount = renumberLocals(insts, varcount);	// 局所変数を振りなおす
 		spec.updateSpec(formals,varcount);
-	}
-
-	public static void compactInstructionListForSlimCode(List<Instruction> insts) {
-		//if (true) return;
-		//List insts = label.insts;
-//		Instruction spec = (Instruction)insts.get(0);
-//		int formals = spec.getIntArg1();
-//		int varcount = spec.getIntArg2();
-		int varcount = 0;
-		varcount = expandBody(insts, varcount);	// 展開（RISC化）
-		boolean changed = true;
-		while (changed) {
-			changed = false;
-//			if (liftUpTestInstructions(insts))  changed = true;
-			if (eliminateCommonSubexpressions(insts))  changed = true;
-			if (eliminateRedundantInstructions(insts))  changed = true;
-		}
-		packUnifyLinks(insts);
-		varcount = compactBody(insts, varcount);	// 圧縮 (CISC化）
-//		varcount = renumberLocals(insts, varcount);	// 局所変数を振りなおす
-//		spec.updateSpec(formals,varcount);
-	}
-
-	//（テスト命令列生成用） for f(X,Y):-X=Y
-	static void genTest(Rule rule) {		
-		if (rule.body.size() > 6) {
-			HashMap<Integer, Integer> map = new HashMap<>();
-			map.put(2, 4);
-			Instruction.applyVarRewriteMap(rule.body, map);
-			map.clear();
-			map.put(3, 2);
-			Instruction.applyVarRewriteMap(rule.body, map);
-			map.clear();
-			map.put(4, 3);
-			Instruction.applyVarRewriteMap(rule.body, map);
-		}
 	}
 
 	/** 命令列をRISC化する */

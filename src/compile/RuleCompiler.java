@@ -54,9 +54,7 @@ public class RuleCompiler
 	 */
 	Rule theRule;
 
-	private List<Instruction> atomMatch;
 	private List<Instruction> memMatch;
-	private List<Instruction> tempMatch;// Slimcode時にのみ使用される(中身はmemMatch)
 
 	List<Instruction> guard;
 
@@ -160,8 +158,6 @@ public class RuleCompiler
 		}
 
 		theRule.memMatch  = memMatch;
-		theRule.tempMatch = tempMatch;
-		theRule.atomMatch = atomMatch;
 		theRule.guard     = guard;
 		theRule.body      = body;
 
@@ -207,10 +203,6 @@ public class RuleCompiler
 	 */
 	private void compile_l()
 	{
-		theRule.atomMatchLabel = new InstructionList();
-		atomMatch = theRule.atomMatchLabel.insts;
-
-		int maxvarcount = 2;	// アトム主導用（仮）
 		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++)
 		{
 			hc.prepare(); // 変数番号を初期化
@@ -252,12 +244,10 @@ public class RuleCompiler
 			if (hc.match == memMatch)
 			{
 				hc.match.add(0, Instruction.spec(1, hc.maxVarCount));
-				hc.tempMatch.add(0, Instruction.spec(1, hc.maxVarCount));
 			}
 			else
 			{
 				hc.match.add(0, Instruction.spec(2, hc.maxVarCount));
-				hc.tempMatch.add(0, Instruction.spec(1, hc.maxVarCount));
 			}
 			// jump命令群の生成
 			List<Integer> memActuals  = hc.getMemActuals();
@@ -265,7 +255,6 @@ public class RuleCompiler
 			List<Object> varActuals  = hc.getVarActuals();
 			// - コード#1
 			hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
-			hc.tempMatch.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
 			// - コード#2
 			//hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
 			//int formals = memActuals.size() + atomActuals.size() + varActuals.size();
@@ -274,11 +263,7 @@ public class RuleCompiler
 			//List brancharg = new ArrayList();
 			//brancharg.add(body);
 			//hc.match.add( new Instruction(Instruction.BRANCH, brancharg) );
-
-			// jump命令群の生成終わり
-			if (maxvarcount < hc.varCount) maxvarcount = hc.maxVarCount;
 		}
-		atomMatch.add(0, Instruction.spec(2,maxvarcount));
 	}
 
 	/**

@@ -43,8 +43,6 @@ class HeadCompiler extends BaseCompiler
 //	public Membrane lhsmem;//m;
 	/** マッチング命令列（のラベル）*/
 	InstructionList tempLabel;
-	/** tempLabel.insts */
-	List<Instruction> tempMatch;
 
 	private HashSet<Membrane> memVisited = new HashSet<>();	// Membrane -> boolean, compileMembraneを呼んだかどうか
 
@@ -108,7 +106,6 @@ class HeadCompiler extends BaseCompiler
 		matchLabel = new InstructionList();
 		tempLabel = new InstructionList();
 		match = matchLabel.insts;
-		tempMatch = tempLabel.insts;
 		varCount = 1;	// [0]は本膜
 //		mempaths.put(mems.get(0), new Integer(0));	// 本膜の変数番号は 0
 		fFindDataAtoms = UNTYPED_COMPILE;

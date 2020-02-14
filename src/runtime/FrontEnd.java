@@ -301,13 +301,13 @@ public class FrontEnd
 			//@ Move up the guard instructions.
 			Optimizer.fGuardMove = true;
 		}
-		else if (opt.equals("--optimize-merging"))
-		{
-			//@ --optimize-merging
-			//@ Merge instructions.
-			Optimizer.fMerging = true;
-			Env.fMerging = true;
-		}
+//		else if (opt.equals("--optimize-merging"))
+//		{
+//			//@ --optimize-merging
+//			//@ Merge instructions.
+//			Optimizer.fMerging = true;
+//			Env.fMerging = true;
+//		}
 		else if (opt.equals("--optimize-systemrulesetsinlining"))
 		{
 			Optimizer.fSystemRulesetsInlining = true;
