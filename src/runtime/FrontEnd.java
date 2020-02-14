@@ -262,12 +262,12 @@ public class FrontEnd
 		}
 		//@ --use-findatom2
 		//@ Use findatom2 instruction (findatom with history).
-		else if (opt.equals("--use-findatom2"))
-		{
-			// Env.compileonly = true;
-			Env.findatom2 = true;
-			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
-		}
+//		else if (opt.equals("--use-findatom2"))
+//		{
+//			// Env.compileonly = true;
+//			Env.findatom2 = true;
+//			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
+//		}
 		else if (opt.equals("--memtest-only"))
 		{
 			//@ --memtest-only

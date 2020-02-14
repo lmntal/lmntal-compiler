@@ -34,7 +34,7 @@ public final class Env
 	//public static boolean compileonly = true;
 
 	/** 履歴つきfindatomを含む中間命令列を出力するモード。 */
-	public static boolean findatom2 = false;
+//	public static boolean findatom2 = false;
 
 	/** 膜主導テストオンリーのモード。 */
 	public static boolean memtestonly = false;

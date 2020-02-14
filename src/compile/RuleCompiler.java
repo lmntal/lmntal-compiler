@@ -219,25 +219,10 @@ public class RuleCompiler
 			{
 				// 膜主導
 				theRule.memMatchLabel = hc.matchLabel;
-				if (Env.findatom2)
-				{
-					tempMatch = hc.tempMatch;
-					memMatch = hc.match;
-				}
-				else
-				{
-					memMatch = hc.match;
-				}
+				memMatch = hc.match;
 				hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
 			}
-			if (Env.findatom2)
-			{
-				hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
-			}
-			else
-			{
-				hc.compileMembrane(rs.leftMem, hc.matchLabel);
-			}
+			hc.compileMembrane(rs.leftMem, hc.matchLabel);
 
 			// 自由出現したデータアトムがないか検査する
 			if (!hc.fFindDataAtoms)
@@ -255,14 +240,7 @@ public class RuleCompiler
 				}
 				hc.switchToUntypedCompilation();
 				hc.setContLabel(contLabel);
-				if (Env.findatom2)
-				{
-					hc.compileMembraneForSlimcode(rs.leftMem, hc.matchLabel, hasISGROUND);
-				}
-				else
-				{
-					hc.compileMembrane(rs.leftMem, hc.matchLabel);
-				}
+				hc.compileMembrane(rs.leftMem, hc.matchLabel);
 			}
 			hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
 
