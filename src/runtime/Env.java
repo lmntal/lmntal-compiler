@@ -37,7 +37,7 @@ public final class Env
 //	public static boolean findatom2 = false;
 
 	/** 膜主導テストオンリーのモード。 */
-	public static boolean memtestonly = false;
+//	public static boolean memtestonly = false;
 
 	/** メモリ使用量を最小化する */
 	public static boolean fMemory = true;

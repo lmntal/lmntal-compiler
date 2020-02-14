@@ -270,9 +270,9 @@ public class FrontEnd
 //		}
 		else if (opt.equals("--memtest-only"))
 		{
-			//@ --memtest-only
-			//@ Use membrane test only.
-			Env.memtestonly = true;
+//			//@ --memtest-only
+//			//@ Use membrane test only.
+//			Env.memtestonly = true;
 		}
 		else if (opt.equals("--help"))
 		{
