@@ -266,20 +266,9 @@ public class Compactor {
 				int sub = renumberLocalsSub(subinsts, locals, varcount);
 				if(sub > max)max = sub;
 			}
-			if(inst.getKind()==Instruction.GUARD_INLINE) {
-				// ガードインラインの場合は、出力変数が複数ある場合がある。hara
-				ArrayList<Integer> out = (ArrayList<Integer>)inst.getArg3();
-				for(int j=0;j<out.size();j++) {
-					renumberLocalsSub2(out.get(j), locals, varcount, insts, i);
-					// ループの最後だけインクリメントしない(9行下でするので)
-					// 2006/09/22 kudo
-					if(j<out.size()-1)locals++;
-				}
-			} else {
-				if (inst.getOutputType() == -1) continue;
-				if (inst.getIntArg1() != locals) {
-					renumberLocalsSub2(inst.getIntArg1(), locals, varcount, insts, i);
-				}
+			if (inst.getOutputType() == -1) continue;
+			if (inst.getIntArg1() != locals) {
+				renumberLocalsSub2(inst.getIntArg1(), locals, varcount, insts, i);
 			}
 			locals++;
 		}

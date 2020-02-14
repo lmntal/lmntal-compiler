@@ -40,12 +40,11 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.FUNC,        4,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.DEREFATOM, 5,4,0));
 		// react
-		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0,Functor.OUTSIDE_PROXY));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  2,3,Functor.INSIDE_PROXY));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3,Functor.INSIDE_PROXY));
-		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0,Functor.OUTSIDE_PROXY));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  1,0));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  2,3));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  4,3));
+		insts.add(new Instruction(Instruction.REMOVEATOM,  5,0));
 		insts.add(new Instruction(Instruction.UNIFY,       1,1,5,1,0)); //n-kato 2006-09-07
-		insts.add(new Instruction(Instruction.UNLOCKMEM,   3)); // 子膜を活性化する必要はない（quietでよい）
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 		//
@@ -70,7 +69,6 @@ public final class GlobalSystemRulesetGenerator {
 		insts.add(new Instruction(Instruction.REMOVEATOM,  5,4,Functor.INSIDE_PROXY));
 		insts.add(new Instruction(Instruction.UNIFY,       3,1,5,1,4)); // memo: 本質的にリモートのUNIFY
 		insts.add(new Instruction(Instruction.ENQUEUEMEM,  4)); // ここでは子膜の活性化が必要
-		insts.add(new Instruction(Instruction.UNLOCKMEM,   4));
 		insts.add(new Instruction(Instruction.PROCEED));
 		ruleset.rules.add(rule);
 
@@ -169,7 +167,6 @@ public final class GlobalSystemRulesetGenerator {
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        5,5));
 		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
-		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  3,0));
@@ -221,7 +218,6 @@ public final class GlobalSystemRulesetGenerator {
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
 		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
-		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
 		insts2.add(new Instruction(Instruction.ADDATOM,  0,3));
@@ -259,7 +255,6 @@ public final class GlobalSystemRulesetGenerator {
 		// react
 		insts2.add(new Instruction(Instruction.SPEC,        4,4));
 		insts2.add(new Instruction(Instruction.COMMIT, rule.name, rule.lineno));
-		insts2.add(new Instruction(Instruction.DEQUEUEATOM, 1));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  1,0));
 		insts2.add(new Instruction(Instruction.REMOVEATOM,  2,0));
 		insts2.add(new Instruction(Instruction.ADDATOM,  0,3));
@@ -288,8 +283,6 @@ public final class GlobalSystemRulesetGenerator {
 		ruleset.rules.add(buildUnaryPlusRule("+.", Instruction.ISFLOAT));
 		ruleset.rules.add(buildUnaryOpRule("-",    Instruction.ISINT,  Instruction.INEG));
 		ruleset.rules.add(buildUnaryOpRule("-.",   Instruction.ISFLOAT,Instruction.FNEG));
-		ruleset.rules.add(buildUnaryOpRule("int",  Instruction.ISFLOAT,Instruction.FLOAT2INT));
-		ruleset.rules.add(buildUnaryOpRule("float",Instruction.ISINT,  Instruction.INT2FLOAT));
 		
 //		// 1:cp(A,B,C), 2:$n[A] :- unary($n) | $3:$n[B], $4:$n[C].
 //		// reuse { 2->4 }

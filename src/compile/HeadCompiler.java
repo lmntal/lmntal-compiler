@@ -51,9 +51,6 @@ class HeadCompiler extends BaseCompiler
 
 	int maxVarCount;
 
-	private static int findAtomCount = 0;
-	// private static int anyMemCount = 0;
-
 	private HashMap<Membrane, ProcessContextEquation> proccxteqMap = new HashMap<>(); // Membrane -> ProcessContextEquation
 
 	protected final int linkToPath(int atomid, int pos) { // todo HeadCompilerの仕様に合わせる？GuardCompilerも。

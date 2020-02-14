@@ -456,7 +456,7 @@ public class RuleCompiler
 		deleteconnectors();
 
 		//次の2つは右辺の構造の生成以降ならいつでもよい
-		addInline();
+//		addInline();
 		if (Env.hyperLink)
 		{
 			addHyperlink();//seiji
@@ -615,7 +615,7 @@ public class RuleCompiler
 		deleteconnectors();
 
 		//次の2つは右辺の構造の生成以降ならいつでもよい
-		addInline();
+//		addInline();
 		if (Env.hyperLink) addHyperlink();//seiji
 		addCallback();
 		addRegAndLoadModules();
@@ -2134,17 +2134,17 @@ public class RuleCompiler
 	/**
 	 * インラインコードを実行する命令を生成する
 	 */
-	private void addInline()
-	{
-		for (Atom atom : rhsatoms)
-		{
-			int atomID = rhsatomToPath(atom);
-			Inline.register(unitName, atom.functor.getName());
-			int codeID = Inline.getCodeID(unitName, atom.functor.getName());
-			if (codeID == -1) continue;
-			body.add(new Instruction(Instruction.INLINE, atomID, unitName, codeID));
-		}
-	}
+//	private void addInline()
+//	{
+//		for (Atom atom : rhsatoms)
+//		{
+//			int atomID = rhsatomToPath(atom);
+//			Inline.register(unitName, atom.functor.getName());
+//			int codeID = Inline.getCodeID(unitName, atom.functor.getName());
+//			if (codeID == -1) continue;
+//			body.add(new Instruction(Instruction.INLINE, atomID, unitName, codeID));
+//		}
+//	}
 
 	private static final Functor FUNCTOR_USE = new SymbolFunctor("use",1);
 
