@@ -35,7 +35,7 @@ import compile.structure.ProcessContextEquation;
  * 現在マッチング命令列では、本膜の変数番号を0、主導するアトムの変数番号を1にしている。これは今後も変えない。
  * ボディ命令列の仮引数では、先にmemsを枚挙してから、その続きの変数番号にatomsを枚挙している。
  */
-class HeadCompiler extends BaseCompiler
+class HeadCompiler extends LHSCompiler
 {
 	private boolean debug = false; //一時的
 	private boolean debug2 = false;

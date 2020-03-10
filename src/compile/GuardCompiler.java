@@ -21,7 +21,7 @@ import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
 
-class GuardCompiler extends BaseCompiler
+class GuardCompiler extends LHSCompiler
 {
 	static final Object UNARY_ATOM_TYPE  = "U"; // 1引数アトム
 	static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス

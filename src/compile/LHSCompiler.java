@@ -16,7 +16,7 @@ import compile.structure.Membrane;
 /**
  * HeadCompiler, GuardCompilerの基底クラス
  */
-abstract class BaseCompiler
+abstract class LHSCompiler
 {
 	/** マッチング命令列（のラベル）*/
 	InstructionList matchLabel;
@@ -48,7 +48,7 @@ abstract class BaseCompiler
 
 	protected static final int UNBOUND = -1;
 
-	BaseCompiler()
+	LHSCompiler()
 	{
 	}
 
