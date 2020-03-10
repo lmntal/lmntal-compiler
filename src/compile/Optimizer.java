@@ -90,17 +90,13 @@ public class Optimizer {
 			rule.guardLabel = null;
 			rule.guard = null;
 		}
-		if(Env.findatom2)
-			optimize(rule.tempMatch, rule.body);
-		else
-			optimize(rule.memMatch, rule.body);
+		optimize(rule.memMatch, rule.body);
 		if(fGuardMove && !fMerging) {
 			guardMove(rule.atomMatch);
 			guardMove(rule.memMatch);
 			allocMove(rule.atomMatch);
 			allocMove(rule.memMatch);
 		}
-		if(Env.findatom2)return ;
 		if(fGrouping && !fMerging) {
 			Grouping g = new Grouping();
 			g.grouping(rule.atomMatch, rule.memMatch);

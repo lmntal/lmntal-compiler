@@ -477,8 +477,6 @@ class GuardCompiler extends BaseCompiler
 						{
 							int atomid1 = loadUnaryAtom(def1);
 							int atomid2 = loadUnaryAtom(def2);
-							if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
-								connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 							match.add(new Instruction(Instruction.ISUNARY, atomid1));
 							match.add(new Instruction(Instruction.ISUNARY, atomid2));
 							int funcid1 = varCount++;
@@ -490,8 +488,6 @@ class GuardCompiler extends BaseCompiler
 						else{
 							checkGroundLink(def1);
 							checkGroundLink(def2);
-							if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
-								connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 							int linkid1 = loadGroundLink(def1);
 							int linkid2 = loadGroundLink(def2);
 //							match.add(new Instruction(Instruction.ISGROUND,linkid1));
@@ -506,8 +502,6 @@ class GuardCompiler extends BaseCompiler
 						if (!identifiedCxtdefs.contains(def2)) continue;
 						int atomid1 = loadUnaryAtom(def1);
 						int atomid2 = loadUnaryAtom(def2);
-						if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
-							connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 						if (ISSTRING != typedCxtDataTypes.get(def2))
 						{
 							match.add(new Instruction(ISSTRING, atomid2));
@@ -720,8 +714,6 @@ class GuardCompiler extends BaseCompiler
 						//Util.println("st");
 						int atomid1 = loadUnaryAtom(def1);
 						int atomid2 = loadUnaryAtom(def2);
-						if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
-							connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 						//Util.println("end");
 
 						Integer t1 = typedCxtDataTypes.get(def1);
@@ -820,8 +812,6 @@ class GuardCompiler extends BaseCompiler
 			typedCxtDataTypes.put(def1,newdatatype);
 			typedCxtDataTypes.put(def2,newdatatype);
 		}
-		if(Env.findatom2 && def1.lhsOcc!=null && def2.lhsOcc!=null)
-			connectAtoms(def1.lhsOcc.args[0].buddy.atom, def2.lhsOcc.args[0].buddy.atom);
 	}
 
 	/** 型制約を廃棄する。エラー復帰用メソッド */
@@ -987,8 +977,6 @@ class GuardCompiler extends BaseCompiler
 					}
 					if(!flgNotAdd){
 						match.add(new Instruction(Instruction.ADDTOLIST,srclinklistpath,paths[i]));
-						if(Env.findatom2 && def.lhsOcc!=null)
-							connectAtoms(def.lhsOcc.args[0].buddy.atom, atom.args[i].atom);
 					}
 				}
 			}
@@ -1046,8 +1034,6 @@ class GuardCompiler extends BaseCompiler
 					}
 					if(!flgNotAdd){
 						match.add(new Instruction(Instruction.ADDTOLIST,srclinklistpath,paths[i]));
-						if(Env.findatom2 && def.lhsOcc!=null)
-							connectAtoms(def.lhsOcc.args[0].buddy.atom, atom.args[i].atom);
 					}
 				}
 			}

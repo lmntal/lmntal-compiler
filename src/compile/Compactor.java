@@ -33,10 +33,7 @@ public class Compactor {
 				compactInstructionList(((InstructionList)inst.getArg1()).insts);
 			else continue;
 		}
-		if(Env.findatom2)
-			compactInsts(rule.memMatch);
-		else
-			compactInstructionList(rule.memMatch);
+		compactInstructionList(rule.memMatch);
 		compactInstructionList(rule.guard);
 		compactInstructionList(rule.body);
 	}

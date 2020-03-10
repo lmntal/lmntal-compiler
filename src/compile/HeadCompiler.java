@@ -39,7 +39,6 @@ class HeadCompiler extends BaseCompiler
 {
 	private boolean debug = false; //一時的
 	private boolean debug2 = false;
-	boolean firsttime = true;
 //	/** 左辺膜 */
 //	public Membrane lhsmem;//m;
 	/** マッチング命令列（のラベル）*/
@@ -467,8 +466,7 @@ class HeadCompiler extends BaseCompiler
 			{
 				if (!isAtomLoaded(atom) && atom.functor.isActive())
 				{
-					if(Env.findatom2) compileMembraneForSlimcode(mem, list, false);
-					else compileMembrane(mem, list);
+					compileMembrane(mem, list);
 					it.remove();
 					continue nextmem;
 				}
@@ -477,8 +475,7 @@ class HeadCompiler extends BaseCompiler
 
 		for (Membrane mem : newmemlist)
 		{
-			if(Env.findatom2) compileMembraneForSlimcode(mem, list, false);
-			else compileMembrane(mem, list);
+			compileMembrane(mem, list);
 		}
 	}
 	/** 引き続きこのヘッドを型なしでコンパイルするための準備をする。*/
@@ -632,282 +629,6 @@ class HeadCompiler extends BaseCompiler
 	}
 
 
-	void compileMembraneForSlimcode(Membrane mem, InstructionList list, boolean rireki) {
-		Env.c("compileMembrane");
-		if(debug2)Util.println("\ncompileMembraneForSlimcode called \n mem :" + mem + "list :\n" + list.insts + "rireki :" + rireki);
-		List<Instruction> insts = list.insts;
-		if (memVisited.contains(mem)) return;
-		memVisited.add(mem);
-		mem.createRG();
-
-		int thismempath;
-		if(firsttime){
-			for(Atom atom : mem.atoms){
-				thismempath = memToPath(mem);
-				InstructionList groupinst, nextgroupinst;
-				nextgroupinst = new InstructionList(list);
-				if (!atom.functor.isActive() && !fFindDataAtoms) continue;
-				//Util.println(atom.getName());
-				if(debug)Util.println("start from " + atom);
-				if (atomToPath(atom) == UNBOUND) {
-					//HashSet ratoms = new HashSet();
-					HashSet<Atom> qatoms = new HashSet<>();
-					int restvarcount = varCount;
-					int diffvarcount = 0;
-					qatoms.clear();
-					HashMap<Atomic, Integer> newatompaths = (HashMap<Atomic, Integer>)atomPaths.clone();
-					HashMap<Membrane, Integer> newmempaths = (HashMap<Membrane, Integer>)memPaths.clone();
-					HashSet<Atom> newvisited = (HashSet<Atom>)visited.clone();
-					HashSet<Membrane> newmemVisited = (HashSet<Membrane>)memVisited.clone();
-					searchLinkedGroup(atom, qatoms, atom, atom.mem);
-					varCount = restvarcount;
-					if(debug)Util.println("qatoms = " + qatoms);
-					groupinst = nextgroupinst;
-					nextgroupinst = new InstructionList(list);
-					for(Iterator<Atom> it3 = qatoms.iterator(); it3.hasNext();){
-						atom = it3.next();
-						visited = newvisited;
-						memVisited = newmemVisited;
-						atomPaths = newatompaths;
-						memPaths = newmempaths;
-						newvisited = (HashSet<Atom>)visited.clone();
-						newmemVisited = (HashSet<Membrane>)memVisited.clone();
-						newatompaths = (HashMap<Atomic, Integer>)((HashMap<Atomic, Integer>)atomPaths).clone();
-						newmempaths = (HashMap<Membrane, Integer>)((HashMap<Membrane, Integer>)memPaths).clone();
-						visited.clear();
-						//ratoms.clear();
-
-						InstructionList subinst = new InstructionList(groupinst);
-						groupinst.add(new Instruction(Instruction.BRANCH, subinst));
-
-						//tmplabel.insts = ;
-						// 見つかったアトムを変数に取得する
-						int atompath = varCount++;
-						if(!Env.findatom2){
-							//insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-							subinst.insts.add(Instruction.findatom2(atompath, thismempath, findAtomCount, atom.functor));
-							findAtomCount++;
-						} else{
-							//	insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-						}
-						emitNeqAtoms(mem, atom, atompath, insts);
-						atomPaths.put(atom, atompath);
-						if(debug)Util.println("put " + atom);
-
-						//リンクの一括取得(RISC化) by mizuno
-						getLinks(atompath, atom.functor.getArity(), subinst.insts);
-						compileLinkedGroup(atom, subinst);
-						// if(ratoms!=null)ratoms.add(atom);
-						List<Integer> memActuals  = getMemActuals();
-						List<Integer> atomActuals = getAtomActuals();
-						List<Object> varActuals  = getVarActuals();
-						// - コード#1
-
-						subinst.add(new Instruction(Instruction.RESETVARS,memActuals, atomActuals, varActuals) );
-						subinst.add(new Instruction(Instruction.PROCEED));
-						//varcount = 0;
-						if(varCount!=restvarcount){
-							diffvarcount = varCount - restvarcount;
-							varCount = restvarcount;
-						}
-						memPaths.put(mems.get(0), 0);
-					}
-					varCount += diffvarcount;
-					if(!groupinst.insts.isEmpty()){
-						insts.add(new Instruction(Instruction.GROUP, groupinst));
-						if(varCount > maxVarCount)
-							maxVarCount = varCount;
-						resetMemActuals();
-						resetAtomActuals();
-					}
-				}
-			}
-			for(Membrane submem : mem.mems){
-				thismempath = memToPath(mem);
-				int submempath = memToPath(submem);
-				if (submempath == UNBOUND) {
-					// !fFindDataAtomsのとき、アクティブアトムを含まない子膜の取得を後回しにする
-					if ( !fFindDataAtoms && !hasActiveAtom(submem)) continue;
-
-					// 子膜を変数に取得する
-					submempath = varCount++;
-					if(Env.findatom2){
-						//	insts.add(Instruction.anymem2(submempath, thismempath, submem.kind, anymemcount, submem.name));
-						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-						// anyMemCount++;
-					} else
-						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-					// NEQMEM は不要になっているが、参考のためにコードは残しておく。
-					for(Membrane othermem : mem.mems){
-						int other = memToPath(othermem);
-						if (other == UNBOUND) continue;
-						//if (othermem == submem) continue;
-						insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
-						mem.connect(submem, othermem);
-					}
-					memPaths.put(submem, submempath);
-				}
-				//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
-				compileMembraneForSlimcode(submem, list, false);
-			}
-		} else {
-			if(debug2){
-				Util.println("allKnownElments is");
-				Util.println(mem.allKnownElements());
-			}
-			for(List<Object> atommems : mem.allKnownElements()){
-				compileMembraneSecondTime(mem, list, atommems, rireki);
-			}
-		}
-		if(varCount > maxVarCount)
-			maxVarCount = varCount;
-		if(debug)Util.println(insts);
-		if(debug2)Util.println("\ncompileMembraneForSlimcode return \n insts\n");
-		if(debug2)Util.println(insts);
-	}
-
-	// private void compileMembraneSecondTimeAtomic(Membrane mem, InstructionList list, List atommems, boolean rireki){
-
-	// }
-	private void compileMembraneSecondTime(Membrane mem, InstructionList list, List<Object> atommems, boolean rireki) {
-		if(debug2)Util.println("\ncompileMembraneSecondTime called \n mem :"+mem+" list:\n"+list.insts+" atommems :"+atommems+"rireki :"+rireki);
-		int thismempath;
-		List<Instruction> insts = list.insts;
-//		mem.printfRG();
-		for(int listi=0; listi<atommems.size();listi++){
-			Object atommem = atommems.get(listi);
-			if(atommem instanceof Atomic){
-				Atom atom = (Atom)atommem;
-				thismempath = memToPath(mem);
-				InstructionList groupinst, nextgroupinst;
-				nextgroupinst = new InstructionList(list);
-				if (!atom.functor.isActive() && !fFindDataAtoms) continue;
-				if (atomToPath(atom) == UNBOUND) {
-					HashSet<Atom> qatoms = new HashSet<>();
-					int restvarcount = varCount;
-					int diffvarcount = 0;
-					if(!rireki){
-						int atompath = varCount++;
-						if(Env.findatom2 && rireki){
-//							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-							insts.add(Instruction.findatom2(atompath, thismempath, findAtomCount, atom.functor));
-							findAtomCount++;
-						} else {
-							insts.add(Instruction.findatom(atompath, thismempath, atom.functor));}
-						emitNeqAtoms(mem, atom, atompath, insts);
-						atomPaths.put(atom, atompath);
-
-						//リンクの一括取得(RISC化) by mizuno
-						getLinks(atompath, atom.functor.getArity(), insts);
-						compileLinkedGroup(atom, list);
-						compileMembraneSecondTime(mem, list, atommems, false);
-						return;
-					}
-					qatoms.clear();
-					HashMap<Atomic, Integer> newatompaths = (HashMap<Atomic, Integer>)atomPaths.clone();
-					HashMap<Membrane, Integer> newmempaths = (HashMap<Membrane, Integer>)memPaths.clone();
-					HashSet<Atom> newvisited = (HashSet<Atom>)visited.clone();
-					HashSet<Membrane> newmemVisited = (HashSet<Membrane>)memVisited.clone();
-					for(int listi2 = listi; listi2<atommems.size();listi2++){
-						if(atommems.get(listi2) instanceof Membrane) continue;
-						if(visited.contains(atommems.get(listi2))) continue;
-						if( ((Atom)atommems.get(listi2)).functor.isNumber()) continue;
-						searchLinkedGroup((Atom)atommems.get(listi2), qatoms, (Atom)atommems.get(listi2), atom.mem);
-					}
-					varCount = restvarcount;
-					groupinst = nextgroupinst;
-					nextgroupinst = new InstructionList(list);
-					for(Iterator<Atom> it = qatoms.iterator(); it.hasNext();){
-						atom = it.next();
-						if( atom.functor.isNumber()) continue;
-						visited = newvisited;
-						memVisited = newmemVisited;
-						atomPaths = newatompaths;
-						memPaths = newmempaths;
-						newvisited = (HashSet<Atom>)visited.clone();
-						newmemVisited = (HashSet<Membrane>)memVisited.clone();
-						newatompaths = (HashMap<Atomic,Integer>)atomPaths.clone();
-						newmempaths = (HashMap<Membrane,Integer>)memPaths.clone();
-//						visited.clear();
-
-						InstructionList subinst = new InstructionList(groupinst);
-						groupinst.add(new Instruction(Instruction.BRANCH, subinst));
-
-						// 見つかったアトムを変数に取得する
-						int atompath = varCount++;
-						if(Env.findatom2 && rireki){
-//							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-							subinst.insts.add(Instruction.findatom2(atompath, thismempath, findAtomCount, atom.functor));
-							findAtomCount++;
-						} else{
-							subinst.insts.add(Instruction.findatom(atompath, thismempath, atom.functor));}
-						emitNeqAtoms(mem, atom, atompath, subinst.insts);
-						atomPaths.put(atom, atompath);
-
-						//リンクの一括取得(RISC化) by mizuno
-						getLinks(atompath, atom.functor.getArity(), subinst.insts);
-						compileLinkedGroup(atom, subinst);
-						compileMembraneSecondTime(mem, subinst, atommems, false);
-						List<Integer> memActuals  = getMemActuals();
-						List<Integer> atomActuals = getAtomActuals();
-						List<Object> varActuals  = getVarActuals();
-
-						subinst.add(new Instruction(Instruction.RESETVARS,memActuals, atomActuals, varActuals) );
-						subinst.add(new Instruction(Instruction.PROCEED));
-						if(varCount!=restvarcount){
-							diffvarcount = varCount - restvarcount;
-							varCount = restvarcount;
-						}
-						memPaths.put(mems.get(0), 0);
-					}
-					varCount += diffvarcount;
-					if(!groupinst.insts.isEmpty()){
-						groupinst.add(new Instruction(Instruction.STOP));
-						insts.add(new Instruction(Instruction.GROUP, groupinst));
-						if(varCount > maxVarCount)
-							maxVarCount = varCount;
-						resetMemActuals();
-						resetAtomActuals();
-					}
-					return ;
-				}
-			} else if(atommem instanceof Membrane){
-				Membrane submem = (Membrane)atommem;
-				thismempath = memToPath(mem);
-				int submempath = memToPath(submem);
-				if (submempath == UNBOUND) {
-					// !fFindDataAtomsのとき、アクティブアトムを含まない子膜の取得を後回しにする
-					if ( !fFindDataAtoms && !hasActiveAtom(submem) ) continue;
-
-					// 子膜を変数に取得する
-					submempath = varCount++;
-					if(Env.findatom2 && rireki){
-						//insts.add(Instruction.anymem2(submempath, thismempath, submem.kind, anymemcount, submem.name));
-						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-						// anyMemCount++;
-					} else
-						insts.add(Instruction.anymem(submempath, thismempath, submem.kind, submem.name));
-					// NEQMEM は不要になっているが、参考のためにコードは残しておく。
-					for(Membrane othermem : mem.mems){
-						int other = memToPath(othermem);
-						if (other == UNBOUND) continue;
-						//if (othermem == submem) continue;
-						insts.add(new Instruction(Instruction.NEQMEM, submempath, other));
-					}
-					memPaths.put(submem, submempath);
-				}
-				//プロセス文脈がない場合やstableの検査は、ガードコンパイラに移動した。by mizuno
-				compileMembraneForSlimcode(submem, list, false);
-				compileMembraneSecondTime(mem, list, atommems.subList(listi+1, atommems.size()), false);
-				return ;
-			} else {
-				System.err.println("Undef Class occured");
-			}
-		}
-	}
-
-
 	/** 膜および子孫の膜に対して自由リンクの個数を調べる。
 	 * <p>かつて$p等式右辺膜以外の場合は、自由リンクに関する検査を行う必要があった。
 	 * しかし現在 redex "Tθ" に = を含んでもよい言語仕様になっているため、この検査は実は不要。
@@ -951,27 +672,6 @@ class HeadCompiler extends BaseCompiler
 		return args;
 	}
 
-	private void resetAtomActuals(){
-		HashMap<Atomic, Integer> newatompaths = new HashMap<>();
-		for (int i = 0; i < atoms.size(); i++) {
-			if(atomPaths.get(atoms.get(i)) != null){
-				newatompaths.put( atoms.get(i), varCount);
-				varCount++;
-			}
-		}
-		atomPaths = newatompaths;
-	}
-	private void resetMemActuals(){
-		HashMap<Membrane, Integer> newmempaths = new HashMap<>();
-		varCount = 0;
-		for (int i = 0; i < mems.size(); i++) {
-			if(memPaths.get(mems.get(i)) != null){
-				newmempaths.put( mems.get(i), varCount);
-				varCount++;
-			}
-		}
-		memPaths = newmempaths;
-	}
 	////////////////////////////////////////////////////////////////
 
 	/** ガード否定条件をコンパイルする */
@@ -985,11 +685,7 @@ class HeadCompiler extends BaseCompiler
 			proccxteqMap.put(eq.mem, eq);
 		}
 		for(ProcessContextEquation eq : eqs){
-			if(Env.findatom2){
-				compileMembraneForSlimcode(eq.mem, list, false);
-			} else {
-				compileMembrane(eq.mem, list);
-			}
+			compileMembrane(eq.mem, list);
 			// プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
 			if (eq.mem.processContexts.isEmpty()) {
 				// TODO （機能拡張）単一のアトム以外にマッチする型付きプロセス文脈でも正しく動くようにする(2)
