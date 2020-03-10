@@ -235,14 +235,12 @@ public class Optimizer {
 				//前に動かせる。
 			default:
 				int judge = guardMove(insts, inst, i-1);
-			if(judge == 2){
-//				System.out.println("remove2\t"+insts.get(i));
-				insts.remove(i);
-				i--;
-			} else if (judge == 1){
-//				System.out.println("remove1\t"+insts.get(i+1));
-				insts.remove(i+1);
-			} 
+				if(judge == 2){
+					insts.remove(i);
+					i--;
+				} else if (judge == 1){
+					insts.remove(i+1);
+				}
 			}
 		}
 	}
@@ -639,7 +637,6 @@ public class Optimizer {
 							while(it.hasNext())
 								inline2.add(it.next());
 							inline2.add(new Instruction(Instruction.PROCEED));
-							//System.out.println(inline2.insts);
 							break;
 						} else continue;
 					} 
