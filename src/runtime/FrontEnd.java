@@ -324,12 +324,13 @@ public class FrontEnd
 			//@ Use loop instruction. (EXPERIMENTAL)
 			Optimizer.fLoop = true;
 		}
-		else if (opt.equals("--optimize-reuse-atom"))
-		{
-			//@ --optimize-reuse-atom
-			//@ Reuse atoms.
-			Optimizer.fReuseAtom = true;
-		}
+		// アトム再利用は--use-swaplinkを使う
+//		else if (opt.equals("--optimize-reuse-atom"))
+//		{
+//			//@ --optimize-reuse-atom
+//			//@ Reuse atoms.
+//			Optimizer.fReuseAtom = true;
+//		}
 		else if (opt.equals("--optimize-reuse-mem"))
 		{
 			//@ --optimize-reuse-mem
