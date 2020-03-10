@@ -67,8 +67,6 @@
 			<tarfileset dir="${bin}" includes="*.bat,lmntal.jar,prettyprinter.properties" excludes="set_cp*" prefix="bin"/>
 			<tarfileset file="${bin}/set_cp_jar.bat" fullpath="bin/set_cp.bat"/>
 			<tarfileset file="${bin}/set_cp_jar.sh" fullpath="bin/set_cp.sh" mode="755"/>
-			<tarfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
-			<tarfileset dir="${lmntal_lib}/public" includes="*.lmn" prefix="lib/src"/>
 			<tarfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
 		</tar>
 	</target>
@@ -79,8 +77,6 @@
 			<zipfileset dir="${bin}" includes="*.bat,lmntal.jar,prettyprinter.properties" excludes="set_cp*" prefix="bin"/>
 			<zipfileset file="${bin}/set_cp_jar.bat" fullpath="bin/set_cp.bat"/>
 			<zipfileset file="${bin}/set_cp_jar.sh" fullpath="bin/set_cp.sh" filemode="755"/>
-			<zipfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
-			<zipfileset dir="${lmntal_lib}/public" includes="*.lmn" prefix="lib/src"/>
 			<zipfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
 		</zip>
 	</target>

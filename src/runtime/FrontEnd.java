@@ -18,7 +18,6 @@ import type.TypeException;
 import type.TypeInferer;
 import util.Util;
 
-import compile.Module;
 import compile.Optimizer;
 import compile.RulesetCompiler;
 import compile.parser.LMNParser;
@@ -30,23 +29,15 @@ public class FrontEnd
 
 	public static void main(String[] args)
 	{
-		Runtime.getRuntime().addShutdownHook(new Thread()
-		{
-			public void run()
-			{
-				Inline.terminate();
-			}
-		});
-
 		processOptions(args);
 
 		if (Env.oneLine)
 		{
-			run(new StringReader(Env.oneLineCode), InlineUnit.DEFAULT_UNITNAME);
+			run(new StringReader(Env.oneLineCode));
 		}
 		else if (Env.stdinLMN)
 		{
-			run(new BufferedReader(new InputStreamReader(System.in)), InlineUnit.DEFAULT_UNITNAME);
+			run(new BufferedReader(new InputStreamReader(System.in)));
 		}
 		else
 		{
@@ -110,21 +101,6 @@ public class FrontEnd
 							Env.debug = Env.DEBUG_DEFAULT;
 						}
 						// System.out.println("debug level " + Env.debug);
-						break;
-					case 'I':
-						//@ -I <path>
-						//@ Additional path for LMNtal library.
-						//@ This option is available only when --use-source-library
-						//@ option is specified.
-						//@ Otherwise, LMNtal library must be in your CLASSPATH
-						//@ environment variable.
-						//@ The default path is ./lib and ../lib
-						compile.Module.libPath.add(args[++i]);
-						break;
-					case 'L':
-						//@ -L <path>
-						//@ Additional path for classpath (inline code compile time)
-						Inline.classPath.add(0, new File(args[++i]));
 						break;
 					case 'O':
 						//@ -O[<0-9>]  (-O=-O1)
@@ -337,9 +313,9 @@ public class FrontEnd
 			//@ Reuse mems.
 			Optimizer.fReuseMem = true;
 		}
-		else if (opt.equals("--optimize-slimoptimizer"))
-		{
-		}
+//		else if (opt.equals("--optimize-slimoptimizer"))
+//		{
+//		}
 		else if (opt.equals("--pp0"))
 		{
 			// 暫定オプション
@@ -368,12 +344,6 @@ public class FrontEnd
 			//@ set <integer> as the upper limit of threads occured
 			//@ in leftside rules.
 			Env.threadMax = Integer.parseInt(args[i].substring(13));
-		}
-		else if (opt.equals("--use-source-library"))
-		{
-			//@ --use-source-library
-			//@ Use source libraries in lib/src and lib/public.
-			Env.fUseSourceLibrary = true;
 		}
 		else if (opt.equals("--debug"))
 		{
@@ -512,10 +482,7 @@ public class FrontEnd
 			{
 				is = new SequenceInputStream(is, new FileInputStream(files.get(i)));
 			}
-
-			// 複数のファイルのときはファイル名が１つに決められない。
-			String unitName = files.size() == 1 ? files.get(0) : InlineUnit.DEFAULT_UNITNAME;
-			run(new BufferedReader(new InputStreamReader(is, sourceCharset)), unitName);
+			run(new BufferedReader(new InputStreamReader(is, sourceCharset)));
 		}
 		catch (FileNotFoundException e)
 		{
@@ -533,9 +500,8 @@ public class FrontEnd
 	 * 与えられたソースについて、一連の実行を行う。
 	 * 
 	 * @param src Reader型で表されたソース
-	 * @param unitName ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
 	 */
-	private static void run(Reader src, String unitName)
+	private static void run(Reader src)
 	{
 		if (Env.preProcess0)
 		{
@@ -571,7 +537,7 @@ public class FrontEnd
 
 			// コンパイル、コード生成
 			// コンパイル時データ構造からルールセットの中間命令列を生成する
-			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
+			Ruleset rs = RulesetCompiler.compileMembrane(m);
 			if (Env.getErrorCount() > 0)
 			{
 				Env.e("Compilation Failed");
@@ -599,23 +565,6 @@ public class FrontEnd
 				showIL((InterpretedRuleset)rs, m);
 			}
 
-			
-			
-			// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
-			for (String libName : Module.loaded)
-			{
-				compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
-				.get(libName);
-				for (Ruleset r : mem.rulesets)
-				{
-					((InterpretedRuleset)r).showDetail();
-				}
-			}
-			// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
-			Module.showModuleList();
-			// インラインコード一覧を出力
-			Inline.initInline();
-			Inline.showInlineList();
 			System.exit(0);
 		}
 		catch (Exception e)
