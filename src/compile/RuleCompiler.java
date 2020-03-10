@@ -2007,6 +2007,12 @@ public class RuleCompiler
 	{
 		for (Atom atom : rhsatoms)
 		{
+			//REG
+			if (atom.functor.getArity()==1 && atom.functor.getName().equals("module"))
+			{
+				Module.regMemName(atom.args[0].buddy.atom.getName(), atom.mem);
+			}
+
 			//LOAD
 			if (atom.functor.equals(FUNCTOR_USE))
 			{

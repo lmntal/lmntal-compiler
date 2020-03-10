@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 
+import compile.Module;
 import type.TypeException;
 import type.TypeInferer;
 import util.Util;
@@ -564,7 +565,7 @@ public class FrontEnd
 				// 通常はこっち？
 				showIL((InterpretedRuleset)rs, m);
 			}
-
+			Module.showModuleList();
 			System.exit(0);
 		}
 		catch (Exception e)
