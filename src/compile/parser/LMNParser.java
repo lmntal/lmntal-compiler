@@ -1082,7 +1082,7 @@ class SyntaxExpander {
 	//
 
 	/** ルール構文に対して略記法の展開を行う */
-	void expandRuleAbbreviations(SrcRule sRule) throws ParseException {
+	void expandRuleAbbreviations(SrcRule sRule) {
 
 		// ガードを型制約と否定条件に分類する
 		flatten(sRule.getGuard());

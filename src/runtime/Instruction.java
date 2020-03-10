@@ -1845,10 +1845,10 @@ public class Instruction implements Cloneable
 			this.data = data;
 			return;
 		}
-		catch (NoSuchFieldException e)
+		catch (NoSuchFieldException ignored)
 		{
 		}
-		catch (IllegalAccessException e)
+		catch (IllegalAccessException ignored)
 		{
 		}
 		//例外発生時

@@ -1,6 +1,5 @@
 package runtime.functor;
 
-import runtime.Env;
 import util.Util;
 
 /** 定数文字列を表現するための1引数ファンクタを表すクラス

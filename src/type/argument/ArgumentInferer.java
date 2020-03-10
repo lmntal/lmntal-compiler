@@ -304,7 +304,7 @@ public class ArgumentInferer {
 		}
 	}
 
-	private PolarizedPath solvePolarizedPath(PolarizedPath pp)throws TypeException{
+	private PolarizedPath solvePolarizedPath(PolarizedPath pp) {
 		Path p = pp.getPath();
 		if (!(p instanceof RootPath)) {
 			Util.println("fatal error in solving path.");
@@ -332,7 +332,7 @@ public class ArgumentInferer {
 	 *            argument of Atom (not Atomic)
 	 * @return
 	 */
-	private PolarizedPath getPolarizedPath(Set<LinkOccurrence> traced, LinkOccurrence lo)throws TypeException{
+	private PolarizedPath getPolarizedPath(Set<LinkOccurrence> traced, LinkOccurrence lo) {
 		if(traced.contains(lo)){
 			// TODO この場合は1つ辿るとこまでのPathが得られるようにする
 			return null;

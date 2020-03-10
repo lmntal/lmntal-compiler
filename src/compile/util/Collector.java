@@ -16,9 +16,9 @@ import compile.structure.ProcessContext;
  */
 public final class Collector
 {
-	public static interface ICondition<T extends Atomic>
+	public interface ICondition<T extends Atomic>
 	{
-		public boolean accept(T x);
+		boolean accept(T x);
 	}
 
 	public static class Not<T extends Atomic> implements ICondition<T>

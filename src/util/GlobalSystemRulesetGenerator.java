@@ -125,7 +125,7 @@ public final class GlobalSystemRulesetGenerator {
 		compile.structure.Membrane m = null;
 		try {
 			m = lp.parse();
-		} catch(Exception e){}
+		} catch(Exception ignored){}
 		// todo 下記コードは明らかに不自然なので、InterpretedRuleset（のリストまたはそれを持つ
 		// コンパイル時膜構造）を生成するだけのメソッドをRulesetCompilerに作る。
 		InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);

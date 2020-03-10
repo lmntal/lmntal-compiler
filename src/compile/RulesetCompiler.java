@@ -9,7 +9,6 @@ import java.util.List;
 import runtime.Env;
 import runtime.InlineUnit;
 import runtime.InterpretedRuleset;
-import runtime.MergedBranchMap;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;

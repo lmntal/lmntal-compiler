@@ -661,7 +661,7 @@ class HeadCompiler extends BaseCompiler
 	////////////////////////////////////////////////////////////////
 
 	/** ガード否定条件をコンパイルする */
-	void compileNegativeCondition(List<ProcessContextEquation> eqs, InstructionList list) throws CompileException{
+	void compileNegativeCondition(List<ProcessContextEquation> eqs, InstructionList list) {
 		List<Instruction> insts = list.insts;
 		//int formals = varcount;
 		//matchLabel.setFormals(formals);

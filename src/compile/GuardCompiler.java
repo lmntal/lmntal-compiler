@@ -392,9 +392,6 @@ class GuardCompiler extends BaseCompiler
 							error("Guard "+func.getName()+" should be custom_"+mo+"_xxxx. (? : 'i' when input, 'o' when output)");
 						}
 
-						String guardID = func.getName().substring(7+func.getArity()+1);
-						List<Integer> vars = new ArrayList<>();
-						List<Integer> out = new ArrayList<>(); // 出力引数
 						for(int k=0;k<cstr.args.length;k++) {
 							ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
 							// 入力引数が未束縛なら延期
@@ -406,25 +403,13 @@ class GuardCompiler extends BaseCompiler
 								aid = typedcxtToSrcPath(defK);
 								if(aid==UNBOUND) {
 									checkGroundLink(defK);
-									aid = groundToSrcPath(defK);
 								}
-//								aid = loadUnaryAtom(defK);
 							} else {
 								int atomid = varCount++;
 								bindToUnaryAtom(defK, atomid);
 								typedCxtDataTypes.put(def3, ISINT);
-								aid = typedcxtToSrcPath(defK);
-								out.add(aid);
 							}
-							vars.add(aid);
-//							vars.add(loadUnaryAtom(def1));
-//							System.out.println("varcount "+varcount);
-//							System.out.println("1 "+typedcxtdatatypes);
-//							System.out.println("1 "+typedcxtdefs);
-//							System.out.println("1 "+typedcxtsrcs);
-//							System.out.println("1 "+typedcxttypes);
 						}
-//						System.out.println("vars "+vars);
 					}
 					else if (func.getName().equals("uniq"))
 					{
@@ -960,8 +945,10 @@ class GuardCompiler extends BaseCompiler
 					boolean flgNotAdd = false; // その引数を避けるべきリストに「加えない」場合true
 					for(int j=0;j<def.lhsOcc.args.length;j++){
 						LinkOccurrence ro = def.lhsOcc.args[j].buddy;
-						if(ro == atom.args[i])
+						if (ro == atom.args[i]) {
 							flgNotAdd = true;
+							break;
+						}
 					}
 					if(!flgNotAdd){
 						match.add(new Instruction(Instruction.ADDTOLIST,srclinklistpath,paths[i]));
@@ -1017,8 +1004,10 @@ class GuardCompiler extends BaseCompiler
 					boolean flgNotAdd = false; // その引数を避けるべきリストに「加えない」場合true
 					for(int j=0;j<def.lhsOcc.args.length;j++){
 						LinkOccurrence ro = def.lhsOcc.args[j].buddy;
-						if(ro == atom.args[i])
+						if (ro == atom.args[i]) {
 							flgNotAdd = true;
+							break;
+						}
 					}
 					if(!flgNotAdd){
 						match.add(new Instruction(Instruction.ADDTOLIST,srclinklistpath,paths[i]));

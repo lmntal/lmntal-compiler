@@ -9,14 +9,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.TreeMap;
 
 import runtime.Env;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Rule;
 import runtime.functor.Functor;
-import runtime.functor.SpecialFunctor;
 
 /**
  * 最適化を行うクラスメソッドを持つクラス。
@@ -111,7 +109,9 @@ public class Optimizer {
 	public static void optimize(List<Instruction> head, List<Instruction> body) {
 		if (fReuseMem) {
 			reuseMem(head, body);
-			if(Env.useSwapLink){ //swaplinkと膜再利用を両方実行すると冗長な命令列ができる場合があるので消す
+			//swaplinkと膜再利用を両方実行すると冗長なremoveatom/addatomができる場合があるので消す
+			// TODO: reuseMemにも冗長なremoveatom/addatomを打ち消すような処理があるが、打ち消せていないのはなぜだろう？
+			if(Env.useSwapLink){
 				removeUnnecessaryInsts(body);
 			}
 		}
@@ -133,7 +133,6 @@ public class Optimizer {
 		if (insts.isEmpty()) return;
 		Instruction spec = insts.get(0);
 		if (spec.getKind() != Instruction.SPEC) return;
-		//アトム主導テスト用
 		for(int i = 1; i<insts.size(); i++){
 			Instruction branch = insts.get(i);
 			if (branch.getKind() != Instruction.BRANCH) break;
@@ -156,7 +155,6 @@ public class Optimizer {
 		int size = insts.size();
 		Instruction jump = insts.get(size - 1);
 		if (jump.getKind() != Instruction.JUMP) return varcount;
-		//
 		InstructionList label = (InstructionList)jump.getArg1();
 		List<Instruction> subinsts = InstructionList.cloneInstructions(label.insts);
 		Instruction subspec = subinsts.get(0);
@@ -178,7 +176,6 @@ public class Optimizer {
 		for (int i = subformals; i < sublocals; i++) {
 			map.put(i, varcount++);
 		}
-		//
 		Instruction.applyVarRewriteMap(subinsts,map);
 		subinsts.remove(0);		// specを除去
 		insts.remove(size - 1);	// jump命令を除去
@@ -269,7 +266,6 @@ public class Optimizer {
 				list = inst.getVarArgs(listn);
 				Instruction inst2 = insts.get(i);
 				if(inst2.getKind() == Instruction.GROUP) {
-//					System.out.println("GROUP");
 					InstructionList subinsts = (InstructionList)inst2.getArg1();
 					moveok = max(moveok, guardMove(subinsts.insts, inst, subinsts.insts.size()-1));
 					if(moveok > 0){
@@ -277,10 +273,8 @@ public class Optimizer {
 						i=0;
 						continue;
 					}
-//					System.out.println(moveok);
 					continue;
 				} else if(inst2.getKind() == Instruction.BRANCH) {
-//					System.out.println("BRANCH");
 					InstructionList subinsts = (InstructionList)inst2.getArg1();
 					Instruction instrep  = (Instruction)inst.clone();
 					moveok = max(moveok, guardMove(subinsts.insts, inst, subinsts.insts.size()-1));
@@ -288,42 +282,31 @@ public class Optimizer {
 						moveok = 2;
 					}
 					inst = instrep;
-//					System.out.println(moveok);
 					continue;
 				} else if(inst2.getKind() == Instruction.RESETVARS){
-//					System.out.println("RESETVARS");
 					int memnum = ((List)inst2.getArg1()).size();
 					ArrayList mems = (ArrayList)inst2.getArg1();
 					ArrayList atoms = (ArrayList)inst2.getArg2();
 
-//					System.out.print(inst + "\t to ");
 					for(int j=0; j<list.size(); j++){
 						int num = (Integer) list.get(j);
-//						System.out.println("j=" + j +", atoms = "+atoms + ", num = "+num+ " ,memnum = " + memnum);
 						//getVarArgsのうち、j番目に設定すべき
 						if(num<memnum){
 							inst.data.set((Integer) listn.get(j), (Integer) mems.get(num));
 						} else if((num-memnum)>=atoms.size() || num-memnum<0) {
-//							System.out.println("atom = "+atoms + ", num = "+num+ " ,memnum = " + memnum);
 							continue;
 						} else {
 							inst.data.set((Integer) listn.get(j), (Integer) atoms.get(num - memnum));
 						}
-//						System.out.println("set " + new Integer(((Integer)atoms.get(num - memnum)).intValue()) );
-//						System.out.println(inst.getArg(j+1));
 //						inst.setArg(j+1, new Integer(((Integer)atoms.get(num - memnum)).intValue()));
 					}
-//					System.out.println(inst);
-//					System.out.println(inst2 + "\t" + memnum);
 					continue;
 				}
 
 				//　instをinst2の下に配置するべきか判定
 				ArrayList list2 = inst2.getVarArgs(listn);
 				if(inst.getKind() == Instruction.ALLOCATOM || inst.getKind() == Instruction.NEWLIST){
-//					System.out.println("check " + inst + "\t to" + inst2);
 					if(list2.contains(inst.getArg1())){
-//						System.out.println("match2 " + inst);
 						moveok = max(moveok, 1);
 						insert_index = i;
 //						i--;
@@ -336,33 +319,26 @@ public class Optimizer {
 							continue;
 						if(inst2.getOutputType() != -1){
 							if(list.get(j).equals(inst2.getArg1())) {
-//								System.out.println("match1 " + inst);
 								moveok = max(moveok, 1);
 								insert_index = i+1;
 								break ff;
 							}
-//							System.out.println("unmatch1 " + list.get(j) + "neq" + inst2.getArg1() + inst);
 						}
 						else if(list2.contains(list.get(j))){
-//							System.out.println("match2 " + inst);
 							moveok = max(moveok, 1);
 							insert_index = i+1;
 							break ff;
 						}
-//						System.out.println("unmatch2 " + inst);
 					}
 //					if(!moveok) break; 
 				}
 			}
-//		System.out.println(moveok);
 		if(moveok > 0){
 			if(insert_index != 0){
-//				System.out.println("add\t" + inst + "to "+insert_index);
 				insts.add(insert_index, inst);
 			}
 			return moveok;
 		}
-//		System.out.println("no\t" + inst);
 		return 0;
 	}
 
@@ -380,11 +356,9 @@ public class Optimizer {
 			case Instruction.NEWLIST:
 				int judge = guardMove(insts, inst, i-1);
 				if(judge == 2){
-//					System.out.println("remove2\t"+insts.get(i));
 					insts.remove(i);
 					i--;
 				} else if (judge == 1){
-//					System.out.println("remove1\t"+insts.get(i+1));
 					insts.remove(i+1);
 				}
 				break;
@@ -638,7 +612,7 @@ public class Optimizer {
 		body.add(0, new Instruction(Instruction.SPEC, spec.getIntArg1(), locals));
 //		不要なnewlinkの除去
 		for(int i2=0; i2<body.size(); i2++){
-			Instruction inst2 = (Instruction)body.get(i2);
+			Instruction inst2 = body.get(i2);
 			if(removelinks.contains(inst2)) body.remove(i2--);
 		}
 	}
@@ -797,7 +771,6 @@ public class Optimizer {
 		body.addAll(2, tmpInsts); /* 最初のボディ命令はcommit，その直後に入れる */ 
 
 		//TODO removeproxies/insertproxies命令を適切に変更する
-//		tmpInsts = new ArrayList();
 		ListIterator<Instruction> lit = body.listIterator();
 		while (lit.hasNext()) {
 			Instruction inst = lit.next();
