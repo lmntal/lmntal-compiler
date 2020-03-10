@@ -203,67 +203,50 @@ public class RuleCompiler
 	 */
 	private void compile_l()
 	{
-		for (int firstid = 0; firstid <= hc.atoms.size(); firstid++)
+		hc.prepare(); // 変数番号を初期化
+		// 膜主導
+		theRule.memMatchLabel = hc.matchLabel;
+		memMatch = hc.match;
+		hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
+		hc.compileMembrane(rs.leftMem, hc.matchLabel);
+		// 自由出現したデータアトムがないか検査する
+		if (!hc.fFindDataAtoms)
 		{
-			hc.prepare(); // 変数番号を初期化
-			if (firstid < hc.atoms.size()) continue;
-			else
+			if (Env.debug >= 1)
 			{
-				// 膜主導
-				theRule.memMatchLabel = hc.matchLabel;
-				memMatch = hc.match;
-				hc.memPaths.put(rs.leftMem, 0);	// 本膜の変数番号は 0
-			}
-			hc.compileMembrane(rs.leftMem, hc.matchLabel);
-
-			// 自由出現したデータアトムがないか検査する
-			if (!hc.fFindDataAtoms)
-			{
-				if (Env.debug >= 1)
+				for (Atomic a : hc.atoms)
 				{
-					for (Atomic a : hc.atoms)
+					Atom atom = (Atom)a;
+					if (!hc.isAtomLoaded(atom))
 					{
-						Atom atom = (Atom)a;
-						if (!hc.isAtomLoaded(atom))
-						{
-							Env.warning("TYPE WARNING: Rule head contains free data atom: " + atom);
-						}
+						Env.warning("TYPE WARNING: Rule head contains free data atom: " + atom);
 					}
 				}
-				hc.switchToUntypedCompilation();
-				hc.setContLabel(contLabel);
-				hc.compileMembrane(rs.leftMem, hc.matchLabel);
 			}
-			hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
-
-			if (Env.hyperLinkOpt)
-			{
-				hc.compileSameProcessContext(rs.leftMem, hc.matchLabel);//seiji
-			}
-
-			if (hc.match == memMatch)
-			{
-				hc.match.add(0, Instruction.spec(1, hc.maxVarCount));
-			}
-			else
-			{
-				hc.match.add(0, Instruction.spec(2, hc.maxVarCount));
-			}
-			// jump命令群の生成
-			List<Integer> memActuals  = hc.getMemActuals();
-			List<Integer> atomActuals = hc.getAtomActuals();
-			List<Object> varActuals  = hc.getVarActuals();
-			// - コード#1
-			hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
-			// - コード#2
-			//hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
-			//int formals = memActuals.size() + atomActuals.size() + varActuals.size();
-			//hc.match.add( Instruction.spec(formals, formals) );
-			//hc.match.add( hc.getResetVarsInstruction() );
-			//List brancharg = new ArrayList();
-			//brancharg.add(body);
-			//hc.match.add( new Instruction(Instruction.BRANCH, brancharg) );
+			hc.switchToUntypedCompilation();
+			hc.setContLabel(contLabel);
+			hc.compileMembrane(rs.leftMem, hc.matchLabel);
 		}
+		hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
+		if (Env.hyperLinkOpt)
+		{
+			hc.compileSameProcessContext(rs.leftMem, hc.matchLabel);//seiji
+		}
+		hc.match.add(0, Instruction.spec(1, hc.maxVarCount));
+		// jump命令群の生成
+		List<Integer> memActuals  = hc.getMemActuals();
+		List<Integer> atomActuals = hc.getAtomActuals();
+		List<Object> varActuals  = hc.getVarActuals();
+		// - コード#1
+		hc.match.add( Instruction.jump(contLabel, memActuals, atomActuals, varActuals) );
+		// - コード#2
+		//hc.match.add( Instruction.inlinereact(theRule, memActuals, atomActuals, varActuals) );
+		//int formals = memActuals.size() + atomActuals.size() + varActuals.size();
+		//hc.match.add( Instruction.spec(formals, formals) );
+		//hc.match.add( hc.getResetVarsInstruction() );
+		//List brancharg = new ArrayList();
+		//brancharg.add(body);
+		//hc.match.add( new Instruction(Instruction.BRANCH, brancharg) );
 	}
 
 	/**
