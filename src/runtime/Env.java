@@ -102,11 +102,6 @@ public final class Env
 	 */
 	public static List<String> srcs = new ArrayList<>();
 
-	/**
-	 * 未コンパイルライブラリを利用する
-	 */
-	public static boolean fUseSourceLibrary = false;
-
 	/** デバッグ実行オプションの有無 by inui */
 	public static boolean debugOption = false;
 

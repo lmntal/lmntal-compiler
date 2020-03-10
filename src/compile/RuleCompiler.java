@@ -3,7 +3,6 @@ package compile;
 import java.util.*;
 
 import runtime.Env;
-import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
 import runtime.Rule;
@@ -77,8 +76,6 @@ public class RuleCompiler
 	// private int lhslinkToPath(Atomic atom, int pos) { return lhslinkToPath(atom.args[pos]); }
 	private int lhslinkToPath(LinkOccurrence link) { return lhslinkpath.get(link); }
 
-	private String unitName;
-
 	/** ヘッドのマッチング終了後の継続命令列のラベル */
 	private InstructionList contLabel;
 
@@ -87,12 +84,6 @@ public class RuleCompiler
 	 */
 	public RuleCompiler(RuleStructure rs)
 	{
-		this(rs, InlineUnit.DEFAULT_UNITNAME);
-	}
-
-	public RuleCompiler(RuleStructure rs, String unitName)
-	{
-		this.unitName = unitName;
 		this.rs = rs;
 	}
 
@@ -2006,21 +1997,6 @@ public class RuleCompiler
 			}
 		}
 	}
-
-	/**
-	 * インラインコードを実行する命令を生成する
-	 */
-//	private void addInline()
-//	{
-//		for (Atom atom : rhsatoms)
-//		{
-//			int atomID = rhsatomToPath(atom);
-//			Inline.register(unitName, atom.functor.getName());
-//			int codeID = Inline.getCodeID(unitName, atom.functor.getName());
-//			if (codeID == -1) continue;
-//			body.add(new Instruction(Instruction.INLINE, atomID, unitName, codeID));
-//		}
-//	}
 
 	private static final Functor FUNCTOR_USE = new SymbolFunctor("use",1);
 
