@@ -161,11 +161,11 @@ public abstract class Functor
 						radix = 16;
 					}
 					return new IntegerFunctor(Integer.parseInt(name, radix));
-				} catch (NumberFormatException e) {
+				} catch (NumberFormatException ignored) {
 				}
 				try {
 					return new FloatingFunctor(Double.parseDouble(name));
-				} catch (NumberFormatException e2) {
+				} catch (NumberFormatException ignored) {
 				}
 			} else if (nametype == SrcName.STRING || nametype == SrcName.QUOTED) {
 				return new StringFunctor(name); // new

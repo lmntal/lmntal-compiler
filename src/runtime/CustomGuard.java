@@ -38,5 +38,5 @@ public interface CustomGuard {
 	 * @param obj カスタムガード制約の引数（List of Atom）
 	 * @return
 	 */
-	public boolean run(String guardID, Membrane mem, Object obj) throws GuardNotFoundException;
+	boolean run(String guardID, Membrane mem, Object obj);
 }

@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import runtime.Atom;
-import runtime.Env;
 import runtime.Link;
 import runtime.functor.Functor;
 import runtime.functor.IntegerFunctor;

@@ -10,9 +10,9 @@ import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import type.TypeException;
 import type.TypeInferer;
@@ -26,7 +26,7 @@ import compile.parser.ParseException;
 
 public class FrontEnd
 {
-	private static Charset sourceCharset = Charset.forName("UTF-8");
+	private static Charset sourceCharset = StandardCharsets.UTF_8;
 
 	public static void main(String[] args)
 	{
@@ -268,12 +268,12 @@ public class FrontEnd
 //			Env.findatom2 = true;
 //			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
 //		}
-		else if (opt.equals("--memtest-only"))
-		{
+//		else if (opt.equals("--memtest-only"))
+//		{
 //			//@ --memtest-only
 //			//@ Use membrane test only.
 //			Env.memtestonly = true;
-		}
+//		}
 		else if (opt.equals("--help"))
 		{
 			//@ --help
@@ -324,12 +324,13 @@ public class FrontEnd
 			//@ Use loop instruction. (EXPERIMENTAL)
 			Optimizer.fLoop = true;
 		}
-		else if (opt.equals("--optimize-reuse-atom"))
-		{
-			//@ --optimize-reuse-atom
-			//@ Reuse atoms.
-			Optimizer.fReuseAtom = true;
-		}
+		// アトム再利用は--use-swaplinkを使う
+//		else if (opt.equals("--optimize-reuse-atom"))
+//		{
+//			//@ --optimize-reuse-atom
+//			//@ Reuse atoms.
+//			Optimizer.fReuseAtom = true;
+//		}
 		else if (opt.equals("--optimize-reuse-mem"))
 		{
 			//@ --optimize-reuse-mem

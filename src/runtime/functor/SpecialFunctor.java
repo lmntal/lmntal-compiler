@@ -1,6 +1,8 @@
 package runtime.functor;
 
 
+import java.util.Objects;
+
 /**
  * 特殊なファンクタ (inside_proxy, outside_proxy, star) を表すクラス
  */
@@ -24,7 +26,7 @@ public class SpecialFunctor extends Functor {
 		if (this == o) return true;
 		if(o instanceof SpecialFunctor) {
 			SpecialFunctor f = (SpecialFunctor)o;
-			return name == f.name && kind == f.kind;
+			return Objects.equals(name, f.name) && kind == f.kind;
 		}
 		return false;
 	}
@@ -34,7 +36,7 @@ public class SpecialFunctor extends Functor {
 	 * @return outside_proxy なら true
 	 */
 	public boolean isOutsideProxy(){
-		return name == OUTSIDE_PROXY_NAME;
+		return Objects.equals(name, OUTSIDE_PROXY_NAME);
 	}
 	
 	/**
@@ -42,7 +44,7 @@ public class SpecialFunctor extends Functor {
 	 * @return outside_proxy なら true
 	 */
 	public boolean isInsideProxy(){
-		return name == INSIDE_PROXY_NAME;
+		return Objects.equals(name, INSIDE_PROXY_NAME);
 	}
 	
 	/**

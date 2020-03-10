@@ -230,7 +230,6 @@ public class Inline {
 					return res;
 				}
 //				System.out.println("GUARD result = "+res);
-			} catch(GuardNotFoundException e) {
 			} catch(Exception e) {
 				e.printStackTrace();
 			}

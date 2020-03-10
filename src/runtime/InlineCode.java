@@ -13,7 +13,7 @@ import runtime.exception.GuardNotFoundException;
  *
  */
 public interface InlineCode {
-	public boolean runGuard(String guardID, Membrane mem, Object obj) throws GuardNotFoundException;
-	public void run(Atom a, int codeID);
+	boolean runGuard(String guardID, Membrane mem, Object obj);
+	void run(Atom a, int codeID);
 }
 

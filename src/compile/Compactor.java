@@ -4,14 +4,12 @@
 package compile;
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import runtime.Instruction;
 import runtime.InstructionList;
-import runtime.Env;
 
 import runtime.Rule;
 

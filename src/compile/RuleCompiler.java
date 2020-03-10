@@ -1,18 +1,8 @@
 package compile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import runtime.Env;
-import runtime.Inline;
 import runtime.InlineUnit;
 import runtime.Instruction;
 import runtime.InstructionList;
@@ -743,8 +733,7 @@ public class RuleCompiler
 	}
 
 	/** 否定条件をコンパイルする */
-	void compileNegatives() throws CompileException
-	{
+	void compileNegatives() {
 		Iterator<List<ProcessContextEquation>> it = rs.guardNegatives.iterator();
 		while (it.hasNext())
 		{
@@ -1026,8 +1015,7 @@ public class RuleCompiler
 	/**
 	 * ルールの左辺と右辺に対してstaticUnifyを呼ぶ
 	 */
-	private void simplify() throws CompileException
-	{
+	private void simplify() {
 		staticUnify(rs.leftMem);
 		staticUnify(rs.rightMem);
 		if (Env.warnEmptyHead && rs.leftMem.atoms.isEmpty() && rs.leftMem.mems.isEmpty() && !rs.isInitialRule())
@@ -2011,7 +1999,7 @@ public class RuleCompiler
 	{
 		for (Atom atom : rhsatoms)
 		{
-			if (atom.getName() == "$callback")
+			if (Objects.equals(atom.getName(), "$callback"))
 			{
 				int atomID = rhsatomToPath(atom);
 				body.add( new Instruction(Instruction.CALLBACK, rhsmemToPath(atom.mem), atomID));
