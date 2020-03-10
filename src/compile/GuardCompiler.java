@@ -115,8 +115,6 @@ class GuardCompiler extends BaseCompiler
 //		putLibrary("lognot"    , 2, 1, array(ISINT  , Instruction.INOT,   ISINT));
 		putLibrary("+."   , 2, 1, array(ISFLOAT,      -1,            ISFLOAT));
 		putLibrary("-."   , 2, 1, array(ISFLOAT, Instruction.FNEG,   ISFLOAT));
-		putLibrary("float", 2, 1, array(ISINT  , Instruction.INT2FLOAT, ISFLOAT));
-		putLibrary("int",   2, 1, array(ISFLOAT, Instruction.FLOAT2INT, ISINT));
 		if (Env.hyperLink)
 		{
 			putLibrary("new"       , 1, 0, array(Instruction.NEWHLINK, ISINT));
@@ -179,7 +177,6 @@ class GuardCompiler extends BaseCompiler
 		putLibrary("string", 1, 1, array(ISSTRING));
 		//guardLibrary2.put(new SymbolFunctor("class",2), new int[]{0,      ISSTRING,Instruction.INSTANCEOF});
 		//guardLibrary1.put(new SymbolFunctor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
-		putLibrary("connectRuntime", 1, 1, array(ISSTRING, Instruction.CONNECTRUNTIME));
 	}
 
 	/** initNormalizedCompiler呼び出し後に呼ばれる。
@@ -286,7 +283,6 @@ class GuardCompiler extends BaseCompiler
 					// 左辺の＠指定で定義される場合
 					identifiedCxtdefs.add(def);
 					int atomid = varCount++;
-					match.add(new Instruction(Instruction.GETRUNTIME, atomid, memToPath(def.lhsMem)));
 					typedCxtSrcs.put(def, atomid);
 					typedCxtDefs.add(def);
 					typedCxtTypes.put(def, UNARY_ATOM_TYPE);
@@ -429,9 +425,8 @@ class GuardCompiler extends BaseCompiler
 //							System.out.println("1 "+typedcxttypes);
 						}
 //						System.out.println("vars "+vars);
-						match.add(new Instruction(Instruction.GUARD_INLINE, guardID, vars, out));
 					}
-					else if (func.getName().equals("uniq") || func.getName().equals("not_uniq"))
+					else if (func.getName().equals("uniq"))
 					{
 						List<Integer> uniqVars = new ArrayList<>();
 						for (int k = 0; k < cstr.args.length; k++)
@@ -449,14 +444,7 @@ class GuardCompiler extends BaseCompiler
 							if(srcPath==UNBOUND) continue FixType;
 							uniqVars.add(srcPath);
 						}
-						if(func.getName().equals("uniq"))
-						{
-							match.add(new Instruction(Instruction.UNIQ, uniqVars));
-						}
-						else
-						{
-							match.add(new Instruction(Instruction.NOT_UNIQ, uniqVars));
-						}
+						match.add(new Instruction(Instruction.UNIQ, uniqVars));
 						rc.theRule.hasUniq = true;
 					}
 					else if (func.equals("\\=", 2))
@@ -1116,55 +1104,6 @@ class GuardCompiler extends BaseCompiler
 	void error(String text) throws CompileException {
 		Env.error(text);
 		throw new CompileException("COMPILE ERROR");
-	}
-
-	private void connectAtoms(Atomic a1, Atomic a2){
-		Membrane m1, m2;
-		m1 = a1.mem;
-		m2 = a2.mem;
-		if(m1==m2)
-			m1.connect(a1, a2);
-		else {
-			Membrane p1, p2, c1, c2;
-			p2 = m2.parent;
-			c2 = m2;
-			while(p2 !=null){
-				if(m1==p2){
-					m1.connect(a1, c2);
-					return ;
-				}
-				c2 = p2;
-				p2 = c2.parent;
-			}
-
-			p1 = m1.parent;
-			c1 = m1;
-			while(p1 !=null){
-				if(p1==m2){
-					m2.connect(c1, a2);
-					return ;
-				}
-				c1 = p1;
-				p1 = c1.parent;
-			}
-
-			p1 = m1.parent;
-			c1 = m1;
-			while(p1 !=null){
-				p2 = m2.parent;
-				c2 = m2;
-				while(p2 !=null){
-					if(p1==p2){
-						p1.connect(c1, c2);
-						return ;
-					}
-					c2 = p2;
-					p2 = c2.parent;
-				}
-				c1 = p1;
-				p1 = c1.parent;
-			}
-		}
 	}
 
 }

@@ -41,10 +41,6 @@ class HeadCompiler extends BaseCompiler
 	private boolean debug2 = false;
 //	/** 左辺膜 */
 //	public Membrane lhsmem;//m;
-	/** マッチング命令列（のラベル）*/
-	InstructionList tempLabel;
-	/** tempLabel.insts */
-	List<Instruction> tempMatch;
 
 	private HashSet<Membrane> memVisited = new HashSet<>();	// Membrane -> boolean, compileMembraneを呼んだかどうか
 
@@ -52,9 +48,6 @@ class HeadCompiler extends BaseCompiler
 	private final boolean UNTYPED_COMPILE	= false;			// fFindDataAtomsの初期値
 
 	int maxVarCount;
-
-	private static int findAtomCount = 0;
-	// private static int anyMemCount = 0;
 
 	private HashMap<Membrane, ProcessContextEquation> proccxteqMap = new HashMap<>(); // Membrane -> ProcessContextEquation
 
@@ -106,9 +99,7 @@ class HeadCompiler extends BaseCompiler
 		visited.clear();
 		memVisited.clear();
 		matchLabel = new InstructionList();
-		tempLabel = new InstructionList();
 		match = matchLabel.insts;
-		tempMatch = tempLabel.insts;
 		varCount = 1;	// [0]は本膜
 //		mempaths.put(mems.get(0), new Integer(0));	// 本膜の変数番号は 0
 		fFindDataAtoms = UNTYPED_COMPILE;
@@ -250,11 +241,11 @@ class HeadCompiler extends BaseCompiler
 			int atompath = varCount++;
 			// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
 			// Membrane[] testmems = { mem };
-			if (proccxteqMap.containsKey(mem))
-			{
+//			if (proccxteqMap.containsKey(mem))
+//			{
 				// $p等式トップレベルのアトムのときは、$pがヘッド出現する膜とも比較する
 				// testmems = new Membrane[]{ mem, proccxteqMap.get(mem).def.lhsOcc.mem };
-			}
+//			}
 			atomPaths.put(atom, atompath);
 			searchLinkedGroup(atom, qatoms, firstatom, firstmem);
 		}
@@ -352,13 +343,11 @@ class HeadCompiler extends BaseCompiler
 					}
 					// 広義先祖膜列の共通部分削除
 					// atomSupermems = {}; buddySupermems = {2}
-					{
-						Iterator<Membrane> ita = atomSupermems.iterator();
-						Iterator<Membrane> itb = buddySupermems.iterator();
-						while (ita.hasNext() && itb.hasNext() && ita.next() == itb.next()) {
-							ita.remove();
-							itb.remove();
-						}
+					Iterator<Membrane> ita = atomSupermems.iterator();
+					Iterator<Membrane> itb = buddySupermems.iterator();
+					while (ita.hasNext() && itb.hasNext() && ita.next() == itb.next()) {
+						ita.remove();
+						itb.remove();
 					}
 					// 広義先祖膜列を命令列に変換しbuddyatompathを訂正する
 					while (!atomSupermems.isEmpty()) {
@@ -504,9 +493,6 @@ class HeadCompiler extends BaseCompiler
 			// 見つかったアトムを変数に取得する
 			int atompath = varCount++;
 			insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
-//			insts.add(Instruction.findatom2(atompath, thismempath, findatomcount, atom.functor));
-
-//				
 			// すでに取得している同じ所属膜かつ同じファンクタを持つアトムとの非同一性を検査する
 			emitNeqAtoms(mem, atom, atompath, insts);
 			atomPaths.put(atom, atompath);

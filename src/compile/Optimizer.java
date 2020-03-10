@@ -35,8 +35,6 @@ public class Optimizer {
 	public static boolean fGuardMove;
 	/** 命令列のグループ化を行う */
 	public static boolean fGrouping;
-	/** 命令列の編み上げを行う */
-	public static boolean fMerging;
 	/** システムルールセットのインライン展開 */
 	public static boolean fSystemRulesetsInlining;
 
@@ -45,7 +43,7 @@ public class Optimizer {
 	 */
 	public static void clearFlag() {
 		fInlining = fReuseMem = fReuseAtom = fLoop = false;
-		fGuardMove = fGrouping = fMerging = fSystemRulesetsInlining = false;
+		fGuardMove = fGrouping = fSystemRulesetsInlining = false;
 	}
 	/**
 	 * 最適化レベルを設定する。
@@ -85,28 +83,23 @@ public class Optimizer {
 		if (fInlining || fGuardMove || fGrouping || fReuseMem || fReuseAtom || fLoop) {
 			//head と guard をくっつける
 			inlineExpandTailJump(rule.memMatch);
-			//現状ではアトム主導テストのインライン展開には対応していない -> 一応対応(sakurai)
-			inlineExpandTailJump(rule.atomMatch);
 			rule.guardLabel = null;
 			rule.guard = null;
 		}
 		optimize(rule.memMatch, rule.body);
-		if(fGuardMove && !fMerging) {
-			guardMove(rule.atomMatch);
+		if(fGuardMove) {
 			guardMove(rule.memMatch);
-			allocMove(rule.atomMatch);
 			allocMove(rule.memMatch);
 		}
-		if(fGrouping && !fMerging) {
+		if(fGrouping) {
 			Grouping g = new Grouping();
-			g.grouping(rule.atomMatch, rule.memMatch);
+			g.grouping(rule.memMatch);
 		} 
 		if (Env.hyperLinkOpt) findproccxtMove(rule.memMatch);//seiji
 		if(fSystemRulesetsInlining) inlineExpandSystemRuleSets(rule.body);
 		if (fInlining) {
 			// head(+guard) と body をくっつける
 			inlineExpandTailJump(rule.memMatch);
-			inlineExpandTailJump(rule.atomMatch);
 
 			rule.bodyLabel = null; 
 			rule.body = null;
@@ -230,8 +223,6 @@ public class Optimizer {
 			case Instruction.JUMP:
 			case Instruction.RESETVARS:
 			case Instruction.UNIQ:
-			case Instruction.NOT_UNIQ:
-			case Instruction.GUARD_INLINE:
 			case Instruction.ADDTOLIST:
 				continue;
 				//引数に命令列を持つ命令
@@ -244,14 +235,12 @@ public class Optimizer {
 				//前に動かせる。
 			default:
 				int judge = guardMove(insts, inst, i-1);
-			if(judge == 2){
-//				System.out.println("remove2\t"+insts.get(i));
-				insts.remove(i);
-				i--;
-			} else if (judge == 1){
-//				System.out.println("remove1\t"+insts.get(i+1));
-				insts.remove(i+1);
-			} 
+				if(judge == 2){
+					insts.remove(i);
+					i--;
+				} else if (judge == 1){
+					insts.remove(i+1);
+				}
 			}
 		}
 	}
@@ -434,13 +423,11 @@ public class Optimizer {
 		InstructionList inline2;
 		HashSet<Instruction> newlink = new HashSet<>();
 		HashSet<Instruction> newlinks2;
-		HashSet<Instruction> enqueueatoms;
 		HashMap<Integer, Integer> old2new = new HashMap<>();
 		for(int i=1; i<body.size(); i++){
 			inline1 = new InstructionList();
 			inline2 = new InstructionList();
 			newlinks2 = new HashSet<>();
-			enqueueatoms = new HashSet<>();
 			Instruction inst = body.get(i);
 			if(inst.getKind() == Instruction.GETLINK){
 				if(!getlinkmap.containsKey(inst.getArg1())) getlinkmap.put(inst.getArg1(), inst);
@@ -645,40 +632,11 @@ public class Optimizer {
 							if(!old2new.containsKey(newatomvar)) old2new.put(newatomvar, locals);
 							locals++;
 
-							Instruction newenqueueatom = new Instruction(Instruction.ENQUEUEATOM, newatomvar);
-							if(enqueueatoms.contains(newenqueueatom)) enqueueatoms.remove(newenqueueatom);
-							else enqueueatoms.add(newenqueueatom);
-							for(int k=i+1; k<body.size(); k++){
-								Instruction inst3 = (Instruction)body.get(k);
-								if(inst3.getKind() == Instruction.ENQUEUEATOM
-										&& (inst3.getIntArg1() == newatomvar))
-									body.remove(k--);
-							}
 							//システムルールセット失敗時の命令列 inline2
 							Iterator<Instruction> it = newlinks2.iterator();
 							while(it.hasNext())
 								inline2.add(it.next());
-							it = enqueueatoms.iterator();
-							while(it.hasNext())
-								inline2.add(it.next());							
 							inline2.add(new Instruction(Instruction.PROCEED));
-							//System.out.println(inline2.insts);
-							//システムルールセット命令の追加
-							for(int i2=body.size()-1; i2>0; i2--){
-								inst2 = body.get(i2);
-								if(!(inst2.getKind() == Instruction.PROCEED)
-										&& !(inst2.getKind() == Instruction.FREEATOM)
-										&& !(inst2.getKind() == Instruction.FREEMEM)
-										&& !(inst2.getKind() == Instruction.FREEGROUND)
-										&& !(inst2.getKind() == Instruction.ENQUEUEALLATOMS)
-										&& !(inst2.getKind() == Instruction.ENQUEUEATOM)
-										&& !(inst2.getKind() == Instruction.ENQUEUEMEM)
-										&& !(inst2.getKind() == Instruction.UNLOCKMEM)
-										&& !(inst2.getKind() == Instruction.SYSTEMRULESETS)){
-									body.add(i2, new Instruction(Instruction.SYSTEMRULESETS, inline1, inline2));
-									break;
-								}
-							}
 							break;
 						} else continue;
 					} 
@@ -761,12 +719,6 @@ public class Optimizer {
 				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg3());
 				break;
 			case Instruction.ANYMEM:
-				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg4());
-				break;
-			case Instruction.ANYMEM2:
-				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg5());
-				break;
-			case Instruction.GETMEM:
 				headMemName.put((Integer)inst.getArg1(), (String)inst.getArg4());
 				break;
 			}
@@ -1888,7 +1840,7 @@ public class Optimizer {
 						if (beforeVar.get(beforeAtom).equals(atomVarMap2.get(beforeAtom))) {
 							Integer t1 = (Integer)inherit.get(t);
 							Integer t2 = (Integer)outToBeforeVar.get(t1);
-							loopIterator.set(new Instruction(Instruction.DEREFLINK, inst.getIntArg1(), t2.intValue(), inst.getIntArg4()));
+//							loopIterator.set(new Instruction(Instruction.DEREFLINK, inst.getIntArg1(), t2.intValue(), inst.getIntArg4()));
 
 							//冗長なnewlink除去のためのデータ
 							Link l1 = new Link(inst.getIntArg1(), inst.getIntArg4());
@@ -1924,7 +1876,6 @@ public class Optimizer {
 
 		HashMap changeToNewlink = new HashMap(); //newlinkに変更するリンク -> リンク先
 //		HashMap changeLink = new HashMap(); //inheritlinkの移動に伴い削除されたgetlink命令の第2引数の前回ループ時変数→第1引数
-		HashSet movableEnqueue = new HashSet(); //enqueue命令をループ後に移動できるアトム
 		baseIterator = body.listIterator(1); //１回目用命令列
 		//loopIteratorはさっきの続き
 		while (baseIterator.hasNext()) {
@@ -2022,22 +1973,6 @@ public class Optimizer {
 				Link l2 = new Link(inst.getIntArg3(), inst.getIntArg4());
 				if (l1.equals(alreadyLinked.get(l2)) || l2.equals(alreadyLinked.get(l1))) {
 					loopIterator.remove();
-				}
-				break;
-			case Instruction.DEQUEUEATOM:
-				if (atomVarMap2.containsKey(inst.getArg1())) {
-					atom = (Integer)atomVarMap2.get(inst.getArg1());
-					if (atom < memvars.size() + atomvars.size()) {
-						loopIterator.remove();
-						movableEnqueue.add(atomVarMap.get(atomvars.get(atom - memvars.size())));
-					}
-				}
-				break;
-			case Instruction.ENQUEUEATOM:
-				if (movableEnqueue.contains(inst.getArg1())) {
-					loopIterator.remove();
-					baseIterator.remove();
-					moveInsts.add(baseInst);
 				}
 				break;
 			}

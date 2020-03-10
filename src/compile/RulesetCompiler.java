@@ -92,17 +92,6 @@ public class RulesetCompiler
 			rules.add(rc.theRule);
 		}
 
-		// 編み上げを行う
-		Merger merger = new Merger();
-		MergedBranchMap mbm = null;
-		MergedBranchMap systemmbm = null;
-		if (Optimizer.fMerging)
-		{
-			mbm = merger.Merging(rules, false);
-			merger.clear();
-			systemmbm = merger.createSystemRulesetsMap();
-		}
-
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		if (!rules.isEmpty())
 		{
@@ -111,8 +100,8 @@ public class RulesetCompiler
 			{
 				ruleset.rules.add(r);
 			}
-			ruleset.branchmap = mbm;
-			ruleset.systemrulemap = systemmbm;
+			ruleset.branchmap = null;
+			ruleset.systemrulemap = null;
 			// Ruleset compiledRuleset = compileRuleset(ruleset);
 			mem.rulesets.add(ruleset);
 		}

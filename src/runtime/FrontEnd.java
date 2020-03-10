@@ -224,20 +224,20 @@ public class FrontEnd
 		String opt = args[i];
 		if (opt.equals("--compileonly"))
 		{
-			// コンパイル後の中間命令列を出力するモード
-			//@ --compileonly
-			//@ Output compiled intermediate instruction sequence only.
-			//@ Compiler will not translate to Java or execute the program.
-			//Env.compileonly = true;
+//			 コンパイル後の中間命令列を出力するモード
+//			//@ --compileonly
+//			//@ Output compiled intermediate instruction sequence only.
+//			//@ Compiler will not translate to Java or execute the program.
+//			Env.compileonly = true;
 		}
 		else if (opt.equals("--slimcode"))
 		{
-			// SLIM用の中間命令列を出力するモード
-			// v1.46以降はオプションがなくても強制的にオンになる
-			// （互換性のため分岐を残している）
-			//@ --slimcode
-			//@ Output intermediate instruction sequence to be executed by SLIM.
-			//Env.compileonly = true;
+//			SLIM用の中間命令列を出力するモード
+//			v1.46以降はオプションがなくても強制的にオンになる
+//			（互換性のため分岐を残している）
+//			//@ --slimcode
+//			//@ Output intermediate instruction sequence to be executed by SLIM.
+//			Env.compileonly = true;
 		}
 		else if (opt.equals("--charset"))
 		{
@@ -260,19 +260,19 @@ public class FrontEnd
 				System.exit(1);
 			}
 		}
-		//@ --use-findatom2
-		//@ Use findatom2 instruction (findatom with history).
+//		//@ --use-findatom2
+//		//@ Use findatom2 instruction (findatom with history).
 //		else if (opt.equals("--use-findatom2"))
 //		{
-//			// Env.compileonly = true;
+//			Env.compileonly = true;
 //			Env.findatom2 = true;
 //			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
 //		}
 		else if (opt.equals("--memtest-only"))
 		{
-			//@ --memtest-only
-			//@ Use membrane test only.
-			Env.memtestonly = true;
+//			//@ --memtest-only
+//			//@ Use membrane test only.
+//			Env.memtestonly = true;
 		}
 		else if (opt.equals("--help"))
 		{
@@ -301,13 +301,13 @@ public class FrontEnd
 			//@ Move up the guard instructions.
 			Optimizer.fGuardMove = true;
 		}
-		else if (opt.equals("--optimize-merging"))
-		{
-			//@ --optimize-merging
-			//@ Merge instructions.
-			Optimizer.fMerging = true;
-			Env.fMerging = true;
-		}
+//		else if (opt.equals("--optimize-merging"))
+//		{
+//			//@ --optimize-merging
+//			//@ Merge instructions.
+//			Optimizer.fMerging = true;
+//			Env.fMerging = true;
+//		}
 		else if (opt.equals("--optimize-systemrulesetsinlining"))
 		{
 			Optimizer.fSystemRulesetsInlining = true;
