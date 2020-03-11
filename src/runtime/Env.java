@@ -12,7 +12,7 @@ public final class Env
 	/**
 	 * LMNtal Compiler のバージョン (M.mm)
 	 */
-	public static final String LMNTAL_COMPILER_VERSION = "1.45";
+	public static final String LMNTAL_COMPILER_VERSION = "1.50";
 
 	/**
 	 * このバージョンをリリースした日付 (yyyy-MM-dd)
