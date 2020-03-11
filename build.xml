@@ -93,9 +93,12 @@
 	</target>
 
 	<target name="doc">
-		<javadoc destdir="${docs}" author="true" version="true" use="true" windowtitle="LMNtal API" encoding="${encoding}" charset="${encoding}">
-			<fileset dir="${src}" defaultexcludes="yes"/>
-			<link href="http://java.sun.com/j2se/1.4/ja/docs/ja/api/"/>
+		<javadoc packagenames="*" sourcepath="${src}" destdir="${docs}" author="true" version="true" use="true" windowtitle="LMNtal API" encoding="${encoding}" charset="${encoding}">
+			<classpath>
+				<fileset dir="${lib}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
 		</javadoc>
 	</target>
 	
