@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="tools/jpplib-0.6.jar"/>
-	<classpathentry kind="lib" path="tools/java_cup-runtime.jar"/>
-	<classpathentry kind="output" path="classes"/>
-</classpath>
