@@ -18,9 +18,9 @@ import compile.structure.Membrane;
  */
 public class FixedCounts {
 	
-	/** ファンクタ -> 量 */
+	/** ファンクタ {@literal -->} 量 */
 	public final Map<Functor,IntervalCount> functorToCount;
-	/** 膜名 -> 量 */
+	/** 膜名 {@literal -->} 量 */
 	public final Map<String,IntervalCount> memnameToCount;
 	
 	final Membrane mem;
@@ -45,9 +45,9 @@ public class FixedCounts {
 	
 	/**
 	 * マージする.
-	 * マージとは[0, 3] , [2, 5] => [0, 5]みたいなこと
+	 * マージとは[0, 3] , [2, 5] {@literal -->} [0, 5]みたいなこと
 	 * TODO 倍数により分ける
-	 * @param com
+	 * @param fcs
 	 */
 	public void merge(FixedCounts fcs){
 		Set<Functor> mergedFunctors = new HashSet<>();

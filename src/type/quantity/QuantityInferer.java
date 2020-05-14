@@ -36,7 +36,6 @@ public class QuantityInferer {
 	
 	/**
 	 * 量的解析を行う
-	 * @param root
 	 */
 	public void infer(){
 		

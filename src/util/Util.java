@@ -151,8 +151,7 @@ abstract public class Util
 	
 	/**
 	 * アトムbase が link1 のリスト中に含まれるかどうかを返す 
-	 * @param link
-	 * @param result
+	 * @param link1
 	 * @return
 	 */
 	public static boolean listMember(Atom base, Link link1) {

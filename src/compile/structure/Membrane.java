@@ -34,7 +34,7 @@ public final class Membrane
 	 * ホスト指定を表す文字列が入る型付きプロセス文脈名を持った
 	 * 所属膜を持たないプロセスコンテキストが代入される。
 	 * <br>[要注意]例外的に、引数の長さおよびbundleは0にセットされる。
-	 * @see ContextDef.lhsMem */
+	 * @see ContextDef#lhsMem */
 	public ProcessContext pragmaAtHost = null;
 //	/** システムルールセットとして使うなら真 */
 //	public boolean is_system_ruleset = false;

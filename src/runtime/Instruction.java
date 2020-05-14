@@ -828,7 +828,7 @@ public class Instruction implements Cloneable
 	 * <br>（予約された）ボディ命令<br>
 	 * 再帰的にロックされた膜$srcmemの内容のコピーを作成し,膜$dstmemに入れる.
 	 * その際、リンク先がこの膜の(子膜を含めて)中に無いアトムの情報を
-	 * コピーされるアトムオブジェクト -> コピーされたアトムオブジェクト
+	 * コピーされるアトムオブジェクト {@literal -->} コピーされたアトムオブジェクト
 	 * (2005/01/13 従来のAtom.idからの参照を変更)
 	 * というMapオブジェクトとして,dstmapに入れる.
 	 **/
@@ -1282,7 +1282,7 @@ public class Instruction implements Cloneable
 	/**
 	 * unifyhlinks [mem, unify_atom]
 	 * 
-	 * 膜memにあるunify_atom"><"に対してhyperlinkの併合操作を行なうことを示す
+	 * 膜memにあるunify_atom{@code ><}に対してhyperlinkの併合操作を行なうことを示す
 	 */
 	@LMNtalIL public static final int UNIFYHLINKS = 268;
 	static {setArgType(UNIFYHLINKS, new ArgType(false, ARG_VAR, ARG_VAR));}
@@ -2117,7 +2117,7 @@ public class Instruction implements Cloneable
 	/** 指定された命令列中で変数が参照される回数を返す（代入は含まない）
 	 * @param list   命令列
 	 * @param varnum 変数番号
-	 * @author n-kato */
+	 * author n-kato */
 	public static int getVarUseCount(List<Instruction> list, Integer varnum)
 	{
 		int count = 0;
@@ -2362,7 +2362,7 @@ public class Instruction implements Cloneable
 	 * デバッグ用表示メソッド。
 	 * 命令のkind (int)を与えると、該当する命令の名前 (String) を返してくれる。
 	 *
-	 * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
+	 * author NAKAJIMA Motomu nakajima@ueda.info.waseda.ac.jp
 	 * @return String
 	 * 
 	 */
@@ -2371,10 +2371,12 @@ public class Instruction implements Cloneable
 		return instructionTable.get(kind);
 	}
 
+	public static int depth;
+	
 	/**
 	 * デバッグ用表示メソッド。
 	 *
-	 * @author NAKAJIMA Motomu <nakajima@ueda.info.waseda.ac.jp>
+	 * author NAKAJIMA Motomu nakajima@ueda.info.waseda.ac.jp
 	 * @return String
 	 *
 	 * メモ：Instructionの中は、Listの中にArrayListが入れ子になって入っている。
@@ -2385,8 +2387,6 @@ public class Instruction implements Cloneable
 	 * メモ：出力の時、モードが−の変数をインデントする。
 	 *
 	 */
-	public static int depth;
-
 	public String toString()
 	{
 		depth++;

@@ -21,14 +21,14 @@ abstract public class Atomic
 	/**
 	 * デバッグ情報:ソースコード中での出現位置(行)
 	 * 情報が無いときは-1を代入
-	 * @author Tomohito Makino
+	 * author Tomohito Makino
 	 */
 	public int line = -1;
 
 	/**
 	 * デバッグ情報:ソースコード中での出現位置(桁)
 	 * 情報が無いときは-1を代入
-	 * @author Tomohito Makino
+	 * author Tomohito Makino
 	 */
 	public int column = -1;
 
