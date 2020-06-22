@@ -120,7 +120,7 @@ public class TypeChecker {
 	
 	/**
 	 * 型定義膜を読み込んで型情報を得る
-	 * @param typedefmem
+	 * @param typedefmems
 	 */
 	public boolean parseTypeDefinition(List<Membrane> typedefmems){
 		

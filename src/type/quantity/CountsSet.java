@@ -30,7 +30,7 @@ public class CountsSet {
 //	/** ソース上の膜 -> 量解析結果(継続膜/評価済み) */
 //	Map<Membrane,FixedCounts> memToInhFixedCounts;
 	private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<>();
-	/** 膜名 -> 量解析結果(継続膜) */
+	/** 膜名 {@literal -->} 量解析結果(継続膜) */
 	// private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
 
 	public CountsSet(){
@@ -99,7 +99,7 @@ public class CountsSet {
 	Map<Membrane, Boolean> memToCRIFlg = new HashMap<>();
 	/**
 	 * 指定した膜名については、全ての膜のルールは全ての膜に影響する
-	 * @param memname
+	 * @param mem
 	 */
 	public void collapseRuleIndependency(Membrane mem){
 		memToCRIFlg.put(mem, true);

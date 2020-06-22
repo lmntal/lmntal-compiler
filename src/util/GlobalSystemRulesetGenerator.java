@@ -18,7 +18,7 @@ import runtime.functor.SymbolFunctor;
  * システムルールセットのモジュール化：
  * system_ruleset アトムがある膜の直属のルールセットはシステムルールセットであることにする。
  * 
- * {system_ruleset, (a:-b)}, {{{{{{a}}}}}}    ==> {{{{{{b}}}}}} 
+ * {system_ruleset, (a:-b)}, {{{{{{a}}}}}}    {@literal -->} {{{{{{b}}}}}} 
  * 
  * @author n-kato, hara
  */

@@ -23,7 +23,7 @@ public class DynamicCounts {
 	/**
 	 * この膜の所属プロセスが何倍されるかを表す。
 	 * 1 : 移動時(あるいはルールの本膜等)
-	 * >1 : 複製、マージ
+	 * &gt;1 : 複製、マージ
 	 */
 	public final int multiple;
 	

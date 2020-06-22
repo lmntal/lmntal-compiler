@@ -70,15 +70,15 @@ public final class Env
 
 	////////////////////////////////////////////////////////////////
 
-	/** リンクの表示をL[数字]で表示する冗長表示レベル　<pre> a(_2) --> a(L2) </pre> */
+	/** リンクの表示をL[数字]で表示する冗長表示レベル　<pre> a(_2) {@literal -->} a(L2) </pre> */
 	public static final int VERBOSE_SIMPLELINK = 1;
 	/** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
 	public static final int VERBOSE_SHOWRULES = 3;
 //	/** 自由リンク管理アトムを表示する冗長表示レベル（EXPANDATOMS未満に限る）*/
 //	public static final int VERBOSE_EXPANDPROXIES = 3;
-	/** 演算子を展開する冗長表示レベル（EXPANDATOMS未満に限る） <pre> X+Y --> '+'(X,Y) </pre> */
+	/** 演算子を展開する冗長表示レベル（EXPANDATOMS未満に限る） <pre> X+Y {@literal -->} '+'(X,Y) </pre> */
 	public static final int VERBOSE_EXPANDOPS = 4;
-	/** アトム引数を展開する冗長表示レベル <pre> a(b) --> a(_2),b(_2) </pre> */
+	/** アトム引数を展開する冗長表示レベル <pre> a(b) {@literal -->} a(_2),b(_2) </pre> */
 	public static final int VERBOSE_EXPANDATOMS = 5;
 	/** ルールセットの内容を展開する冗長表示レベル */
 	public static final int VERBOSE_EXPANDRULES = 6;

@@ -125,10 +125,10 @@ public class Optimizer {
 
 	/** 命令列の末尾のjump命令をインライン展開する。
 	 * @param insts 命令列
-	 * <pre>
+	 * <pre>{@code
 	 *     [ spec[X,Y];  C;jump[L,A1..Am] ] where L:[spec[m,m+n];D]
 	 * ==> [ spec[X,Y+n];C; D{ 1..m->A1..Am, m+1..m+n->Y+1..Y+n } ]
-	 * </pre> */
+	 * }</pre> */
 	public static void inlineExpandTailJump(List<Instruction> insts) {
 		if (insts.isEmpty()) return;
 		Instruction spec = insts.get(0);

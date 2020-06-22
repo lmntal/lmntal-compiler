@@ -56,17 +56,17 @@ public final class RuleStructure
 	public List<List<ProcessContextEquation>> guardNegatives = new LinkedList<>();
 
 	/**
-	 * プロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef)
+	 * プロセス文脈の限定名 ("$p"などのString) {@literal -->} 文脈の定義 (ContextDef)
 	 */
 	public Map<String, ContextDef> processContexts = new HashMap<>();
 
 	/**
-	 * ルール文脈の限定名 ("@p"などのString) -> 文脈の定義 (ContextDef)
+	 * ルール文脈の限定名 ("@p"などのString) {@literal -->} 文脈の定義 (ContextDef)
 	 */
 	public Map<String, ContextDef> ruleContexts = new HashMap<>();
 
 	/**
-	 * 型付きプロセス文脈の限定名 ("$p"などのString) -> 文脈の定義 (ContextDef)
+	 * 型付きプロセス文脈の限定名 ("$p"などのString) {@literal -->} 文脈の定義 (ContextDef)
 	 */
 	public Map<String, ContextDef> typedProcessContexts = new HashMap<>();
 
