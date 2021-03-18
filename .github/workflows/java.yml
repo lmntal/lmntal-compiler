@@ -8,10 +8,14 @@ jobs:
       slim_CHECK_ND: "yes"
     steps:
     - uses: actions/checkout@v2
-    - run: sudo apt-get -qq update
-    - run: sudo apt-get install -y ant re2c
+    - run: sudo apt -qq update
+    - run: sudo apt install -y ant re2c
     - run: ant
-    - run: git clone https://github.com/lmntal/slim.git
+    - uses: actions/checkout@v2
+      with:
+        repository: lmntal/slim
+        path: slim
+        token: ${{ secrets.EX_GITHUB_TOKEN }}
     - run: cd slim
     - run: ./autogen.sh
     - run: ./configure
