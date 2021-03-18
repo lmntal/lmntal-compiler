@@ -1,0 +1,22 @@
+name: Java CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env: 
+      LMNTAL_HOME: ${{ github.workspace }}
+      slim_CHECK_ND: "yes"
+    steps:
+    - uses: actions/checkout@v2
+    - run: sudo apt -qq update
+    - run: sudo apt install -y ant re2c
+    - run: ant
+    - run: git clone https://github.com/lmntal/slim.git
+    - run: ./autogen.sh
+      working-directory: ./slim
+    - run: ./configure
+      working-directory: ./slim
+    - run: make
+      working-directory: ./slim
+    - run: make check
+      working-directory: ./slim
