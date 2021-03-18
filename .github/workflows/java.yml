@@ -16,7 +16,7 @@ jobs:
       working-directory: ./slim
     - run: ./configure
       working-directory: ./slim
-    - run: make -j
+    - run: make
       working-directory: ./slim
-    - run: make -j check
+    - run: make check
       working-directory: ./slim
