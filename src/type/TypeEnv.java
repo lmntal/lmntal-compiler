@@ -26,8 +26,8 @@ public final class TypeEnv {
 
 	public static final int CONNECTOR = -2;
 	
-	private static final Map<Functor, Integer> functorToOut = new HashMap<Functor, Integer>();
-	private static final Map<Functor, String> functorToTypeName = new HashMap<Functor, String>();
+	private static final Map<Functor, Integer> functorToOut = new HashMap<>();
+	private static final Map<Functor, String> functorToTypeName = new HashMap<>();
 
 	static{
 		functorToOut.put(Functor.UNIFY, CONNECTOR);
@@ -58,7 +58,7 @@ public final class TypeEnv {
 		if (f instanceof ObjectFunctor)
 			return 0;
 		if (functorToOut.containsKey(f))
-			return ((Integer)functorToOut.get(f)).intValue();
+			return (Integer) functorToOut.get(f);
 		return ACTIVE;
 	}
 
@@ -97,9 +97,9 @@ public final class TypeEnv {
 	}
 
 	/** 左辺膜および左辺出現膜の集合 */
-	private static final Set<Membrane> lhsmems = new HashSet<Membrane>();
+	private static final Set<Membrane> lhsmems = new HashSet<>();
 
-	private static final Map<Membrane, String> memToName = new HashMap<Membrane, String>();
+	private static final Map<Membrane, String> memToName = new HashMap<>();
 	
 	public static void initialize(Membrane root)throws TypeException{
 		// 全ての膜について、ルールの左辺最外部出現かどうかの情報を得る
@@ -113,7 +113,7 @@ public final class TypeEnv {
 	}
 	
 	/** 型付きプロセス文脈定義 -> データ型*/
-	private static Map<ContextDef, Functor> def2type = new HashMap<ContextDef, Functor>();
+	private static Map<ContextDef, Functor> def2type = new HashMap<>();
 	
 	public static Functor dataTypeOfContextDef(ContextDef cd){
 		return def2type.get(cd);

@@ -23,7 +23,7 @@ public final class InterpretedRuleset extends Ruleset
 	/** 現在実行中のルール */
 	public Rule currentRule;
 	
-	private int backtracks, lockfailure;
+	// private int backtracks, lockfailure;
 
 	/**
 	 * RuleCompiler では、まず生成してからデータを入れ込む。
@@ -31,14 +31,14 @@ public final class InterpretedRuleset extends Ruleset
 	 */
 	public InterpretedRuleset()
 	{
-		rules = new ArrayList<Rule>();
+		rules = new ArrayList<>();
 		id = ++lastId;
 		branchmap = null;
 		systemrulemap = null;
 	}
 
 	/** グローバルルールセットID（未定義の場合はnull）*/
-	private String globalRulesetID;
+	// private String globalRulesetID;
 
 	/**このルールセットのローカルIDを取得する。*/
 	public int getId()
@@ -112,21 +112,18 @@ public final class InterpretedRuleset extends Ruleset
 
 	public void showDetail()
 	{
-		if (Env.compileonly)
+		if (isSystemRuleset)
 		{
-			if (isSystemRuleset)
-			{
-				Env.p("Compiled SystemRuleset @" + id + dumpRules());
-			}
-			else
-			{
-				Env.p("Compiled Ruleset @" + id + dumpRules());
-			}
+			Env.p("Compiled SystemRuleset @" + id + dumpRules());
 		}
+		else
+		{
+			Env.p("Compiled Ruleset @" + id + dumpRules());
+		}	
 		for (Rule rule : rules)
 		{
 			rule.showDetail();
 		}
-		if (Env.slimcode) Env.p("");
+		Env.p("");
 	}
 }

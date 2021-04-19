@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import runtime.Env;
-import runtime.InlineUnit;
 import runtime.InterpretedRuleset;
-import runtime.MergedBranchMap;
 import runtime.Rule;
 import runtime.Ruleset;
 import runtime.SystemRulesets;
@@ -29,19 +27,13 @@ public class RulesetCompiler
 	/**
 	 * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。
 	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
-	 * 
-	 * @param unitName ファイル名
+	 *
 	 * @param m 膜構造
 	 * @return (:-m)というルール1つだけからなるルールセット
 	 */
-	public static Ruleset compileMembrane(Membrane m, String unitName)
-	{
-		return compileMembraneToGeneratingMembrane(m, unitName).rulesets.get(0);
-	}
-
 	public static Ruleset compileMembrane(Membrane m)
 	{
-		return compileMembrane(m, InlineUnit.DEFAULT_UNITNAME);
+		return compileMembraneToGeneratingMembrane(m).rulesets.get(0);
 	}
 
 	/**
@@ -52,35 +44,25 @@ public class RulesetCompiler
 	 */
 	public static void processMembrane(Membrane mem)
 	{
-		processMembrane(mem, InlineUnit.DEFAULT_UNITNAME);
-	}
-
-	/**
-	 * 与えられた膜の階層下にある全ての {@code RuleStructure} について、対応する {@code Rule} を生成してその膜のルールセットに追加する。
-	 * <p>ルールをちょうど1つ持つ膜にはちょうど1つのルールセットが追加される。</p>
-	 * @param mem 対象となる膜
-	 */
-	public static void processMembrane(Membrane mem, String unitName)
-	{
 		// 子膜にあるルールをルールセットにコンパイルする
 		for (Membrane submem : mem.mems)
 		{
-			processMembrane(submem, unitName);
+			processMembrane(submem);
 		}
 
-		List<Rule> rules = new ArrayList<Rule>();
+		List<Rule> rules = new ArrayList<>();
 
 		// この膜にあるルール構造をルールオブジェクトにコンパイルする
 		for (RuleStructure rs : mem.rules)
 		{
 			// ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
-			processMembrane(rs.leftMem, unitName); // 一応左辺も
-			processMembrane(rs.rightMem, unitName);
+			processMembrane(rs.leftMem); // 一応左辺も
+			processMembrane(rs.rightMem);
 
 			RuleCompiler rc = null;
 			try
 			{
-				rc = new RuleCompiler(rs, unitName);
+				rc = new RuleCompiler(rs);
 				rc.compile();
 				//2006.1.22 Ruleに行番号を渡す by inui
 				rc.theRule.lineno = rs.lineno;
@@ -92,17 +74,6 @@ public class RulesetCompiler
 			rules.add(rc.theRule);
 		}
 
-		// 編み上げを行う
-		Merger merger = new Merger();
-		MergedBranchMap mbm = null;
-		MergedBranchMap systemmbm = null;
-		if (Optimizer.fMerging)
-		{
-			mbm = merger.Merging(rules, false);
-			merger.clear();
-			systemmbm = merger.createSystemRulesetsMap();
-		}
-
 		// 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
 		if (!rules.isEmpty())
 		{
@@ -111,9 +82,8 @@ public class RulesetCompiler
 			{
 				ruleset.rules.add(r);
 			}
-			ruleset.branchmap = mbm;
-			ruleset.systemrulemap = systemmbm;
-			Ruleset compiledRuleset = compileRuleset(ruleset);
+			ruleset.branchmap = null;
+			ruleset.systemrulemap = null;
 			mem.rulesets.add(ruleset);
 		}
 		// 必要ならシステムルールセットに登録
@@ -148,10 +118,9 @@ public class RulesetCompiler
 	 * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。
 	 * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
 	 * @param m 膜構造
-	 * @param unitName
 	 * @return 生成したルールセットを持つ膜構造
 	 */
-	private static Membrane compileMembraneToGeneratingMembrane(Membrane m, String unitName)
+	private static Membrane compileMembraneToGeneratingMembrane(Membrane m)
 	{
 		Env.c("RulesetGenerator.runStartWithNull");
 
@@ -164,12 +133,8 @@ public class RulesetCompiler
 		rs.rightMem = m;
 		root.rules.add(rs);
 
-		processMembrane(root, unitName);
+		processMembrane(root);
 
-		if (Env.fUseSourceLibrary)
-		{
-			Module.resolveModules(root);
-		}
 		return root;
 	}
 }

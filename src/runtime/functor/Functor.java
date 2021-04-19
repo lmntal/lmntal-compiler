@@ -103,7 +103,7 @@ public abstract class Functor
 	/**
 	 * 指定された文字列を表すシンボルリテラルのテキスト表現を取得する。 例えば a'b を渡すと 'a\'b' が返る。
 	 */
-	static final String quoteName(String text) {
+	static String quoteName(String text) {
 		return Util.quoteString(text, '\'');
 	}
 
@@ -125,9 +125,7 @@ public abstract class Functor
 	}
 
 	public String toString() {
-		if (Env.compileonly)
-			return Util.quoteString(getName(), '\'') + "_" + getArity();
-		return getQuotedFunctorName() + "_" + getArity();
+		return Util.quoteString(getName(), '\'') + "_" + getArity();
 	}
 
 	/**
@@ -163,11 +161,11 @@ public abstract class Functor
 						radix = 16;
 					}
 					return new IntegerFunctor(Integer.parseInt(name, radix));
-				} catch (NumberFormatException e) {
+				} catch (NumberFormatException ignored) {
 				}
 				try {
 					return new FloatingFunctor(Double.parseDouble(name));
-				} catch (NumberFormatException e2) {
+				} catch (NumberFormatException ignored) {
 				}
 			} else if (nametype == SrcName.STRING || nametype == SrcName.QUOTED) {
 				return new StringFunctor(name); // new

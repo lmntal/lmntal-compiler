@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import runtime.Env;
 import type.TypeEnv;
 
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
+import compile.structure.Context;
 import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
 
@@ -36,7 +36,6 @@ public class QuantityInferer {
 	
 	/**
 	 * 量的解析を行う
-	 * @param root
 	 */
 	public void infer(){
 		
@@ -91,10 +90,10 @@ public class QuantityInferer {
 		// 左辺膜と右辺膜を、同じ膜として扱う
 		inferRuleRootMembrane(rule);
 		// 右辺子膜の走査
-		for(Membrane rhsmem : ((List<Membrane>)rule.rightMem.mems))
+		for(Membrane rhsmem : rule.rightMem.mems)
 			inferRHSMembrane(rhsmem);
 		// 右辺出現ルールの検査
-		for(RuleStructure rhsrule : ((List<RuleStructure>)rule.rightMem.rules))
+		for(RuleStructure rhsrule : rule.rightMem.rules)
 			inferRule(rhsrule);
 	}
 
@@ -108,13 +107,13 @@ public class QuantityInferer {
 	 */
 	private void inferRHSMembrane(Membrane rhs){
 		
-		Set<Membrane> lhss = new HashSet<Membrane>();
+		Set<Membrane> lhss = new HashSet<>();
 		/* プロセス文脈、型付きプロセス文脈について左辺出現膜の集合を得る */
-		for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.processContexts)){
+		for(ProcessContext rhsOcc : rhs.processContexts){
 			ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
 			if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
 		}
-		for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.typedProcessContexts)){
+		for(ProcessContext rhsOcc : rhs.typedProcessContexts){
 			// データ型は無視
 			if(TypeEnv.dataTypeOfContextDef(rhsOcc.def)!=null)continue;
 			ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
@@ -147,12 +146,12 @@ public class QuantityInferer {
 		}
 
 		/** プロセス文脈の分散が無いことを確認し、あればプロセス独立性を失う */
-		if(!checkIndependency((List<ProcessContext>)rhs.processContexts, rhs) ||
-			!checkIndependency((List<ProcessContext>)rhs.typedProcessContexts, rhs) )
+		if(!checkIndependency(rhs.processContexts, rhs) ||
+			!checkIndependency(rhs.typedProcessContexts, rhs) )
 			countsset.collapseProcessUnderBounds(TypeEnv.getMemName(rhs));
 		
 		/** ルール文脈の分散の有無を確認し、あればルールセット独立性を失う */
-		for(RuleContext rc : ((List<RuleContext>)rhs.ruleContexts)){
+		for(RuleContext rc : rhs.ruleContexts){
 			if(lhss.contains(rc.mem))continue;
 			else{
 				if(lhss.size() == 0) // 生成膜であればその膜のみ
@@ -166,20 +165,21 @@ public class QuantityInferer {
 		}
 		
 		// 子膜の検査
-		for(Membrane child : ((List<Membrane>)rhs.mems))
+		for(Membrane child : rhs.mems)
 			inferRHSMembrane(child);
 		// ルールの検査
-		for(RuleStructure rule : ((List<RuleStructure>)rhs.rules))
+		for(RuleStructure rule : rhs.rules)
 			inferRule(rule);
 	}
 
 	/**
 	 * わたされた文脈列のいずれかがこの膜に出現することを確かめる
 	 * いずれも出現していない場合、falseを返す
+	 * todo ProcessContextをContextに変更したが問題ないか？
 	 */
-	public boolean checkOccurrence(List<ProcessContext> rhsOccs, Membrane rhs){
+	public boolean checkOccurrence(List<Context> rhsOccs, Membrane rhs){
 		boolean okflg = false;
-		for(ProcessContext pcRhsOcc : rhsOccs){
+		for(Context pcRhsOcc : rhsOccs){
 			if(pcRhsOcc.mem == rhs){
 				okflg = true;
 				break;
@@ -196,12 +196,12 @@ public class QuantityInferer {
 			if(TypeEnv.dataTypeOfContextDef(rhsOcc.def)!=null)continue;
 			Membrane lhsmem = ((ProcessContext)rhsOcc.def.lhsOcc).mem;
 			if(lhsmem.processContexts.size() > 0){
-				boolean ok = checkOccurrence((List<ProcessContext>)((ProcessContext)lhsmem.processContexts.get(0)).def.rhsOccs, rhs);
+				boolean ok = checkOccurrence(lhsmem.processContexts.get(0).def.rhsOccs, rhs);
 				if(!ok)return false;
 			}
 			boolean okflg = true;
-			for(ProcessContext lhsOcc : ((List<ProcessContext>)lhsmem.typedProcessContexts)){
-				boolean ok = checkOccurrence((List<ProcessContext>)lhsOcc.def.rhsOccs, rhs);
+			for(ProcessContext lhsOcc : lhsmem.typedProcessContexts){
+				boolean ok = checkOccurrence(lhsOcc.def.rhsOccs, rhs);
 				if(!ok){
 					okflg = false;
 					break;
@@ -276,10 +276,10 @@ public class QuantityInferer {
 	private StaticCounts getCountsOfMem(int sign, Membrane mem, Count count){
 		StaticCounts quantities = new StaticCounts(mem);
 		//アトムの解析結果
-		for(Atom atom : ((List<Atom>)mem.atoms))
+		for(Atom atom : mem.atoms)
 			quantities.addAtomCount(atom,(Count.mul(sign, count)));
 		//子膜の解析結果
-		for(Membrane child : ((List<Membrane>)mem.mems))
+		for(Membrane child : mem.mems)
 			quantities.addMemCount(child,(Count.mul(sign,count)));
 		return quantities;
 	}

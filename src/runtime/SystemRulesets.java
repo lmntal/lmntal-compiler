@@ -8,8 +8,8 @@ import java.util.Iterator;
  * @author Mizuno
  */
 public final class SystemRulesets {
-	private static ArrayList<Ruleset> all = new ArrayList<Ruleset>();
-	private static ArrayList<Ruleset> userDefined = new ArrayList<Ruleset>();
+	private static ArrayList<Ruleset> all = new ArrayList<>();
+	private static ArrayList<Ruleset> userDefined = new ArrayList<>();
 	static {
 		clear();
 	}

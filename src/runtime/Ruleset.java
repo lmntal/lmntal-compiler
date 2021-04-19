@@ -17,7 +17,7 @@ public abstract class Ruleset
 	 */
 	protected Functor[] holes;
 
-	public List<Rule> compiledRules = new ArrayList<Rule>();
+	public List<Rule> compiledRules = new ArrayList<>();
 	public boolean isRulesSetted = false;
 	public boolean isSystemRuleset = false;
 

@@ -18,9 +18,9 @@ import compile.structure.Membrane;
  */
 public class FixedCounts {
 	
-	/** ファンクタ -> 量 */
+	/** ファンクタ {@literal -->} 量 */
 	public final Map<Functor,IntervalCount> functorToCount;
-	/** 膜名 -> 量 */
+	/** 膜名 {@literal -->} 量 */
 	public final Map<String,IntervalCount> memnameToCount;
 	
 	final Membrane mem;
@@ -31,8 +31,8 @@ public class FixedCounts {
 	 */
 	public FixedCounts(StaticCounts com){
 		this.mem = com.mem;
-		functorToCount = new HashMap<Functor, IntervalCount>();
-		memnameToCount = new HashMap<String, IntervalCount>();
+		functorToCount = new HashMap<>();
+		memnameToCount = new HashMap<>();
 		for(Functor f : com.functorToCount.keySet()){
 			Count c = com.functorToCount.get(f);
 			functorToCount.put(f,c.evaluate());
@@ -45,12 +45,12 @@ public class FixedCounts {
 	
 	/**
 	 * マージする.
-	 * マージとは[0, 3] , [2, 5] => [0, 5]みたいなこと
+	 * マージとは[0, 3] , [2, 5] {@literal -->} [0, 5]みたいなこと
 	 * TODO 倍数により分ける
-	 * @param com
+	 * @param fcs
 	 */
 	public void merge(FixedCounts fcs){
-		Set<Functor> mergedFunctors = new HashSet<Functor>();
+		Set<Functor> mergedFunctors = new HashSet<>();
 		mergedFunctors.addAll(functorToCount.keySet());
 		mergedFunctors.addAll(fcs.functorToCount.keySet());
 		for(Functor f : mergedFunctors){
@@ -63,7 +63,7 @@ public class FixedCounts {
 			else if(fc1!=null && fc2!=null)
 				functorToCount.put(f, fc1.or(fc2));
 		}
-		Set<String> mergedNames = new HashSet<String>();
+		Set<String> mergedNames = new HashSet<>();
 		mergedNames.addAll(memnameToCount.keySet());
 		mergedNames.addAll(fcs.memnameToCount.keySet());
 		for(String name : mergedNames){

@@ -11,6 +11,7 @@ import util.Util;
 
 import compile.structure.Atom;
 import compile.structure.ContextDef;
+import compile.structure.Context;
 import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
@@ -60,7 +61,7 @@ public class ArgumentInferer {
 	 * @throws TypeException
 	 */
 	public void infer() throws TypeException{
-		defs = new HashSet<ContextDef>();
+		defs = new HashSet<>();
 
 		// TODO Active Head Condition をチェックする
 		// 全ての引数についてモード変数、型変数を振る
@@ -79,9 +80,9 @@ public class ArgumentInferer {
 	 */
 	private void processLinksOfProcessContexts()throws TypeException{
 		for(ContextDef def : defs)
-			for(ProcessContext rhsOcc : (List<ProcessContext>)def.rhsOccs)
+			for(Context rhsOcc : def.rhsOccs)
 				if( def.lhsOcc != null)
-					processExplicitLinks((ProcessContext)def.lhsOcc, rhsOcc);
+					processExplicitLinks((ProcessContext)def.lhsOcc, (ProcessContext)rhsOcc);
 	}
 
 	/**
@@ -159,8 +160,8 @@ public class ArgumentInferer {
 	 */
 	private void inferArgumentRule(RuleStructure rule) throws TypeException{
 		// 左辺／右辺それぞれについて型／モードを解決し、1回出現するリンクを集める
-		Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(rule.leftMem, new HashSet<LinkOccurrence>());
-		Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(rule.rightMem, new HashSet<LinkOccurrence>());
+		Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(rule.leftMem, new HashSet<>());
+		Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(rule.rightMem, new HashSet<>());
 		for(LinkOccurrence leftlink : freelinksLeft){
 			LinkOccurrence rightlink = TypeEnv.getRealBuddy(leftlink);
 			if (!freelinksRight.contains(rightlink)) // リンクが左辺／右辺出現でないなら
@@ -303,7 +304,7 @@ public class ArgumentInferer {
 		}
 	}
 
-	private PolarizedPath solvePolarizedPath(PolarizedPath pp)throws TypeException{
+	private PolarizedPath solvePolarizedPath(PolarizedPath pp) {
 		Path p = pp.getPath();
 		if (!(p instanceof RootPath)) {
 			Util.println("fatal error in solving path.");
@@ -316,7 +317,7 @@ public class ArgumentInferer {
 		LinkOccurrence lo = ((RootPath) p).getTarget();
 		if (!(lo.atom instanceof Atom))
 			return pp;
-		Set<LinkOccurrence> traced = new HashSet<LinkOccurrence>();
+		Set<LinkOccurrence> traced = new HashSet<>();
 		PolarizedPath tp = getPolarizedPath(traced, lo);
 		if(tp == null){
 			return new PolarizedPath(1,p);
@@ -331,7 +332,7 @@ public class ArgumentInferer {
 	 *            argument of Atom (not Atomic)
 	 * @return
 	 */
-	private PolarizedPath getPolarizedPath(Set<LinkOccurrence> traced, LinkOccurrence lo)throws TypeException{
+	private PolarizedPath getPolarizedPath(Set<LinkOccurrence> traced, LinkOccurrence lo) {
 		if(traced.contains(lo)){
 			// TODO この場合は1つ辿るとこまでのPathが得られるようにする
 			return null;

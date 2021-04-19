@@ -5,9 +5,6 @@
 
 package compile.parser;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +12,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Properties;
 
 import java_cup.runtime.Scanner;
 import runtime.Env;
@@ -415,7 +411,7 @@ public class LMNParser {
 	 *  @param names 左辺およびガード型制約に出現した$p（と*X）からその定義（と出現）へのマップ[in] */
 	private void addGuardNegatives(LinkedList<List> sNegatives, RuleStructure rule, HashMap names) throws ParseException {
 		for(List<List> list1 : sNegatives){
-			List<ProcessContextEquation> neg = new LinkedList<ProcessContextEquation>();
+			List<ProcessContextEquation> neg = new LinkedList<>();
 			ListIterator it2 = list1.listIterator();
 			while(it2.hasNext()){
 				LinkedList sPair = (LinkedList)it2.next();
@@ -447,7 +443,7 @@ public class LMNParser {
 	/** 子膜に対して再帰的にプロキシを追加する。
 	 * @return この膜の更新された自由リンクマップ mem.freeLinks */
 	private HashMap addProxies(Membrane mem) {
-		HashSet<String> proxyLinkNames = new HashSet<String>();	// memとその子膜の間に作成した膜間リンク名の集合
+		HashSet<String> proxyLinkNames = new HashSet<>();	// memとその子膜の間に作成した膜間リンク名の集合
 		for(Membrane submem : mem.mems){
 			HashMap freeLinks = addProxies(submem);
 			// 子膜の自由リンクに対してプロキシを追加する
@@ -1075,7 +1071,7 @@ public class LMNParser {
 
 class SyntaxExpander {
 	private LMNParser parser;
-	private HashSet<String> TopAtomNameSet = new HashSet<String>();
+	private HashSet<String> TopAtomNameSet = new HashSet<>();
 	SyntaxExpander(LMNParser parser) {
 		this.parser = parser;
 	}	
@@ -1086,7 +1082,7 @@ class SyntaxExpander {
 	//
 
 	/** ルール構文に対して略記法の展開を行う */
-	void expandRuleAbbreviations(SrcRule sRule) throws ParseException {
+	void expandRuleAbbreviations(SrcRule sRule) {
 
 		// ガードを型制約と否定条件に分類する
 		flatten(sRule.getGuard());
@@ -1148,7 +1144,7 @@ class SyntaxExpander {
 		// 左辺に2回以上$pが出現した場合に、新しい名前$qにして $p=$qを型制約に追加する
 		// todo 実装する
 		// // 実装しました。便宜上、"同名型付きプロセス文脈の分離"と呼んでいます
-		// // 現状では、SLIMでのみ(--slimcodeと-hl系を併用した場合のみ)使用可能 (10/09/29 seiji)
+		// // 現状では、-hl系を指定した場合のみ使用可能 (10/09/29 seiji)
 		HashMap ruleProcNameMap = new HashMap();
 		if (Env.hyperLink) 
   		sameTypedProcessContext(sRule.getHead(), typeConstraints, ruleProcNameMap);

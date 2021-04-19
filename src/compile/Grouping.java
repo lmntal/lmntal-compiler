@@ -19,15 +19,15 @@ public class Grouping {
 	/** 変数番号⇒変数番号を定義した命令のマップ */
 	private HashMap var2DefInst;
 	/** 命令⇒グループ識別番号のマップ */
-	private HashMap Inst2GroupId;
+	private HashMap<Instruction,Integer> Inst2GroupId;
 	/** グループ命令内の計算コスト*/
-	private HashMap group2Cost;
+	private HashMap<Instruction,Cost> group2Cost;
 	
 	Instruction spec;
 	Grouping(){
 		var2DefInst = new HashMap();
-		Inst2GroupId = new HashMap();
-		group2Cost = new HashMap();
+		Inst2GroupId = new HashMap<>();
+		group2Cost = new HashMap<>();
 		spec = null;
 	}
 	
@@ -40,22 +40,17 @@ public class Grouping {
 	}
 	
 	/** 命令列のグループ化
-	 *  アトム主導テスト部と膜主導テスト部で操作を分ける。
-	 *  @atom アトム主導テスト部の命令列
-	 *  @param 膜主導テスト部の命令列
+	 *  @param mem 膜主導テスト部の命令列
 	 * */
-	public void grouping(List atom, List mem){
-		//アトム主導テスト部
-		if(!Optimizer.fMerging) groupingInstsForAtomMatch(atom);
+	public void grouping(List<Instruction> mem){
 		//膜主導テスト部
-		groupingInsts(mem, false);
+		groupingInsts(mem);
 	}
 	
 	/** 命令列のグループ化 
 	 * @param insts グループ化する命令列
-	 * @param isAtomMatch instsがアトム主導テスト部かどうかのフラグ
 	 * */
-	public void groupingInsts(List<Instruction> insts, boolean isAtomMatch){
+	public void groupingInsts(List<Instruction> insts){
 		if(insts.get(0).getKind() != Instruction.SPEC) return;
 		spec = insts.get(0);
 		int last = -1;
@@ -67,61 +62,36 @@ public class Grouping {
 			if(inst.getKind() == Instruction.COMMIT) continue;
 			if (inst.getKind() == Instruction.JUMP) continue;
 			//グループ番号を割り振る	  
-			Inst2GroupId.put(inst, new Integer(i));
+			Inst2GroupId.put(inst, i);
 			//変数番号→命令にマップを張る
 			//System.out.println("instruction = "+inst);
 			if(inst.getOutputType() != -1)
 				var2DefInst.put(inst.getArg1(), inst);
 			last = i+1;
 		}
-		if(isAtomMatch){
-			for(int i=1; i<insts.size(); i++){
-				Instruction inst = insts.get(i);
-				if(inst.getKind() == Instruction.FUNC){
-					Inst2GroupId.put(inst, new Integer(last));
-					var2DefInst.put(inst.getArg1(), inst);
-					break;
-				}
-			}
-		}
 		//viewMap();
-		createGroup(insts, isAtomMatch);
+		createGroup(insts);
 		initMap();
 	}
-	
-	/** 命令列のグループ化 アトム主導テスト用 
-	 * @param insts グループ化するアトム主導テスト部の命令列
-	 * */
-	public void groupingInstsForAtomMatch(List<Instruction> insts){
-		if(insts.get(0).getKind() != Instruction.SPEC) return;
-		for(int i=1; i<insts.size(); i++){
-			Instruction branch = insts.get(i);
-			//if(branch.getKind() == Instruction.COMMIT) break;
-			if(branch.getKind() == Instruction.BRANCH){
-				InstructionList subinsts = (InstructionList)branch.getArg1();
-				groupingInsts(subinsts.insts, true);
-			}
-		}	
-	}	
+
 
 	/**
 	 * マップに基づいてグループを生成する。
 	 * var2DefInstを参照し、グループ識別番号が同じ命令を同じグループとする。 
 	 * @param insts 命令列
-	 * @param isAtomMatch instsがアトム主導テスト部かどうかのフラグ
 	 * */
-	private void createGroup(List<Instruction> insts, boolean isAtomMatch){
+	private void createGroup(List<Instruction> insts){
 		//マップの書き換え
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.COMMIT
 				|| inst.getKind() == Instruction.JUMP) break;
-			Object group = null;
-			Object changegroup = null;
+			Integer group = null;
+			Integer changegroup = null;
 			ArrayList list = inst.getVarArgs(new HashMap());
 			if(list.isEmpty()) continue;
 			for (int j = 0; j < list.size(); j++) {
-				if (list.get(j).equals(new Integer(0))) continue;
+				if (list.get(j).equals(0)) continue;
 				//if (list.get(j).equals(new Integer(1)) && isAtomMatch) continue;
 				group = Inst2GroupId.get(var2DefInst.get(list.get(j)));
 				changegroup = Inst2GroupId.get(inst);
@@ -132,8 +102,8 @@ public class Grouping {
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.COMMIT
 				|| inst.getKind() == Instruction.JUMP) break;
-			Object group = null;
-			Object changegroup = null;
+			Integer group = null;
+			Integer changegroup = null;
 			boolean norules = false;
 			boolean meminsttype = false; //anymem -> true  lockmem -> false
 			int natoms = -1;
@@ -268,26 +238,17 @@ public class Grouping {
 //		Group命令の並び替え
 		//アトム主導テストでは最初のfunc命令を含むグループの位置は先頭のままとする
 		int groupstart = 0;
-		if(isAtomMatch){
-			for(int i=0; i<insts.size(); i++){
-				Instruction inst = insts.get(i);
-				if(inst.getKind() == Instruction.GROUP){
-					groupstart = i+1;
-					break;
-				}
-			}
-		}
 		for(int i=groupstart; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
 			if(inst.getKind() == Instruction.GROUP){
 				Cost cost1 = null;
-				if(group2Cost.containsKey(inst)) cost1 = (Cost)group2Cost.get(inst);
+				if(group2Cost.containsKey(inst)) cost1 = group2Cost.get(inst);
 				else break;
 				for(int j=i-1; j>0; j--){
 					Instruction inst2 = insts.get(j);
 					if (inst2.getKind() == Instruction.GROUP){
 						Cost cost2 = null;
-						if(group2Cost.containsKey(inst2)) cost2 = (Cost)group2Cost.get(inst2);
+						if(group2Cost.containsKey(inst2)) cost2 = group2Cost.get(inst2);
 						else break;
 						if(cost2.igtCost(cost1)){
 							insts.add(j--, inst);
@@ -309,10 +270,10 @@ public class Grouping {
 	 * @param group2 書き換え後の値
 	 * */
 	//Inst2GroupIdの内, 値group1をもつ全てのキーに対し, 値group2へマップを張り替える.
-	public void changeMap(Object group1, Object group2){
-		Iterator it = Inst2GroupId.keySet().iterator();
+	public void changeMap(Integer group1, Integer group2){
+		Iterator<Instruction> it = Inst2GroupId.keySet().iterator();
 		while (it.hasNext()) {
-			Object key = it.next();
+			Instruction key = it.next();
 			if (group1.equals(Inst2GroupId.get(key))) {
 				Inst2GroupId.put(key, group2);
 			}
@@ -322,10 +283,10 @@ public class Grouping {
 	//生成されたマップの確認 デバッグ用
 	public void viewMap(){
 		Set set1 = var2DefInst.entrySet();
-		Set set2 = Inst2GroupId.entrySet();
+		Set<Map.Entry<Instruction, Integer>> set2 = Inst2GroupId.entrySet();
 
 		Iterator it1 = set1.iterator();
-		Iterator it2 = set2.iterator();
+		Iterator<Map.Entry<Instruction, Integer>> it2 = set2.iterator();
 	
 		Util.println("var2DefInst :- ");
 		while(it1.hasNext()){
@@ -334,7 +295,7 @@ public class Grouping {
 		}
 			Util.println("Inst2GroupId :- ");
 		while(it2.hasNext()){
-			Map.Entry mapentry = (Map.Entry)it2.next();
+			Map.Entry<Instruction, Integer> mapentry = it2.next();
 			Util.println(mapentry.getKey() + "/" + mapentry.getValue());
 		}	
 	}
@@ -347,8 +308,8 @@ class Cost {
 	int n;
 	
 	Cost(){
-		costvalueN = new ArrayList<Integer>();
-		costvalueM = new ArrayList<Integer>();
+		costvalueN = new ArrayList<>();
+		costvalueM = new ArrayList<>();
 		memend = new HashMap();
 		n = 0;
 	}
@@ -360,13 +321,13 @@ class Cost {
 			Instruction inst = insts.get(i);
 			switch(inst.getKind()){
 			case Instruction.FINDATOM:
-				costvalueN.add(n++, new Integer(vn));
-				costvalueM.add(new Integer(vm));
+				costvalueN.add(n++, vn);
+				costvalueM.add(vm);
 				vn = 1;
 				break;
 			case Instruction.ANYMEM:
-				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
-				else costvalueN.set(n, new Integer(++vn));
+				if(costvalueN.size() <= n) costvalueN.add(++vn);
+				else costvalueN.set(n, ++vn);
 				for(int j=insts.size()-1; j>i; j--) {
 					Instruction inst2 = insts.get(j);
 					switch(inst2.getKind()){
@@ -386,15 +347,15 @@ class Cost {
 						break;
 					}
 				}
-				if(costvalueM.size() <= n) costvalueM.add(new Integer(++vm));
-				else costvalueM.set(n, new Integer(++vm));
+				if(costvalueM.size() <= n) costvalueM.add(++vm);
+				else costvalueM.set(n, ++vm);
 				break;
 			case Instruction.NATOMS:
 			case Instruction.NMEMS:
 			case Instruction.NORULES:
 				if(Optimizer.fGuardMove) {vn++; break;}
-				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
-				else costvalueN.set(n, new Integer(++vn));
+				if(costvalueN.size() <= n) costvalueN.add(++vn);
+				else costvalueN.set(n, ++vn);
 				if(memend.containsValue(inst)){
 //					while(costvalueM.size() <=n) costvalueM.add(new Integer(vm));
 //						costvalueM.set(n, new Integer(vm--));
@@ -409,8 +370,8 @@ class Cost {
 				}
 				break;
 			default:
-				if(costvalueN.size() <= n) costvalueN.add(new Integer(++vn));
-				else costvalueN.set(n, new Integer(++vn));
+				if(costvalueN.size() <= n) costvalueN.add(++vn);
+				else costvalueN.set(n, ++vn);
 				
 				break;
 			}
@@ -426,11 +387,11 @@ class Cost {
 		else {
 			for(int i=costvalueN.size()-1, j=costvalueM.size()-1; i>=0 && j>=0; i--, j--){
 				if(costvalueM.size() > j && costsm.size() > j){
-					if(costvalueM.get(j).intValue() > costsm.get(j).intValue()) return true;
-					else if(costvalueM.get(j).intValue() < costsm.get(j).intValue())return false;
+					if(costvalueM.get(j) > costsm.get(j)) return true;
+					else if(costvalueM.get(j) < costsm.get(j))return false;
 				}
-				if(costvalueN.get(i).intValue() > costsn.get(i).intValue()) return true;
-				else if(costvalueN.get(i).intValue() < costsn.get(i).intValue()) return false;
+				if(costvalueN.get(i) > costsn.get(i)) return true;
+				else if(costvalueN.get(i) < costsn.get(i)) return false;
 				else continue;
 			}
 			return false;

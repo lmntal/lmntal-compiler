@@ -21,10 +21,8 @@ public class StreamClassLoader extends ClassLoader {
 	 * @param name バイナリ名(Java API 参照)
 	 * @param in InputStream
 	 * @return Class
-	 * @throws ClassNotFoundException
-	 */
-	public Class findClass(String name, InputStream in)
-			throws ClassNotFoundException {
+     */
+	public Class<?> findClass(String name, InputStream in) {
 		byte[] classData = getClassData(name, in);
 		return defineClass("translated." + name, classData, 0, classData.length);
 	}

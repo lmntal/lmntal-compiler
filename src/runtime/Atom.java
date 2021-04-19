@@ -66,17 +66,17 @@ public final class Atom extends QueuedEntity
 	}
 	
 	/** ファンクタ名を設定する。 */
-	public void setName(String name)
-	{
-		setFunctor(name, getFunctor().getArity());
-	}
+	//public void setName(String name)
+	//{
+		//setFunctor(name, getFunctor().getArity());
+	//}
 	
 	/** ファンクタを設定する。
 	 * AtomSetを更新するため、膜のalterAtomFunctorメソッドを呼ぶ。*/
-	public void setFunctor(String name, int arity)
-	{
+	//public void setFunctor(String name, int arity)
+	//{
 		//mem.alterAtomFunctor(this, new SymbolFunctor(name, arity));
-	}
+	//}
 
 	public String toString() {
 		return functor.getName();

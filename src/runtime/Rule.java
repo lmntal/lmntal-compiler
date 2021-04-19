@@ -6,14 +6,9 @@ import java.util.Map;
 
 public final class Rule
 {
-	/** アトム主導ルール適用の命令列（atomMatchLabel.insts）
-	 * 先頭の命令はspec[2,*]でなければならない。*/
-	public List<Instruction> atomMatch;
 	/** 膜主導ルール適用の命令列（memMatchLabel.insts）
 	 * 先頭の命令はspec[1,*]でなければならない。*/
 	public List<Instruction> memMatch;
-	/** コンパイル時専用膜主導ルール適用の命令列 */
-	public List<Instruction> tempMatch;
 
 	/** ガード命令列（guardLabel.insts）またはnull。
 	 * 先頭の命令はspec[*,*]でなければならない。*/
@@ -22,8 +17,6 @@ public final class Rule
 	 * 先頭の命令はspec[*,*]でなければならない。*/
 	public List<Instruction> body;
 
-	/** ラベル付きアトム主導ルール適用命令列 */
-	public InstructionList atomMatchLabel;
 	/** ラベル付き膜主導ルール適用命令列 */
 	public InstructionList memMatchLabel;	
 	/** ラベル付きガード命令列またはnull */
@@ -75,23 +68,19 @@ public final class Rule
 	{
 		this.text = text;
 		this.fullText = fullText;
-		atomMatchLabel = new InstructionList();
 		memMatchLabel = new InstructionList();
-		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
-		bench = new HashMap<Thread, Benchmark>();
+		bench = new HashMap<>();
 	}
 
 	/**
 	 * パーザーで利用するコンストラクタ
 	 */
-	public Rule(InstructionList atomMatchLabel, InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel)
+	public Rule( InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel)
 	{
-		this.atomMatchLabel = atomMatchLabel;
 		this.memMatchLabel = memMatchLabel;
 		this.guardLabel = guardLabel;
 		this.bodyLabel = bodyLabel;
-		atomMatch = atomMatchLabel.insts;
 		memMatch = memMatchLabel.insts;
 		if (guardLabel != null)
 			guard = guardLabel.insts;
@@ -104,9 +93,9 @@ public final class Rule
 	 */
 	public void showDetail()
 	{
-		if (Env.debug == 0 && !Env.compileonly) return;
+		
 
-		if (hasUniq && Env.slimcode)
+		if (hasUniq)
 		{
 			Env.p("Compiled Uniq Rule " + this);
 		}
@@ -115,9 +104,7 @@ public final class Rule
 			Env.p("Compiled Rule " + this);
 		}
 
-		Env.p("--atommatch:", 1);
-		printInstructions(atomMatch);
-
+		Env.p("--atommatch:", 1); // atommatchはコンパイラから削除されたが、現状のSLIMでは--atommatchを出力する必要がある
 		Env.p("--memmatch:", 1);
 		printInstructions(memMatch);
 
@@ -146,8 +133,7 @@ public final class Rule
 
 	public String toString()
 	{
-		if (Env.compileonly) return "";
-		return name != null && !name.equals("") ? name : text;
+		return "";
 	}
 
 	/**
@@ -407,7 +393,6 @@ class Benchmark {
 	public long lockfailure = 0;
 
 	Benchmark(Thread thread) {
-		this.threadid = (Env.majorVersion == 1 && Env.minorVersion > 4) 
-		? thread.getId() : thread.hashCode();
+		this.threadid = thread.getId();
 	}
 }

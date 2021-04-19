@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import runtime.Atom;
-import runtime.Env;
 import runtime.Link;
 import runtime.functor.Functor;
 import runtime.functor.IntegerFunctor;
@@ -60,7 +59,7 @@ abstract public class Util
 		return vs;
 	}
 	public static Object[] arrayOfList(Link link) {
-		List<Object> l = new ArrayList<Object>();
+		List<Object> l = new ArrayList<>();
 		while(true) {
 			Atom a = link.getAtom();
 			if(!a.getFunctor().equals(DOT)) break;
@@ -152,8 +151,7 @@ abstract public class Util
 	
 	/**
 	 * アトムbase が link1 のリスト中に含まれるかどうかを返す 
-	 * @param link
-	 * @param result
+	 * @param link1
 	 * @return
 	 */
 	public static boolean listMember(Atom base, Link link1) {
@@ -196,8 +194,6 @@ abstract public class Util
 	}
 	
 	public static long getTime(){
-		if(Env.majorVersion==1 &&Env.minorVersion>4)
-	        return System.nanoTime();
-		return System.currentTimeMillis();
+		return System.nanoTime();
 	}
 }

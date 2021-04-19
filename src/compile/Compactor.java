@@ -4,14 +4,12 @@
 package compile;
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import runtime.Instruction;
 import runtime.InstructionList;
-import runtime.Env;
 
 import runtime.Rule;
 
@@ -24,39 +22,16 @@ import runtime.Rule;
  */
 public class Compactor {
 	/** ルールオブジェクトを最適化する（予定） */
-	public static void compactRule(Rule rule) {		
-		// todo compactInstructionList(rule.atomMatchLabel);
-		List<Instruction> atomMatch = rule.atomMatch;
-		for(int i=1; i<atomMatch.size(); i++){
-			Instruction inst = atomMatch.get(i);
-			if(inst.getKind() == Instruction.BRANCH)
-				compactInstructionList(((InstructionList)inst.getArg1()).insts);
-			else continue;
-		}
-		if(Env.findatom2)
-			compactInsts(rule.memMatch);
-		else
-			compactInstructionList(rule.memMatch);
+	public static void compactRule(Rule rule) {
+		compactInstructionList(rule.memMatch);
 		compactInstructionList(rule.guard);
 		compactInstructionList(rule.body);
-	}
-	private static void compactInsts(List<Instruction> insts) {		
-		// todo compactInstructionList(rule.atomMatchLabel);
-		compactInstructionListForSlimCode(insts);
-		for(int i=0; i<insts.size(); i++){
-			Instruction inst = insts.get(i);
-			if(inst.getKind() == Instruction.BRANCH)
-				compactInsts(((InstructionList)inst.getArg1()).insts);
-			else if(inst.getKind() == Instruction.GROUP)
-				compactInsts(((InstructionList)inst.getArg1()).insts);
-			else continue;
-		}
 	}
 	/** 命令列を最適化する（予定）*/
 	public static void compactInstructionList(List<Instruction> insts) {
 		//if (true) return;
 		//List insts = label.insts;
-		Instruction spec = (Instruction)insts.get(0);
+		Instruction spec = insts.get(0);
 		int formals = spec.getIntArg1();
 		int varcount = spec.getIntArg2();
 		varcount = expandBody(insts, varcount);	// 展開（RISC化）
@@ -71,42 +46,6 @@ public class Compactor {
 		varcount = compactBody(insts, varcount);	// 圧縮 (CISC化）
 		varcount = renumberLocals(insts, varcount);	// 局所変数を振りなおす
 		spec.updateSpec(formals,varcount);
-	}
-
-	public static void compactInstructionListForSlimCode(List<Instruction> insts) {
-		//if (true) return;
-		//List insts = label.insts;
-//		Instruction spec = (Instruction)insts.get(0);
-//		int formals = spec.getIntArg1();
-//		int varcount = spec.getIntArg2();
-		int varcount = 0;
-		varcount = expandBody(insts, varcount);	// 展開（RISC化）
-		boolean changed = true;
-		while (changed) {
-			changed = false;
-//			if (liftUpTestInstructions(insts))  changed = true;
-			if (eliminateCommonSubexpressions(insts))  changed = true;
-			if (eliminateRedundantInstructions(insts))  changed = true;
-		}
-		packUnifyLinks(insts);
-		varcount = compactBody(insts, varcount);	// 圧縮 (CISC化）
-//		varcount = renumberLocals(insts, varcount);	// 局所変数を振りなおす
-//		spec.updateSpec(formals,varcount);
-	}
-
-	//（テスト命令列生成用） for f(X,Y):-X=Y
-	static void genTest(Rule rule) {		
-		if (rule.body.size() > 6) {
-			HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-			map.put(2, 4);
-			Instruction.applyVarRewriteMap(rule.body, map);
-			map.clear();
-			map.put(3, 2);
-			Instruction.applyVarRewriteMap(rule.body, map);
-			map.clear();
-			map.put(4, 3);
-			Instruction.applyVarRewriteMap(rule.body, map);
-		}
 	}
 
 	/** 命令列をRISC化する */
@@ -325,20 +264,9 @@ public class Compactor {
 				int sub = renumberLocalsSub(subinsts, locals, varcount);
 				if(sub > max)max = sub;
 			}
-			if(inst.getKind()==Instruction.GUARD_INLINE) {
-				// ガードインラインの場合は、出力変数が複数ある場合がある。hara
-				ArrayList<Integer> out = (ArrayList<Integer>)inst.getArg3();
-				for(int j=0;j<out.size();j++) {
-					renumberLocalsSub2(out.get(j), locals, varcount, insts, i);
-					// ループの最後だけインクリメントしない(9行下でするので)
-					// 2006/09/22 kudo
-					if(j<out.size()-1)locals++;
-				}
-			} else {
-				if (inst.getOutputType() == -1) continue;
-				if (inst.getIntArg1() != locals) {
-					renumberLocalsSub2(inst.getIntArg1(), locals, varcount, insts, i);
-				}
+			if (inst.getOutputType() == -1) continue;
+			if (inst.getIntArg1() != locals) {
+				renumberLocalsSub2(inst.getIntArg1(), locals, varcount, insts, i);
 			}
 			locals++;
 		}
@@ -355,12 +283,12 @@ public class Compactor {
 	 * @param begin
 	 */
 	static void renumberLocalsSub2(int isrc, int locals, int varcount, List<Instruction> insts, int begin) {
-		Integer src = new Integer(isrc);
-		Integer dst = new Integer(locals);
-		Integer tmp = new Integer(varcount);
-		HashMap<Integer, Integer> map1 = new HashMap<Integer, Integer>();
-		HashMap<Integer, Integer> map2 = new HashMap<Integer, Integer>();
-		HashMap<Integer, Integer> map3 = new HashMap<Integer, Integer>();
+		Integer src = isrc;
+		Integer dst = locals;
+		Integer tmp = varcount;
+		HashMap<Integer, Integer> map1 = new HashMap<>();
+		HashMap<Integer, Integer> map2 = new HashMap<>();
+		HashMap<Integer, Integer> map3 = new HashMap<>();
 		map1.put(src, tmp);
 		map2.put(dst, src);
 		map3.put(tmp, dst);
@@ -444,7 +372,7 @@ public class Compactor {
 						break;
 					}
 					if (sameTypeAndSameInputArgs(inst1, inst2, true)) {
-						Map<Integer, Integer> varChangeMap = new HashMap<Integer, Integer>();
+						Map<Integer, Integer> varChangeMap = new HashMap<>();
 						varChangeMap.put((Integer)inst2.getArg1(), (Integer)inst1.getArg1());
 						insts.remove(i2);
 						i2--;

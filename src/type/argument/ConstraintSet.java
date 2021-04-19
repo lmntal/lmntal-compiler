@@ -13,11 +13,11 @@ import type.TypeException;
 
 public class ConstraintSet /* implements Set */{
 
-	private Map<PolarizedPath,Set<ReceiveConstraint>> receivePassiveConstraintsMap = new HashMap<PolarizedPath,Set<ReceiveConstraint>>();
+	private Map<PolarizedPath,Set<ReceiveConstraint>> receivePassiveConstraintsMap = new HashMap<>();
 
-	private Set<UnifyConstraint> unifyConstraints = new HashSet<UnifyConstraint>();
+	private Set<UnifyConstraint> unifyConstraints = new HashSet<>();
 
-	private Set<TypeVarConstraint> typeVarConstraints = new HashSet<TypeVarConstraint>();
+	private Set<TypeVarConstraint> typeVarConstraints = new HashSet<>();
 
 	// public int size() {
 	// return all().size();
@@ -60,7 +60,7 @@ public class ConstraintSet /* implements Set */{
 	}
 
 	public Set<ReceiveConstraint> getReceivePassiveConstraints() {
-		Set<ReceiveConstraint> rpcall = new HashSet<ReceiveConstraint>();
+		Set<ReceiveConstraint> rpcall = new HashSet<>();
 		Iterator<Set<ReceiveConstraint>> it = receivePassiveConstraintsMap.values().iterator();
 		while (it.hasNext()) {
 			Set<ReceiveConstraint> rpcs = it.next();
@@ -71,7 +71,7 @@ public class ConstraintSet /* implements Set */{
 	}
 
 	public void refreshReceivePassiveConstraints(Set<ReceiveConstraint> rpcs) {
-		receivePassiveConstraintsMap = new HashMap<PolarizedPath,Set<ReceiveConstraint>>();
+		receivePassiveConstraintsMap = new HashMap<>();
 		addAllR(rpcs);
 	}
 
@@ -101,7 +101,7 @@ public class ConstraintSet /* implements Set */{
 	
 	public void add(ReceiveConstraint rpc){
 		if (!receivePassiveConstraintsMap.containsKey(rpc.getPPath())) {
-			receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet<ReceiveConstraint>());
+			receivePassiveConstraintsMap.put(rpc.getPPath(), new HashSet<>());
 		}
 		receivePassiveConstraintsMap.get(rpc.getPPath()).add(rpc);
 	}
@@ -183,7 +183,7 @@ public class ConstraintSet /* implements Set */{
 //		if (Env.flgShowAllConstraints)
 			printUnifyConstraints();
 		Env.p("----TypeVarConstraints : ");
-		TreeSet<TypeVarConstraint> tvcs = new TreeSet<TypeVarConstraint>(new TypeVarConstraintComparator());
+		TreeSet<TypeVarConstraint> tvcs = new TreeSet<>(new TypeVarConstraintComparator());
 		tvcs.addAll(typeVarConstraints);
 		for(TypeVarConstraint tvc : tvcs){
 			Env.p(tvc);
@@ -193,9 +193,9 @@ public class ConstraintSet /* implements Set */{
 
 	public void printReceiveConstraints() {
 		Env.p("-----ReceiveConstarints : ");
-		Iterator it = receivePassiveConstraintsMap.values().iterator();
+		Iterator<Set<ReceiveConstraint>> it = receivePassiveConstraintsMap.values().iterator();
 		while (it.hasNext()) {
-			Iterator it2 = ((Set) it.next()).iterator();
+			Iterator<ReceiveConstraint> it2 = it.next().iterator();
 			while (it2.hasNext()) {
 				Env.p(it2.next());
 			}
@@ -204,7 +204,7 @@ public class ConstraintSet /* implements Set */{
 
 	public void printUnifyConstraints() {
 		Env.p("-----UnifyConstraints : ");
-		Iterator it = unifyConstraints.iterator();
+		Iterator<UnifyConstraint> it = unifyConstraints.iterator();
 		while (it.hasNext())
 			Env.p(it.next());
 	}

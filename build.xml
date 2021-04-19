@@ -12,6 +12,7 @@
 	<!-- tool properties -->
 	<property name="flex"  location="${lib}/JFlex.jar"/>
 	<property name="bison"  location="${lib}/java_cup.jar"/>
+	<property name="bison_runtime" location="${lib}/java_cup-runtime.jar"/>
 	<property name="jpp" location="${lib}/jpplib-0.6.jar"/>
 
 	<!-- properties -->
@@ -43,9 +44,9 @@
 	</target>
 
 	<!-- java compile -->
-	<target name="compile" depends="mkdir" description="compile the source">
+	<target name="compile" depends="mkdir,help" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp}"
+		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp};${bison_runtime}"
 				encoding="${encoding}" target="${java_ver}" source="${java_ver}" includeantruntime="false" />
 	</target>
 
@@ -66,8 +67,6 @@
 			<tarfileset dir="${bin}" includes="*.bat,lmntal.jar,prettyprinter.properties" excludes="set_cp*" prefix="bin"/>
 			<tarfileset file="${bin}/set_cp_jar.bat" fullpath="bin/set_cp.bat"/>
 			<tarfileset file="${bin}/set_cp_jar.sh" fullpath="bin/set_cp.sh" mode="755"/>
-			<tarfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
-			<tarfileset dir="${lmntal_lib}/public" includes="*.lmn" prefix="lib/src"/>
 			<tarfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
 		</tar>
 	</target>
@@ -78,8 +77,6 @@
 			<zipfileset dir="${bin}" includes="*.bat,lmntal.jar,prettyprinter.properties" excludes="set_cp*" prefix="bin"/>
 			<zipfileset file="${bin}/set_cp_jar.bat" fullpath="bin/set_cp.bat"/>
 			<zipfileset file="${bin}/set_cp_jar.sh" fullpath="bin/set_cp.sh" filemode="755"/>
-			<zipfileset file="${lmntal_lib}/std_lib.jar" prefix="lib"/>
-			<zipfileset dir="${lmntal_lib}/public" includes="*.lmn" prefix="lib/src"/>
 			<zipfileset dir="sample/public" includes="*.lmn" prefix="sample"/>
 		</zip>
 	</target>
@@ -91,13 +88,17 @@
 			<fileset dir="${build}" includes="**"/>
 			<fileset file="${bin}/lmntal.jar"/>
 			<fileset file="lmntal.tgz"/>
+			<fileset file="${src}/runtime/Help.java"/>
 		</delete>
 	</target>
 
 	<target name="doc">
-		<javadoc destdir="${docs}" author="true" version="true" use="true" windowtitle="LMNtal API" encoding="${encoding}" charset="${encoding}">
-			<fileset dir="${src}" defaultexcludes="yes"/>
-			<link href="http://java.sun.com/j2se/1.4/ja/docs/ja/api/"/>
+		<javadoc packagenames="*" sourcepath="${src}" destdir="${docs}" author="true" version="true" use="true" windowtitle="LMNtal API" encoding="${encoding}" charset="${encoding}">
+			<classpath>
+				<fileset dir="${lib}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
 		</javadoc>
 	</target>
 	

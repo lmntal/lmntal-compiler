@@ -16,9 +16,9 @@ import compile.structure.ProcessContext;
  */
 public final class Collector
 {
-	public static interface ICondition<T extends Atomic>
+	public interface ICondition<T extends Atomic>
 	{
-		public boolean accept(T x);
+		boolean accept(T x);
 	}
 
 	public static class Not<T extends Atomic> implements ICondition<T>
@@ -52,7 +52,7 @@ public final class Collector
 		}
 	};
 
-	public static final ICondition<Atom> IS_NOT_UNIFY = new Not<Atom>(IS_UNIFY);
+	public static final ICondition<Atom> IS_NOT_UNIFY = new Not<>(IS_UNIFY);
 
 	public static final ICondition<ProcessContext> IS_TYPED = new ICondition<ProcessContext>()
 	{
@@ -66,14 +66,14 @@ public final class Collector
 
 	public static Set<ProcessContext> collectTypedProcessContexts(Membrane mem)
 	{
-		Set<ProcessContext> pcs = new HashSet<ProcessContext>();
+		Set<ProcessContext> pcs = new HashSet<>();
 		collectTypedProcessContexts(pcs, mem);
 		return pcs;
 	}
 
 	public static Set<Atomic> collectAllAtomsAndTypedPCs(Membrane mem)
 	{
-		Set<Atomic> atomics = new HashSet<Atomic>();
+		Set<Atomic> atomics = new HashSet<>();
 		collectAtoms(atomics, mem, ALL);
 		collectTypedProcessContexts(atomics, mem);
 		return atomics;
@@ -102,7 +102,7 @@ public final class Collector
 	 */
 	public static Set<Atom> collectAtoms(Membrane mem, ICondition<? super Atom> cond)
 	{
-		Set<Atom> atoms = new HashSet<Atom>();
+		Set<Atom> atoms = new HashSet<>();
 		collectAtoms(atoms, mem, cond);
 		return atoms;
 	}

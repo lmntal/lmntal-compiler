@@ -20,7 +20,7 @@ public class ContextDef
 
 	/**
 	 * ＠指定される左辺の膜またはnull（仮）
-	 * @see Membrane.pragma
+	 * @see Membrane#pragmaAtHost
 	 * todo HashMap を使うようにしてlhsMemは廃止する
 	 */
 	public Membrane lhsMem = null;
@@ -35,7 +35,7 @@ public class ContextDef
 	/**
 	 * 右辺でのコンテキスト出現 (Context) のリスト
 	 */
-	public List rhsOccs = new ArrayList();
+	public List<Context> rhsOccs = new ArrayList<>();
 
 	/**
 	 * コンストラクタ

@@ -18,26 +18,26 @@ import compile.structure.Membrane;
  */
 public class CountsSet {
 	/** 生成膜 -> 固定多重度 */
-	private final Map<Membrane,StaticCounts> memToGenCounts = new HashMap<Membrane,StaticCounts>();
+	private final Map<Membrane,StaticCounts> memToGenCounts = new HashMap<>();
 	/** 継続膜・混在膜・最外膜 -> その膜の変動多重度 */
-	private final Map<Membrane,Set<DynamicCounts>> memToInhCountss = new HashMap<Membrane,Set<DynamicCounts>>();
+	private final Map<Membrane,Set<DynamicCounts>> memToInhCountss = new HashMap<>();
 	/** 膜名 -> 全ての変動多重度 */
-	private final Map<String,Set<DynamicCounts>> memnameToAllInhCountss = new HashMap<String,Set<DynamicCounts>>();
+	private final Map<String,Set<DynamicCounts>> memnameToAllInhCountss = new HashMap<>();
 	/** 膜名 -> 共通の変動多重度 */
-	private final Map<String,Set<DynamicCounts>> memnameToCommonInhCountss = new HashMap<String, Set<DynamicCounts>>();
+	private final Map<String,Set<DynamicCounts>> memnameToCommonInhCountss = new HashMap<>();
 	/** ソース上の膜 -> 量解析結果(生成膜/評価済み) */
-	private final Map<Membrane,FixedCounts> memToFixedCounts = new HashMap<Membrane, FixedCounts>();
+	private final Map<Membrane,FixedCounts> memToFixedCounts = new HashMap<>();
 //	/** ソース上の膜 -> 量解析結果(継続膜/評価済み) */
 //	Map<Membrane,FixedCounts> memToInhFixedCounts;
-	private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<String, FixedCounts>();
-	/** 膜名 -> 量解析結果(継続膜) */
-	private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
+	private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<>();
+	/** 膜名 {@literal -->} 量解析結果(継続膜) */
+	// private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
 
 	public CountsSet(){
 	}
 	
 	/** 効果対象 (生成膜 : 自身, 継続膜/過剰膜/混在膜 : null, 最外部 : ルール所属膜の効果対象*/
-	public final Map<Membrane, Membrane> effectTarget = new HashMap<Membrane, Membrane>();
+	public final Map<Membrane, Membrane> effectTarget = new HashMap<>();
 	
 	/**
 	 * 膜の解析結果を加えていく。
@@ -61,14 +61,14 @@ public class CountsSet {
 		if(common){// 共通
 			Set<DynamicCounts> doms = memnameToCommonInhCountss.get(memname);
 			if(doms == null){
-				doms = new HashSet<DynamicCounts>();
+				doms = new HashSet<>();
 				memnameToCommonInhCountss.put(memname, doms);
 			}
 			doms.add(counts);
 		}// 生成膜ルール
 		else{
 			if(!memToInhCountss.containsKey(counts.mem)){
-				Set<DynamicCounts> doms = new HashSet<DynamicCounts>();
+				Set<DynamicCounts> doms = new HashSet<>();
 				doms.add(counts);
 				memToInhCountss.put(counts.mem,doms);
 			}
@@ -78,7 +78,7 @@ public class CountsSet {
 			}
 		}
 		if(!memnameToAllInhCountss.containsKey(memname)){
-			Set<DynamicCounts> doms = new HashSet<DynamicCounts>();
+			Set<DynamicCounts> doms = new HashSet<>();
 			doms.add(counts);
 			memnameToAllInhCountss.put(memname, doms);
 		}
@@ -88,7 +88,7 @@ public class CountsSet {
 		}
 	}
 	
-	Map<String, Boolean> memnameToCRIFlg = new HashMap<String, Boolean>();
+	Map<String, Boolean> memnameToCRIFlg = new HashMap<>();
 	/**
 	 * 指定した膜名については、全ての膜のルールは全ての膜に影響する
 	 * @param memname
@@ -96,15 +96,15 @@ public class CountsSet {
 	public void collapseRulesIndependency(String memname){
 		memnameToCRIFlg.put(memname, true);
 	}
-	Map<Membrane, Boolean> memToCRIFlg = new HashMap<Membrane, Boolean>();
+	Map<Membrane, Boolean> memToCRIFlg = new HashMap<>();
 	/**
 	 * 指定した膜名については、全ての膜のルールは全ての膜に影響する
-	 * @param memname
+	 * @param mem
 	 */
 	public void collapseRuleIndependency(Membrane mem){
 		memToCRIFlg.put(mem, true);
 	}
-	Map<String, Boolean> memnameToCPUBFlg = new HashMap<String, Boolean>();
+	Map<String, Boolean> memnameToCPUBFlg = new HashMap<>();
 	/**
 	 * 指定した膜名については、プロセスの下限を無くす
 	 * @param memname
@@ -113,7 +113,7 @@ public class CountsSet {
 		memnameToCPUBFlg.put(memname, true);
 		collapseProcessIndependency(memname);
 	}
-	Map<String, Boolean> memnameToCPIFlg = new HashMap<String, Boolean>();
+	Map<String, Boolean> memnameToCPIFlg = new HashMap<>();
 	/**
 	 * 指定した膜名については、具体膜を区別しない
 	 * @param memname
@@ -122,7 +122,7 @@ public class CountsSet {
 		memnameToCPIFlg.put(memname, true);
 	}
 
-	Map<String, Boolean> memnameToAlreadyApplyed = new HashMap<String, Boolean>();
+	Map<String, Boolean> memnameToAlreadyApplyed = new HashMap<>();
 	
 //	Set<DynamicCounts> clonedDynamicCounts = new HashSet<DynamicCounts>();
 	

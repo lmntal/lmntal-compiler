@@ -2,6 +2,8 @@ package type.argument;
 
 import runtime.functor.Functor;
 
+import java.util.Objects;
+
 public class ActiveAtomPath implements Path {
 
 	/**
@@ -44,7 +46,7 @@ public class ActiveAtomPath implements Path {
 	}
 	
 	public String toStringWithOutAnonMem(){
-		return "<" + (memname=="??"?"":(memname + ":")) + functor + "," + pos + ">";
+		return "<" + (Objects.equals(memname, "??") ?"":(memname + ":")) + functor + "," + pos + ">";
 	}
 
 	public int hashCode(){

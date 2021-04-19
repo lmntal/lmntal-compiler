@@ -10,15 +10,15 @@ import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
-import java.util.StringTokenizer;
 
+import compile.Module;
 import type.TypeException;
 import type.TypeInferer;
 import util.Util;
 
-import compile.Module;
 import compile.Optimizer;
 import compile.RulesetCompiler;
 import compile.parser.LMNParser;
@@ -26,29 +26,19 @@ import compile.parser.ParseException;
 
 public class FrontEnd
 {
-	private static Charset sourceCharset = Charset.forName("UTF-8");
+	private static Charset sourceCharset = StandardCharsets.UTF_8;
 
 	public static void main(String[] args)
 	{
-		checkVersion();
-
-		Runtime.getRuntime().addShutdownHook(new Thread()
-		{
-			public void run()
-			{
-				Inline.terminate();
-			}
-		});
-
 		processOptions(args);
 
 		if (Env.oneLine)
 		{
-			run(new StringReader(Env.oneLineCode), InlineUnit.DEFAULT_UNITNAME);
+			run(new StringReader(Env.oneLineCode));
 		}
 		else if (Env.stdinLMN)
 		{
-			run(new BufferedReader(new InputStreamReader(System.in)), InlineUnit.DEFAULT_UNITNAME);
+			run(new BufferedReader(new InputStreamReader(System.in)));
 		}
 		else
 		{
@@ -58,34 +48,6 @@ public class FrontEnd
 				System.exit(1);
 			}
 			run(Env.srcs);
-		}
-	}
-
-	/**
-	 * <p>Javaのバージョンをチェックする。</p>
-	 * <p>Java1.4以上を使っていないとエラーを出力して終了する。</p>
-	 */
-	private static void checkVersion()
-	{
-		// バージョンチェック by 水野
-		try
-		{
-			String ver = System.getProperty("java.version");
-			StringTokenizer tokenizer = new StringTokenizer(ver, ".");
-			int major = Integer.parseInt(tokenizer.nextToken());
-			int minor = Integer.parseInt(tokenizer.nextToken());
-			if (major < 1 || (major == 1 && minor < 4))
-			{
-				Util.errPrintln("use jre 1.4 or higher!!");
-				System.exit(1);
-			}
-			Env.majorVersion = major;
-			Env.minorVersion = minor;
-			// うまくいかなかった場合は無視する
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
 		}
 	}
 
@@ -140,21 +102,6 @@ public class FrontEnd
 							Env.debug = Env.DEBUG_DEFAULT;
 						}
 						// System.out.println("debug level " + Env.debug);
-						break;
-					case 'I':
-						//@ -I <path>
-						//@ Additional path for LMNtal library.
-						//@ This option is available only when --use-source-library
-						//@ option is specified.
-						//@ Otherwise, LMNtal library must be in your CLASSPATH
-						//@ environment variable.
-						//@ The default path is ./lib and ../lib
-						compile.Module.libPath.add(args[++i]);
-						break;
-					case 'L':
-						//@ -L <path>
-						//@ Additional path for classpath (inline code compile time)
-						Inline.classPath.add(0, new File(args[++i]));
 						break;
 					case 'O':
 						//@ -O[<0-9>]  (-O=-O1)
@@ -247,12 +194,6 @@ public class FrontEnd
 				}
 			}
 		}
-
-		if (Env.slimcode && !Optimizer.forceReuseAtom)
-		{
-			Optimizer.fReuseAtom = false;
-			// Env.findatom2 = true;
-		}
 	}
 
 	private static int processLongOptions(String[] args, int i)
@@ -260,14 +201,20 @@ public class FrontEnd
 		String opt = args[i];
 		if (opt.equals("--compileonly"))
 		{
-			// コンパイル後の中間命令列を出力するモード
-			Env.compileonly = true;
+//			 コンパイル後の中間命令列を出力するモード
+//			//@ --compileonly
+//			//@ Output compiled intermediate instruction sequence only.
+//			//@ Compiler will not translate to Java or execute the program.
+//			Env.compileonly = true;
 		}
 		else if (opt.equals("--slimcode"))
 		{
-			// コンパイル後の中間命令列を出力するモード
-			Env.compileonly = true;
-			Env.slimcode = true;
+//			SLIM用の中間命令列を出力するモード
+//			v1.46以降はオプションがなくても強制的にオンになる
+//			（互換性のため分岐を残している）
+//			//@ --slimcode
+//			//@ Output intermediate instruction sequence to be executed by SLIM.
+//			Env.compileonly = true;
 		}
 		else if (opt.equals("--charset"))
 		{
@@ -290,17 +237,20 @@ public class FrontEnd
 				System.exit(1);
 			}
 		}
-		else if (opt.equals("--use-findatom2"))
-		{
-			// Env.compileonly = true;
-			Env.slimcode = true;
-			Env.findatom2 = true;
-			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
-		}
-		else if (opt.equals("--memtest-only"))
-		{
-			Env.memtestonly = true;
-		}
+//		//@ --use-findatom2
+//		//@ Use findatom2 instruction (findatom with history).
+//		else if (opt.equals("--use-findatom2"))
+//		{
+//			Env.compileonly = true;
+//			Env.findatom2 = true;
+//			Optimizer.fGuardMove = true; // これをtrueにしないと動かない
+//		}
+//		else if (opt.equals("--memtest-only"))
+//		{
+//			//@ --memtest-only
+//			//@ Use membrane test only.
+//			Env.memtestonly = true;
+//		}
 		else if (opt.equals("--help"))
 		{
 			//@ --help
@@ -328,13 +278,13 @@ public class FrontEnd
 			//@ Move up the guard instructions.
 			Optimizer.fGuardMove = true;
 		}
-		else if (opt.equals("--optimize-merging"))
-		{
-			//@ --optimize-merging
-			//@ Merge instructions.
-			Optimizer.fMerging = true;
-			Env.fMerging = true;
-		}
+//		else if (opt.equals("--optimize-merging"))
+//		{
+//			//@ --optimize-merging
+//			//@ Merge instructions.
+//			Optimizer.fMerging = true;
+//			Env.fMerging = true;
+//		}
 		else if (opt.equals("--optimize-systemrulesetsinlining"))
 		{
 			Optimizer.fSystemRulesetsInlining = true;
@@ -351,22 +301,22 @@ public class FrontEnd
 			//@ Use loop instruction. (EXPERIMENTAL)
 			Optimizer.fLoop = true;
 		}
-		else if (opt.equals("--optimize-reuse-atom"))
-		{
-			//@ --optimize-reuse-atom
-			//@ Reuse atoms.
-			Optimizer.fReuseAtom = true;
-			Optimizer.forceReuseAtom = true;
-		}
+		// アトム再利用は--use-swaplinkを使う
+//		else if (opt.equals("--optimize-reuse-atom"))
+//		{
+//			//@ --optimize-reuse-atom
+//			//@ Reuse atoms.
+//			Optimizer.fReuseAtom = true;
+//		}
 		else if (opt.equals("--optimize-reuse-mem"))
 		{
 			//@ --optimize-reuse-mem
 			//@ Reuse mems.
 			Optimizer.fReuseMem = true;
 		}
-		else if (opt.equals("--optimize-slimoptimizer"))
-		{
-		}
+//		else if (opt.equals("--optimize-slimoptimizer"))
+//		{
+//		}
 		else if (opt.equals("--pp0"))
 		{
 			// 暫定オプション
@@ -395,12 +345,6 @@ public class FrontEnd
 			//@ set <integer> as the upper limit of threads occured
 			//@ in leftside rules.
 			Env.threadMax = Integer.parseInt(args[i].substring(13));
-		}
-		else if (opt.equals("--use-source-library"))
-		{
-			//@ --use-source-library
-			//@ Use source libraries in lib/src and lib/public.
-			Env.fUseSourceLibrary = true;
 		}
 		else if (opt.equals("--debug"))
 		{
@@ -465,52 +409,46 @@ public class FrontEnd
 			// -- --compile-rule
 			// compile one rule (for SLIM model checking mode)
 			Env.compileRule = true;
-			Env.compileonly = true;
+			//Env.compileonly = true;
 		}
 		else if (opt.equals("--hl") || opt.equals("--hl-opt")) //seiji
 		{
-			boolean slimcode = false;
-			for (String arg : args)
+			//@ --hl, --hl-opt
+			//@ Use hyperlinks (HyperLMNtal).
+			Env.hyperLink = true;
+			if (opt.equals("--hl-opt"))
 			{
-				if (arg.equals("--slimcode"))
-				{
-					slimcode = true;
-					break;
-				}
-			}
-			if (slimcode)
-			{
-				Env.hyperLink = true;
-				if (opt.equals("--hl-opt"))
-				{
-					Env.hyperLinkOpt = true;
-				}
-			}
-			else
-			{
-				Util.errPrintln("Can't use option " + opt + " without option --slimcode.");
-				System.exit(1);
+				Env.hyperLinkOpt = true;
 			}
 		}
 		else if (opt.equals("--use-swaplink"))
 		{
 			// リンク操作に swaplink 命令を使用する (shinobu)
+			//@ --use-swaplink
+			//@ Use swaplink instruction to manipulate links.
 			Env.useSwapLink = true;
 		}
 		else if (opt.equals("--use-cyclelinks"))
 		{
 			// リンク操作に cyclelinks 命令を使用する (shinobu)
+			//@ --use-cyclelinks
+			//@ Use cyclelinks instruction to manipulate links.
 			Env.useCycleLinks = true;
 		}
 		else if (opt.equals("--use-atomlistop"))
 		{
 			// アトムリスト操作に必要な中間命令を出力する (aoyama)
+			//@ --use-atomlistop
+			//@ Output intermediate instructions to optimize execution by SLIM
+			//@ by dynamically modifying atomlist (a data structure in SLIM).
 			Env.useSwapLink = true;
 			Env.useAtomListOP = true;
 		}
 		else if (opt.equals("--verbose-linkext"))
 		{
 			// swaplink/cyclelinks使用時において置換過程を出力する開発者用オプション (shinobu)
+			//@ --verbose-linkext
+			//@ (For developers) Output process of permutation by swaplink/cyclelinks.
 			Env.verboseLinkExt = true;
 		}
 		else if (opt.equals("--Wempty-head"))
@@ -545,10 +483,7 @@ public class FrontEnd
 			{
 				is = new SequenceInputStream(is, new FileInputStream(files.get(i)));
 			}
-
-			// 複数のファイルのときはファイル名が１つに決められない。
-			String unitName = files.size() == 1 ? files.get(0) : InlineUnit.DEFAULT_UNITNAME;
-			run(new BufferedReader(new InputStreamReader(is, sourceCharset)), unitName);
+			run(new BufferedReader(new InputStreamReader(is, sourceCharset)));
 		}
 		catch (FileNotFoundException e)
 		{
@@ -566,9 +501,8 @@ public class FrontEnd
 	 * 与えられたソースについて、一連の実行を行う。
 	 * 
 	 * @param src Reader型で表されたソース
-	 * @param unitName ファイル名。インラインコードのキャッシュはこの名前ベースで管理される。
 	 */
-	private static void run(Reader src, String unitName)
+	private static void run(Reader src)
 	{
 		if (Env.preProcess0)
 		{
@@ -604,7 +538,7 @@ public class FrontEnd
 
 			// コンパイル、コード生成
 			// コンパイル時データ構造からルールセットの中間命令列を生成する
-			Ruleset rs = RulesetCompiler.compileMembrane(m, unitName);
+			Ruleset rs = RulesetCompiler.compileMembrane(m);
 			if (Env.getErrorCount() > 0)
 			{
 				Env.e("Compilation Failed");
@@ -631,26 +565,8 @@ public class FrontEnd
 				// 通常はこっち？
 				showIL((InterpretedRuleset)rs, m);
 			}
-
-			if (Env.compileonly)
-			{
-				// ソースから読み込んだライブラリのルールセットを表示（--use-source-library指定時）
-				for (String libName : Module.loaded)
-				{
-					compile.structure.Membrane mem = (compile.structure.Membrane) Module.memNameTable
-					.get(libName);
-					for (Ruleset r : mem.rulesets)
-					{
-						((InterpretedRuleset)r).showDetail();
-					}
-				}
-				// モジュールのルールセット一覧を表示（同一ソース内モジュールと、--use-source-library指定時のライブラリ）
-				Module.showModuleList();
-				// インラインコード一覧を出力
-				Inline.initInline();
-				Inline.showInlineList();
-				System.exit(0);
-			}
+			Module.showModuleList();
+			System.exit(0);
 		}
 		catch (Exception e)
 		{

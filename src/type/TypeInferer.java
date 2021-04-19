@@ -36,7 +36,7 @@ public class TypeInferer {
 		
 		// ユーザ定義情報を取得する
 		boolean typeDefined = false;
-		List<Membrane> typedefmems = new ArrayList<Membrane>();
+		List<Membrane> typedefmems = new ArrayList<>();
 		for(Membrane topmem : root.mems)
 			if(TypeEnv.getMemName(topmem).equals("typedef")){
 				typedefmems.add(topmem);
@@ -74,8 +74,8 @@ public class TypeInferer {
 		// 引数制約を推論する
 		if(Env.flgArgumentInference){
 			ai.infer();
-			if(false)
-				ai.printAll();
+			// if(false)
+				// ai.printAll();
 		}
 		
 		// 型定義が与えられていたら整合性をチェックする

@@ -15,7 +15,7 @@ public class ModeVarSet {
 	private Set<ModeVar> modes;
 	
 	public ModeVarSet(){
-		modes = new HashSet<ModeVar>();
+		modes = new HashSet<>();
 	}
 	
 	/**
@@ -93,7 +93,7 @@ public class ModeVarSet {
 		}
 	}
 	
-	public ModeVar getModeVar(Path path)throws TypeException{
+	public ModeVar getModeVar(Path path) {
 		ModeVar ms = getModeVarOfPath(path);
 		if(ms==null){
 			ms = newModeVar();
