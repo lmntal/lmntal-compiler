@@ -1,0 +1,3 @@
+ str("a").
+ match.
+ str("a") \ match :- done.
