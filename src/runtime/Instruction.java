@@ -1478,6 +1478,7 @@ public class Instruction implements Cloneable
 	static {setArgType(FEQ, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(FNE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 
+	// int と float の相互変換用ガード命令（630--631+OPT）
 	@LMNtalIL public static final int FLOAT2INT = 630;
 	@LMNtalIL public static final int INT2FLOAT = 631;
 	static {setArgType(FLOAT2INT, new ArgType(true, ARG_ATOM, ARG_ATOM));}
