@@ -1,0 +1,3 @@
+n(5), m(3.2).
+n(Int)   :- Float = float(Int) | n(Float).
+m(Float) :- Int   = int(Float) | m(Int).

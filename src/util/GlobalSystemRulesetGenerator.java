@@ -283,6 +283,8 @@ public final class GlobalSystemRulesetGenerator {
 		ruleset.rules.add(buildUnaryPlusRule("+.", Instruction.ISFLOAT));
 		ruleset.rules.add(buildUnaryOpRule("-",    Instruction.ISINT,  Instruction.INEG));
 		ruleset.rules.add(buildUnaryOpRule("-.",   Instruction.ISFLOAT,Instruction.FNEG));
+		ruleset.rules.add(buildUnaryOpRule("int",  Instruction.ISFLOAT,Instruction.FLOAT2INT));
+		ruleset.rules.add(buildUnaryOpRule("float",Instruction.ISINT,  Instruction.INT2FLOAT));
 		
 //		// 1:cp(A,B,C), 2:$n[A] :- unary($n) | $3:$n[B], $4:$n[C].
 //		// reuse { 2->4 }
