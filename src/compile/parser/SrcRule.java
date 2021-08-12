@@ -257,7 +257,7 @@ class SrcRule
 			if (o instanceof SrcAtom)
 			{
 				SrcAtom sa = (SrcAtom)o;
-				ret.add(new SrcAtom(sa.getName(), copySrcs(sa.getProcess())));
+				ret.add(new SrcAtom(sa.getSrcName(), copySrcs(sa.getProcess())));
 			}
 			else if (o instanceof SrcMembrane)
 			{
