@@ -51,6 +51,16 @@ class SrcAtom
 	}
 
 	/**
+	 * 指定された名前トークンと子供プロセスで初期化します
+	 * @param srcname 名前トークン
+	 * @param process 子供プロセス
+	 */
+	public SrcAtom(SrcName srcname, LinkedList process)
+	{
+		this(srcname, process, -1,-1);
+	}
+
+	/**
 	 * デバッグ情報も受け取るコンストラクタ(子供プロセス無し)
 	 * @author Tomohito Makino
 	 * @param srcname 名前トークン
