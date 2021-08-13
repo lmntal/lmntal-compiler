@@ -608,6 +608,7 @@ class GuardCompiler extends LHSCompiler
 					{
 						int[] desc = array(ISHLINK);
 						if (!identifiedCxtdefs.contains(def1)) continue;
+						if (!identifiedCxtdefs.contains(def2)) continue;
 						int atomid1 = loadUnaryAtom(def1);
 						int dstatomid = varCount++;
 						if (desc[0] != 0 && (!typedCxtDataTypes.containsKey(def1) || desc[0] != typedCxtDataTypes.get(def1)))
