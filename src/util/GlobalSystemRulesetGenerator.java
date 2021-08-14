@@ -131,7 +131,7 @@ public final class GlobalSystemRulesetGenerator {
 		// InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
                 // TODO RulesetCompiler.compileMembrane の仕様変更にともない，irの処理は一時的に中止
                 // (2021-08-14 ueda)
-		compile.RulesetCompiler.compileMembrane(m);
+		compile.RulesetCompiler.processMembrane(m);
 		//		for(Instruction loadruleset : ir.rules.get(0).body){
 		//			if (loadruleset.getKind() == Instruction.LOADRULESET) {
 		//		InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
