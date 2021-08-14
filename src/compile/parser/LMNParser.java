@@ -66,42 +66,47 @@ public class LMNParser {
 	}
 
 	/**
-	 * メインメソッド。ソースファイルを解析し、プロセス構造が入った膜構造を生成する。
+	 * メインメソッド。ソースファイルを解析し、プロセス構造を生成するルールが入った膜構造を生成する。
 	 * 解析後は構文エラーが修正され、リンクやコンテキスト名の解決、およびプロキシの作成が行われている。
-	 * 
+	 * プロセス構造自体ではなくそれを生成するルールの形式で返すのは、a(!H,!H,!H) のようなハイパー
+         * リンクをもつ初期プロセスに対して，SrcRule内の addHyperLinkConstraintによってハイパーリンク
+         * 生成のためのガード (new) が自動生成できるようにするため。 
 	 * 詳しくはaddSrcRuleToMem を参照。
 	 * 
 	 * @return ソースファイル全体が表すプロセス構造が入った膜構造
 	 * @throws ParseException
 	 */
 	public Membrane parse() throws ParseException {
-		LinkedList srcProcess = parseSrc();
-		setRuleText(srcProcess);
+	        // LinkedList srcProcess = parseSrc();
+	        SrcRule initRule = parseSrc();  // プロセス構造を生成するルール
+		setRuleText(initRule);
 		Membrane mem = new Membrane(null);
-		expander.incorporateSignSymbols(srcProcess);
-//		expander.incorporateModuleNames(srcProcess);
-		expander.expandAtoms(srcProcess);
-//		expander.correctPragma(new LinkedList(), srcProcess, "connectRuntime"); // TODO ガードが無いので書けない ( やらなくてよくなった )
-		expander.correctWorld(srcProcess);
-		addProcessToMem(srcProcess, mem);
+		expander.incorporateSignSymbols(initRule.body);
+//		expander.incorporateModuleNames(initRule);
+		expander.expandAtoms(initRule.body);
+//		expander.correctPragma(new LinkedList(), initRule, "connectRuntime"); // TODO ガードが無いので書けない ( やらなくてよくなった )
+		expander.correctWorld(initRule.body);
+		// addProcessToMem(srcProcess, mem);
+		addObjectToMem(initRule, mem);
 		HashMap freeLinks = addProxies(mem);
 		if (!freeLinks.isEmpty()) closeFreeLinks(mem);
 		return mem;
 	}
 	
 	/**	
-		解析の結果を LinkedList とする解析木として返します。
-		@return 解析されたソースコードのリスト
+		ソースコードの構文解析結果をルール形式の解析木として返す。
+		@return 解析されたソースコードのプロセス構造を生成するルール
 		@throws ParseException 
 	*/
-	protected LinkedList parseSrc() throws ParseException {
+        // protected LinkedList parseSrc() throws ParseException {
+	protected SrcRule parseSrc() throws ParseException {
 		parser p = new parser(lex);
-		LinkedList result = null;
+		SrcRule result = null;
 		try {
-			result = (LinkedList)p.parse().value;
+                       result = (SrcRule)p.parse().value;
 		} catch (Error e) {
 			error("ERROR: " + e.getMessage());
-			result = new LinkedList();
+			result = new SrcRule("ERROR", new LinkedList(), new LinkedList());
 		} catch (Throwable e) {
 			throw new ParseException(e.getMessage(), e);	
 		}
@@ -109,6 +114,12 @@ public class LMNParser {
 	}
 
 	////////////////////////////////////////////////////////////////
+
+	/** ルールのテキスト表現を決定する */
+	private void setRuleText(SrcRule rule) {
+	    rule.setText();
+	    setRuleText(rule.body);
+	}
 
 	/** ルールのテキスト表現を決定する */
 	private void setRuleText(LinkedList process) {

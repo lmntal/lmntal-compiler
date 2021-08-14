@@ -81,8 +81,10 @@ non terminal LinkedList			LinkList;
 non terminal LinkedList			NonemptyLinkList;
 non terminal SrcLinkBundle		Bundle;
 non terminal SrcAtom			Aggregate;
+non terminal SrcRule			InitRule;
 
-start with WorldProcessList;
+// start with WorldProcessList;
+start with InitRule;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
 
@@ -580,4 +582,10 @@ NonemptyWorldProcessList ::=
       {: list.add(p); RESULT = list; :}
   | NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
       {: list.addAll(p); RESULT = list; :}
+;
+
+// rule for creating toplevel
+InitRule ::=
+    WorldProcessList:body
+      {: RESULT = new SrcRule("_init", new LinkedList(), body, 1); :}
 ;
