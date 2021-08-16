@@ -120,7 +120,7 @@ class GuardCompiler extends LHSCompiler
 		if (Env.hyperLink)
 		{
 			putLibrary("new"       , 1, 0, array(Instruction.NEWHLINK, ISINT));
-			putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
+			// putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
 			putLibrary("hlink"     , 1, 1, array(ISHLINK));
 			putLibrary("num"       , 2, 1, array(ISHLINK, Instruction.GETNUM, ISINT));
 			//putLibrary("name"      , 1, 1, array(ISNAME));

@@ -53,7 +53,7 @@ class SrcRule
 		this.guard = guard;
 		this.guardNegatives = new LinkedList();
 		this.body = body;
-		addHyperLinkConstraint(head, body);
+		addHyperLinkConstraint(head, this.guard, body);
 	}
 
 	//2006.1.22 by inui
@@ -94,20 +94,20 @@ class SrcRule
 		LinkedList head3 = this.head;
 		LinkedList body2 = this.body;
 		addTypeConstraint(head3);
-		addHyperLinkConstraint(head3, body2);
+		addHyperLinkConstraint(head3, this.guard, body2);
 	}
 
 	/**
 	 *	 Head部, Body部に!Xが出現した場合，Guard部にhlink(X)もしくはnew(X)を追加する.
 	 *	 meguro
 	 */	
-	public void addHyperLinkConstraint(LinkedList head, LinkedList body)
+	public void addHyperLinkConstraint(LinkedList head, LinkedList guard, LinkedList body)
 	{
 		LinkedList headhl = new LinkedList();
-		addHyperLinkConstraintSub(head, body, headhl);	
+		addHyperLinkConstraintSub(head, guard, body, headhl);	
 	}
 
-	private LinkedList addHyperLinkConstraintSub(LinkedList head, LinkedList body, LinkedList headhl)
+	private LinkedList addHyperLinkConstraintSub(LinkedList head, LinkedList guard, LinkedList body, LinkedList headhl)
 	{
 		if (head != null)
 		{
@@ -118,7 +118,12 @@ class SrcRule
 					SrcHyperLink shl = (SrcHyperLink)o;
 					LinkedList newl = new LinkedList();
 					SrcLink name = new SrcLink(shl.name);
+					SrcAtom attr = new SrcAtom(shl.attr);
 					newl.add(name);
+					if (!attr.getName().equals(""))
+					{
+						newl.add(attr);
+					}
 					headhl.add(name.toString());	
 					SrcAtom newg = new SrcAtom("hlink", newl);
 					guard.add(newg);
@@ -126,12 +131,12 @@ class SrcRule
 				else if (o instanceof SrcAtom)
 				{
 					SrcAtom sa = (SrcAtom)o;
-					headhl = addHyperLinkConstraintSub(sa.process, null, headhl);
+					headhl = addHyperLinkConstraintSub(sa.process, guard, null, headhl);
 				} 
 				else if (o instanceof SrcMembrane)
 				{
 					SrcMembrane sm = (SrcMembrane)o;
-					headhl = addHyperLinkConstraintSub(sm.process, null, headhl);
+					headhl = addHyperLinkConstraintSub(sm.process, guard, null, headhl);
 				}
 			}
 		}
@@ -144,10 +149,15 @@ class SrcRule
 				{
 					SrcHyperLink shl = (SrcHyperLink)o;
 					SrcLink name = new SrcLink(shl.name);
+					SrcAtom attr = new SrcAtom(shl.attr);
 					if (!headhl.contains(name.toString()))
 					{
 						LinkedList newl = new LinkedList();
 						newl.add(name);
+						if (!attr.getName().equals(""))
+						{
+							newl.add(attr);
+						}
 						headhl.add(name.toString());
 						SrcAtom newg = new SrcAtom("new", newl);
 						guard.add(newg);
@@ -156,12 +166,12 @@ class SrcRule
 				else if (o instanceof SrcAtom)
 				{
 					SrcAtom sa = (SrcAtom)o;
-					headhl = addHyperLinkConstraintSub(null, sa.process, headhl);
+					headhl = addHyperLinkConstraintSub(null, guard, sa.process, headhl);
 				}
 				else if (o instanceof SrcMembrane)
 				{
 					SrcMembrane sm = (SrcMembrane)o;
-					headhl = addHyperLinkConstraintSub(null, sm.process, headhl);
+					headhl = addHyperLinkConstraintSub(null, guard, sm.process, headhl);
 				}
 			}
 		}

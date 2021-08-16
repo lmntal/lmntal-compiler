@@ -1259,8 +1259,8 @@ public class Instruction implements Cloneable
 	 * 過去に生成されたhyperlinkのうち, 識別子IDを持つhyperlinkを生成し, link先に接続することを示す
 	 * （未実装、hyperlinkへの値の代入などに使用できるかも？）
 	 */
-	@LMNtalIL public static final int MAKEHLINK = 251;
-	static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));}
+	// @LMNtalIL public static final int MAKEHLINK = 251;
+	// static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));}
 
 	/**
 	 * ishlink [link]
@@ -1356,7 +1356,7 @@ public class Instruction implements Cloneable
 	 * ハイパーリンクの属性を取得する
 	 */
 	@LMNtalIL public static final int GETATTRATOM = 285;
-	static {setArgType(GETATTRATOM, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(GETATTRATOM, new ArgType(true, ARG_VAR, ARG_VAR));}
 	
 	/**
 	 * hypergetlink [link, atom, pos]
