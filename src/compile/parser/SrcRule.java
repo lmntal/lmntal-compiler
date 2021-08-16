@@ -100,6 +100,12 @@ class SrcRule
 	/**
 	 *	 Head部, Body部に!Xが出現した場合，Guard部にhlink(X)もしくはnew(X)を追加する.
 	 *	 meguro
+         *       Head, Bodyに!X:Aが出現した場合，Guardにhlink(X,A)もしくはnew(X,A)を追加する.
+         *       ただし!Xもしくは!X:Aが複数回出現する場合，初出の出現における属性の有無および
+         *       属性値が採用される．
+         *       つまり a(!H:1,!H:1,!H:1) と書いても a(!H:1,!H,!H) と書いても同じになる．
+         *       a(!H:1,!H:2,!H:3) も同じになってしまうのは要改良．
+         *       ueda
 	 */	
 	public void addHyperLinkConstraint(LinkedList head, LinkedList guard, LinkedList body)
 	{
