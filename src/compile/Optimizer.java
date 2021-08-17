@@ -446,7 +446,7 @@ public class Optimizer {
 						typecheck = Instruction.ISINT;
 					}
 					else if(funcname.equals("ash")) {
-						op = Instruction.IASH;
+						op = Instruction.ISAL;
 						typecheck = Instruction.ISINT;
 					}
 					else if(funcname.equals("+.")) {
