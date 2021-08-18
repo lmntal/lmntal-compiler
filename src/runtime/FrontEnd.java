@@ -538,7 +538,10 @@ public class FrontEnd
 
 			// コンパイル、コード生成
 			// コンパイル時データ構造からルールセットの中間命令列を生成する
-			Ruleset rs = RulesetCompiler.compileMembrane(m);
+			// (2021-08-14 ueda) パーザを変更して初期プロセス生成ルールが最初から
+			// 存在するようにしたため，初期プロセス生成ルールの別扱いを中止した
+			// Ruleset rs = RulesetCompiler.compileMembrane(m);
+			RulesetCompiler.processMembrane(m);
 			if (Env.getErrorCount() > 0)
 			{
 				Env.e("Compilation Failed");
@@ -563,7 +566,8 @@ public class FrontEnd
 			else
 			{
 				// 通常はこっち？
-				showIL((InterpretedRuleset)rs, m);
+    				// showIL((InterpretedRuleset)rs, m);
+				showIL(m);
 			}
 			Module.showModuleList();
 			System.exit(0);
@@ -595,12 +599,12 @@ public class FrontEnd
 
 	/**
 	 * 中間命令列を出力する
-	 * @param rs 初期化ルールのみを含むルールセット
 	 * @param m グローバル膜
 	 */
-	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)
+    //	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)
+	private static void showIL(compile.structure.Membrane m)
 	{
-		rs.showDetail();
+	    	// rs.showDetail();
 		m.showAllRules();
 	}
 

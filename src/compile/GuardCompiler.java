@@ -120,7 +120,7 @@ class GuardCompiler extends LHSCompiler
 		if (Env.hyperLink)
 		{
 			putLibrary("new"       , 1, 0, array(Instruction.NEWHLINK, ISINT));
-			putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
+			// putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
 			putLibrary("hlink"     , 1, 1, array(ISHLINK));
 			putLibrary("num"       , 2, 1, array(ISHLINK, Instruction.GETNUM, ISINT));
 			//putLibrary("name"      , 1, 1, array(ISNAME));
@@ -309,8 +309,9 @@ class GuardCompiler extends LHSCompiler
 					it.remove();
 				}
 				if (a.functor.getName().startsWith("custom") ||
-					a.functor.getName().equals("new") ||
-					a.functor.getName().equals("make"))
+					a.functor.getName().equals("new") 
+					// || a.functor.getName().equals("make")
+				    )
 				{
 					tmpLast.add(a);
 					it.remove();
@@ -591,7 +592,7 @@ class GuardCompiler extends LHSCompiler
 						int atomid = varCount++;
 						match.add(new Instruction(Instruction.NEWHLINKWITHATTR, atomid, attrs.get(0)));
 						bindToUnaryAtom(def1, atomid);
-						typedCxtDataTypes.put(def1, Instruction.ISINT);
+						typedCxtDataTypes.put(def1, Instruction.ISHLINK);
 						if (identifiedCxtdefs.contains(def1))
 						{
 							int funcid2 = varCount++;

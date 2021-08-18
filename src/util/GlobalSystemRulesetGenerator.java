@@ -128,13 +128,16 @@ public final class GlobalSystemRulesetGenerator {
 		} catch(Exception ignored){}
 		// todo 下記コードは明らかに不自然なので、InterpretedRuleset（のリストまたはそれを持つ
 		// コンパイル時膜構造）を生成するだけのメソッドをRulesetCompilerに作る。
-		InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
-		for(Instruction loadruleset : ir.rules.get(0).body){
-			if (loadruleset.getKind() == Instruction.LOADRULESET) {
-				InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
-				ruleset.rules.addAll(ir2.rules);
-			}
-		}
+		// InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
+                // TODO RulesetCompiler.compileMembrane の仕様変更にともない，irの処理は一時的に中止
+                // (2021-08-14 ueda)
+		compile.RulesetCompiler.processMembrane(m);
+		//		for(Instruction loadruleset : ir.rules.get(0).body){
+		//			if (loadruleset.getKind() == Instruction.LOADRULESET) {
+		//		InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
+		//				ruleset.rules.addAll(ir2.rules);
+		//			}
+		//		}
 	}
 	/**
 	 * 仮メソッド。

@@ -31,10 +31,18 @@ public class RulesetCompiler
 	 * @param m 膜構造
 	 * @return (:-m)というルール1つだけからなるルールセット
 	 */
-	public static Ruleset compileMembrane(Membrane m)
-	{
-		return compileMembraneToGeneratingMembrane(m).rulesets.get(0);
-	}
+	// (2021-08-14 ueda) パーザを変更して初期プロセス生成ルールが最初から
+	// 存在するようにしたため，初期プロセス生成ルールの別扱いを中止した．
+        // このため compileMembrane は processMembrane と同じになった．
+        // HeadCompiler, RuleCompiler の compileMembrane（２引数）と紛らわしいので，
+        // こちらは processMembrane を直接呼び出すことにしたい．
+        //
+        // // public static Ruleset compileMembrane(Membrane m)
+        // public static void compileMembrane(Membrane m)
+        // {
+        //      // return compileMembraneToGeneratingMembrane(m).rulesets.get(0)
+        // 	processMembrane(m);
+        // }
 
 	/**
 	 * 与えられた膜の階層下にある全ての RuleStructure について、
@@ -120,21 +128,20 @@ public class RulesetCompiler
 	 * @param m 膜構造
 	 * @return 生成したルールセットを持つ膜構造
 	 */
-	private static Membrane compileMembraneToGeneratingMembrane(Membrane m)
-	{
-		Env.c("RulesetGenerator.runStartWithNull");
+	// private static Membrane compileMembraneToGeneratingMembrane(Membrane m)
+	// {
+	// 	Env.c("RulesetGenerator.runStartWithNull");
 
-		// グローバルルート膜
-		Membrane root = new Membrane(null);
+	// 	// グローバルルート膜
+	// 	Membrane root = new Membrane(null);
 
-		// 初期構造を生成するルール
-		RuleStructure rs = RuleStructure.createInitialRule(root);
-		rs.leftMem  = new Membrane(null);
-		rs.rightMem = m;
-		root.rules.add(rs);
+	// 	// 初期構造を生成するルール
+	// 	RuleStructure rs = RuleStructure.createInitialRule(root);
+	// 	rs.leftMem  = new Membrane(null);
+	// 	rs.rightMem = m;
+	// 	root.rules.add(rs);
 
-		processMembrane(root);
-
-		return root;
-	}
+	// 	processMembrane(root);
+	// 	return m;
+	// }
 }

@@ -43,7 +43,7 @@ terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME
 terminal String CHAR_CODE_LITERAL;
 
 non terminal SrcLink			Link;
-non terminal SrcHyperLink       HyperLink;
+non terminal SrcHyperLink       	HyperLink;
 non terminal SrcName			FuncName;
 non terminal String				AtomName;
 non terminal String				RuleName;
@@ -81,8 +81,10 @@ non terminal LinkedList			LinkList;
 non terminal LinkedList			NonemptyLinkList;
 non terminal SrcLinkBundle		Bundle;
 non terminal SrcAtom			Aggregate;
+non terminal SrcRule			InitRule;
 
-start with WorldProcessList;
+// start with WorldProcessList;
+start with InitRule;
 
 /* -------------Precedence and Associatively of Terminals Section----------- */
 
@@ -91,9 +93,12 @@ Link ::=
       {: RESULT = new SrcLink(name.toString(), nameleft); :}
 ;
 
+// ハイパーリンク，属性なしハイパーリンクは空文字列の属性名をもつものとして扱う
 HyperLink ::=
     EXCLA LINK_NAME:name
-      {: RESULT = new SrcHyperLink(name.toString(), -1); :}
+      {: RESULT = new SrcHyperLink(name.toString(),new SrcName("")); :}
+  | EXCLA LINK_NAME:name COLON FuncName:attr
+      {: RESULT = new SrcHyperLink(name.toString(), attr); :}
 ;
 
 // 引数なしまたは引数ありのアトムの名前として使用できるリテラル
@@ -580,4 +585,10 @@ NonemptyWorldProcessList ::=
       {: list.add(p); RESULT = list; :}
   | NonemptyWorldProcessList:list PERIOD NonemptyProcessList:p
       {: list.addAll(p); RESULT = list; :}
+;
+
+// rule for creating toplevel
+InitRule ::=
+    WorldProcessList:body
+      {: RESULT = new SrcRule("_init", new LinkedList(), body, 1); :}
 ;
