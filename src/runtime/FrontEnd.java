@@ -599,7 +599,6 @@ public class FrontEnd
 
 	/**
 	 * 中間命令列を出力する
-	 * @param rs 初期化ルールのみを含むルールセット
 	 * @param m グローバル膜
 	 */
     //	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)

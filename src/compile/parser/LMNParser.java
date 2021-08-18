@@ -73,7 +73,7 @@ public class LMNParser {
          * 生成のためのガード (new) が自動生成できるようにするため。 
 	 * 詳しくはaddSrcRuleToMem を参照。
 	 * 
-	 * @return ソースファイル全体が表すプロセス構造が入った膜構造
+	 * @return ソースファイル全体が表すプロセス構造を生成するルールが入った膜構造
 	 * @throws ParseException
 	 */
 	public Membrane parse() throws ParseException {
