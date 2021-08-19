@@ -410,7 +410,7 @@ public class Optimizer {
 				   funcname.equals("+") || funcname.equals("-") || funcname.equals("*") || funcname.equals("/")
 				   || funcname.equals("mod")
 				   || funcname.equals("logand") || funcname.equals("logior") || funcname.equals("logxor")
-//				   || funcname.equals("ash")
+				   || funcname.equals("ash")
 				   || funcname.equals("+.") || funcname.equals("-.")
 				   || funcname.equals("*.") || funcname.equals("/.")){
 					if(funcname.equals("+")) {
@@ -445,10 +445,10 @@ public class Optimizer {
 						op = Instruction.IXOR;
 						typecheck = Instruction.ISINT;
 					}
-//					else if(funcname.equals("ash")) {
-//						op = Instruction.IASH;
-//						typecheck = Instruction.ISINT;
-//					}
+					else if(funcname.equals("ash")) {
+						op = Instruction.ISAL;
+						typecheck = Instruction.ISINT;
+					}
 					else if(funcname.equals("+.")) {
 						op = Instruction.FADD;
 						typecheck = Instruction.ISFLOAT;

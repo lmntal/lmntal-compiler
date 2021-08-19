@@ -1383,20 +1383,22 @@ public class Instruction implements Cloneable
 	@LMNtalIL public static final int IDIV = 403;
 	@LMNtalIL public static final int INEG = 404;
 	@LMNtalIL public static final int IMOD = 405;
-	@LMNtalIL public static final int INOT = 410;
+    //	@LMNtalIL public static final int INOT = 410;
 	@LMNtalIL public static final int IAND = 411;
 	@LMNtalIL public static final int IOR  = 412;
 	@LMNtalIL public static final int IXOR = 413;
+	@LMNtalIL public static final int ISAL = 414;
 	static {setArgType(IADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(ISUB, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IMUL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IDIV, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(INEG, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IMOD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
-	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+    //	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IAND, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IXOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(ISAL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 
 	/**
 	 * iaddfunc [-dstintfunc, intfunc1, intfunc2]
