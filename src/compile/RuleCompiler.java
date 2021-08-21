@@ -92,6 +92,7 @@ public class RuleCompiler
 	 */
 	public Rule compile() throws CompileException
 	{
+		// System.out.println("compile() called: " + rs);
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
 		checkExplicitFreeLinks(rs.leftMem);
@@ -229,6 +230,7 @@ public class RuleCompiler
 		rhslinkpath = new HashMap<>();
 		int rhslinkindex = 0;
 		// アトムの引数のリンク出現
+		// System.out.println("computeRHSLinks 1: " + rhsatoms);
 		for (Atom atom : rhsatoms)
 		{
 			for (int pos = 0; pos < atom.functor.getArity(); pos++)
@@ -245,6 +247,7 @@ public class RuleCompiler
 		}
 
 		// unary型付プロセス文脈のリンク出現
+		// System.out.println("computeRHSLinks 2: " + rhstypedcxtpaths.keySet());
 		for (ProcessContext atom : rhstypedcxtpaths.keySet())
 		{
 			body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhstypedcxtToPath(atom),0));
@@ -312,6 +315,7 @@ public class RuleCompiler
 
 	private int getLinkPath(LinkOccurrence link)
 	{
+		// System.out.println("getLinkPath: " + link.getInformativeText());
 		if (rhslinkpath.containsKey(link))
 		{
 			return rhslinkpath.get(link);
@@ -533,6 +537,8 @@ public class RuleCompiler
 		}
 		// 右辺で生成されるリンクを処理
 		compileNewlinks(newLinks);
+		// 右辺にコピーされる単項型付きプロセス文脈を処理
+		linkTypedcxt();
 
 		deleteconnectors();
 
@@ -1816,6 +1822,31 @@ public class RuleCompiler
 			int pos2 = l2.pos;
 			int memi = rhsmemToPath(l1.atom.mem);
 			body.add(newlink(atom1, pos1, atom2, pos2, memi));
+		}
+	}
+
+	/**
+	 * 右辺にコピーされる単項型付きプロセス文脈のリンクを接続
+	 */
+	private void linkTypedcxt()
+	{
+		List<LinkOccurrence> rhslinks = new ArrayList<>(); // ueda
+		rhslinkpath = new HashMap<>(); // ueda
+		int rhslinkindex = 0; // ueda
+
+		for (ProcessContext atom : rhstypedcxtpaths.keySet())
+		{
+			body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhstypedcxtToPath(atom),0));
+			rhslinkpath.put(atom.args[0], varcount);
+			varcount++;
+			LinkOccurrence link = atom.args[0];
+			int linkpath = getLinkPath(link);
+			int lhspath = getLinkPath(link.buddy);
+
+			Membrane mem = link.atom.mem;
+			int mempath = rhsmemToPath(mem);
+			body.add(new Instruction(Instruction.UNIFYLINKS,linkpath,lhspath,mempath));
+			varcount++;
 		}
 	}
 
