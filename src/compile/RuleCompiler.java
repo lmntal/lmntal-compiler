@@ -59,7 +59,7 @@ public class RuleCompiler
 	//private Map<Atomic, Integer> rhsAtomicPath;		// プロセス文脈拡張用
 	private Map<Membrane, Integer>  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)
 	private Map<LinkOccurrence, Integer>  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
-	//private List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り血にした
+	//private List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り値にした
 	private List<Atomic> lhsatoms;
 	private List<Membrane> lhsmems;
 	private Map<Atomic, Integer>  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
