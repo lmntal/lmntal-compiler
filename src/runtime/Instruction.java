@@ -1124,17 +1124,21 @@ public class Instruction implements Cloneable
 	static {setArgType(NEQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
 
 	/**
-	 * copyground [-dstlist, srclinklist, dstmem]
+	 * copyground [-dstlist, srclinklist, dstmem, attrs]
 	 * 
 	 * （基底項プロセスを指す）リンク列$srclinklistを$dstmemに複製し、
 	 * $dstlistの第1要素はコピーされたリンク列を，
 	 * 第二要素にはコピー元のアトムからコピー先のアトムへのマップがそれぞれ格納される．
+	 * attrs を属性としたハイパーリンクは，コピー元の基底項に局所的ならばコピーされ
+	 * （つまり新たなハイパーリンクが作成され），局所的でないならばコピーされず共有される．
+	 * 属性をもたないハイパーリンクやattrs に指定されていない属性のハイパーリンクは
+	 * コピーされない．
 	 */
 	@LMNtalIL public static final int COPYGROUND = 218;
-	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM));}
+	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM, ARG_OBJS));}
 
 	/**
-	 * removeground [srclinklist,srcmem]
+	 * removeground [srclinklist, srcmem]
 	 * 
 	 * $srcmemに属する（基底項プロセスを指す）リンク列$srclinklistを現在の膜から取り出す。
 	 * 実行アトムスタックは操作しない。
@@ -1153,14 +1157,18 @@ public class Instruction implements Cloneable
 	// 型検査のためのガード命令 (221--229)	
 
 	/**
-	 * isground [-natomsfunc, linklist, avolist]
+	 * isground [-natomsfunc, linklist, avolist, attrs]
 	 * 
 	 * <br>（予約された）ロック取得する拡張ガード命令<br>
 	 * リンク列$linklistの指す先が基底項プロセスであることを確認する。
 	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこの膜に存在していることを確認する。
 	 * ただし、$avolistに登録されたリンクに到達したら失敗する。
 	 * 見つかった基底項プロセスを構成するこの膜のアトムの個数（をラップしたInteger）を$natomsに格納する。
-	 * 
+	 *
+	 * 基底項プロセスのハイパーリンクはたどらないが，attrsに指定した属性のハイパーリンクで
+	 * すべての端点がこの基底項プロセスに属する場合，そのハイパーリンクはこの基底項プロセス
+	 * の局所ハイパーリンクといい，後続のcopyground命令で（共有でなく）新規作成の対象となる．
+	 *
 	 * <p>natomsとnmemsと統合した命令を作り、$natomsの総和を引数に渡すようにする。
 	 * 子膜の個数の照合は、本膜がロックしていない子膜の個数が0個かどうか調べればよい。
 	 * しかし本膜がロックしたかどうかを調べるメカニズムが今は備わっていないため、保留。
@@ -1168,7 +1176,7 @@ public class Instruction implements Cloneable
 	 * groundには膜は含まれないことになったので、上記は不要
 	 */
 	@LMNtalIL public static final int ISGROUND = 221;
-	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS));}
 
 	/**
 	 * isunary [atom]

@@ -898,12 +898,17 @@ public class RuleCompiler
 					rhstypedcxtpaths.put(pc, atompath);
 					rhsmappaths.put(pc, atompath);
 				}
+				// TODO: refactor                                                    // ueda
 				else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE)
 				{
 					int retlistpath = varcount++;
+					// System.out.println("buildRHSTypedProcesses, def: " + def);
+
+					Atom[] atoms = this.gc.hlgroundAttrs.get(def); // hlgroundの属性 // ueda 
+					List<Functor> attrs = this.gc.getHlgroundAttrs(atoms);           // ueda
 					body.add(new Instruction( Instruction.COPYGROUND, retlistpath,
 							groundToSrcPath(pc.def), // groundの場合はリンクの変数番号のリストを指す変数番号
-							rhsmemToPath(pc.mem) ));
+							rhsmemToPath(pc.mem), attrs));
 					int groundpath = varcount++;
 					body.add(new Instruction( Instruction.GETFROMLIST,groundpath,retlistpath,0));
 					int mappath = varcount++;
