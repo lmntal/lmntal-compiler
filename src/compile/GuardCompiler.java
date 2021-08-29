@@ -441,7 +441,13 @@ class GuardCompiler extends LHSCompiler
 //							Env.p("VAR## "+srcPath);
 							if(srcPath==UNBOUND) continue FixType;
 							uniqVars.add(srcPath);
+
+						// System.out.println("typedCxtTypes, defK: " + typedCxtTypes + " " + defK);
+						// System.out.println("hlgroundAttrs: " + hlgroundAttrs);
+
+						hlgroundAttrs.put(defK, new Atom[0]);
 						}
+
 						match.add(new Instruction(Instruction.UNIQ, uniqVars));
 						rc.theRule.hasUniq = true;
 					}
