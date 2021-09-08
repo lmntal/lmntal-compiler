@@ -129,8 +129,9 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	"logand"			{ return symbol(sym.LOGAND); }//ueda
 	"logior"			{ return symbol(sym.LOGIOR); }//ueda
 	"logxor"			{ return symbol(sym.LOGXOR); }//ueda
+// 綴りの単項の演算子は，現状の文法では lognot(a,a) などの曖昧性の排除が難しいので断念 (ueda)
 //	"lognot"			{ return symbol(sym.LOGNOT); }//ueda
-//	"ash"				{ return symbol(sym.ASH); }//ueda
+	"ash"				{ return symbol(sym.ASH); }//ueda 
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
 	{HyperLinkOp}		{ return symbol(sym.HL, yytext()); }//seiji

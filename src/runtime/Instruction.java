@@ -1259,8 +1259,8 @@ public class Instruction implements Cloneable
 	 * 過去に生成されたhyperlinkのうち, 識別子IDを持つhyperlinkを生成し, link先に接続することを示す
 	 * （未実装、hyperlinkへの値の代入などに使用できるかも？）
 	 */
-	@LMNtalIL public static final int MAKEHLINK = 251;
-	static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));}
+	// @LMNtalIL public static final int MAKEHLINK = 251;
+	// static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));}
 
 	/**
 	 * ishlink [link]
@@ -1356,7 +1356,7 @@ public class Instruction implements Cloneable
 	 * ハイパーリンクの属性を取得する
 	 */
 	@LMNtalIL public static final int GETATTRATOM = 285;
-	static {setArgType(GETATTRATOM, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(GETATTRATOM, new ArgType(true, ARG_VAR, ARG_VAR));}
 	
 	/**
 	 * hypergetlink [link, atom, pos]
@@ -1383,20 +1383,22 @@ public class Instruction implements Cloneable
 	@LMNtalIL public static final int IDIV = 403;
 	@LMNtalIL public static final int INEG = 404;
 	@LMNtalIL public static final int IMOD = 405;
-	@LMNtalIL public static final int INOT = 410;
+    //	@LMNtalIL public static final int INOT = 410;
 	@LMNtalIL public static final int IAND = 411;
 	@LMNtalIL public static final int IOR  = 412;
 	@LMNtalIL public static final int IXOR = 413;
+	@LMNtalIL public static final int ISAL = 414;
 	static {setArgType(IADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(ISUB, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IMUL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IDIV, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(INEG, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IMOD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
-	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+    //	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IAND, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IXOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(ISAL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 
 	/**
 	 * iaddfunc [-dstintfunc, intfunc1, intfunc2]

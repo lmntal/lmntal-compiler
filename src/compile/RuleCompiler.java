@@ -705,7 +705,8 @@ public class RuleCompiler
 			for (Instruction inst : guard)
 			{
 				// シンボルアトムを生成する命令に出会うまでループ
-				if (inst.getKind() == Instruction.NEWHLINK || inst.getKind() == Instruction.MAKEHLINK)
+				if (inst.getKind() == Instruction.NEWHLINK 
+                                    /* || inst.getKind() == Instruction.MAKEHLINK */)
 				{
 					guardallocs = true;
 					break;
