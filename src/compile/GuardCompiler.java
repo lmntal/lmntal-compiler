@@ -511,7 +511,7 @@ class GuardCompiler extends LHSCompiler
 					else if (cstr.isSelfEvaluated && func.getArity() == 1)
 					{
 						bindToFunctor(def1, func);
-						// typedcxtdatatypes.put(def1, Instruction.ISUNARY);
+						// typedCxtDataTypes.put(def1, Instruction.ISUNARY);
 					}
 					else if (func.equals(Functor.UNIFY)) // (-X = +Y)
 					{
@@ -538,7 +538,7 @@ class GuardCompiler extends LHSCompiler
 						int atomid1 = loadUnaryAtom(def1);
 						match.add(new Instruction(Instruction.ISUNARY, atomid1));
 						int atomid2 = loadUnaryAtom(def2);
-						match.add(new Instruction(Instruction.ISUNARY, atomid2));
+						// match.add(new Instruction(Instruction.ISUNARY, atomid2));
 						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
 					}
 					else if (func.equals("\\==", 2)) // (+X \== +Y) //seiji
