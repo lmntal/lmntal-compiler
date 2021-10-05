@@ -432,9 +432,17 @@ class GuardCompiler extends LHSCompiler
 							ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
 							if (!identifiedCxtdefs.contains(defK)) continue FixType; // 未割り当てのプロセス（表記に-が付くもの）は認めない
 							int srcPath;
+
 //							srcPath = typedcxtToSrcPath(defK);
 //							Env.p("VAR# "+srcPath);
 //							if(srcPath==UNBOUND) {
+
+							if (typedCxtTypes.get(defK) != GROUND_LINK_TYPE) {
+								hlgroundAttrs.put(defK, new Atom[0]);  // hyperlink attributes not handled
+							} else if (hlgroundAttrs.get(defK).length != 0) {
+								error("COMPILE ERROR: incompatible attributes in ground constraints");
+							}
+
 							checkGroundLink(defK);
 							srcPath = groundToSrcPath(defK);
 //							}
@@ -444,8 +452,6 @@ class GuardCompiler extends LHSCompiler
 
 						// System.out.println("typedCxtTypes, defK: " + typedCxtTypes + " " + defK);
 						// System.out.println("hlgroundAttrs: " + hlgroundAttrs);
-
-						hlgroundAttrs.put(defK, new Atom[0]);
 						}
 
 						match.add(new Instruction(Instruction.UNIQ, uniqVars));
