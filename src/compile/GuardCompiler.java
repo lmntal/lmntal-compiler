@@ -345,15 +345,18 @@ class GuardCompiler extends LHSCompiler
 						int atomid1 = loadUnaryAtom(def1);
 						match.add(new Instruction(Instruction.ISUNARY, atomid1));
 					}
-					else if (func.equals("ground", 1))
+					// groundも第２引数以降をとるようにするのでhlgroundの処理とできるだけ統合
+					// else if (func.equals("ground", 1))
+					// {
+					// 	if (!identifiedCxtdefs.contains(def1)) continue;
+					// 	checkGroundLink(def1);
+					// }
+					// else if (func.getName().equals("hlground"))
+					else if (func.getName().equals("ground") || func.getName().equals("hlground"))
 					{
+						// System.out.println("identifiedCxtdefs: " + identifiedCxtdefs + " " + def1);
 						if (!identifiedCxtdefs.contains(def1)) continue;
-						checkGroundLink(def1);
-					}
-					else if (func.getName().equals("hlground"))
-					{
-						if (!identifiedCxtdefs.contains(def1)) continue;
-						// hlgroundの属性取得
+						// ground, hlgroundの属性取得
 						Atom hlgroundAtom = cstr;
 						int i = 0;
 						Atom[] attrAtoms = new Atom[hlgroundAtom.args.length-1];
@@ -371,9 +374,16 @@ class GuardCompiler extends LHSCompiler
 							}
 							i++;
 						}
+
+						if (typedCxtTypes.get(def1) != GROUND_LINK_TYPE) {
+							hlgroundAttrs.put(def1, attrAtoms);
+						} else if (hlgroundAttrs.get(def1).length != 0 || attrAtoms.length != 0) {
+							error("COMPILE ERROR: incompatible attributes in ground constraints");
+						}
 						hlgroundAttrs.put(def1, attrAtoms);
-						
-						checkHLGroundLink(def1);
+						// System.out.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
+						// System.out.println("typedCxtTypes: " + typedCxtTypes);
+						checkHLGroundLink(func, def1);
 					}
 					// ガードインライン
 					else if (func.getName().startsWith("custom_"))
@@ -422,16 +432,28 @@ class GuardCompiler extends LHSCompiler
 							ContextDef defK = ((ProcessContext)cstr.args[k].buddy.atom).def;
 							if (!identifiedCxtdefs.contains(defK)) continue FixType; // 未割り当てのプロセス（表記に-が付くもの）は認めない
 							int srcPath;
+
 //							srcPath = typedcxtToSrcPath(defK);
 //							Env.p("VAR# "+srcPath);
 //							if(srcPath==UNBOUND) {
+
+							if (typedCxtTypes.get(defK) != GROUND_LINK_TYPE) {
+								hlgroundAttrs.put(defK, new Atom[0]);  // hyperlink attributes not handled
+							} else if (hlgroundAttrs.get(defK).length != 0) {
+								error("COMPILE ERROR: incompatible attributes in ground constraints");
+							}
+
 							checkGroundLink(defK);
 							srcPath = groundToSrcPath(defK);
 //							}
 //							Env.p("VAR## "+srcPath);
 							if(srcPath==UNBOUND) continue FixType;
 							uniqVars.add(srcPath);
+
+						// System.out.println("typedCxtTypes, defK: " + typedCxtTypes + " " + defK);
+						// System.out.println("hlgroundAttrs: " + hlgroundAttrs);
 						}
+
 						match.add(new Instruction(Instruction.UNIQ, uniqVars));
 						rc.theRule.hasUniq = true;
 					}
@@ -462,6 +484,16 @@ class GuardCompiler extends LHSCompiler
 							match.add(new Instruction(Instruction.NEQFUNC, funcid1, funcid2));
 						}
 						else{
+							if (typedCxtTypes.get(def1) != GROUND_LINK_TYPE) {
+								hlgroundAttrs.put(def1, new Atom[0]);  // hyperlink attributes not handled
+							} else if (hlgroundAttrs.get(def1).length != 0) {
+								error("COMPILE ERROR: incompatible attributes in ground constraints");
+							}
+							if (typedCxtTypes.get(def2) != GROUND_LINK_TYPE) {
+								hlgroundAttrs.put(def2, new Atom[0]);  // for eqground constraint
+							} else if (hlgroundAttrs.get(def2).length != 0) {
+								error("COMPILE ERROR: incompatible attributes in ground constraints");
+							}
 							checkGroundLink(def1);
 							checkGroundLink(def2);
 							int linkid1 = loadGroundLink(def1);
@@ -753,6 +785,7 @@ class GuardCompiler extends LHSCompiler
 				&& typedCxtTypes.get(def2) == null); // 型付きであることの検査が必要かどうか
 		//boolean GROUND_ALLOWED = true;
 		// GROUND_ALLOWED のとき (unary = ?) は (? = unary) として処理する（ただし?はgroundまたはnull）
+		// System.out.println("X=Y handling, typedCxtTypes: " + typedCxtTypes);
 		if (GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE) {
 			if (typedCxtTypes.get(def1) == UNARY_ATOM_TYPE) {
 				ContextDef swaptmp=def1; def1=def2; def2=swaptmp;
@@ -760,6 +793,20 @@ class GuardCompiler extends LHSCompiler
 		}
 		if (GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE) { // (? = ground)
 			//if(checkNeeded){
+
+			// System.out.println("X=Y being handled: " + typedCxtTypes.get(def1) 
+							   // + " " + typedCxtTypes.get(def2));
+			if (typedCxtTypes.get(def1) != GROUND_LINK_TYPE) {
+				hlgroundAttrs.put(def1, new Atom[0]);  // hyperlink attributes not handled
+			} else if (hlgroundAttrs.get(def1).length != 0) {
+				error("COMPILE ERROR: incompatible attributes in ground constraints");
+			}
+			if (typedCxtTypes.get(def2) != GROUND_LINK_TYPE) {
+				hlgroundAttrs.put(def2, new Atom[0]);  // for eqground constraint
+			} else if (hlgroundAttrs.get(def2).length != 0) {
+				error("COMPILE ERROR: incompatible attributes in ground constraints");
+			}
+
 			checkGroundLink(def1);
 			checkGroundLink(def2);
 			//}
@@ -789,6 +836,7 @@ class GuardCompiler extends LHSCompiler
 			typedCxtDataTypes.put(def1,newdatatype);
 			typedCxtDataTypes.put(def2,newdatatype);
 		}
+		// System.out.println("X=Y handled, typedCxtTypes: " + typedCxtTypes);
 	}
 
 	/** 型制約を廃棄する。エラー復帰用メソッド */
@@ -916,7 +964,10 @@ class GuardCompiler extends LHSCompiler
 
 	/** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
 	 *  @param def プロセス文脈定義 */
+    // (ueda) extended ground（ハイパーリンクの局所性も検査）は checkHLGroundLink に委ねる
 	private void checkGroundLink(ContextDef def) {
+		// System.out.println("checkGroundLink, typedCxtTypes: " + def + " " + typedCxtTypes.get(def));
+
 		if(typedCxtTypes.get(def) != UNARY_ATOM_TYPE && typedCxtTypes.get(def) != GROUND_LINK_TYPE && typedCxtTypes.get(def) != HLGROUND_LINK_TYPE){
 			typedCxtTypes.put(def,GROUND_LINK_TYPE);
 //			int linkid = loadGroundLink(def);
@@ -962,22 +1013,28 @@ class GuardCompiler extends LHSCompiler
 //			memToLinkListPath.put(def.lhsOcc.mem, srclinklistpath);
 //			}
 //			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
+			List<Functor> attrs = new ArrayList<>();
 			int natom = varCount++;
-			match.add(new Instruction(Instruction.ISGROUND, natom, linkids, srclinklistpath));//,memToPath(def.lhsOcc.mem)));
+			match.add(new Instruction(Instruction.ISGROUND, natom, linkids, srclinklistpath, attrs));//,memToPath(def.lhsOcc.mem)));
 			rc.hasISGROUND = false;
 			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem, new HashMap<>());
 			memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
 			
+		} else {
+			// System.out.println("typedCxtTypes contained: " + def);
 		}
 		return;
 	}
 	
 	/** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
 	 *  @param def プロセス文脈定義 */
-	// hlground型
-	private void checkHLGroundLink(ContextDef def) {
+	// hlground型および属性付きground型
+	private void checkHLGroundLink(Functor func, ContextDef def) {
+        Object linktype = (func.getName().equals("ground") ? GROUND_LINK_TYPE : HLGROUND_LINK_TYPE);
+		// System.out.println("checkHLGroundLink, typedCxtTypes: " + def + " " + typedCxtTypes.get(def));
+
 		if(typedCxtTypes.get(def) != UNARY_ATOM_TYPE && typedCxtTypes.get(def) != GROUND_LINK_TYPE && typedCxtTypes.get(def) != HLGROUND_LINK_TYPE){
-			typedCxtTypes.put(def,HLGROUND_LINK_TYPE);
+			typedCxtTypes.put(def, linktype);
 //			int linkid = loadGroundLink(def);
 //			ArrayList linkids = loadGroundLink(def);
 			int linkids = loadGroundLink(def);
@@ -1024,11 +1081,14 @@ class GuardCompiler extends LHSCompiler
 			Atom[] atoms = hlgroundAttrs.get(def); // hlgroundの属性
 			List<Functor> attrs = getHlgroundAttrs(atoms);
 			int natom = varCount++;
-			match.add(new Instruction(Instruction.ISHLGROUND, natom, linkids, srclinklistpath, attrs));//,memToPath(def.lhsOcc.mem)));
+			int inst = (func.getName().equals("ground") ? Instruction.ISGROUND : Instruction.ISHLGROUND);
+			match.add(new Instruction(inst, natom, linkids, srclinklistpath, attrs));//,memToPath(def.lhsOcc.mem)));
 			rc.hasISGROUND = false;
 			if(!memToGroundSizes.containsKey(def.lhsOcc.mem))memToGroundSizes.put(def.lhsOcc.mem, new HashMap<>());
 			memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
 			
+		} else {
+			// System.out.println("typedCxtTypes contained: " + def);
 		}
 		return;
 	}
