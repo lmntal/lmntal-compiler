@@ -263,6 +263,7 @@ public class LMNParser {
 		// [2] アトム構造を生成する
 		Atom atom = new Atom(mem, func);
 		atom.setSourceLocation(sAtom.line, sAtom.column);
+		// single-quote の記号のみを SelfEvaluated とみなす (e.g., int vs 'int')
 		if(sAtom.getNameType() == SrcName.SYMBOL){
 			atom.isSelfEvaluated = true;
 		}

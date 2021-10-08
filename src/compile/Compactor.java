@@ -209,21 +209,23 @@ public class Compactor {
 				continue;
 			}
 
+			// (ueda) Commented out to allow optimization of ==/2 that converts
+			//        ALLOCATOM + GETFUNC to LOADFUNC (to eliminate ALLOCATOM in guard)
 			// getfunc[!func1,atom1];getfunc[!func2,atom2];eqfunc[!func1,!func2]
 			// ==> samefunc[atom1,atom2]
-			if (inst0.getKind() == Instruction.GETFUNC
-					&& inst1.getKind() == Instruction.GETFUNC
-					&& inst2.getKind() == Instruction.EQFUNC
-					&& inst0.getIntArg1() == inst2.getIntArg1() && inst1.getIntArg1() == inst2.getIntArg2()
-					&& Instruction.getVarUseCountFrom(insts, (Integer)inst0.getArg1(), i + 3) == 0
-					&& Instruction.getVarUseCountFrom(insts, (Integer)inst1.getArg1(), i + 3) == 0) {
-				insts.remove(i); insts.remove(i); insts.remove(i);
-				inst = new Instruction(Instruction.SAMEFUNC,
-						inst0.getIntArg2(), inst1.getIntArg2() );
-				insts.add(i,inst);
-				size -= 2;
-				continue;
-			}
+			// if (inst0.getKind() == Instruction.GETFUNC
+			// 		&& inst1.getKind() == Instruction.GETFUNC
+			// 		&& inst2.getKind() == Instruction.EQFUNC
+			// 		&& inst0.getIntArg1() == inst2.getIntArg1() && inst1.getIntArg1() == inst2.getIntArg2()
+			// 		&& Instruction.getVarUseCountFrom(insts, (Integer)inst0.getArg1(), i + 3) == 0
+			// 		&& Instruction.getVarUseCountFrom(insts, (Integer)inst1.getArg1(), i + 3) == 0) {
+			// 	insts.remove(i); insts.remove(i); insts.remove(i);
+			// 	inst = new Instruction(Instruction.SAMEFUNC,
+			// 			inst0.getIntArg2(), inst1.getIntArg2() );
+			// 	insts.add(i,inst);
+			// 	size -= 2;
+			// 	continue;
+			// }
 		}
 		return varcount;
 	}

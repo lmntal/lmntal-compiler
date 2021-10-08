@@ -314,6 +314,6 @@ public final class Env
 	public static boolean compileRule = false;
 
 	/** hyperlink */
-	public static boolean hyperLink    = false;//seiji
-	public static boolean hyperLinkOpt = false;//seiji
+	public static boolean hyperLink    = true; //seiji
+	public static boolean hyperLinkOpt = true; //seiji
 }

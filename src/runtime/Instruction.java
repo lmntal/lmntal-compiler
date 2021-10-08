@@ -2212,6 +2212,15 @@ public class Instruction implements Cloneable
 		}
 	}
 
+	/**
+	 * この命令の引数の種類を返す。
+	 */
+	public int getArgType(int i)
+	{
+	    ArgType argtype = argTypeTable.get(kind);
+	    return argtype.type[i];
+	}
+
 	/** この命令が副作用を持つ可能性があるかどうかを返す。不明な場合trueを返さなければならない。
 	 * ただし膜のロック取得は副作用とは見なさない。
 	 * <p>どうやら、従来「ガード命令」と呼んでいたものに相当するらしい。*/

@@ -59,7 +59,7 @@ public class RuleCompiler
 	//private Map<Atomic, Integer> rhsAtomicPath;		// プロセス文脈拡張用
 	private Map<Membrane, Integer>  rhsmempath;		// 右辺の膜 (Membrane) -> 変数番号 (Integer)
 	private Map<LinkOccurrence, Integer>  rhslinkpath;		// 右辺のリンク出現(LinkOccurence) -> 変数番号(Integer)
-	//private List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り血にした
+	//private List rhslinks;		// 右辺のリンク出現(LinkOccurence)のリスト（片方のみ） -> computeRHSLinksの返り値にした
 	private List<Atomic> lhsatoms;
 	private List<Membrane> lhsmems;
 	private Map<Atomic, Integer>  lhsatompath;		// 左辺のアトム (Atomic) -> 変数番号 (Integer)
@@ -92,6 +92,7 @@ public class RuleCompiler
 	 */
 	public Rule compile() throws CompileException
 	{
+		// System.out.println("compile() called: " + rs);
 		liftupActiveAtoms(rs.leftMem);
 		simplify();
 		checkExplicitFreeLinks(rs.leftMem);
@@ -229,6 +230,7 @@ public class RuleCompiler
 		rhslinkpath = new HashMap<>();
 		int rhslinkindex = 0;
 		// アトムの引数のリンク出現
+		// System.out.println("computeRHSLinks 1: " + rhsatoms);
 		for (Atom atom : rhsatoms)
 		{
 			for (int pos = 0; pos < atom.functor.getArity(); pos++)
@@ -245,6 +247,7 @@ public class RuleCompiler
 		}
 
 		// unary型付プロセス文脈のリンク出現
+		// System.out.println("computeRHSLinks 2: " + rhstypedcxtpaths.keySet());
 		for (ProcessContext atom : rhstypedcxtpaths.keySet())
 		{
 			body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhstypedcxtToPath(atom),0));
@@ -307,22 +310,27 @@ public class RuleCompiler
 				}
 			}
 		}
+		// System.out.println("rhslinks: " + rhslinks);
 		return rhslinks;
 	}
 
 	private int getLinkPath(LinkOccurrence link)
 	{
+		// System.out.println("getLinkPath: " + link.getInformativeText());
 		if (rhslinkpath.containsKey(link))
 		{
+			// System.out.println(" case 1");
 			return rhslinkpath.get(link);
 		}
 		else if (link.atom instanceof ProcessContext && !((ProcessContext)link.atom).def.typed)
 		{
+			// System.out.println(" case 2");
 			LinkOccurrence srclink = ((ProcessContext)link.atom).def.lhsOcc.args[link.pos].buddy;
 			int linkpath = varcount++;
 			body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(srclink.atom),srclink.pos));
 			if (!(fUseMoveCells && ((ProcessContext)link.atom).def.rhsOccs.size() == 1))
 			{
+				// System.out.println(" case 2b");
 				int copiedlink = varcount++;
 				body.add( new Instruction(Instruction.LOOKUPLINK,
 						copiedlink, rhspcToMapPath(((ProcessContext)link.atom)), linkpath));
@@ -332,8 +340,10 @@ public class RuleCompiler
 		}
 		else
 		{
+			// System.out.println(" case 3");
 			if (!lhslinkpath.containsKey(link))
 			{
+				// System.out.println(" case 3b");
 				int linkpath = varcount++;
 				body.add(new Instruction(Instruction.GETLINK,linkpath,lhsatomToPath(link.atom),link.pos));
 				lhslinkpath.put(link, linkpath);
@@ -533,6 +543,8 @@ public class RuleCompiler
 		}
 		// 右辺で生成されるリンクを処理
 		compileNewlinks(newLinks);
+		// 右辺にコピーされる単項型付きプロセス文脈を処理
+		linkTypedcxt(newLinks);
 
 		deleteconnectors();
 
@@ -1378,6 +1390,7 @@ public class RuleCompiler
 				rhsatompath.put(atom, atomid);
 				if (created.contains(atom))
 				{
+					// System.out.println("newatom created: " + atom + " " + atomid);
 					body.add(Instruction.newatom(rhsatomToPath(atom), rhsmemToPath(mem), atom.functor));
 				}
 			}
@@ -1812,8 +1825,10 @@ public class RuleCompiler
 	 */
 	private void compileNewlinks(Set<LinkOccurrence> newlinks)
 	{
+		// System.out.println("compileNewlinks: " + newlinks);
 		for (LinkOccurrence l1 : newlinks)
 		{
+			// System.out.println("new link: " + l1);
 			LinkOccurrence l2 = l1.buddy;
 			int atom1 = getRegisterIndexOf(l1.atom);
 			int atom2 = getRegisterIndexOf(l2.atom);
@@ -1821,6 +1836,42 @@ public class RuleCompiler
 			int pos2 = l2.pos;
 			int memi = rhsmemToPath(l1.atom.mem);
 			body.add(newlink(atom1, pos1, atom2, pos2, memi));
+			// System.out.println(newlink(atom1, pos1, atom2, pos2, memi));
+		}
+	}
+
+	/**
+	 * 右辺にコピーされる単項型付きプロセス文脈のリンクを接続
+	 * （右辺で生成されるリンクはcompileNewlinksで処理済み）
+	 */
+	private void linkTypedcxt(Set<LinkOccurrence> newlinks)
+	{
+		rhslinkpath = new HashMap<>();  // swaplink モードでは使われないようだが
+
+		// System.out.println("rhstypedcxtpaths: " + rhstypedcxtpaths);
+		// System.out.print("newlinks: ");
+		// for (LinkOccurrence l : newlinks) System.out.print(l.getInformativeText() + " ");
+		// System.out.println();
+		for (ProcessContext atom : rhstypedcxtpaths.keySet())
+		{
+			LinkOccurrence link = atom.args[0];
+			// System.out.println("atom: " + atom + " " + rhstypedcxtToPath(atom) + " " + varcount);
+			// System.out.println("link: " + link.getInformativeText());
+			// System.out.println("link.buddy: " + link.buddy.getInformativeText());
+
+			// compileNewlinks で処理済みならば飛ばす．link.buddy も調べる必要あり
+			if (newlinks.contains(link) || newlinks.contains(link.buddy)) continue; 
+
+			body.add(new Instruction(Instruction.ALLOCLINK,varcount,rhstypedcxtToPath(atom),0));
+			rhslinkpath.put(atom.args[0], varcount);  // swaplink モードでは使われないようだが
+			varcount++;
+			int linkpath = getLinkPath(link);
+			int lhspath = getLinkPath(link.buddy);
+			Membrane mem = link.atom.mem;
+			int mempath = rhsmemToPath(mem);
+			body.add(new Instruction(Instruction.UNIFYLINKS,linkpath,lhspath,mempath));
+			// System.out.println(body);
+			varcount++;
 		}
 	}
 
