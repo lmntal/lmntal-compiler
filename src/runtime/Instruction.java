@@ -1124,17 +1124,21 @@ public class Instruction implements Cloneable
 	static {setArgType(NEQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));}
 
 	/**
-	 * copyground [-dstlist, srclinklist, dstmem]
+	 * copyground [-dstlist, srclinklist, dstmem, attrs]
 	 * 
 	 * （基底項プロセスを指す）リンク列$srclinklistを$dstmemに複製し、
 	 * $dstlistの第1要素はコピーされたリンク列を，
 	 * 第二要素にはコピー元のアトムからコピー先のアトムへのマップがそれぞれ格納される．
+	 * attrs を属性としたハイパーリンクは，コピー元の基底項に局所的ならばコピーされ
+	 * （つまり新たなハイパーリンクが作成され），局所的でないならばコピーされず共有される．
+	 * 属性をもたないハイパーリンクやattrs に指定されていない属性のハイパーリンクは
+	 * コピーされない．
 	 */
 	@LMNtalIL public static final int COPYGROUND = 218;
-	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM));}
+	static {setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM, ARG_OBJS));}
 
 	/**
-	 * removeground [srclinklist,srcmem]
+	 * removeground [srclinklist, srcmem]
 	 * 
 	 * $srcmemに属する（基底項プロセスを指す）リンク列$srclinklistを現在の膜から取り出す。
 	 * 実行アトムスタックは操作しない。
@@ -1153,14 +1157,18 @@ public class Instruction implements Cloneable
 	// 型検査のためのガード命令 (221--229)	
 
 	/**
-	 * isground [-natomsfunc, linklist, avolist]
+	 * isground [-natomsfunc, linklist, avolist, attrs]
 	 * 
 	 * <br>（予約された）ロック取得する拡張ガード命令<br>
 	 * リンク列$linklistの指す先が基底項プロセスであることを確認する。
 	 * すなわち、リンク先から（戻らずに）到達可能なアトムが全てこの膜に存在していることを確認する。
 	 * ただし、$avolistに登録されたリンクに到達したら失敗する。
 	 * 見つかった基底項プロセスを構成するこの膜のアトムの個数（をラップしたInteger）を$natomsに格納する。
-	 * 
+	 *
+	 * 基底項プロセスのハイパーリンクはたどらないが，attrsに指定した属性のハイパーリンクで
+	 * すべての端点がこの基底項プロセスに属する場合，そのハイパーリンクはこの基底項プロセス
+	 * の局所ハイパーリンクといい，後続のcopyground命令で（共有でなく）新規作成の対象となる．
+	 *
 	 * <p>natomsとnmemsと統合した命令を作り、$natomsの総和を引数に渡すようにする。
 	 * 子膜の個数の照合は、本膜がロックしていない子膜の個数が0個かどうか調べればよい。
 	 * しかし本膜がロックしたかどうかを調べるメカニズムが今は備わっていないため、保留。
@@ -1168,7 +1176,7 @@ public class Instruction implements Cloneable
 	 * groundには膜は含まれないことになったので、上記は不要
 	 */
 	@LMNtalIL public static final int ISGROUND = 221;
-	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));}
+	static {setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS));}
 
 	/**
 	 * isunary [atom]
@@ -1259,8 +1267,8 @@ public class Instruction implements Cloneable
 	 * 過去に生成されたhyperlinkのうち, 識別子IDを持つhyperlinkを生成し, link先に接続することを示す
 	 * （未実装、hyperlinkへの値の代入などに使用できるかも？）
 	 */
-	@LMNtalIL public static final int MAKEHLINK = 251;
-	static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));}
+	// @LMNtalIL public static final int MAKEHLINK = 251;
+	// static {setArgType(MAKEHLINK, new ArgType(true, ARG_VAR, ARG_VAR));}
 
 	/**
 	 * ishlink [link]
@@ -1356,7 +1364,7 @@ public class Instruction implements Cloneable
 	 * ハイパーリンクの属性を取得する
 	 */
 	@LMNtalIL public static final int GETATTRATOM = 285;
-	static {setArgType(GETATTRATOM, new ArgType(false, ARG_VAR, ARG_VAR));}
+	static {setArgType(GETATTRATOM, new ArgType(true, ARG_VAR, ARG_VAR));}
 	
 	/**
 	 * hypergetlink [link, atom, pos]
@@ -1383,20 +1391,22 @@ public class Instruction implements Cloneable
 	@LMNtalIL public static final int IDIV = 403;
 	@LMNtalIL public static final int INEG = 404;
 	@LMNtalIL public static final int IMOD = 405;
-	@LMNtalIL public static final int INOT = 410;
+    //	@LMNtalIL public static final int INOT = 410;
 	@LMNtalIL public static final int IAND = 411;
 	@LMNtalIL public static final int IOR  = 412;
 	@LMNtalIL public static final int IXOR = 413;
+	@LMNtalIL public static final int ISAL = 414;
 	static {setArgType(IADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(ISUB, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IMUL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IDIV, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(INEG, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IMOD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
-	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+    //	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IAND, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(IXOR, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+	static {setArgType(ISAL, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
 
 	/**
 	 * iaddfunc [-dstintfunc, intfunc1, intfunc2]
@@ -1477,6 +1487,16 @@ public class Instruction implements Cloneable
 	static {setArgType(FGE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(FEQ, new ArgType(false, ARG_ATOM, ARG_ATOM));}
 	static {setArgType(FNE, new ArgType(false, ARG_ATOM, ARG_ATOM));}
+
+	// int と float の相互変換の組み込みガード命令 (630--639+OPT)
+	@LMNtalIL public static final int FLOAT2INT = 630; 
+	@LMNtalIL public static final int INT2FLOAT = 631; 
+	static {setArgType(FLOAT2INT, new ArgType(true, ARG_ATOM, ARG_ATOM));} 
+	static {setArgType(INT2FLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));} 
+	@LMNtalIL public static final int FLOAT2INTFUNC = FLOAT2INT + OPT; 
+	@LMNtalIL public static final int INT2FLOATFUNC = INT2FLOAT + OPT; 
+	static {setArgType(FLOAT2INTFUNC, new ArgType(true, ARG_VAR, ARG_VAR));} 
+	static {setArgType(INT2FLOATFUNC, new ArgType(true, ARG_VAR, ARG_VAR));} 
 
 	//グループ化に関する命令
 	/**
@@ -2190,6 +2210,15 @@ public class Instruction implements Cloneable
 		{
 			return -1;
 		}
+	}
+
+	/**
+	 * この命令の引数の種類を返す。
+	 */
+	public int getArgType(int i)
+	{
+	    ArgType argtype = argTypeTable.get(kind);
+	    return argtype.type[i];
 	}
 
 	/** この命令が副作用を持つ可能性があるかどうかを返す。不明な場合trueを返さなければならない。

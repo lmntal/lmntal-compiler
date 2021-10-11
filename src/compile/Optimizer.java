@@ -89,6 +89,7 @@ public class Optimizer {
 			Grouping g = new Grouping();
 			g.grouping(rule.memMatch);
 		} 
+        allocatomReduce(rule.memMatch, rule.body); // ueda
 		if (Env.hyperLinkOpt) findproccxtMove(rule.memMatch);//seiji
 		if(fSystemRulesetsInlining) inlineExpandSystemRuleSets(rule.body);
 		if (fInlining) {
@@ -249,6 +250,65 @@ public class Optimizer {
 		}
 	}
 	
+	/** allocatom に続く getfunc を loadfunc に変換する
+	 * allocatom は単項アトムにしか使わないので，isunary の検査も消去する
+	 * allocatom が参照されなくなった場合は対応する freeatom とともに除去する
+	 * @param match ガードまでの命令列
+	 * @param body  右辺命令列
+	 */
+	private static void allocatomReduce(List<Instruction> match, List<Instruction> body) { // ueda
+		int maxm = match.size();
+		int maxb = body.size();
+		for (int i = 0; i < maxm; i++) {
+			if (match.get(i).getKind() == Instruction.ALLOCATOM) {
+				boolean referred = false;
+                int allocreg = (Integer) match.get(i).getArg1();
+                Functor func = (Functor) match.get(i).getArg2();
+				for (int j = i+1; j < maxm; j++) {
+					if (match.get(j).getKind() == Instruction.GETFUNC) {
+                        int setreg = (Integer) match.get(j).getArg1();
+                        int refreg = (Integer) match.get(j).getArg2();
+						if (allocreg == refreg) {
+							match.remove(j);
+							match.add(j,new Instruction(Instruction.LOADFUNC, setreg, func));
+						}
+					} else if (match.get(j).getKind() == Instruction.ISUNARY) {
+                        int refreg = (Integer) match.get(j).getArg1();
+						if (allocreg == refreg) {
+							match.remove(j);
+                            j--;                            
+							maxm--;
+						}
+					} else {
+						Instruction inst = match.get(j);
+						int size = inst.data.size();
+						for (int k = 0; k < size; k++) {
+							if (inst.getArgType(k) == Instruction.ARG_ATOM) {
+								if ((Integer) inst.data.get(k) == allocreg) {
+									referred = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (!referred) {
+					match.remove(i);
+					maxm--;
+					for (int j = 0; j < maxb; j++) {
+						if (body.get(j).getKind() == Instruction.FREEATOM) {
+							int freereg = (Integer) body.get(j).getArg1();
+							if (allocreg == freereg) {
+								body.remove(j);
+								maxb--;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	private static int max(int m, int n){
 		if(m>n)
 			return m;
@@ -350,7 +410,6 @@ public class Optimizer {
 	public static void allocMove(List<Instruction> insts){
 		for(int i=1; i<insts.size(); i++){
 			Instruction inst = insts.get(i);
-
 			switch(inst.getKind()){
 			case Instruction.ALLOCATOM:
 			case Instruction.NEWLIST:
@@ -410,7 +469,7 @@ public class Optimizer {
 				   funcname.equals("+") || funcname.equals("-") || funcname.equals("*") || funcname.equals("/")
 				   || funcname.equals("mod")
 				   || funcname.equals("logand") || funcname.equals("logior") || funcname.equals("logxor")
-//				   || funcname.equals("ash")
+				   || funcname.equals("ash")
 				   || funcname.equals("+.") || funcname.equals("-.")
 				   || funcname.equals("*.") || funcname.equals("/.")){
 					if(funcname.equals("+")) {
@@ -445,10 +504,10 @@ public class Optimizer {
 						op = Instruction.IXOR;
 						typecheck = Instruction.ISINT;
 					}
-//					else if(funcname.equals("ash")) {
-//						op = Instruction.IASH;
-//						typecheck = Instruction.ISINT;
-//					}
+					else if(funcname.equals("ash")) {
+						op = Instruction.ISAL;
+						typecheck = Instruction.ISINT;
+					}
 					else if(funcname.equals("+.")) {
 						op = Instruction.FADD;
 						typecheck = Instruction.ISFLOAT;

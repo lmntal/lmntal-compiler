@@ -128,13 +128,16 @@ public final class GlobalSystemRulesetGenerator {
 		} catch(Exception ignored){}
 		// todo 下記コードは明らかに不自然なので、InterpretedRuleset（のリストまたはそれを持つ
 		// コンパイル時膜構造）を生成するだけのメソッドをRulesetCompilerに作る。
-		InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
-		for(Instruction loadruleset : ir.rules.get(0).body){
-			if (loadruleset.getKind() == Instruction.LOADRULESET) {
-				InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
-				ruleset.rules.addAll(ir2.rules);
-			}
-		}
+		// InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
+                // TODO RulesetCompiler.compileMembrane の仕様変更にともない，irの処理は一時的に中止
+                // (2021-08-14 ueda)
+		compile.RulesetCompiler.processMembrane(m);
+		//		for(Instruction loadruleset : ir.rules.get(0).body){
+		//			if (loadruleset.getKind() == Instruction.LOADRULESET) {
+		//		InterpretedRuleset ir2 = (InterpretedRuleset)loadruleset.getArg2();
+		//				ruleset.rules.addAll(ir2.rules);
+		//			}
+		//		}
 	}
 	/**
 	 * 仮メソッド。
@@ -283,6 +286,8 @@ public final class GlobalSystemRulesetGenerator {
 		ruleset.rules.add(buildUnaryPlusRule("+.", Instruction.ISFLOAT));
 		ruleset.rules.add(buildUnaryOpRule("-",    Instruction.ISINT,  Instruction.INEG));
 		ruleset.rules.add(buildUnaryOpRule("-.",   Instruction.ISFLOAT,Instruction.FNEG));
+		ruleset.rules.add(buildUnaryOpRule("int",  Instruction.ISFLOAT,Instruction.FLOAT2INT)); 
+		ruleset.rules.add(buildUnaryOpRule("float",Instruction.ISINT,  Instruction.INT2FLOAT)); 
 		
 //		// 1:cp(A,B,C), 2:$n[A] :- unary($n) | $3:$n[B], $4:$n[C].
 //		// reuse { 2->4 }
