@@ -24,14 +24,15 @@ public class sym {
   public static final int RBRACE_SLASH = 7;
   public static final int RPAREN = 4;
   public static final int RULE = 41;
-  public static final int QUOTED_STRING = 42;
+  public static final int QUOTED_STRING = 43;
   public static final int MINUS_DOT = 34;
   public static final int NEGATIVE = 23;
   public static final int COMMA = 2;
   public static final int PROCVAR = 19;
-  public static final int CHAR_CODE_LITERAL = 51;
+  public static final int CHAR_CODE_LITERAL = 52;
+  public static final int TYPEDEF = 42;
   public static final int PLUS = 37;
-  public static final int RELOP = 43;
+  public static final int RELOP = 44;
   public static final int GUARD = 18;
   public static final int ASTERISK_DOT = 31;
   public static final int EOF = 0;
@@ -40,22 +41,22 @@ public class sym {
   public static final int HAT = 28;
   public static final int RULEVAR = 20;
   public static final int MOD = 24;
-  public static final int LINK_NAME = 46;
+  public static final int LINK_NAME = 47;
   public static final int RBRACE_UNDERBAR_AT = 12;
   public static final int LOGIOR = 26;
   public static final int COLON = 15;
-  public static final int HL = 45;
+  public static final int HL = 46;
   public static final int LBRACE = 5;
-  public static final int SYMBOL_NAME = 48;
+  public static final int SYMBOL_NAME = 49;
   public static final int RBRACE_AT = 8;
-  public static final int PATHED_ATOM_NAME = 50;
+  public static final int PATHED_ATOM_NAME = 51;
   public static final int RBRACE = 6;
-  public static final int NUMBER_NAME = 47;
+  public static final int NUMBER_NAME = 48;
   public static final int RBRACE_SLASH_AT = 9;
   public static final int RBRACE_UNDERBAR_SLASH = 11;
-  public static final int ATOM_NAME = 49;
+  public static final int ATOM_NAME = 50;
   public static final int RBRACE_UNDERBAR = 10;
-  public static final int STRING = 44;
+  public static final int STRING = 45;
   public static final int ASTERISK_ASTERISK = 30;
   public static final int LOGXOR = 27;
   public static final int RBRACE_ASTERISK = 14;
@@ -103,6 +104,7 @@ public class sym {
   "EXCLA",
   "RULENAMESEP",
   "RULE",
+  "TYPEDEF",
   "QUOTED_STRING",
   "RELOP",
   "STRING",

@@ -200,6 +200,9 @@ public class LMNParser {
 		else if (obj instanceof SrcRuleContext) {
 			addSrcRuleContextToMem((SrcRuleContext)obj, mem);
 		}
+//		else if (obj instanceof SrcTypeDef) {
+//			addSrcTypeDefToMem((SrcTypeDef)obj, mem);
+//		}
 		// リンク
 		else if (obj instanceof SrcLink) {
 			SrcLink link = (SrcLink)obj;
@@ -386,6 +389,48 @@ public class LMNParser {
 		mem.rules.add(rule);
 	
 	}
+	
+	/**
+	 * typedef 構文を膜に追加する
+	 * @param sTypeDef 追加したい typedef 構文
+	 * @param mem 追加先の膜
+	 */
+//	private void addSrcTypeDefToMem(SrcTypeDef sTypeDef, Membrane mem) throws ParseException {
+//		//2006.1.22 linenoを追加 by inui
+//		RuleStructure rule = new RuleStructure(mem, sRule.getText(), sRule.lineno);
+//		rule.name = sRule.name;
+//		// 略記法の展開		
+//		expander.expandRuleAbbreviations(sRule);
+//		//  左辺のルールを構文エラーとして除去する
+//		assertLHSRules(sRule.getHead());
+//		
+//		// 左辺およびガード型制約に対して、構造を生成し、リンク以外の名前を解決する
+//		addProcessToMem(sRule.getHead(), rule.leftMem);		
+//		addProcessToMem(sRule.getGuard(), rule.guardMem);
+//		HashMap names = resolveHeadContextNames(rule);
+//		// ガード否定条件および右辺に対して、構造を生成し、リンク以外の名前を解決する
+//		addGuardNegatives(sRule.getGuardNegatives(), rule, names);
+//		addProcessToMem(sRule.getBody(), rule.rightMem);
+//		resolveContextNames(rule, names);
+//		
+//		//略記法が展開されて構造が生成され，
+//		//リンク以外の名前が解決されている ( $p,@pのContext.defがセットされている，*Vは双方向リンクがはられている )
+//		
+//		// プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
+//		// この時点ではアトムのリンク引数には自分自身のLinkOccurreceが格納されている
+//		// これらが終わると，アトムのリンク引数のLinkOccurrenceのbuddyがセットされる
+//		// リンクを繋ぐ作業はaddLinkOccurrenceで行われる
+//		
+//		addProxies(rule.leftMem); // addProxiesAndCoupleLinksであるべき?
+//		coupleLinks(rule.guardMem);
+//		addProxies(rule.rightMem);
+//		addProxiesToGuardNegatives(rule);
+//		coupleGuardNegativeLinks(rule);		// ガード否定条件のリンクを接続する
+//		coupleInheritedLinks(rule);			// 右辺と左辺の自由リンクを接続する
+//		
+//		mem.rules.add(rule);
+//	
+//	}
 	
 	/**
 	 * アトム展開されたソース膜に対してルールが無いことを確認する
@@ -1849,6 +1894,7 @@ class SyntaxExpander {
 				error("SYNTAX ERROR: process/rule context must occur in a rule: " + obj);
 				it.remove();
 			}
+			else if (obj instanceof SrcTypeDef) {}
 			else {
 				error("SYNTAX ERROR: illegal object outside a rule: " + obj);
 				it.remove();

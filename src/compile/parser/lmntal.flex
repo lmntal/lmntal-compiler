@@ -131,6 +131,7 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	"logxor"			{ return symbol(sym.LOGXOR); }//ueda
 //	"lognot"			{ return symbol(sym.LOGNOT); }//ueda
 //	"ash"				{ return symbol(sym.ASH); }//ueda
+	"typedef"			{ return symbol(sym.TYPEDEF, new Integer(yyline+1)); }//taguchi
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
 	{HyperLinkOp}		{ return symbol(sym.HL, yytext()); }//seiji
