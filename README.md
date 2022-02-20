@@ -43,7 +43,7 @@ See <https://github.com/jhipster/prettier-java> for more detailed information.
 
 ### build.xml
 
-1. flex*\* / bison*\*  
+1. `flex_*` / `bison_*`  
    lexer / parser の生成
 2. help  
    Help.java （--help オプション指定時の出力を行うクラス）の生成
@@ -55,11 +55,11 @@ See <https://github.com/jhipster/prettier-java> for more detailed information.
    compile を実行して bin ディレクトリに lmntal.jar を置く。
 6. archive  
    公開用形式でアーカイブ (lmntal.tgz)。アーカイブするものは以下の通り。（矢印の右はアーカイブ内のパス）
-   bin/_ (set_cp_jar.bat → set_cp.bat, set_cp_jar.sh → set_cp.sh)
-   sample/public/_.lmn → sample/\*.lmn
+   `bin/*` (set_cp_jar.bat → set_cp.bat, set_cp_jar.sh → set_cp.sh)
+   `sample/public/*.lmn` → `sample/*.lmn`
 7. zip  
    archive の zip バージョン。lmntal.zip を生成する。
-8. dist  
+8. dist
    help, jar, archive を実行する。
 9. clean  
    8 で生成されるファイルの削除。
