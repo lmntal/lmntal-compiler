@@ -2,7 +2,6 @@ package runtime;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import runtime.functor.Functor;
 
 /**
@@ -10,31 +9,30 @@ import runtime.functor.Functor;
  * 現在はルールの配列として表現しているが、将来的には複数のルールのマッチングを
  * １つのマッチングテストで行うようにする。
  */
-public abstract class Ruleset
-{
-	/**
-	 * new束縛された名前の具体値を格納する配列
-	 */
-	protected Functor[] holes;
+public abstract class Ruleset {
 
-	public List<Rule> compiledRules = new ArrayList<>();
-	public boolean isRulesSetted = false;
-	public boolean isSystemRuleset = false;
+  /**
+   * new束縛された名前の具体値を格納する配列
+   */
+  protected Functor[] holes;
 
-	public abstract String toString();
-	public abstract String encode();
+  public List<Rule> compiledRules = new ArrayList<>();
+  public boolean isRulesSetted = false;
+  public boolean isSystemRuleset = false;
 
-	public String[] encodeRulesIndividually()
-	{
-		return null;
-	}
+  public abstract String toString();
 
-	/**
-	 * new束縛された名前の具体値を指定して新しいRulesetを作成する。
-	 * @return 新しいRuleset
-	 */
-	public Ruleset fillHoles(Functor[] holes)
-	{
-		return null;
-	}
+  public abstract String encode();
+
+  public String[] encodeRulesIndividually() {
+    return null;
+  }
+
+  /**
+   * new束縛された名前の具体値を指定して新しいRulesetを作成する。
+   * @return 新しいRuleset
+   */
+  public Ruleset fillHoles(Functor[] holes) {
+    return null;
+  }
 }

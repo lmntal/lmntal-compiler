@@ -3,37 +3,36 @@ package type.occurrence;
 import runtime.functor.Functor;
 
 public class AtomOccurrence {
-	private String memname;
 
-	private Functor functor;
+  private String memname;
 
-	public String getMemname(){
-		return memname;
-	}
-	
-	public Functor getFunctor(){
-		return functor;
-	}
-	
-	public AtomOccurrence(String memname, Functor functor) {
-		this.memname = (memname == null ? "??" : memname);
-		this.functor = functor;
-	}
+  private Functor functor;
 
-	public boolean equals(Object o) {
-		if (o instanceof AtomOccurrence) {
-			AtomOccurrence haac = (AtomOccurrence) o;
-			return (memname.equals(haac.memname) && functor
-					.equals(haac.functor));
-		} else
-			return false;
-	}
+  public String getMemname() {
+    return memname;
+  }
 
-	public int hashCode() {
-		return (memname.hashCode() * 2) + functor.hashCode();
-	}
+  public Functor getFunctor() {
+    return functor;
+  }
 
-	public String toString() {
-		return "(" + memname + ":" + functor + ")";
-	}
+  public AtomOccurrence(String memname, Functor functor) {
+    this.memname = (memname == null ? "??" : memname);
+    this.functor = functor;
+  }
+
+  public boolean equals(Object o) {
+    if (o instanceof AtomOccurrence) {
+      AtomOccurrence haac = (AtomOccurrence) o;
+      return (memname.equals(haac.memname) && functor.equals(haac.functor));
+    } else return false;
+  }
+
+  public int hashCode() {
+    return (memname.hashCode() * 2) + functor.hashCode();
+  }
+
+  public String toString() {
+    return "(" + memname + ":" + functor + ")";
+  }
 }

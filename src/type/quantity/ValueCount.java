@@ -5,13 +5,15 @@ package type.quantity;
  * @author kudo
  *
  */
-public abstract class ValueCount{
-	public abstract ValueCount add(ValueCount v);
-	public abstract ValueCount mul(int m);
-	
-	public abstract int compare(ValueCount vc);
+public abstract class ValueCount {
 
-	public boolean equals(ValueCount v){
-		return compare(v)==0;
-	}
+  public abstract ValueCount add(ValueCount v);
+
+  public abstract ValueCount mul(int m);
+
+  public abstract int compare(ValueCount vc);
+
+  public boolean equals(ValueCount v) {
+    return compare(v) == 0;
+  }
 }

@@ -3,34 +3,33 @@ package type.argument;
 import compile.structure.LinkOccurrence;
 
 public class RootPath implements Path {
-	LinkOccurrence target;
 
-	public RootPath(LinkOccurrence target) {
-		this.target = target;
-	}
+  LinkOccurrence target;
 
-	public LinkOccurrence getTarget() {
-		return target;
-	}
+  public RootPath(LinkOccurrence target) {
+    this.target = target;
+  }
 
-	public int hashCode(){
-		return target.hashCode();
-	}
-	
-	public boolean equals(Object o) {
-		if (o instanceof RootPath) {
-			RootPath rp = (RootPath)o;
-			return target == rp.target;
-		} else
-			return false;
-	}
+  public LinkOccurrence getTarget() {
+    return target;
+  }
 
-	public String toString() {
-		return target.toString();
-	}
+  public int hashCode() {
+    return target.hashCode();
+  }
 
-	public String toStringWithOutAnonMem(){
-		return target.toString();
-	}
-	
+  public boolean equals(Object o) {
+    if (o instanceof RootPath) {
+      RootPath rp = (RootPath) o;
+      return target == rp.target;
+    } else return false;
+  }
+
+  public String toString() {
+    return target.toString();
+  }
+
+  public String toStringWithOutAnonMem() {
+    return target.toString();
+  }
 }
