@@ -27,7 +27,8 @@ jobs:
         run: |
           wget -q -O google-java-format.jar \
             "https://github.com/google/google-java-format/releases/download/google-java-format-1.9/google-java-format-1.9-all-deps.jar"
-　　　　　 # 以下の例ではすべての変更に対してフォーマッタを加えております。
+
+　　　　  # 以下の例ではすべての変更に対してフォーマッタを加えております。
           # プルリクエスト時の変更を取る場合はgit logで変更差分のみ取得してフォーマッタをかけましょう。(※2)
           java -jar google-java-format.jar -replace $(git ls-files src/**/*.java)
       # 変更確認
