@@ -198,30 +198,22 @@ class SrcRule {
     for (Object o : l) {
       if (o instanceof SrcLink) {
         SrcLink sl = (SrcLink) o;
-        if (
-          sl.name.matches("^_I.*")
-        ) { // int
+        if (sl.name.matches("^_I.*")) { // int
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("int", newl);
           guard.add(newg);
-        } else if (
-          sl.name.matches("^_G.*")
-        ) { // ground
+        } else if (sl.name.matches("^_G.*")) { // ground
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("ground", newl);
           guard.add(newg);
-        } else if (
-          sl.name.matches("^_S.*")
-        ) { // string
+        } else if (sl.name.matches("^_S.*")) { // string
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("string", newl);
           guard.add(newg);
-        } else if (
-          sl.name.matches("^_U.*")
-        ) { // unary
+        } else if (sl.name.matches("^_U.*")) { // unary
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("unary", newl);
@@ -280,14 +272,10 @@ class SrcRule {
           cppc.bundle = new SrcLinkBundle(spc.bundle.getName());
         }
         ret.add(cppc);
-      } else if (
-        o instanceof SrcContext
-      ) { // SrcLink, SrcLinkBundle, SrcRuleContext
+      } else if (o instanceof SrcContext) { // SrcLink, SrcLinkBundle, SrcRuleContext
         SrcLink sl = (SrcLink) o;
         ret.add(new SrcLink(sl.getName()));
-      } else if (
-        o instanceof SrcRule
-      ) {} // ※左辺にルールは出現しない筈
+      } else if (o instanceof SrcRule) {} // ※左辺にルールは出現しない筈
     }
     return ret;
   }

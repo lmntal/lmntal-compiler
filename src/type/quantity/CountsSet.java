@@ -339,8 +339,7 @@ public class CountsSet {
       Boolean cpiflg = memnameToCPIFlg.get(TypeEnv.getMemName(mem));
       if (
         cpiflg != null && cpiflg
-      ) //			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
-      continue;
+      ) continue; //			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
       memToGenCounts.get(mem).solveByCounts();
     }
   }

@@ -54,9 +54,10 @@ public class FixedCounts {
     for (Functor f : mergedFunctors) {
       IntervalCount fc1 = functorToCount.get(f);
       IntervalCount fc2 = fcs.functorToCount.get(f);
-      if (
-        fc1 == null && fc2 != null
-      ) functorToCount.put(f, fc2.or0()); else if ( // 片方にしかない場合
+      if (fc1 == null && fc2 != null) functorToCount.put(
+        f,
+        fc2.or0()
+      ); else if ( // 片方にしかない場合
         fc1 != null && fc2 == null
       ) functorToCount.put(f, fc1.or0()); else if ( // 片方にしかない場合
         fc1 != null && fc2 != null

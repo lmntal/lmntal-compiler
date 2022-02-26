@@ -762,7 +762,9 @@ class Lexer implements java_cup.runtime.Scanner {
           case 68:
             break;
           case 3:
-            {/* just skip */}
+            {
+              /* just skip */
+            }
           // fall through
           case 69:
             break;
