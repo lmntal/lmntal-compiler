@@ -20,8 +20,3 @@ jobs:
         working-directory: ./slim
       - run: make check
         working-directory: ./slim
-
-      # 以下 formatter をかける
-      - run: sudo apt install npm
-      - run: npm install
-      - run: npx prettier --write "**/*.java"
