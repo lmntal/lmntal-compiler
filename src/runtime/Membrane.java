@@ -12,19 +12,21 @@ import util.QueuedEntity;
 import util.Stack;
 
 /**
- * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。
- * todo （効率改善） 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
- * <p><b>排他制御</b></p>
- * <p>lockThread フィールドへの代入（すなわちロックの取得・解放）と、ロック解放の待ち合わせのために
- * このクラスのインスタンスに関する synchronized 節を利用する。
+ * ローカル膜クラス。実行時の、自計算ノード内にある膜を表す。 todo （効率改善） 最適化用に、子孫にルート膜を持つことができない（実行時エラーを出す）「データ膜」クラスを作る。
+ *
+ * <p><b>排他制御</b>
+ *
+ * <p>lockThread フィールドへの代入（すなわちロックの取得・解放）と、ロック解放の待ち合わせのために このクラスのインスタンスに関する synchronized 節を利用する。
  * フィールドへの代入をする時は、特に記述がない限りこの膜のロックを取得している必要がある。
+ *
  * @author Mizuno, n-kato
  */
 public final class Membrane extends QueuedEntity {
 
-  /** 親膜。リモートにあるならばRemoteMembraneオブジェクトを参照する。GlobalRootならばnull。
-   * 修正するときは、親膜のロックを取得している必要がある。
-   * null を代入する（=この膜を除去する）時は、この膜と親膜の両方のロックを取得している必要がある。 */
+  /**
+   * 親膜。リモートにあるならばRemoteMembraneオブジェクトを参照する。GlobalRootならばnull。 修正するときは、親膜のロックを取得している必要がある。 null
+   * を代入する（=この膜を除去する）時は、この膜と親膜の両方のロックを取得している必要がある。
+   */
   protected Membrane parent;
   /** アトムの集合 */
   protected AtomSet atoms = new AtomSet();
@@ -36,28 +38,28 @@ public final class Membrane extends QueuedEntity {
   protected List<Ruleset> rulesets = new ArrayList<>();
   /** 膜のタイプ */
   protected int kind = 0;
+
   public static final int KIND_ND = 2;
   /** trueならばこの膜以下に適用できるルールが無い */
   protected boolean stable = false;
-  /** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
+  /** 永続フラグ（trueならばルール適用できなくてもstableにならない） */
   public boolean perpetual = false;
-  /** この膜をロックしているスレッド。ロックされていないときはnullが入っている。*/
+  /** この膜をロックしているスレッド。ロックされていないときはnullが入っている。 */
   protected Thread lockThread = null;
 
   private static int nextId = 0;
   private int id;
 
-  /** 子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜)
-   * TODO 膜のメンバ変数でいいのかどうか */
+  /** 子膜->(コピー元のアトムin子膜->コピー先のアトムinコピーされた子膜) TODO 膜のメンバ変数でいいのかどうか */
   HashMap<Membrane, Map<Atom, Atom>> memToCopyMap = null;
 
   /** この膜の名前（internされた文字列またはnull） */
   String name = null;
 
   public boolean equalName(String s) {
-    if (name == null && s == null) return true; else if (
-      name != null && name != null
-    ) return name.equals(s); else return false;
+    if (name == null && s == null) return true;
+    else if (name != null && name != null) return name.equals(s);
+    else return false;
   }
 
   public String getName() {
@@ -68,9 +70,7 @@ public final class Membrane extends QueuedEntity {
     this.name = name;
   } // 仕様が固まったらコンストラクタで渡すようにすべきかも
 
-  /** 実行アトムスタック。
-   * 操作する際にこの膜のロックを取得している必要はない。
-   * 排他制御には、Stack インスタンスに関する synchronized 節を利用している。 */
+  /** 実行アトムスタック。 操作する際にこの膜のロックを取得している必要はない。 排他制御には、Stack インスタンスに関する synchronized 節を利用している。 */
   private Stack ready = null;
 
   //	/** リモートホストとの通信でこの膜のアトムを同定するときに使用されるatomidの表。
@@ -86,7 +86,7 @@ public final class Membrane extends QueuedEntity {
   ///////////////////////////////
   // コンストラクタ
 
-  /** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。*/
+  /** 指定されたタスクに所属する膜を作成する。newMem/newRoot から呼ばれる。 */
   private Membrane(Membrane parent) {
     mems = new HashSet<>();
 
@@ -94,7 +94,7 @@ public final class Membrane extends QueuedEntity {
     id = nextId++;
   }
 
-  /** 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。*/
+  /** 親膜を持たない膜を作成する。Task.createFreeMembrane から呼ばれる。 */
   protected Membrane() {
     this(null);
   }
@@ -110,10 +110,7 @@ public final class Membrane extends QueuedEntity {
   ///////////////////////////////
   // 情報の取得
 
-  /**
-   * デフォルトの実装だと処理系の内部状態が変わると変わってしまうので、
-   * インスタンスごとにユニークなidを用意してハッシュコードとして利用する。
-   */
+  /** デフォルトの実装だと処理系の内部状態が変わると変わってしまうので、 インスタンスごとにユニークなidを用意してハッシュコードとして利用する。 */
   public int hashCode() {
     return id;
   }
@@ -144,13 +141,12 @@ public final class Membrane extends QueuedEntity {
     return mems.size();
   }
 
-  /** proxy以外のアトムの数を取得
-   * todo この名前でいいのかどうか */
+  /** proxy以外のアトムの数を取得 todo この名前でいいのかどうか */
   public int getAtomCount() {
     return atoms.getNormalAtomCount();
   }
 
-  /** 指定されたファンクタをもつアトムの数を取得*/
+  /** 指定されたファンクタをもつアトムの数を取得 */
   public int getAtomCountOfFunctor(Functor functor) {
     return atoms.getAtomCountOfFunctor(functor);
   }
@@ -169,7 +165,7 @@ public final class Membrane extends QueuedEntity {
   public void changeKind(int k) {
     kind = k;
     if (kind == KIND_ND) {
-      //非決定的実行膜は、普通の方法では実行しない
+      // 非決定的実行膜は、普通の方法では実行しない
       dequeue();
       toStable();
     }
@@ -180,7 +176,7 @@ public final class Membrane extends QueuedEntity {
     return stable;
   }
 
-  /** stableフラグをONにする 10/26矢島 Task#exec()内で使う*/
+  /** stableフラグをONにする 10/26矢島 Task#exec()内で使う */
   void toStable() {
     stable = true;
   }
@@ -230,9 +226,9 @@ public final class Membrane extends QueuedEntity {
   /** 子膜のコピーを取得 */
   public HashSet<Membrane> getMemCopy() {
     return new HashSet<>(mems);
-    //RandomSet s = new RandomSet();
-    //s.addAll(mems);
-    //return s;
+    // RandomSet s = new RandomSet();
+    // s.addAll(mems);
+    // return s;
   }
 
   /** この膜にあるアトムの反復子を取得する */
@@ -308,7 +304,7 @@ public final class Membrane extends QueuedEntity {
    * @param m2hc mの子膜からハッシュコードへのマップ。子膜のハッシュコード算出を繰り返さないために使う。
    */
   private static int calculate(Membrane m, Map<Membrane, Integer> m2hc) {
-    //System.out.println("membrane:" + m);
+    // System.out.println("membrane:" + m);
     final long MAX_VALUE = Integer.MAX_VALUE;
     /*
      * add: m内の分子のハッシュコードが加算されていく変数
@@ -327,9 +323,11 @@ public final class Membrane extends QueuedEntity {
      * toCalculate:現在計算中の分子内の未処理アトムまたは子膜の集合
      * calculated:現在計算中の分子内の処理済アトムまたは子膜の集合
      */
-    Set<QueuedEntity> contents = new HashSet<>(), toCalculate = new HashSet<>(), calculated = new HashSet<>();
+    Set<QueuedEntity> contents = new HashSet<>(),
+        toCalculate = new HashSet<>(),
+        calculated = new HashSet<>();
 
-    for (Iterator<Atom> i = m.atomIterator(); i.hasNext();) {
+    for (Iterator<Atom> i = m.atomIterator(); i.hasNext(); ) {
       a = i.next();
       if (a.getFunctor().isOutsideProxy() || a.getFunctor().isInsideProxy()) {
         continue;
@@ -337,14 +335,14 @@ public final class Membrane extends QueuedEntity {
       contents.add(a);
     }
 
-    for (Iterator<Membrane> i = m.memIterator(); i.hasNext();) {
+    for (Iterator<Membrane> i = m.memIterator(); i.hasNext(); ) {
       mm = i.next();
       contents.add(mm);
       m2hc.put(mm, calculate(mm, m2hc));
     }
 
     while (!contents.isEmpty()) {
-      //System.out.println("uncalculated:" + contents);
+      // System.out.println("uncalculated:" + contents);
       q = contents.iterator().next();
       contents.remove(q);
 
@@ -419,10 +417,7 @@ public final class Membrane extends QueuedEntity {
 
           // この膜から膜の外部へのリンクを処理する
           Link link = null;
-          for (
-            Iterator<Atom> i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY);
-            i.hasNext();
-          ) {
+          for (Iterator<Atom> i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY); i.hasNext(); ) {
             Atom inside = i.next();
             // この膜外部の（プロキシでない）リンク先アトムまでトレース
             int s = 0;
@@ -468,7 +463,7 @@ public final class Membrane extends QueuedEntity {
         mol_mult %= MAX_VALUE;
       }
       mol = mol_add ^ mol_mult;
-      //System.out.println("molecule: " + calculated + " = " + mol);
+      // System.out.println("molecule: " + calculated + " = " + mol);
       /* ハッシュコードを算出した分子を計算対象から取り除く */
       contents.removeAll(calculated);
 
@@ -478,7 +473,8 @@ public final class Membrane extends QueuedEntity {
       mult %= MAX_VALUE;
     }
 
-    //System.out.println("membrane:" + m + " = " + (mult^add) + " (mult=" + mult + ", add=" + add + ")");
+    // System.out.println("membrane:" + m + " = " + (mult^add) + " (mult=" + mult + ", add=" + add +
+    // ")");
     return (int) (mult ^ add);
   }
 }

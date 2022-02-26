@@ -10,10 +10,7 @@ import runtime.functor.Functor;
 import runtime.functor.IntegerFunctor;
 import runtime.functor.SymbolFunctor;
 
-/**
- * @author mizuno
- * 汎用ユーティリティメソッド・定数を集めたクラス
- */
+/** @author mizuno 汎用ユーティリティメソッド・定数を集めたクラス */
 public abstract class Util {
 
   public static Functor DOT = new SymbolFunctor(".", 3);
@@ -45,6 +42,7 @@ public abstract class Util {
 
   /**
    * LMNtal リストをうけとり、Object配列にして返す。リストは消さない。
+   *
    * @param link
    * @return
    */
@@ -73,6 +71,7 @@ public abstract class Util {
 
   /**
    * リストかどうかを返す
+   *
    * @param link
    * @return
    */
@@ -88,6 +87,7 @@ public abstract class Util {
 
   /**
    * リスト中の最大値を求め、result に IntegerFunctor としてセットする
+   *
    * @param link
    * @param result
    * @return
@@ -119,6 +119,7 @@ public abstract class Util {
 
   /**
    * リスト中の最小値を求め、result に IntegerFunctor としてセットする
+   *
    * @param link
    * @param result
    * @return
@@ -150,6 +151,7 @@ public abstract class Util {
 
   /**
    * アトムbase が link1 のリスト中に含まれるかどうかを返す
+   *
    * @param link1
    * @return
    */
@@ -176,8 +178,8 @@ public abstract class Util {
   }
 
   /**
-   * 指定された文字列を表す文字列リテラルのテキスト表現を取得する。
-   * 特殊文字と quoter を、バックスラッシュでエスケープする。
+   * 指定された文字列を表す文字列リテラルのテキスト表現を取得する。 特殊文字と quoter を、バックスラッシュでエスケープする。
+   *
    * @param text 変換する文字列
    * @param quoter クォート文字。普通は " や ' を使う。
    * @return 変換後の文字列

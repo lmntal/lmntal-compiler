@@ -1,9 +1,6 @@
 package runtime;
 
-/**
- * リンクの接続先を、アトムと引数番号の組として表す。LMNtalのリンクには方向が無いので、
- * １つのリンクに対してこのクラスのインスタンスを２つ使用する。
- */
+/** リンクの接続先を、アトムと引数番号の組として表す。LMNtalのリンクには方向が無いので、 １つのリンクに対してこのクラスのインスタンスを２つ使用する。 */
 public final class Link implements Cloneable {
 
   private static int lastId = 0;
@@ -66,19 +63,13 @@ public final class Link implements Cloneable {
     return id;
   }
 
-  /**
-   * 接続先を設定する。
-   * 膜クラスのリンク操作用メソッド内でのみ呼び出される。
-   */
+  /** 接続先を設定する。 膜クラスのリンク操作用メソッド内でのみ呼び出される。 */
   void set(Atom atom, int pos) {
     this.atom = atom;
     this.pos = pos;
   }
 
-  /**
-   * このリンクの接続先を、与えられたリンクの接続先と同じにする。
-   * 膜クラスのリンク操作用メソッド内でのみ呼び出される。
-   */
+  /** このリンクの接続先を、与えられたリンクの接続先と同じにする。 膜クラスのリンク操作用メソッド内でのみ呼び出される。 */
   void set(Link link) {
     this.atom = link.atom;
     this.pos = link.pos;

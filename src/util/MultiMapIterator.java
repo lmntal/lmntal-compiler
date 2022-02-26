@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * マップの値に格納されたコレクション中のデータを列挙する反復子。
- * 複数要素を格納するマップを実現するために、値にコレクションを挿入するマップに対して利用する。
+ * マップの値に格納されたコレクション中のデータを列挙する反復子。 複数要素を格納するマップを実現するために、値にコレクションを挿入するマップに対して利用する。
+ *
  * @author Mizuno
  */
 public class MultiMapIterator<E> implements Iterator<E> {

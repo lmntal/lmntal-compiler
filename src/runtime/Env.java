@@ -8,14 +8,10 @@ import util.Util;
 
 public final class Env {
 
-  /**
-   * LMNtal Compiler のバージョン (M.mm)
-   */
+  /** LMNtal Compiler のバージョン (M.mm) */
   public static final String LMNTAL_COMPILER_VERSION = "1.51";
 
-  /**
-   * このバージョンをリリースした日付 (yyyy-MM-dd)
-   */
+  /** このバージョンをリリースした日付 (yyyy-MM-dd) */
   public static final String RELEASE_DATE = "2021-04-19";
 
   /** -dオプション指定時のデフォルトのデバッグレベル */
@@ -30,7 +26,7 @@ public final class Env {
   ////////////////////////////////////////////////////////////////
 
   /** 中間命令列を出力するモード。Java への変換や実行は行わない。 */
-  //public static boolean compileonly = true;
+  // public static boolean compileonly = true;
 
   /** 履歴つきfindatomを含む中間命令列を出力するモード。 */
   //	public static boolean findatom2 = false;
@@ -44,40 +40,42 @@ public final class Env {
   public static boolean oneLine = false;
   public static String oneLineCode = "";
 
-  /**
-   * <p>初期生成ルール以外のルールについて空ヘッド警告を出す。</p>
-   */
+  /** 初期生成ルール以外のルールについて空ヘッド警告を出す。 */
   public static boolean warnEmptyHead = false;
 
-  /**
-   * <p>リンク操作に{@code swaplink}命令を使用する。</p>
-   */
+  /** リンク操作に{@code swaplink}命令を使用する。 */
   public static boolean useSwapLink = false;
 
-  /**
-   * <p>リンク操作に{@code cyclelinks}命令を使用する。</p>
-   */
+  /** リンク操作に{@code cyclelinks}命令を使用する。 */
   public static boolean useCycleLinks = false;
-  /**
-   * <p>SLIM内のデータ構造atomlistを動的に変化させて最適化を行う。</p>
-   */
+  /** SLIM内のデータ構造atomlistを動的に変化させて最適化を行う。 */
   public static boolean useAtomListOP = false;
-  /**
-   * <p>{@code swaplink/cyclelinks} 命令を使用する場合、コンパイル情報を標準エラー出力に出力する。</p>
-   */
+  /** {@code swaplink/cyclelinks} 命令を使用する場合、コンパイル情報を標準エラー出力に出力する。 */
   public static boolean verboseLinkExt = false;
 
   ////////////////////////////////////////////////////////////////
 
-  /** リンクの表示をL[数字]で表示する冗長表示レベル　<pre> a(_2) {@literal -->} a(L2) </pre> */
+  /**
+   * リンクの表示をL[数字]で表示する冗長表示レベル
+   *
+   * <pre> a(_2) {@literal -->} a(L2) </pre>
+   */
   public static final int VERBOSE_SIMPLELINK = 1;
-  /** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
+  /** ルールセットの内容を1回だけ表示する冗長表示レベル　 */
   public static final int VERBOSE_SHOWRULES = 3;
   //	/** 自由リンク管理アトムを表示する冗長表示レベル（EXPANDATOMS未満に限る）*/
   //	public static final int VERBOSE_EXPANDPROXIES = 3;
-  /** 演算子を展開する冗長表示レベル（EXPANDATOMS未満に限る） <pre> X+Y {@literal -->} '+'(X,Y) </pre> */
+  /**
+   * 演算子を展開する冗長表示レベル（EXPANDATOMS未満に限る）
+   *
+   * <pre> X+Y {@literal -->} '+'(X,Y) </pre>
+   */
   public static final int VERBOSE_EXPANDOPS = 4;
-  /** アトム引数を展開する冗長表示レベル <pre> a(b) {@literal -->} a(_2),b(_2) </pre> */
+  /**
+   * アトム引数を展開する冗長表示レベル
+   *
+   * <pre> a(b) {@literal -->} a(_2),b(_2) </pre>
+   */
   public static final int VERBOSE_EXPANDATOMS = 5;
   /** ルールセットの内容を展開する冗長表示レベル */
   public static final int VERBOSE_EXPANDRULES = 6;
@@ -91,14 +89,10 @@ public final class Env {
 
   public static boolean showlongrulename = false;
 
-  /**
-   * プログラムに与える引数
-   */
+  /** プログラムに与える引数 */
   public static List<String> argv = new ArrayList<>();
 
-  /**
-   * ソースファイル
-   */
+  /** ソースファイル */
   public static List<String> srcs = new ArrayList<>();
 
   /** デバッグ実行オプションの有無 by inui */
@@ -107,14 +101,10 @@ public final class Env {
   /** 標準入力から LMNtal プログラムを読み込むオプション 2006.07.11 inui */
   public static boolean stdinLMN = false;
 
-  /**
-   * ルール左辺に出現する、スレッド数の上限を設定
-   */
+  /** ルール左辺に出現する、スレッド数の上限を設定 */
   public static int threadMax = 128;
 
-  /**
-   * スレッド曖昧指定を使用したときの、変換後のルールをダンプ
-   */
+  /** スレッド曖昧指定を使用したときの、変換後のルールをダンプ */
   public static boolean dumpConvertedRules = false;
 
   public static boolean preProcess0 = false;
@@ -127,6 +117,7 @@ public final class Env {
 
   /**
    * General error report
+   *
    * @param o
    */
   public static void e(Object o) {
@@ -135,6 +126,7 @@ public final class Env {
 
   /**
    * General error report with indent
+   *
    * @param o
    * @param depth インデントの深さ
    */
@@ -148,6 +140,7 @@ public final class Env {
 
   /**
    * General dumper for debug
+   *
    * @param o Object to print
    */
   public static void d(Object o) {
@@ -156,6 +149,7 @@ public final class Env {
 
   /**
    * Exception dumper for debug
+   *
    * @param e
    */
   public static void d(Exception e) {
@@ -164,6 +158,7 @@ public final class Env {
 
   /**
    * General dumper for debug with indent
+   *
    * @param o
    * @param depth インデントの深さ
    */
@@ -173,6 +168,7 @@ public final class Env {
 
   /**
    * General dumper
+   *
    * @param o Object to print
    */
   public static void p(Object o) {
@@ -181,6 +177,7 @@ public final class Env {
 
   /**
    * General dumper with indent
+   *
    * @param o
    * @param depth インデントの深さ
    */
@@ -190,23 +187,23 @@ public final class Env {
 
   /**
    * Debug output when some method called
+   *
    * @param o method name
    */
   public static void c(Object o) {
-    //d(">>> "+o);
+    // d(">>> "+o);
   }
 
   /**
    * Debug output when new some object: write at constructor.
+   *
    * @param o Class name
    */
   public static void n(Object o) {
     d(">>> new " + o);
   }
 
-  /**
-   * 走査可能なコレクションの各要素の文字列表現を区切り文字 {@code delim} で連結した文字列を返します。
-   */
+  /** 走査可能なコレクションの各要素の文字列表現を区切り文字 {@code delim} で連結した文字列を返します。 */
   public static <E> String parray(Iterable<E> l, String delim) {
     StringBuilder s = new StringBuilder();
     boolean first = true;
@@ -220,15 +217,14 @@ public final class Env {
     return s.toString();
   }
 
-  /**
-   * 走査可能なコレクションの各要素の文字列表現を半角空白で連結した文字列を返します。
-   */
+  /** 走査可能なコレクションの各要素の文字列表現を半角空白で連結した文字列を返します。 */
   public static <E> String parray(Iterable<E> l) {
     return parray(l, " ");
   }
 
   /**
    * 指定した数のインデントを返す
+   *
    * @param depth
    * @return
    */
@@ -240,9 +236,7 @@ public final class Env {
     return indent;
   }
 
-  /**
-   * 拡張コマンドライン引数をこれに格納する
-   */
+  /** 拡張コマンドライン引数をこれに格納する */
   public static Map<String, String> extendedOption = new HashMap<>();
 
   public static String getExtendedOption(String key) {
@@ -257,6 +251,7 @@ public final class Env {
 
   /** 各推論の有効／無効 */
   public static boolean flgOccurrenceInference = false;
+
   public static boolean flgQuantityInference = true;
   public static boolean flgArgumentInference = true;
 
@@ -307,6 +302,7 @@ public final class Env {
   public static boolean compileRule = false;
 
   /** hyperlink */
-  public static boolean hyperLink = true; //seiji
-  public static boolean hyperLinkOpt = true; //seiji
+  public static boolean hyperLink = true; // seiji
+
+  public static boolean hyperLinkOpt = true; // seiji
 }
