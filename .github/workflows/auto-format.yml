@@ -29,8 +29,9 @@ jobs:
             "https://github.com/google/google-java-format/releases/download/google-java-format-1.9/google-java-format-1.9-all-deps.jar"
 
           java -jar google-java-format.jar -replace $(git ls-files src/**/*.java)
-　　　　  # 上の例ではすべての変更に対してフォーマッタを加えております。
-          # プルリクエスト時の変更を取る場合はgit logで変更差分のみ取得してフォーマッタをかけましょう。(※2)
+      # 上の例ではすべての変更に対してフォーマッタを加えております。
+      # プルリクエスト時の変更を取る場合はgit log
+      # で変更差分のみ取得してフォーマッタをかけましょう。(※2)
       # 変更確認
       - name: Check for modified files
         id: git-check
