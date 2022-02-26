@@ -45,7 +45,9 @@ public final class ProcessContext extends Context {
    */
   public String toString() {
     String argstext = "";
-    if (bundle == null || bundle.name.matches("\\*[A-Z_].*")) { // TODO: (buddy!=null)かどうかで判定すべきである
+    if (
+      bundle == null || bundle.name.matches("\\*[A-Z_].*")
+    ) { // TODO: (buddy!=null)かどうかで判定すべきである
       argstext =
         "[" +
         Arrays

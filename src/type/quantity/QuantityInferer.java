@@ -149,7 +149,9 @@ public class QuantityInferer {
     /** ルール文脈の分散の有無を確認し、あればルールセット独立性を失う */
     for (RuleContext rc : rhs.ruleContexts) {
       if (lhss.contains(rc.mem)) continue; else {
-        if (lhss.size() == 0) countsset.collapseRuleIndependency(rhs); else if ( // 生成膜であればその膜のみ // 継続膜等であれば効果対象において。
+        if (
+          lhss.size() == 0
+        ) countsset.collapseRuleIndependency(rhs); else if ( // 生成膜であればその膜のみ // 継続膜等であれば効果対象において。
           countsset.effectTarget.get(rhs) == null
         ) {
           countsset.collapseRulesIndependency(TypeEnv.getMemName(rhs));

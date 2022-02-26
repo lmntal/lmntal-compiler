@@ -553,7 +553,9 @@ class GuardCompiler extends LHSCompiler {
         else if (cstr.isSelfEvaluated && func.getArity() == 1) {
           bindToFunctor(def1, func);
           // typedCxtDataTypes.put(def1, Instruction.ISUNARY);
-        } else if (func.equals(Functor.UNIFY)) { // (-X = +Y)
+        } else if (
+          func.equals(Functor.UNIFY)
+        ) { // (-X = +Y)
           if (!identifiedCxtdefs.contains(def2)) { // (+X = -Y) は (-Y = +X) として処理する
             ContextDef swaptmp = def1;
             def1 = def2;
@@ -571,7 +573,9 @@ class GuardCompiler extends LHSCompiler {
         //						if (!identifiedCxtdefs.contains(def2)) continue;
         //						processEquivalenceConstraint(def1,def2);
         //					}
-        else if (func.equals("==", 2)) { // (+X == +Y) //seiji
+        else if (
+          func.equals("==", 2)
+        ) { // (+X == +Y) //seiji
           /* unary用比較演算子 (10/07/07 seiji) */
           if (!identifiedCxtdefs.contains(def1)) continue;
           if (!identifiedCxtdefs.contains(def2)) continue;
@@ -580,7 +584,9 @@ class GuardCompiler extends LHSCompiler {
           int atomid2 = loadUnaryAtom(def2);
           // match.add(new Instruction(Instruction.ISUNARY, atomid2));
           match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
-        } else if (func.equals("\\==", 2)) { // (+X \== +Y) //seiji
+        } else if (
+          func.equals("\\==", 2)
+        ) { // (+X \== +Y) //seiji
           /* unary用比較演算子 (11/01/25 seiji) */
           if (!identifiedCxtdefs.contains(def1)) continue;
           if (!identifiedCxtdefs.contains(def2)) continue;
@@ -604,7 +610,9 @@ class GuardCompiler extends LHSCompiler {
         //						match.add(new Instruction(Instruction.ISHLINK, atomid2));
         //						match.add(new Instruction(Instruction.SAMEFUNC, atomid1, atomid2));
         //					}
-        else if (func.getName().equals("new") && func.getArity() >= 2) { // newhlinkwithattr
+        else if (
+          func.getName().equals("new") && func.getArity() >= 2
+        ) { // newhlinkwithattr
           // newの2番目以降についてアトムを取得しnewAtomArgAtomsに格納する
           Atom newAtom = cstr;
           int i = 0;
@@ -644,7 +652,9 @@ class GuardCompiler extends LHSCompiler {
             identifiedCxtdefs.add(def1);
             typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
           }
-        } else if (func.getName().equals("hlink") && func.getArity() >= 2) { // getattratom
+        } else if (
+          func.getName().equals("hlink") && func.getArity() >= 2
+        ) { // getattratom
           int[] desc = array(ISHLINK);
           if (!identifiedCxtdefs.contains(def1)) continue;
           if (!identifiedCxtdefs.contains(def2)) continue;
@@ -665,7 +675,9 @@ class GuardCompiler extends LHSCompiler {
           );
           int atomid2 = loadUnaryAtom(def2);
           match.add(new Instruction(Instruction.SAMEFUNC, dstatomid, atomid2));
-        } else if (guardLibrary0.containsKey(func)) { // 0入力制約//seiji
+        } else if (
+          guardLibrary0.containsKey(func)
+        ) { // 0入力制約//seiji
           int[] desc = guardLibrary0.get(func);
           int atomid = varCount++;
           match.add(new Instruction(desc[0], atomid));
@@ -683,7 +695,9 @@ class GuardCompiler extends LHSCompiler {
             identifiedCxtdefs.add(def1);
             typedCxtTypes.put(def1, UNARY_ATOM_TYPE);
           }
-        } else if (guardLibrary1.containsKey(func)) { // 1入力制約
+        } else if (
+          guardLibrary1.containsKey(func)
+        ) { // 1入力制約
           int[] desc = guardLibrary1.get(func);
           if (!identifiedCxtdefs.contains(def1)) continue;
           int atomid1 = loadUnaryAtom(def1);
@@ -698,7 +712,9 @@ class GuardCompiler extends LHSCompiler {
             typedCxtDataTypes.put(def1, desc[0]);
           }
 
-          if (func.getArity() == 1) { // {t1,inst} --> p(+X1)
+          if (
+            func.getArity() == 1
+          ) { // {t1,inst} --> p(+X1)
             // // 060831okabe
             // // 以下をコメントアウト．
             // // つまりconnectruntime はput してget されるだけ．
@@ -707,7 +723,9 @@ class GuardCompiler extends LHSCompiler {
             if (desc.length > 1) match.add(new Instruction(desc[1], atomid1));
           } else { // {t1,inst,t2} --> p(+X1,-X2)
             int atomid2;
-            if (desc[1] == -1) { // 単項 + と +. だけ特別扱い
+            if (
+              desc[1] == -1
+            ) { // 単項 + と +. だけ特別扱い
               atomid2 = atomid1;
               //bindToUnaryAtom 内で、実際に使うアトムを生成している。
             } else {
@@ -722,7 +740,9 @@ class GuardCompiler extends LHSCompiler {
             bindToUnaryAtom(def2, atomid2);
             typedCxtDataTypes.put(def2, desc[2]);
           }
-        } else if (guardLibrary2.containsKey(func)) { // 2入力制約
+        } else if (
+          guardLibrary2.containsKey(func)
+        ) { // 2入力制約
           int[] desc = guardLibrary2.get(func);
           if (!identifiedCxtdefs.contains(def1)) continue;
           if (!identifiedCxtdefs.contains(def2)) continue;
@@ -744,7 +764,9 @@ class GuardCompiler extends LHSCompiler {
             typedCxtDataTypes.put(def2, desc[1]);
           }
 
-          if (func.getArity() == 2) { // {t1,t2,inst} --> p(+X1,+X2)
+          if (
+            func.getArity() == 2
+          ) { // {t1,t2,inst} --> p(+X1,+X2)
             match.add(new Instruction(desc[2], atomid1, atomid2));
           } else { // desc={t1,t2,inst,t3} --> p(+X1,+X2,-X3)
             int atomid3 = varCount++;
@@ -1018,7 +1040,8 @@ class GuardCompiler extends LHSCompiler {
           if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
             if (
               atom.args[i].buddy.atom.mem != rc.rs.rightMem
-            ) if ( // 反対側が右辺出現の時のみ追加
+            ) // 反対側が右辺出現の時のみ追加
+            if (
               !def.lhsOcc.mem.typedProcessContexts.contains(
                 atom.args[i].buddy.atom
               )
@@ -1107,7 +1130,8 @@ class GuardCompiler extends LHSCompiler {
           if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
             if (
               atom.args[i].buddy.atom.mem != rc.rs.rightMem
-            ) if ( // 反対側が右辺出現の時のみ追加
+            ) // 反対側が右辺出現の時のみ追加
+            if (
               !def.lhsOcc.mem.typedProcessContexts.contains(
                 atom.args[i].buddy.atom
               )
