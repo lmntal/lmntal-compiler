@@ -10,8 +10,8 @@ jobs:
       - uses: actions/checkout@v2
       - run: sudo apt -qq update
       - run: sudo apt install -y ant re2c
-      - run: ant lmntal_flex
-      - run: ant lmntal_bison
+      - run: ant flex_lmntal
+      - run: ant bison_lmntal
       - run: ant
       - run: git clone https://github.com/lmntal/slim.git
       - run: ./autogen.sh
