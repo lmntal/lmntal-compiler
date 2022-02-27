@@ -1,67 +1,71 @@
 package compile.structure;
 
-/** 
+/**
  * ソースコード中のリンクまたはリンク束の各出現を表す。<br>
  * {@link runtime.Link} と違って、{@code LinkOccurrence.atom} はこちら側のアトムオブジェクトが入っている。
  */
-public final class LinkOccurrence
-{
-	/**
-	 * このリンクの名前
-	 */
-	public String name;
+public final class LinkOccurrence {
 
-	/**
-	 * このリンクが所属するアトムオブジェクト
-	 */
-	public Atomic atom;
+  /**
+   * このリンクの名前
+   */
+  public String name;
 
-	/**
-	 * このリンクが所属するアトムにおけるこのリンクの引数番号
-	 */
-	public int pos;
+  /**
+   * このリンクが所属するアトムオブジェクト
+   */
+  public Atomic atom;
 
-	/**
-	 * 2回しか出現しない場合に、もう片方の出現を保持する
-	 */
-	public LinkOccurrence buddy = null;
+  /**
+   * このリンクが所属するアトムにおけるこのリンクの引数番号
+   */
+  public int pos;
 
-	/**
-	 * リンク出現を生成する。
-	 * @param name リンク名
-	 * @param atom 所属するアトム
-	 * @param pos 所属するアトムでの場所
-	 */
-	public LinkOccurrence(String name, Atomic atom, int pos)
-	{
-		this.name = name;
-		this.atom = atom;
-		this.pos = pos;
-	}
+  /**
+   * 2回しか出現しない場合に、もう片方の出現を保持する
+   */
+  public LinkOccurrence buddy = null;
 
-	public String toString()
-	{
-		return name.replace('~', '_');
-	}
+  /**
+   * リンク出現を生成する。
+   * @param name リンク名
+   * @param atom 所属するアトム
+   * @param pos 所属するアトムでの場所
+   */
+  public LinkOccurrence(String name, Atomic atom, int pos) {
+    this.name = name;
+    this.atom = atom;
+    this.pos = pos;
+  }
 
-	public String getInformativeText()
-	{
-		return toString() + "(" + atom.getName() + "/" + atom.getArity() + "," + pos + ")";
-	}
+  public String toString() {
+    return name.replace('~', '_');
+  }
 
-	public boolean equals(Object o)
-	{
-		return o == this
-			|| o instanceof LinkOccurrence && equals((LinkOccurrence)o);
-	}
+  public String getInformativeText() {
+    return (
+      toString() +
+      "(" +
+      atom.getName() +
+      "/" +
+      atom.getArity() +
+      "," +
+      pos +
+      ")"
+    );
+  }
 
-	public boolean equals(LinkOccurrence l)
-	{
-		return atom == l.atom && pos == l.pos;
-	}
+  public boolean equals(Object o) {
+    return (
+      o == this || o instanceof LinkOccurrence && equals((LinkOccurrence) o)
+    );
+  }
 
-	public int hashCode()
-	{
-		return atom.hashCode() ^ (17 * pos);
-	}
+  public boolean equals(LinkOccurrence l) {
+    return atom == l.atom && pos == l.pos;
+  }
+
+  public int hashCode() {
+    return atom.hashCode() ^ (17 * pos);
+  }
 }

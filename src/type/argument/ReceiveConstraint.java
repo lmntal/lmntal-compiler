@@ -2,40 +2,41 @@ package type.argument;
 
 import runtime.functor.Functor;
 
-public class ReceiveConstraint{
-	private PolarizedPath ppath;
+public class ReceiveConstraint {
 
-	private Functor functor;
-	
-	public PolarizedPath getPPath(){
-		return ppath;
-	}
-	public void setPPath(PolarizedPath ppath){
-		this.ppath = ppath;
-	}
+  private PolarizedPath ppath;
 
-	public Functor getFunctor(){
-		return functor;
-	}
-	
-	public ReceiveConstraint(PolarizedPath pp, Functor f) {
-		this.ppath = pp;
-		this.functor = f;
-	}
+  private Functor functor;
 
-	public String toString() {
-		return "(" + ppath + ":" + functor + ")";
-	}
+  public PolarizedPath getPPath() {
+    return ppath;
+  }
 
-	public boolean equals(Object o) {
-		if (o instanceof ReceiveConstraint) {
-			ReceiveConstraint rpc = (ReceiveConstraint) o;
-			return (functor.equals(rpc.functor) && ppath.equals(rpc.ppath));
-		} else
-			return false;
-	}
+  public void setPPath(PolarizedPath ppath) {
+    this.ppath = ppath;
+  }
 
-	public int hashCode() {
-		return (ppath.hashCode() * 2) + functor.hashCode();
-	}
+  public Functor getFunctor() {
+    return functor;
+  }
+
+  public ReceiveConstraint(PolarizedPath pp, Functor f) {
+    this.ppath = pp;
+    this.functor = f;
+  }
+
+  public String toString() {
+    return "(" + ppath + ":" + functor + ")";
+  }
+
+  public boolean equals(Object o) {
+    if (o instanceof ReceiveConstraint) {
+      ReceiveConstraint rpc = (ReceiveConstraint) o;
+      return (functor.equals(rpc.functor) && ppath.equals(rpc.ppath));
+    } else return false;
+  }
+
+  public int hashCode() {
+    return (ppath.hashCode() * 2) + functor.hashCode();
+  }
 }

@@ -1,50 +1,49 @@
 package type.argument;
 
-
 /**
  * @author kudo
- * 
+ *
  */
 public class PolarizedPath {
-	private int pol;
 
-	private Path path;
+  private int pol;
 
-	public PolarizedPath(int pol, Path path) {
-		this.pol = pol;
-		this.path = path;
-	}
+  private Path path;
 
-	public PolarizedPath inverse() {
-		pol *= -1;
-		return this;
-	}
+  public PolarizedPath(int pol, Path path) {
+    this.pol = pol;
+    this.path = path;
+  }
 
-	public Path getPath() {
-		return path;
-	}
+  public PolarizedPath inverse() {
+    pol *= -1;
+    return this;
+  }
 
-	public int getSign() {
-		return pol;
-	}
+  public Path getPath() {
+    return path;
+  }
 
-	public void setPath(Path path) {
-		this.path = path;
-	}
+  public int getSign() {
+    return pol;
+  }
 
-	public int hashCode(){
-		return pol + path.hashCode();
-	}
-	
-	public boolean equals(Object o){
-		if (o instanceof PolarizedPath) {
-			PolarizedPath pp = (PolarizedPath) o;
-			return (pol == pp.pol && path.equals(pp.path));
-		} else
-			return false;
-	}
+  public void setPath(Path path) {
+    this.path = path;
+  }
 
-	public String toString() {
-		return (pol == -1 ? "-" : "") + path;
-	}
+  public int hashCode() {
+    return pol + path.hashCode();
+  }
+
+  public boolean equals(Object o) {
+    if (o instanceof PolarizedPath) {
+      PolarizedPath pp = (PolarizedPath) o;
+      return (pol == pp.pol && path.equals(pp.path));
+    } else return false;
+  }
+
+  public String toString() {
+    return (pol == -1 ? "-" : "") + path;
+  }
 }
