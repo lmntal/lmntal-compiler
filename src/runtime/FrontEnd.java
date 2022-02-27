@@ -59,9 +59,7 @@ public class FrontEnd {
       // -> 引数を "" にすると長さ 0 になるのでチェックする。
       // 2006/07/11 --args　以降を全てLMNtalプログラムへのコマンドライン引数とするように変更 by kudo
       if (isSrcs && (args[i].length() > 0) && (args[i].charAt(0) == '-')) {
-        if (
-          args[i].length() < 2
-        ) { // '-'のみの時
+        if (args[i].length() < 2) { // '-'のみの時
           Util.errPrintln("不明なオプション:" + args[i]);
           System.exit(1);
         } else { // オプション解釈部
@@ -273,9 +271,7 @@ public class FrontEnd {
     else if (opt.equals("--pp0")) {
       // 暫定オプション
       Env.preProcess0 = true;
-    } else if (
-      opt.equals("--stdin-lmn")
-    ) { // 2006.07.11
+    } else if (opt.equals("--stdin-lmn")) { // 2006.07.11
       // inui
       //@ --stdin-lmn
       //@ read LMNtal program from standard input
@@ -338,9 +334,7 @@ public class FrontEnd {
       // compile one rule (for SLIM model checking mode)
       Env.compileRule = true;
       //Env.compileonly = true;
-    } else if (
-      opt.equals("--hl") || opt.equals("--hl-opt")
-    ) { //seiji
+    } else if (opt.equals("--hl") || opt.equals("--hl-opt")) { //seiji
       //@ --hl, --hl-opt
       //@ Use hyperlinks (HyperLMNtal).
       Env.hyperLink = true;
