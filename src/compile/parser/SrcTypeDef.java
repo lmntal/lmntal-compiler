@@ -7,64 +7,70 @@ import java.util.List;
  * ソース中の型定義を表します
  */
 class SrcTypeDef {
-	public SrcName srcname; 	// 型名
-	public LinkedList link;		// 引数のリンクリスト
-	public LinkedList rule;		// 型の内容
-	public int lineno;			// 行番号
 
-	private String text; 		// typedef 構文のテキスト表現
+  public SrcName srcname; // 型名
+  public LinkedList link; // 引数のリンクリスト
+  public LinkedList rule; // 型の内容
+  public int lineno; // 行番号
 
-	public SrcTypeDef(SrcName srcname, LinkedList linklist, LinkedList processlist, int lineno)	{
-		this.srcname = srcname;
-		this.link = linklist;
-		this.rule = processlist;
-		this.lineno = lineno;
-	}
+  private String text; // typedef 構文のテキスト表現
 
-	public void setName(SrcName srcname) {
-		this.srcname = srcname;
-	}
+  public SrcTypeDef(
+    SrcName srcname,
+    LinkedList linklist,
+    LinkedList processlist,
+    int lineno
+  ) {
+    this.srcname = srcname;
+    this.link = linklist;
+    this.rule = processlist;
+    this.lineno = lineno;
+  }
 
-	public void setName(String name) {
-		this.srcname = new SrcName(name);
-	}
+  public void setName(SrcName srcname) {
+    this.srcname = srcname;
+  }
 
-	public void setLink(LinkedList link) {
-		this.link = link;
-	}
+  public void setName(String name) {
+    this.srcname = new SrcName(name);
+  }
 
-	public void setRule(LinkedList rule) {
-		this.rule = rule;
-	}
+  public void setLink(LinkedList link) {
+    this.link = link;
+  }
 
-	public SrcName getSrcName() {
-		return srcname;
-	}
+  public void setRule(LinkedList rule) {
+    this.rule = rule;
+  }
 
-	public String getSourceName() {
-		return srcname.getSourceName();
-	}
+  public SrcName getSrcName() {
+    return srcname;
+  }
 
-	public String getName() {
-		return srcname.getName();
-	}
+  public String getSourceName() {
+    return srcname.getSourceName();
+  }
 
-	public LinkedList getLink() {
-		return link;
-	}
+  public String getName() {
+    return srcname.getName();
+  }
 
-	public LinkedList getRule() {
-		return rule;
-	}
+  public LinkedList getLink() {
+    return link;
+  }
 
-	/**
-	 * LMNtal ソース形式のテキスト表現を取得する。
-	 */
-	public String getText() {
-		return text;
-	}
+  public LinkedList getRule() {
+    return rule;
+  }
 
-	void setText() {
-		text = SrcDumper.dump(this);
-	}
+  /**
+   * LMNtal ソース形式のテキスト表現を取得する。
+   */
+  public String getText() {
+    return text;
+  }
+
+  void setText() {
+    text = SrcDumper.dump(this);
+  }
 }
