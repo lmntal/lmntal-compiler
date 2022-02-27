@@ -325,7 +325,8 @@ public class TypeChecker {
     String memname,
     Functor functor,
     List<ModedType> types
-  ) throws TypeParseException {
+  )
+    throws TypeParseException {
     if (!activeAtomTypes.containsKey(memname)) activeAtomTypes.put(
       memname,
       new HashMap<>()
@@ -364,7 +365,8 @@ public class TypeChecker {
     String parentname,
     String childname,
     IntervalCount fc
-  ) throws TypeParseException {
+  )
+    throws TypeParseException {
     if (!memCounts.containsKey(parentname)) memCounts.put(
       parentname,
       new HashMap<>()
@@ -388,7 +390,8 @@ public class TypeChecker {
     String parentname,
     Functor functor,
     IntervalCount fc
-  ) throws TypeParseException {
+  )
+    throws TypeParseException {
     if (!functorCounts.containsKey(parentname)) functorCounts.put(
       parentname,
       new HashMap<>()
@@ -564,7 +567,8 @@ public class TypeChecker {
     String s,
     IntervalCount constraint,
     IntervalCount infered
-  ) throws TypeException {
+  )
+    throws TypeException {
     //		if(constraint instanceof InfinityCount){
     //			throw new TypeException("fatal error : infinity is given as definition.");
     ////			if(!(infered instanceof InfinityCount))
@@ -618,7 +622,8 @@ public class TypeChecker {
     String s,
     IntervalCount constraint,
     IntervalCount infered
-  ) throws TypeException {
+  )
+    throws TypeException {
     throw new TypeException(
       "count error : " +
       s +
