@@ -226,9 +226,7 @@ public class ArgumentInferer {
       LinkOccurrence lhsPartner = TypeEnv.getRealBuddy(lhsOcc.args[i]);
       LinkOccurrence rhsPartner = TypeEnv.getRealBuddy(rhsOcc.args[i]);
       if (rhsPartner.atom instanceof Atom) {
-        if (
-          TypeEnv.isLHSAtom((Atom) rhsPartner.atom)
-        ) addConstraintAboutLinks( //					addUnifyConstraint(-1,lhsPartner,rhsPartner);
+        if (TypeEnv.isLHSAtom((Atom) rhsPartner.atom)) addConstraintAboutLinks( //					addUnifyConstraint(-1,lhsPartner,rhsPartner);
           -1,
           lhsPartner,
           rhsPartner

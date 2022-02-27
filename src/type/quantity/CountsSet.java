@@ -337,9 +337,7 @@ public class CountsSet {
     for (Membrane mem : memToGenCounts.keySet()) {
       // プロセスの独立性が保たれていなければ無視
       Boolean cpiflg = memnameToCPIFlg.get(TypeEnv.getMemName(mem));
-      if (
-        cpiflg != null && cpiflg
-      ) continue; //			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
+      if (cpiflg != null && cpiflg) continue; //			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
       memToGenCounts.get(mem).solveByCounts();
     }
   }

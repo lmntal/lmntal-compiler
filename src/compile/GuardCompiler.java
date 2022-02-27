@@ -1016,9 +1016,7 @@ class GuardCompiler extends LHSCompiler {
         for (int i = 0; i < atom.args.length; i++) {
           //					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
           if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
-            if (
-              atom.args[i].buddy.atom.mem != rc.rs.rightMem
-            ) if ( // 反対側が右辺出現の時のみ追加
+            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem) if ( // 反対側が右辺出現の時のみ追加
               !def.lhsOcc.mem.typedProcessContexts.contains(
                 atom.args[i].buddy.atom
               )
@@ -1105,9 +1103,7 @@ class GuardCompiler extends LHSCompiler {
         for (int i = 0; i < atom.args.length; i++) {
           //					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
           if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
-            if (
-              atom.args[i].buddy.atom.mem != rc.rs.rightMem
-            ) if ( // 反対側が右辺出現の時のみ追加
+            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem) if ( // 反対側が右辺出現の時のみ追加
               !def.lhsOcc.mem.typedProcessContexts.contains(
                 atom.args[i].buddy.atom
               )
