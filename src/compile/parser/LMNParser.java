@@ -484,8 +484,7 @@ public class LMNParser {
     LinkedList<List> sNegatives,
     RuleStructure rule,
     HashMap names
-  )
-    throws ParseException {
+  ) throws ParseException {
     for (List<List> list1 : sNegatives) {
       List<ProcessContextEquation> neg = new LinkedList<>();
       ListIterator it2 = list1.listIterator();
