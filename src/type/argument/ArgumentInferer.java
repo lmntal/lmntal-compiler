@@ -109,9 +109,8 @@ public class ArgumentInferer {
     // この時点で、子孫膜に出現する全てのアトム／プロセス文脈について、局所リンクの処理は終わっている
 
     for (Atom atom : (List<Atom>) mem.atoms) {
-      if (
-        TypeEnv.outOfPassiveAtom(atom) != TypeEnv.CONNECTOR
-      ) freelinks = inferArgumentAtom(atom, freelinks); // '='/2だったら無視する
+      if (TypeEnv.outOfPassiveAtom(atom) != TypeEnv.CONNECTOR) freelinks =
+        inferArgumentAtom(atom, freelinks); // '='/2だったら無視する
     }
 
     // この時点で、子孫膜に出現する全てのアトム／プロセス文脈、およびこの膜のアトムの引数の処理は終わっている
@@ -173,9 +172,9 @@ public class ArgumentInferer {
     );
     for (LinkOccurrence leftlink : freelinksLeft) {
       LinkOccurrence rightlink = TypeEnv.getRealBuddy(leftlink);
-      if (
-        !freelinksRight.contains(rightlink)
-      ) throw new TypeException("link occurs once in a rule."); // リンクが左辺／右辺出現でないなら
+      if (!freelinksRight.contains(rightlink)) throw new TypeException(
+        "link occurs once in a rule."
+      ); // リンクが左辺／右辺出現でないなら
       if (leftlink.atom instanceof Atom) {
         addConstraintAboutLinks(1, rightlink, leftlink);
       } else if (
@@ -227,15 +226,11 @@ public class ArgumentInferer {
       LinkOccurrence lhsPartner = TypeEnv.getRealBuddy(lhsOcc.args[i]);
       LinkOccurrence rhsPartner = TypeEnv.getRealBuddy(rhsOcc.args[i]);
       if (rhsPartner.atom instanceof Atom) {
-        if (
-          TypeEnv.isLHSAtom((Atom) rhsPartner.atom)
-        ) //					addUnifyConstraint(-1,lhsPartner,rhsPartner);
-        addConstraintAboutLinks(
+        if (TypeEnv.isLHSAtom((Atom) rhsPartner.atom)) addConstraintAboutLinks( //					addUnifyConstraint(-1,lhsPartner,rhsPartner);
           -1,
           lhsPartner,
           rhsPartner
-        ); else //					addUnifyConstraint(1,lhsPartner,rhsPartner);
-        addConstraintAboutLinks(1, lhsPartner, rhsPartner);
+        ); else addConstraintAboutLinks(1, lhsPartner, rhsPartner); //					addUnifyConstraint(1,lhsPartner,rhsPartner);
       } else { // 右辺出現がプロセス文脈と継っている
         ProcessContext pc = (ProcessContext) rhsPartner.atom;
         Functor df = TypeEnv.dataTypeOfContextDef(pc.def);
@@ -281,9 +276,9 @@ public class ArgumentInferer {
     } else {
       int out = TypeEnv.outOfPassiveAtom((Atom) lo.atom);
       if (out == lo.pos) { // データアトムの出力引数
-        if (
-          TypeEnv.outOfPassiveAtom((Atom) b.atom) == b.pos
-        ) if (sign == -1) throw new TypeException( //!= TypeEnv.ACTIVE)
+        if (TypeEnv.outOfPassiveAtom((Atom) b.atom) == b.pos) if (
+          sign == -1
+        ) throw new TypeException( //!= TypeEnv.ACTIVE)
           "output arguments connected each other. : " +
           lo.atom.getName() +
           " <=> " +

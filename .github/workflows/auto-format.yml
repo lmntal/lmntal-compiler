@@ -1,0 +1,46 @@
+# https://qiita.com/__snow_rabbit__/items/9df812e8977bc0f1786f
+
+name: Reformat Java source code
+
+on:
+  pull_request:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      # Pull Requestされたブランチをチェックアウト
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      # Java のセットアップ
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      # Gitの設定
+      - name: Git settings
+        run: |
+          # Git リポジトリの設定
+          git config --local user.name "lang"
+          git config --local user.email "lang@ueda.info.waseda.ac.jp"
+      # コードフォーマットの実行(※1)
+      - name: Code format
+        run: |
+          sudo apt install npm
+          npm install .
+          npx prettier --write "**/*.java"
+
+      # 上の例ではすべての変更に対してフォーマッタを加えております。
+      # プルリクエスト時の変更を取る場合はgit log
+      # で変更差分のみ取得してフォーマッタをかけましょう。(※2)
+      # 変更確認
+      - name: Check for modified files
+        id: git-check
+        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+      # 変更されていた場合、コミット・プッシュを行う(※3)
+      - name: Push
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git commit -am "Automated: Reformat Java source code."
+          git push
