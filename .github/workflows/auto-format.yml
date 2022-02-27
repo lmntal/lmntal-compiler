@@ -1,3 +1,5 @@
+# https://qiita.com/__snow_rabbit__/items/9df812e8977bc0f1786f
+
 name: Reformat Java source code
 
 on:
@@ -20,8 +22,8 @@ jobs:
       - name: Git settings
         run: |
           # Git リポジトリの設定
-          git config --local user.name "ユーザ名"
-          git config --local user.email "E-Mailアドレス"
+          git config --local user.name "lang"
+          git config --local user.email "lang@ueda.info.waseda.ac.jp"
       # コードフォーマットの実行(※1)
       - name: Code format
         run: |
@@ -40,5 +42,5 @@ jobs:
       - name: Push
         if: steps.git-check.outputs.modified == 'true'
         run: |
-          git commit -am "Automated :Reformat Java source code."
+          git commit -am "Automated: Reformat Java source code."
           git push
