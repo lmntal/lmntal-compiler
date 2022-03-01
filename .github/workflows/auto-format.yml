@@ -41,7 +41,7 @@ jobs:
       - name: Foo
         run: |
           if [[ $(git diff-index HEAD | wc -l) -gt 0 ]]; then echo 'true'; else echo 'false'; fi
-          echo $(steps.git-check.outputs.modified)
+          echo ${{steps.git-check.outputs.modified}}
           echo steps.git-check.outputs.modified
           echo ">>>>> "
           git diff-index HEAD
