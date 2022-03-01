@@ -2,7 +2,6 @@ package compile.structure;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-
 import runtime.functor.Functor;
 import runtime.functor.SymbolFunctor;
 
