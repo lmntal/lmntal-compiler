@@ -1,9 +1,16 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
 /**
  * ソースファイル中のリンク・リンク束・プロセスコンテキスト・ルールコンテキストの抽象親クラス
  * <p>プロセス文脈名およびルール文脈名には '...' や [[...]] が使えないようにした。
  */
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.ANY
+)
 abstract class SrcContext {
 
   protected String name = null;

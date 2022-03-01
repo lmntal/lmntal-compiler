@@ -54,7 +54,7 @@ public class Grouping {
   public void groupingInsts(List<Instruction> insts) {
     if (insts.get(0).getKind() != Instruction.SPEC) return;
     spec = insts.get(0);
-    int last = -1;
+    // int last = -1;
     for (int i = 1; i < insts.size(); i++) {
       Instruction inst = insts.get(i);
       //否定条件がある場合はグループ化は無効 暫定的処置

@@ -6,6 +6,7 @@
 package compile.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import compile.structure.Atom;
 import compile.structure.Atomic;
 import compile.structure.Context;
@@ -78,7 +79,9 @@ public class LMNParser {
     // LinkedList srcProcess = parseSrc();
     SrcRule initRule = parseSrc(); // プロセス構造を生成するルール
     // try {
-    //   String json = new ObjectMapper().writeValueAsString(initRule);
+    //   ObjectMapper mapper = new ObjectMapper();
+    //   mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    //   String json = mapper.writeValueAsString(initRule);
     //   System.out.println(json);
     // } catch (Exception e) {
     //   System.err.println(e);
@@ -676,7 +679,7 @@ public class LMNParser {
         HashMap rhscxtfreelinks = new HashMap(); // この等式右辺トップレベル$ppの自由リンク集合
         for (int i = 0; i < a.args.length; i++) {
           LinkOccurrence lhslnk = a.args[i];
-          String linkname = lhslnk.name;
+          // String linkname = lhslnk.name;
           if (rhsfreelinks.containsKey(lhslnk.name)) {
             // 両辺に出現する場合: ( {$p[X]} :- \+($p=(a(X),$pp)) | ... )
             LinkOccurrence rhslnk = (LinkOccurrence) rhsfreelinks.get(

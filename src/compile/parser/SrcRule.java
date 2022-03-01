@@ -1,11 +1,17 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * ソース中のルールを表します
  */
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 class SrcRule {
 
   public String name; // ルール名
@@ -16,6 +22,8 @@ class SrcRule {
   public LinkedList guardNegatives; // ガード否定条件構文のリスト
 
   private String text; //ルールのテキスト表現
+
+  public SrcRule() {}
 
   /**
    * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します
