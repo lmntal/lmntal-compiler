@@ -120,9 +120,7 @@ public class LMNParser {
 
   /** ルールのテキスト表現を決定する */
   private void setRuleText(LinkedList process) {
-    ListIterator it = process.listIterator();
-    while (it.hasNext()) {
-      Object obj = it.next();
+    for (Object obj : process) {
       if (obj instanceof SrcAtom) {
         setRuleText(((SrcAtom) obj).getProcess());
       } else if (obj instanceof SrcMembrane) {
@@ -171,9 +169,8 @@ public class LMNParser {
    * @param mem 追加先の膜
    */
   void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
-    Iterator it = list.iterator();
-    while (it.hasNext()) {
-      addObjectToMem(it.next(), mem);
+    for (Object obj : list) {
+      addObjectToMem(obj, mem);
     }
   }
 
@@ -185,9 +182,8 @@ public class LMNParser {
   private void addObjectToMem(Object obj, Membrane mem) throws ParseException {
     // リスト
     if (obj instanceof LinkedList) {
-      Iterator it = ((LinkedList) obj).iterator();
-      while (it.hasNext()) {
-        addObjectToMem(it.next(), mem);
+      for (Object elem : (LinkedList) obj) {
+        addObjectToMem(elem, mem);
       }
     }
     // アトム
@@ -417,9 +413,7 @@ public class LMNParser {
    *
    */
   private void assertLHSRules(List procs) throws ParseException {
-    Iterator it = procs.iterator();
-    while (it.hasNext()) {
-      Object obj = it.next();
+    for (Object obj : procs) {
       if (obj instanceof SrcRule) {
         SrcRule sr = (SrcRule) obj;
         throw new ParseException(
@@ -443,9 +437,8 @@ public class LMNParser {
     throws ParseException {
     for (List<List> list1 : sNegatives) {
       List<ProcessContextEquation> neg = new LinkedList<>();
-      ListIterator it2 = list1.listIterator();
-      while (it2.hasNext()) {
-        LinkedList sPair = (LinkedList) it2.next();
+      for (Object obj : list1) {
+        LinkedList sPair = (LinkedList) obj;
         String cxtname =
           ((SrcProcessContext) sPair.getFirst()).getQualifiedName();
         if (!names.containsKey(cxtname)) {
@@ -488,9 +481,8 @@ public class LMNParser {
       HashMap freeLinks = addProxies(submem);
       // 子膜の自由リンクに対してプロキシを追加する
       HashMap newFreeLinks = new HashMap();
-      Iterator it2 = freeLinks.keySet().iterator();
-      while (it2.hasNext()) {
-        LinkOccurrence freeLink = (LinkOccurrence) freeLinks.get(it2.next());
+      for (Object link : freeLinks.keySet()) {
+        LinkOccurrence freeLink = (LinkOccurrence) freeLinks.get(link);
         // 子膜の自由リンク名 freeLink.name に対して、膜間リンク名 proxyLinkName を決定する。
         // 通常はXに対して、1^Xとする。
         // Xがmemの局所リンクであり、1^Xをmem内ですでに使用した場合は、1^^Xとする。
@@ -544,11 +536,9 @@ public class LMNParser {
 
   /** ガード否定条件に対してaddProxiesを呼ぶ */
   private void addProxiesToGuardNegatives(RuleStructure rule) {
-    Iterator it = rule.guardNegatives.iterator();
-    while (it.hasNext()) {
-      Iterator it2 = ((LinkedList) it.next()).iterator();
-      while (it2.hasNext()) {
-        ProcessContextEquation eq = (ProcessContextEquation) it2.next();
+    for (Object guardNegative : rule.guardNegatives) {
+      for (Object pCtxEq : (LinkedList) guardNegative) {
+        ProcessContextEquation eq = (ProcessContextEquation) pCtxEq;
         addProxies(eq.mem);
       }
     }
@@ -564,10 +554,9 @@ public class LMNParser {
     // 同じ膜レベルのリンク結合を行う
     HashMap links = new HashMap();
     List[] lists = { mem.atoms, mem.processContexts, mem.typedProcessContexts };
-    for (int i = 0; i < lists.length; i++) {
-      Iterator it = lists[i].iterator();
-      while (it.hasNext()) {
-        Atomic a = (Atomic) it.next();
+    for (List list : lists) {
+      for (Object obj : list) {
+        Atomic a = (Atomic) obj;
         for (int j = 0; j < a.args.length; j++) {
           if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
             addLinkOccurrence(links, a.args[j]);
