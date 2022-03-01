@@ -5,6 +5,7 @@
 
 package compile.parser;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import compile.structure.Atom;
 import compile.structure.Atomic;
 import compile.structure.Context;
@@ -76,6 +77,12 @@ public class LMNParser {
   public Membrane parse() throws ParseException {
     // LinkedList srcProcess = parseSrc();
     SrcRule initRule = parseSrc(); // プロセス構造を生成するルール
+    // try {
+    //   String json = new ObjectMapper().writeValueAsString(initRule);
+    //   System.out.println(json);
+    // } catch (Exception e) {
+    //   System.err.println(e);
+    // }
     setRuleText(initRule);
     Membrane mem = new Membrane(null);
     expander.incorporateSignSymbols(initRule.body);

@@ -1,8 +1,14 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.util.LinkedList;
 
 /** ソースファイル中のアトム表現 */
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 class SrcAtom {
 
   protected LinkedList process = null;
