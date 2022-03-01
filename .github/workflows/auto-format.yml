@@ -41,11 +41,14 @@ jobs:
       - name: Foo
         run: |
           if [[ $(git diff-index HEAD | wc -l) -gt 0 ]]; then echo 'true'; else echo 'false'; fi
+          echo $(steps.git-check.outputs.modified)
           echo steps.git-check.outputs.modified
+          echo ">>>>> "
           git diff-index HEAD
           git diff HEAD
           git diff-index HEAD --
           git diff HEAD --
+          git branch
 
       # 変更されていた場合、コミット・プッシュを行う(※3)
       - name: Push
