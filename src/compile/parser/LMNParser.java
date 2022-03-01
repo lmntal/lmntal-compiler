@@ -615,9 +615,8 @@ public class LMNParser {
 
   /** 膜memの自由リンクを膜内で閉じる（構文エラーからの復帰用） */
   public void closeFreeLinks(Membrane mem) {
-    Iterator<String> it = mem.freeLinks.keySet().iterator();
-    while (it.hasNext()) {
-      LinkOccurrence link = mem.freeLinks.get(it.next());
+    for (Object obj : mem.freeLinks.keySet()) {
+      LinkOccurrence link = mem.freeLinks.get(obj);
       warning(
         "WARNING: global singleton link: " +
         link.name +
@@ -644,12 +643,10 @@ public class LMNParser {
    * </ul>
    * <p>ガードコンパイルで実際に使うときには、等式間リンクに対して、自由リンク管理アトムの鎖を適宜補うこと。*/
   void coupleGuardNegativeLinks(RuleStructure rule) {
-    Iterator it = rule.guardNegatives.iterator();
-    while (it.hasNext()) {
+    for (Object obj1 : rule.guardNegatives) {
       HashMap interlinks = new HashMap(); // 等式間リンクおよびガード匿名リンクの一覧
-      Iterator it2 = ((LinkedList) it.next()).iterator();
-      while (it2.hasNext()) {
-        ProcessContextEquation eq = (ProcessContextEquation) it2.next();
+      for (Object obj2 : ((LinkedList) obj1)) {
+        ProcessContextEquation eq = (ProcessContextEquation) obj2;
         // 等式右辺の自由リンク出現の一覧を取得する
         Membrane mem = eq.mem;
         HashMap rhsfreelinks = mem.freeLinks;
@@ -672,9 +669,8 @@ public class LMNParser {
           }
         }
         removeClosedLinks(rhsfreelinks);
-        Iterator it3 = rhsfreelinks.keySet().iterator();
-        while (it3.hasNext()) {
-          String linkname = (String) it3.next();
+        for (Object obj3 : rhsfreelinks.keySet()) {
+          String linkname = (String) obj3;
           LinkOccurrence lnk = (LinkOccurrence) rhsfreelinks.get(linkname);
           // 右辺にのみ出現する場合:
           // ( ... :- \+($p=a(X),$q=b(X)) | ... ) => 等式間リンクは、2回目の出現のとき閉じられる
@@ -699,9 +695,8 @@ public class LMNParser {
 
       // {$p[A|*V]} :- \+($p=(f(B),$pp[A,B|*W])) | ... //
 
-      Iterator it3 = interlinks.keySet().iterator();
-      anonymouslink:while (it3.hasNext()) {
-        String linkname = (String) it3.next();
+      anonymouslink:for (Object obj3 : interlinks.keySet()) {
+        String linkname = (String) obj3;
         LinkOccurrence lnk = (LinkOccurrence) interlinks.get(linkname);
         if (lnk.atom.mem.processContexts.isEmpty()) {
           warning(
@@ -730,23 +725,20 @@ public class LMNParser {
     HashMap lhsFreeLinks = rule.leftMem.freeLinks;
     HashMap rhsFreeLinks = rule.rightMem.freeLinks;
     HashMap links = new HashMap();
-    Iterator it = lhsFreeLinks.keySet().iterator();
-    while (it.hasNext()) {
-      String linkname = (String) it.next();
+    for (Object obj : lhsFreeLinks.keySet()) {
+      String linkname = (String) obj;
       LinkOccurrence lhsocc = (LinkOccurrence) lhsFreeLinks.get(linkname);
       addLinkOccurrence(links, lhsocc);
     }
-    it = rhsFreeLinks.keySet().iterator();
-    while (it.hasNext()) {
-      String linkname = (String) it.next();
+    for (Object obj : rhsFreeLinks.keySet()) {
+      String linkname = (String) obj;
       LinkOccurrence rhsocc = (LinkOccurrence) rhsFreeLinks.get(linkname);
       addLinkOccurrence(links, rhsocc);
     }
     removeClosedLinks(links);
     if (!links.isEmpty()) {
-      it = links.keySet().iterator();
-      while (it.hasNext()) {
-        LinkOccurrence link = (LinkOccurrence) links.get(it.next());
+      for (Object obj : links.keySet()) {
+        LinkOccurrence link = (LinkOccurrence) links.get(obj);
         //				error("SYNTAX ERROR: rule with free variable: "+ link.name + "\n    in " + rule);
         error(
           "SYNTAX ERROR: rule with free variable: " +
