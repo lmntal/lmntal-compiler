@@ -21,6 +21,8 @@ import java.util.List;
 import type.TypeException;
 import type.TypeInferer;
 import util.Util;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class FrontEnd {
 
@@ -421,6 +423,11 @@ public class FrontEnd {
         Env.e(e.getMessage());
         System.exit(1);
       }
+
+      // ObjectMapper mapper = new ObjectMapper();
+      // mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		  // String json = mapper.writeValueAsString(m);
+      // System.out.println(json);
 
       if (Env.fType) {
         if (!analyseTypes(m)) {
