@@ -38,6 +38,13 @@ jobs:
       - name: Check for modified files
         id: git-check
         run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
+
+      - name: Print debug
+        id: print-debug
+        run: |
+          git diff-index HEAD
+          git diff HEAD
+
       # 変更されていた場合、コミット・プッシュを行う(※3)
       - name: Push
         if: steps.git-check.outputs.modified == 'true'
