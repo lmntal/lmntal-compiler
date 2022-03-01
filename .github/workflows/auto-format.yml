@@ -37,10 +37,10 @@ jobs:
       # 変更確認
       - name: Check for modified files
         id: git-check
-        run: echo "::set-output name=modified::$(if [[ $(git diff-index HEAD | wc -l) -gt 0 ]]; then echo 'true'; else echo 'false'; fi)"
+        run: echo "::set-output name=modified::$(if [[ $(git diff-index HEAD | grep -v 'M package-lock.json' | wc -l) -gt 0 ]]; then echo 'true'; else echo 'false'; fi)"
       - name: Foo
         run: |
-          if [[ $(git diff-index HEAD | wc -l) -gt 0 ]]; then echo 'true'; else echo 'false'; fi
+          if [[ $(git diff-index HEAD | grep -v 'M package-lock.json' | wc -l) -gt 0 ]]; then echo 'true'; else echo 'false'; fi
           echo ${{steps.git-check.outputs.modified}}
           echo steps.git-check.outputs.modified
           echo ">>>>> "
