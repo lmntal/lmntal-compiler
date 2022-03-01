@@ -1,9 +1,15 @@
 package runtime;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 public final class Rule {
 
   /** 膜主導ルール適用の命令列（memMatchLabel.insts）
