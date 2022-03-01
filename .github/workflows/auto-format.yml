@@ -35,12 +35,9 @@ jobs:
       # プルリクエスト時の変更を取る場合はgit log
       # で変更差分のみ取得してフォーマッタをかけましょう。(※2)
       # 変更確認
-      # 追記：grep -vE 'package-lock.json$' で，package-lock.json の変更は無視している
       - name: Check for modified files
         id: git-check
-        run: echo ::set-output name=modified::$(if [[ $(git diff-index HEAD | grep -vE 'package-lock.json$' | wc -l) -gt 0  ]]; then echo 'true'; else echo 'false'; fi)
-        # run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
-
+        run: echo ::set-output name=modified::$(if git diff-index --quiet HEAD --; then echo "false"; else echo "true"; fi)
       # 変更されていた場合、コミット・プッシュを行う(※3)
       - name: Push
         if: steps.git-check.outputs.modified == 'true'
