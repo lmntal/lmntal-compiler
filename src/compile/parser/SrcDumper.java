@@ -74,7 +74,7 @@ public class SrcDumper {
   }
 
   public static String dumpTypeDef(SrcTypeDef typedef) {
-    String s = "typedef " + dumpAtom(typedef.getAtom());
+    String s = "typedef " + dumpAtom(typedef.getTypeAtom());
     s += " { " + dumpLinkedList(typedef.getRules(), ". ") + " }";
     return s;
   }
