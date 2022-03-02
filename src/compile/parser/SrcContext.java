@@ -16,6 +16,8 @@ abstract class SrcContext {
   protected String name = null;
   protected int lineno = -1;
 
+  public SrcContext() {}
+
   /**
    * 指定された名前でコンテキストを初期化します
    * @param name コンテキスト名

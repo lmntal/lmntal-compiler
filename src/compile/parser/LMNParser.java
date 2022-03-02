@@ -82,7 +82,8 @@ public class LMNParser {
     //   ObjectMapper mapper = new ObjectMapper();
     //   mapper.enable(SerializationFeature.INDENT_OUTPUT);
     //   String json = mapper.writeValueAsString(initRule);
-    //   System.out.println(json);
+    //   initRule = mapper.readValue(json, SrcRule.class);
+    //   System.err.println(json);
     // } catch (Exception e) {
     //   System.err.println(e);
     // }
