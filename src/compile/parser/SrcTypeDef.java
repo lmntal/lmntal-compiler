@@ -11,7 +11,7 @@ class SrcTypeDef {
   // public SrcName srcname; // 型名
   // public LinkedList links; // 引数のリンクリスト
   public SrcAtom typeName; // 型名と引数のリンクリスト
-  public LinkedList rules; // 型の内容
+  public LinkedList<Object> rules; // 型の内容
   public int lineno; // 行番号
 
   private String text; // typedef 構文のテキスト表現

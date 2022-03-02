@@ -433,7 +433,9 @@ public class LMNParser {
     addSrcAtomToMem(sTypeDef.getTypeAtom(), typeDef.typeAtom);
     for (Object obj : sTypeDef.rules) {
       if (obj instanceof SrcRule) {
-        addSrcRuleToMem((SrcRule) obj, typeDef.mem);
+        SrcRule rule = (SrcRule) obj;
+        rule.head.addFirst(typeDef.typeAtom);
+        addSrcRuleToMem(rule, typeDef.mem);
       } else if (obj instanceof SrcAtom) {
         error("NOT IMPLEMENTED YET: atom appeared in typedef");
       }
