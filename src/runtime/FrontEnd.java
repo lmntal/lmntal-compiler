@@ -371,6 +371,8 @@ public class FrontEnd {
       Env.warnEmptyHead = true;
     } else if (opt.equals("--interpret")) {
       // DO NOTHING
+    } else if (opt.equals("--dump-json")) {
+      Env.dumpJson = true;
     } else {
       Util.errPrintln("Invalid option: " + opt);
       Util.errPrintln("Use option --help to see a long list of options.");
@@ -456,6 +458,11 @@ public class FrontEnd {
           System.exit(1);
         }
         System.exit(0);
+      } else if (Env.dumpJson) {
+        ObjectMapper mapper = new ObjectMapper();
+        // mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String json = mapper.writeValueAsString(m.rulesets);
+        System.out.println(json);
       } else {
         // 通常はこっち？
         // showIL((InterpretedRuleset)rs, m);
