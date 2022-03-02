@@ -26,7 +26,9 @@ public class SrcDumper {
     if (list == null || list.size() == 0) return "";
     String s = "";
     s += dump(list.get(0));
-    for (int i = 1; i < list.size(); i++) s += sep + dump(list.get(i));
+    for (int i = 1; i < list.size(); i++) {
+      s += sep + dump(list.get(i));
+    }
     return s;
   }
 
@@ -72,9 +74,8 @@ public class SrcDumper {
   }
 
   public static String dumpTypeDef(SrcTypeDef typedef) {
-    String s = "typedef " + typedef.getSourceName();
-    s += "(" + dumpLinkedList(typedef.getLink(), ", ") + ")";
-    s += " { " + dumpLinkedList(typedef.getRule(), ". ") + " }";
+    String s = "typedef " + dumpAtom(typedef.getAtom());
+    s += " { " + dumpLinkedList(typedef.getRules(), ". ") + " }";
     return s;
   }
 

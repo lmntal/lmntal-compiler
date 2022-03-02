@@ -15,6 +15,7 @@ import compile.structure.ProcessContext;
 import compile.structure.ProcessContextEquation;
 import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
+import compile.structure.TypeDefStructure;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,10 +91,10 @@ public class LMNParser {
     return mem;
   }
 
-  /**	
+  /**
 		ソースコードの構文解析結果をルール形式の解析木として返す。
 		@return 解析されたソースコードのプロセス構造を生成するルール
-		@throws ParseException 
+		@throws ParseException
 	*/
   // protected LinkedList parseSrc() throws ParseException {
   protected SrcRule parseSrc() throws ParseException {
@@ -133,6 +134,10 @@ public class LMNParser {
         SrcRule rule = (SrcRule) obj;
         rule.setText();
         setRuleText(rule.body);
+      } else if (obj instanceof SrcTypeDef) {
+        SrcTypeDef typeDef = (SrcTypeDef) obj;
+        typeDef.setText();
+        setRuleText(typeDef.getRules());
       }
     }
   }
@@ -209,10 +214,9 @@ public class LMNParser {
     // ルールコンテキスト
     else if (obj instanceof SrcRuleContext) {
       addSrcRuleContextToMem((SrcRuleContext) obj, mem);
+    } else if (obj instanceof SrcTypeDef) {
+      addSrcTypeDefToMem((SrcTypeDef) obj, mem);
     }
-    //		else if (obj instanceof SrcTypeDef) {
-    //			addSrcTypeDefToMem((SrcTypeDef)obj, mem);
-    //		}
     // リンク
     else if (obj instanceof SrcLink) {
       SrcLink link = (SrcLink) obj;
@@ -315,9 +319,11 @@ public class LMNParser {
     }
 
     // [4] アトムとアトム集団を識別する
-    if (arity > 0 && allbundles) mem.aggregates.add(atom); else if (
-      arity == 0 || alllinks
-    ) mem.atoms.add(atom); else {
+    if (arity > 0 && allbundles) {
+      mem.aggregates.add(atom);
+    } else if (arity == 0 || alllinks) {
+      mem.atoms.add(atom);
+    } else {
       error(
         "SYNTAX ERROR: arguments of an atom contain both of links and bundles"
       );
@@ -420,42 +426,21 @@ public class LMNParser {
    * @param sTypeDef 追加したい typedef 構文
    * @param mem 追加先の膜
    */
-  //	private void addSrcTypeDefToMem(SrcTypeDef sTypeDef, Membrane mem) throws ParseException {
-  //		//2006.1.22 linenoを追加 by inui
-  //		RuleStructure rule = new RuleStructure(mem, sRule.getText(), sRule.lineno);
-  //		rule.name = sRule.name;
-  //		// 略記法の展開
-  //		expander.expandRuleAbbreviations(sRule);
-  //		//  左辺のルールを構文エラーとして除去する
-  //		assertLHSRules(sRule.getHead());
-  //
-  //		// 左辺およびガード型制約に対して、構造を生成し、リンク以外の名前を解決する
-  //		addProcessToMem(sRule.getHead(), rule.leftMem);
-  //		addProcessToMem(sRule.getGuard(), rule.guardMem);
-  //		HashMap names = resolveHeadContextNames(rule);
-  //		// ガード否定条件および右辺に対して、構造を生成し、リンク以外の名前を解決する
-  //		addGuardNegatives(sRule.getGuardNegatives(), rule, names);
-  //		addProcessToMem(sRule.getBody(), rule.rightMem);
-  //		resolveContextNames(rule, names);
-  //
-  //		//略記法が展開されて構造が生成され，
-  //		//リンク以外の名前が解決されている ( $p,@pのContext.defがセットされている，*Vは双方向リンクがはられている )
-  //
-  //		// プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
-  //		// この時点ではアトムのリンク引数には自分自身のLinkOccurreceが格納されている
-  //		// これらが終わると，アトムのリンク引数のLinkOccurrenceのbuddyがセットされる
-  //		// リンクを繋ぐ作業はaddLinkOccurrenceで行われる
-  //
-  //		addProxies(rule.leftMem); // addProxiesAndCoupleLinksであるべき?
-  //		coupleLinks(rule.guardMem);
-  //		addProxies(rule.rightMem);
-  //		addProxiesToGuardNegatives(rule);
-  //		coupleGuardNegativeLinks(rule);		// ガード否定条件のリンクを接続する
-  //		coupleInheritedLinks(rule);			// 右辺と左辺の自由リンクを接続する
-  //
-  //		mem.rules.add(rule);
-  //
-  //	}
+  private void addSrcTypeDefToMem(SrcTypeDef sTypeDef, Membrane mem)
+    throws ParseException {
+    TypeDefStructure typeDef = new TypeDefStructure(mem, sTypeDef.getLineNo());
+
+    addSrcAtomToMem(sTypeDef.getTypeAtom(), typeDef.typeAtom);
+    for (Object obj : sTypeDef.rules) {
+      if (obj instanceof SrcRule) {
+        addSrcRuleToMem((SrcRule) obj, typeDef.mem);
+      } else if (obj instanceof SrcAtom) {
+        error("NOT IMPLEMENTED YET: atom appeared in typedef");
+      }
+    }
+
+    mem.typeDefs.add(typeDef);
+  }
 
   /**
    * アトム展開されたソース膜に対してルールが無いことを確認する

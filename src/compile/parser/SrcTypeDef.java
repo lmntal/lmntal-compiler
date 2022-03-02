@@ -8,59 +8,38 @@ import java.util.List;
  */
 class SrcTypeDef {
 
-  public SrcName srcname; // 型名
-  public LinkedList link; // 引数のリンクリスト
-  public LinkedList rule; // 型の内容
+  // public SrcName srcname; // 型名
+  // public LinkedList links; // 引数のリンクリスト
+  public SrcAtom typeName; // 型名と引数のリンクリスト
+  public LinkedList rules; // 型の内容
   public int lineno; // 行番号
 
   private String text; // typedef 構文のテキスト表現
 
-  public SrcTypeDef(
-    SrcName srcname,
-    LinkedList linklist,
-    LinkedList processlist,
-    int lineno
-  ) {
-    this.srcname = srcname;
-    this.link = linklist;
-    this.rule = processlist;
+  public SrcTypeDef(SrcAtom typeName, LinkedList processlist, int lineno) {
+    this.typeName = typeName;
+    this.rules = processlist;
     this.lineno = lineno;
   }
 
-  public void setName(SrcName srcname) {
-    this.srcname = srcname;
+  public void setTypeAtom(SrcAtom typeName) {
+    this.typeName = typeName;
   }
 
-  public void setName(String name) {
-    this.srcname = new SrcName(name);
+  public void setRules(LinkedList rule) {
+    this.rules = rule;
   }
 
-  public void setLink(LinkedList link) {
-    this.link = link;
+  public SrcAtom getTypeAtom() {
+    return typeName;
   }
 
-  public void setRule(LinkedList rule) {
-    this.rule = rule;
+  public LinkedList getRules() {
+    return rules;
   }
 
-  public SrcName getSrcName() {
-    return srcname;
-  }
-
-  public String getSourceName() {
-    return srcname.getSourceName();
-  }
-
-  public String getName() {
-    return srcname.getName();
-  }
-
-  public LinkedList getLink() {
-    return link;
-  }
-
-  public LinkedList getRule() {
-    return rule;
+  public int getLineNo() {
+    return lineno;
   }
 
   /**
