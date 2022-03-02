@@ -429,12 +429,11 @@ public class LMNParser {
   private void addSrcTypeDefToMem(SrcTypeDef sTypeDef, Membrane mem)
     throws ParseException {
     TypeDefStructure typeDef = new TypeDefStructure(mem, sTypeDef.getLineNo());
-
     addSrcAtomToMem(sTypeDef.getTypeAtom(), typeDef.typeAtom);
     for (Object obj : sTypeDef.rules) {
       if (obj instanceof SrcRule) {
         SrcRule rule = (SrcRule) obj;
-        rule.head.addFirst(typeDef.typeAtom);
+        rule.head.addFirst(sTypeDef.typeName);
         addSrcRuleToMem(rule, typeDef.mem);
       } else if (obj instanceof SrcAtom) {
         error("NOT IMPLEMENTED YET: atom appeared in typedef");

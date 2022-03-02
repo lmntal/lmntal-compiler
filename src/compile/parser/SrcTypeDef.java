@@ -16,8 +16,13 @@ class SrcTypeDef {
 
   private String text; // typedef 構文のテキスト表現
 
-  public SrcTypeDef(SrcAtom typeName, LinkedList processlist, int lineno) {
-    this.typeName = typeName;
+  public SrcTypeDef(
+    SrcName name,
+    LinkedList links,
+    LinkedList processlist,
+    int lineno
+  ) {
+    this.typeName = new SrcAtom(name, links);
     this.rules = processlist;
     this.lineno = lineno;
   }

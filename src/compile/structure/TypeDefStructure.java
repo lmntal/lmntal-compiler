@@ -40,5 +40,7 @@ public final class TypeDefStructure {
   public TypeDefStructure(Membrane parent, int lineno) {
     this.parent = parent;
     this.lineno = lineno;
+    this.typeAtom = new Membrane(parent);
+    this.mem = new Membrane(parent);
   }
 }

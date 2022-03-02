@@ -585,10 +585,8 @@ NonemptyWorldProcessList ::=
 
 // CSLMNtal の typedef 構文を受理。
 TypeDef ::=
-    // TYPEDEF:lineno FuncName:name LPAREN NonemptyLinkList:linklist RPAREN LBRACE WorldProcessList:processlist RBRACE
-    //     {: RESULT = new SrcTypeDef(name, linklist, processlist, lineno.intValue()); :}
-    TYPEDEF:lineno Atom:atom LBRACE WorldProcessList:processlist RBRACE
-      {: RESULT = new SrcTypeDef(atom, processlist, lineno.intValue()); :}
+    TYPEDEF:lineno FuncName:name LPAREN NonemptyLinkList:linklist RPAREN LBRACE WorldProcessList:processlist RBRACE
+        {: RESULT = new SrcTypeDef(name, linklist, processlist, lineno.intValue()); :}
 ;
 
 // rule for creating toplevel
