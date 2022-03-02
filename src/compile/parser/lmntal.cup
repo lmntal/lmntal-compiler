@@ -75,7 +75,7 @@ non terminal LinkedList			ProcessList;
 non terminal LinkedList			NonemptyProcessList;
 non terminal LinkedList			WorldProcessList;
 non terminal LinkedList			NonemptyWorldProcessList;
-non terminal Object				List;
+non terminal SrcAtom			List;
 non terminal Object				ListCdr;
 non terminal LinkedList			BundleList;
 non terminal LinkedList			LinkList;

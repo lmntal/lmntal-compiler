@@ -426,10 +426,10 @@ public class FrontEnd {
         System.exit(1);
       }
 
-      // ObjectMapper mapper = new ObjectMapper();
-      // mapper.enable(SerializationFeature.INDENT_OUTPUT);
-      // String json = mapper.writeValueAsString(m);
-      // System.out.println(json);
+      ObjectMapper mapper1 = new ObjectMapper();
+      mapper1.enable(SerializationFeature.INDENT_OUTPUT);
+      String json1 = mapper1.writeValueAsString(m);
+      System.out.println(json1);
 
       if (Env.fType) {
         if (!analyseTypes(m)) {
