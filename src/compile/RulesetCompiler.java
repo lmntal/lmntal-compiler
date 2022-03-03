@@ -6,6 +6,7 @@ package compile;
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.RuleStructure;
+import compile.structure.TypeDefStructure;
 import java.util.ArrayList;
 import java.util.List;
 import runtime.Env;
@@ -98,6 +99,43 @@ public class RulesetCompiler {
         SystemRulesets.addUserDefinedSystemRuleset(ir);
         ir.isSystemRuleset = true;
       }
+    }
+
+    // typedef におけるサブルールをコンパイルする
+
+    List<Rule> subrules = new ArrayList<>();
+
+    // この膜にあるルール構造をルールオブジェクトにコンパイルする
+    for (TypeDefStructure typeDefStructure : mem.typeDefs) {
+      for (RuleStructure rs : typeDefStructure.mem.rules) {
+        // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+        processMembrane(rs.leftMem); // 一応左辺も
+        processMembrane(rs.rightMem);
+
+        RuleCompiler rc = null;
+        try {
+          rc = new RuleCompiler(rs);
+          rc.compile();
+
+          System.out.println(rc);
+          //2006.1.22 Ruleに行番号を渡す by inui
+          rc.theRule.lineno = rs.lineno;
+        } catch (CompileException e) {
+          Env.p("    in " + rs.toString() + "\n");
+        }
+        subrules.add(rc.theRule);
+      }
+    }
+
+    // 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
+    if (!subrules.isEmpty()) {
+      InterpretedRuleset ruleset = new InterpretedRuleset();
+      for (Rule r : subrules) {
+        ruleset.rules.add(r);
+      }
+      ruleset.branchmap = null;
+      ruleset.systemrulemap = null;
+      mem.rulesets.add(ruleset);
     }
   }
 
