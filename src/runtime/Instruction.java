@@ -2227,6 +2227,19 @@ public class Instruction implements Cloneable {
     setArgType(TAILATOMLIST, new ArgType(false, ARG_ATOM, ARG_MEM));
   }
 
+  /**
+   * subrule [-retset,memi,typename,arglist]
+   *
+   * CSLMNtalによる型制約実装のための中間命令
+   * ルール内にユーザー定義型のガードが現れた場合subrule命令を発行し、対象の型検査を行う
+   */
+
+  public static final int SUBRULE = 999;
+
+  static {
+    setArgType(SUBRULE, new ArgType(true, ARG_INT, ARG_INT, ARG_OBJ, ARG_VARS));
+  }
+
   /** 命令の種類を取得する。*/
   public int getKind() {
     return kind;
@@ -2492,6 +2505,26 @@ public class Instruction implements Cloneable {
     InstructionList label = new InstructionList();
     label.add(new Instruction(PROCEED));
     return new Instruction(Instruction.NOT, label);
+  }
+
+  /** subrule命令を生成する
+   * @param retset
+   * @param memi
+   * @param typename
+   * @param arglist
+   */
+  public static Instruction subrule(
+    int retset,
+    int memi,
+    String typename,
+    List arglist
+  ) {
+    Instruction i = new Instruction(SUBRULE);
+    i.add(retset);
+    i.add(memi);
+    i.add(typename);
+    i.add(arglist);
+    return i;
   }
 
   // コンストラクタ

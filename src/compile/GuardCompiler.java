@@ -757,7 +757,73 @@ class GuardCompiler extends LHSCompiler {
         //						// new, hlink
         //						// bindToFunctor(def1, func);
         //					}
-        else {
+        else if (true) {
+          // //if (!identifiedCxtdefs.contains(def1)) continue;
+          // //if (!identifiedCxtdefs.contains(def2)) continue;
+          ArrayList<Integer> arglist = new ArrayList<Integer>();
+          arglist.add(0);
+          // typedCxtTypes.put(def1, GROUND_LINK_TYPE);
+          // typedCxtTypes.put(def2, GROUND_LINK_TYPE);
+          // idea from loadGroundLink
+          for (int i = 0; i < def1.lhsOcc.args.length; i++) {
+            int[] argelem = linkPaths.get(
+              atomToPath(def1.lhsOcc.args[i].buddy.atom)
+              //atomToPath(def1.lhsOcc.mem.atoms.get(0))
+            );
+            arglist.add(argelem[def1.lhsOcc.args[i].buddy.pos]);
+          }
+          int linkids = groundToSrcPath(def1);
+          if (linkids == UNBOUND) linkids = varCount++;
+          match.add(Instruction.subrule(linkids, 0, func.getName(), arglist));
+
+          System.out.println("checkpoint1");
+
+          // System.out.println("identifiedCxtdefs: " + identifiedCxtdefs + " " + def1);
+          if (!identifiedCxtdefs.contains(def1)) continue;
+          // ground, hlgroundの属性取得
+          Atom hlgroundAtom = cstr;
+          int i = 0;
+          Atom[] attrAtoms = new Atom[hlgroundAtom.args.length - 1];
+          System.out.println("checkpoint2");
+          for (LinkOccurrence link : hlgroundAtom.args) {
+            System.out.println("checkpoint3");
+            if (i != 0) {
+              Atomic linkedAtom = link.buddy.atom;
+              ContextDef d = ((ProcessContext) linkedAtom).def;
+              for (ProcessContext pc : linkedAtom.mem.typedProcessContexts) {
+                if (pc.def == d && pc != linkedAtom) {
+                  if (pc.args.length != 0) {
+                    attrAtoms[i - 1] = (Atom) pc.args[0].buddy.atom;
+                  }
+                }
+              }
+            }
+            i++;
+          }
+
+          // System.out.println("checkpoint4");
+          // System.out.println(typedCxtTypes.get(def1));
+          // System.out.println(hlgroundAttrs.get(def1));
+          // System.out.println(hlgroundAttrs.get(def1).length);
+          // System.out.println(attrAtoms.length);
+          if (typedCxtTypes.get(def1) != GROUND_LINK_TYPE) {
+            System.out.println("checkpoint4-1");
+            hlgroundAttrs.put(def1, attrAtoms);
+            System.out.println("checkpoint4-2");
+          } else if (
+            hlgroundAttrs.get(def1).length != 0 || attrAtoms.length != 0
+          ) {
+            System.out.println("checkpoint4-3");
+            error(
+              "COMPILE ERROR: incompatible attributes in ground constraints"
+            );
+          }
+          System.out.println("checkpoint5");
+          hlgroundAttrs.put(def1, attrAtoms);
+          // System.out.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
+          System.out.println("typedCxtTypes: " + typedCxtTypes);
+          checktypedefLink(func, def1);
+        } else {
           error("COMPILE ERROR: unrecognized type constraint: " + cstr);
           discardTypeConstraint(cstr); // ここには来ない
         }
@@ -1071,9 +1137,92 @@ class GuardCompiler extends LHSCompiler {
     return;
   }
 
+  // CSLMNtal用
   /** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
    *  @param def プロセス文脈定義 */
   // hlground型および属性付きground型
+  private void checktypedefLink(Functor func, ContextDef def) {
+    Object linktype = GROUND_LINK_TYPE;
+    // System.out.println("checkHLGroundLink, typedCxtTypes: " + def + " " + typedCxtTypes.get(def));
+
+    if (
+      typedCxtTypes.get(def) != UNARY_ATOM_TYPE &&
+      typedCxtTypes.get(def) != GROUND_LINK_TYPE &&
+      typedCxtTypes.get(def) != HLGROUND_LINK_TYPE
+    ) {
+      typedCxtTypes.put(def, linktype);
+      //			int linkid = loadGroundLink(def);
+      //			ArrayList linkids = loadGroundLink(def);
+      int linkids = loadGroundLink(def);
+      int srclinklistpath;
+      //			if(!memToLinkListPath.containsKey(def.lhsOcc.mem)){
+      srclinklistpath = varCount++;
+      // 避けるリンクのリスト
+      // match.add(new Instruction(Instruction.NEWLIST, srclinklistpath));
+
+      // 左辺出現アトムの，全ての引数(を指すリンク)のうち,
+      // 左辺の自由リンクもしくは同じ膜のプロセス文脈に接続していて
+      // このプロセス文脈の根でないものをリストに追加する
+      for (Atom atom : def.lhsOcc.mem.atoms) {
+        //				Util.println("checkGroundLink"+atom);
+        int[] paths = (int[]) linkPaths.get(atomToPath(atom));
+        for (int i = 0; i < atom.args.length; i++) {
+          //					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
+          if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
+            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem) if ( // 反対側が右辺出現の時のみ追加
+              !def.lhsOcc.mem.typedProcessContexts.contains(
+                atom.args[i].buddy.atom
+              )
+            ) continue;
+          } else { // 左辺出現が膜内
+            if (
+              !def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom)
+            ) if ( // 反対側がプロセス文脈の引数の時のみ追加
+              !def.lhsOcc.mem.typedProcessContexts.contains(
+                atom.args[i].buddy.atom
+              )
+            ) continue;
+          }
+          // boolean flgNotAdd = false; // その引数を避けるべきリストに「加えない」場合true
+          // for (int j = 0; j < def.lhsOcc.args.length; j++) {
+          //   LinkOccurrence ro = def.lhsOcc.args[j].buddy;
+          //   if (ro == atom.args[i]) {
+          //     flgNotAdd = true;
+          //     break;
+          //   }
+          // }
+          // if (!flgNotAdd) {
+          //   match.add(
+          //     new Instruction(Instruction.ADDTOLIST, srclinklistpath, paths[i])
+          //   );
+          // }
+        }
+      }
+      //			memToLinkListPath.put(def.lhsOcc.mem, srclinklistpath);
+      //			}
+      //			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
+      Atom[] atoms = hlgroundAttrs.get(def); // hlgroundの属性
+      List<Functor> attrs = new ArrayList<>();
+      int natom = varCount++;
+      // int inst =
+      //   (
+      //     func.getName().equals("ground")
+      //       ? Instruction.ISGROUND
+      //       : Instruction.ISHLGROUND
+      //   );
+      // match.add(new Instruction(inst, natom, linkids, srclinklistpath, attrs)); //,memToPath(def.lhsOcc.mem)));
+      rc.hasISGROUND = false;
+      if (!memToGroundSizes.containsKey(def.lhsOcc.mem)) memToGroundSizes.put(
+        def.lhsOcc.mem,
+        new HashMap<>()
+      );
+      memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
+    } else {
+      // System.out.println("typedCxtTypes contained: " + def);
+    }
+    return;
+  }
+
   private void checkHLGroundLink(Functor func, ContextDef def) {
     Object linktype =
       (func.getName().equals("ground") ? GROUND_LINK_TYPE : HLGROUND_LINK_TYPE);
