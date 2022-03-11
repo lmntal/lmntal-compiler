@@ -1,5 +1,7 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.LinkedList;
 
 /**
@@ -8,6 +10,7 @@ import java.util.LinkedList;
 class SrcMembrane {
 
   /** 膜の内容プロセスの表現 */
+  @JsonTypeInfo(use = Id.CLASS)
   LinkedList process = null;
 
   /** 終了フラグの有無 */

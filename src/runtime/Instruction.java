@@ -1,5 +1,7 @@
 package runtime;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,6 +55,10 @@ import util.Util;
  *
  * @author hara, nakajima, n-kato
  */
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 public class Instruction implements Cloneable {
 
   /** 命令毎の引数情報を入れるテーブル */
