@@ -14,6 +14,12 @@
 	<property name="bison"  location="${lib}/java_cup.jar"/>
 	<property name="bison_runtime" location="${lib}/java_cup-runtime.jar"/>
 	<property name="jpp" location="${lib}/jpplib-0.6.jar"/>
+	<path id="jackson">
+		<fileset dir="${lib}/jackson">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	<property name="jackson" refid="jackson"/>
 
 	<!-- properties -->
 	<property name="encoding" value="UTF-8"/>
@@ -46,7 +52,7 @@
 	<!-- java compile -->
 	<target name="compile" depends="flex_lmntal, bison_lmntal, mkdir, help" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp};${bison_runtime}"
+		<javac srcdir="${src}" destdir="${build}" classpath="${classpath};${jpp};${bison_runtime};${jackson}"
 				encoding="${encoding}" target="${java_ver}" source="${java_ver}" includeantruntime="false" />
 	</target>
 
@@ -57,6 +63,8 @@
 				<attribute name="Main-Class" value="runtime.FrontEnd"/>
 			</manifest>
 			<zipfileset src="${jpp}"/>
+			<zipfileset src="${bison_runtime}"/>
+			<zipgroupfileset dir="${lib}/jackson" includes="*.jar"/>
 		</jar>
 	</target>
 

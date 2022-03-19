@@ -28,7 +28,7 @@ public class MultiMapIterator<E> implements Iterator<E> {
   }
 
   /** 指定されたMap内にあるデータを列挙する反復子を生成する */
-  public <K> MultiMapIterator(Map<K, List<E>> map) {
+  public <K>MultiMapIterator(Map<K, List<E>> map) {
     setIterator = map.values().iterator();
     dataIterator = Util.NULL_ITERATOR;
     setNext();

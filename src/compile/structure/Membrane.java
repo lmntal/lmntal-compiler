@@ -272,9 +272,9 @@ class RependenceGraph {
     uf.union(x, y);
   }
 
-  private void reachable(Object x, Object y) {
-    uf.areUnified(x, y);
-  }
+  // private void reachable(Object x, Object y) {
+  //   uf.areUnified(x, y);
+  // }
 
   public String toString() {
     return uf.allKnownElements().toString();
@@ -322,10 +322,6 @@ class RependenceGraph {
 
     private void addAll(Collection<? extends Object> c) {
       for (Object o : c) add(o);
-    }
-
-    private boolean areUnified(Object x, Object y) {
-      return find(x) == find(y);
     }
 
     public Collection<List<Object>> allKnownElements() {

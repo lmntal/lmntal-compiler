@@ -94,7 +94,8 @@ public class ArgumentInferer {
   private Set<LinkOccurrence> inferArgumentMembrane(
     Membrane mem,
     Set<LinkOccurrence> freelinks
-  ) throws TypeException {
+  )
+    throws TypeException {
     //ルールについて走査する
     for (RuleStructure rs : (List<RuleStructure>) mem.rules) {
       //			new ArgumentInferer(rs,constraints).infer();
@@ -196,7 +197,8 @@ public class ArgumentInferer {
   private Set<LinkOccurrence> inferArgumentAtom(
     Atom atom,
     Set<LinkOccurrence> freelinks
-  ) throws TypeException {
+  )
+    throws TypeException {
     for (int i = 0; i < atom.args.length; i++) {
       LinkOccurrence lo = atom.args[i];
       LinkOccurrence b = TypeEnv.getRealBuddy(lo);
@@ -221,7 +223,8 @@ public class ArgumentInferer {
   private void processExplicitLinks(
     ProcessContext lhsOcc,
     ProcessContext rhsOcc
-  ) throws TypeException {
+  )
+    throws TypeException {
     for (int i = 0; i < lhsOcc.args.length; i++) {
       LinkOccurrence lhsPartner = TypeEnv.getRealBuddy(lhsOcc.args[i]);
       LinkOccurrence rhsPartner = TypeEnv.getRealBuddy(rhsOcc.args[i]);
@@ -267,7 +270,8 @@ public class ArgumentInferer {
     int sign,
     LinkOccurrence lo,
     LinkOccurrence b
-  ) throws TypeException {
+  )
+    throws TypeException {
     // 型付きプロセス文脈で、データ型の時にはデータアトムとして扱う
     if (lo.atom instanceof ProcessContext) {
       ProcessContext pc = (ProcessContext) lo.atom;

@@ -7,6 +7,8 @@ class SrcLinkBundle extends SrcLink {
 
   static final String PREFIX_TAG = "*";
 
+  public SrcLinkBundle() {}
+
   /**
    * 指定された名前のリンク束を作成します
    * @param name リンク束の名前

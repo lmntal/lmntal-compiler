@@ -67,6 +67,11 @@ public final class Env {
    */
   public static boolean verboseLinkExt = false;
 
+  /**
+   * <p>中間命令列を json 形式で出力する。</p>
+   */
+  public static boolean dumpJson = false;
+
   ////////////////////////////////////////////////////////////////
 
   /** リンクの表示をL[数字]で表示する冗長表示レベル　<pre> a(_2) {@literal -->} a(L2) </pre> */

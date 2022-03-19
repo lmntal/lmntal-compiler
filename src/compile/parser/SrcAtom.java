@@ -1,10 +1,19 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.LinkedList;
 
 /** ソースファイル中のアトム表現 */
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 class SrcAtom {
 
+  @JsonTypeInfo(use = Id.CLASS)
   protected LinkedList process = null;
 
   /** 名前トークン */
@@ -21,6 +30,8 @@ class SrcAtom {
    * @author Tomohito Makino
    */
   int column = -1;
+
+  public SrcAtom() {}
 
   /**
    * 指定された名前の子プロセスなしのアトム構文を生成する

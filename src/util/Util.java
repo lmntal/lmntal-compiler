@@ -1,5 +1,7 @@
 package util;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,6 +16,10 @@ import runtime.functor.SymbolFunctor;
  * @author mizuno
  * 汎用ユーティリティメソッド・定数を集めたクラス
  */
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 public abstract class Util {
 
   public static Functor DOT = new SymbolFunctor(".", 3);
