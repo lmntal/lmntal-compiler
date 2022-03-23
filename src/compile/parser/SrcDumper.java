@@ -53,7 +53,7 @@ public class SrcDumper {
     s += " :- ";
     if (rule.getGuard().size() > 0) s +=
       dumpLinkedList(rule.getGuard(), ", ") + " | ";
-    s += dumpLinkedList(rule.getBody(), ", ") + ")";
+    s += dumpLinkedList(rule.getBody(), ", ") + ". )";
     return s;
   }
 
@@ -75,7 +75,7 @@ public class SrcDumper {
 
   public static String dumpTypeDef(SrcTypeDef typedef) {
     String s = "typedef " + dumpAtom(typedef.getTypeAtom());
-    s += " { " + dumpLinkedList(typedef.getRules(), ". ") + " }";
+    s += " { " + dumpLinkedList(typedef.getRules(), ". ") + ". }";
     return s;
   }
 

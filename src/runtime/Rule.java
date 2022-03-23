@@ -40,6 +40,11 @@ public final class Rule {
   /** uniq制約を持つかどうか */
   public boolean hasUniq = false;
 
+  /** typedef の内容かどうか */
+  public boolean isTypeDef = false;
+
+  public String typeDefName = "";
+
   // todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 
   /**
@@ -92,6 +97,8 @@ public final class Rule {
   public void showDetail() {
     if (hasUniq) {
       Env.p("Compiled Uniq Rule " + this);
+    } else if (isTypeDef) {
+      Env.p("Compiled SubRule @" + typeDefName + this);
     } else {
       Env.p("Compiled Rule " + this);
     }

@@ -75,6 +75,31 @@ public class RulesetCompiler {
       rules.add(rc.theRule);
     }
 
+    for (TypeDefStructure typeDefStructure : mem.typeDefs) {
+      int i = 0;
+      for (RuleStructure rs : typeDefStructure.mem.rules) {
+        // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+        processMembrane(rs.leftMem); // 一応左辺も
+        processMembrane(rs.rightMem);
+
+        RuleCompiler rc = null;
+        try {
+          rc = new RuleCompiler(rs);
+          rc.compile();
+
+          System.out.println(rc);
+          //2006.1.22 Ruleに行番号を渡す by inui
+          rc.theRule.lineno = rs.lineno;
+        } catch (CompileException e) {
+          Env.p("    in " + rs.toString() + "\n");
+        }
+        rc.theRule.isTypeDef = true;
+        rc.theRule.typeDefName =
+          typeDefStructure.typeAtom.atoms.get(0).getName() + "_" + i++;
+        rules.add(rc.theRule);
+      }
+    }
+
     // 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
     if (!rules.isEmpty()) {
       InterpretedRuleset ruleset = new InterpretedRuleset();
@@ -100,43 +125,42 @@ public class RulesetCompiler {
         ir.isSystemRuleset = true;
       }
     }
+    // // typedef におけるサブルールをコンパイルする
 
-    // typedef におけるサブルールをコンパイルする
+    // List<Rule> subrules = new ArrayList<>();
 
-    List<Rule> subrules = new ArrayList<>();
+    // // この膜にあるルール構造をルールオブジェクトにコンパイルする
+    // for (TypeDefStructure typeDefStructure : mem.typeDefs) {
+    //   for (RuleStructure rs : typeDefStructure.mem.rules) {
+    //     // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+    //     processMembrane(rs.leftMem); // 一応左辺も
+    //     processMembrane(rs.rightMem);
 
-    // この膜にあるルール構造をルールオブジェクトにコンパイルする
-    for (TypeDefStructure typeDefStructure : mem.typeDefs) {
-      for (RuleStructure rs : typeDefStructure.mem.rules) {
-        // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
-        processMembrane(rs.leftMem); // 一応左辺も
-        processMembrane(rs.rightMem);
+    //     RuleCompiler rc = null;
+    //     try {
+    //       rc = new RuleCompiler(rs);
+    //       rc.compile();
 
-        RuleCompiler rc = null;
-        try {
-          rc = new RuleCompiler(rs);
-          rc.compile();
+    //       System.out.println(rc);
+    //       //2006.1.22 Ruleに行番号を渡す by inui
+    //       rc.theRule.lineno = rs.lineno;
+    //     } catch (CompileException e) {
+    //       Env.p("    in " + rs.toString() + "\n");
+    //     }
+    //     subrules.add(rc.theRule);
+    //   }
+    // }
 
-          System.out.println(rc);
-          //2006.1.22 Ruleに行番号を渡す by inui
-          rc.theRule.lineno = rs.lineno;
-        } catch (CompileException e) {
-          Env.p("    in " + rs.toString() + "\n");
-        }
-        subrules.add(rc.theRule);
-      }
-    }
-
-    // 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
-    if (!subrules.isEmpty()) {
-      InterpretedRuleset ruleset = new InterpretedRuleset();
-      for (Rule r : subrules) {
-        ruleset.rules.add(r);
-      }
-      ruleset.branchmap = null;
-      ruleset.systemrulemap = null;
-      mem.rulesets.add(ruleset);
-    }
+    // // 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
+    // if (!subrules.isEmpty()) {
+    //   InterpretedRuleset ruleset = new InterpretedRuleset();
+    //   for (Rule r : subrules) {
+    //     ruleset.rules.add(r);
+    //   }
+    //   ruleset.branchmap = null;
+    //   ruleset.systemrulemap = null;
+    //   mem.rulesets.add(ruleset);
+    // }
   }
 
   public static Ruleset compileRuleset(InterpretedRuleset rs) {
