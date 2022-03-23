@@ -1046,6 +1046,39 @@ class GuardCompiler extends LHSCompiler {
     return linkids;
   }
 
+  /** 型付プロセス文脈defの（特定されている）ソース出現のリンクを取得する。
+   *  それらをリスト変数に格納する．
+   *  その変数番号をgroundsrcsに追加する。
+   *  型情報を更新する。
+   *  @param def プロセス文脈定義
+   *  @return リンクリストの変数番号 */
+  private int loadGroundLinkcslmntal(ContextDef def) {
+    //		ArrayList linkids = groundToSrcPath(def);
+    int linkids = groundToSrcPath(def);
+    if (linkids == UNBOUND) {
+      linkids = varCount++;
+      //match.add(new Instruction(Instruction.NEWLIST, linkids));
+      for (int i = 0; i < def.lhsOcc.args.length; i++) {
+        //				Util.println("loadGroundLink "+def.lhsOcc.args[i].buddy.atom);
+        int[] paths = (int[]) linkPaths.get(
+          atomToPath(def.lhsOcc.args[i].buddy.atom)
+        );
+        //linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
+        //				linkids.set(i, paths[def.lhsOcc.args[i].buddy.pos]);
+        //				groundsrcs.put(def, linkids);
+        // match.add(
+        //   new Instruction(
+        //     Instruction.ADDTOLIST,
+        //     linkids,
+        //     paths[def.lhsOcc.args[i].buddy.pos]
+        //   )
+        // );
+      }
+      groundSrcs.put(def, linkids);
+    }
+    return linkids;
+  }
+
   //左辺の膜(Membrane) -> その膜のアトムが入ったsetを指す変数番号(Integer)
   //	HashMap memToAtomSetPath = new HashMap();
 
@@ -1153,7 +1186,7 @@ class GuardCompiler extends LHSCompiler {
       typedCxtTypes.put(def, linktype);
       //			int linkid = loadGroundLink(def);
       //			ArrayList linkids = loadGroundLink(def);
-      int linkids = loadGroundLink(def);
+      int linkids = loadGroundLinkcslmntal(def);
       int srclinklistpath;
       //			if(!memToLinkListPath.containsKey(def.lhsOcc.mem)){
       srclinklistpath = varCount++;
