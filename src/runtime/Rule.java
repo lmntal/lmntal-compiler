@@ -96,7 +96,7 @@ public final class Rule {
    */
   public void showDetail() {
     if (isTypeDef) {
-      Env.p("Compiled SubRule @" + typeDefName + this);
+      Env.p("Compiled Subrule @" + typeDefName + this);
       printInstructions(memMatch);
       Env.p("");
       return;

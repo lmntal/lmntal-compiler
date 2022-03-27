@@ -442,7 +442,12 @@ public class LMNParser {
         //   typeDef.mem.rules.size() - 1
         // );
       } else if (obj instanceof SrcAtom) {
-        error("NOT IMPLEMENTED YET: atom appeared in typedef");
+        LinkedList atoms = new LinkedList<>();
+        atoms.add(sTypeDef.typeName);
+        atoms.add(obj);
+        SrcRule rule = new SrcRule("", atoms, new LinkedList<>());
+        rule.setText();
+        addSrcRuleToMem(rule, typeDef.mem);
       }
     }
 

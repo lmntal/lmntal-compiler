@@ -470,14 +470,25 @@ class HeadCompiler extends LHSCompiler {
 
         if (atomToPath(buddyatom) != UNBOUND) {
           // リンク先のアトムをすでに取得している場合
-          // lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
-          insts.add(
-            new Instruction(
-              Instruction.EQATOM,
-              buddyatompath,
-              atomToPath(buddyatom)
-            )
-          );
+          if (atomToPath(buddyatom) == -2) {
+            insts.remove(insts.size() - 1);
+            insts.add(
+              new Instruction(
+                Instruction.ISPAIREDLINK,
+                pos + 1,
+                buddylink.pos + 1
+              )
+            );
+          } else {
+            // lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
+            insts.add(
+              new Instruction(
+                Instruction.EQATOM,
+                buddyatompath,
+                atomToPath(buddyatom)
+              )
+            );
+          }
           continue;
         }
 

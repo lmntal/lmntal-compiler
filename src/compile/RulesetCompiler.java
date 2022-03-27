@@ -110,23 +110,25 @@ public class RulesetCompiler {
 
       int i = 0;
       for (RuleStructure rs : typeDefStructure.mem.rules) {
-        // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
-        processMembrane(rs.leftMem); // 一応左辺も
-        processMembrane(rs.rightMem);
+        if (true) {
+          // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+          processMembrane(rs.leftMem); // 一応左辺も
+          processMembrane(rs.rightMem);
 
-        RuleCompiler rc = null;
-        try {
-          rc = new RuleCompiler(rs);
-          rc.compile(true);
+          RuleCompiler rc = null;
+          try {
+            rc = new RuleCompiler(rs);
+            rc.compile(true);
 
-          //2006.1.22 Ruleに行番号を渡す by inui
-          rc.theRule.lineno = rs.lineno;
-        } catch (CompileException e) {
-          Env.p("    in " + rs.toString() + "\n");
+            //2006.1.22 Ruleに行番号を渡す by inui
+            rc.theRule.lineno = rs.lineno;
+          } catch (CompileException e) {
+            Env.p("    in " + rs.toString() + "\n");
+          }
+          rc.theRule.typeDefName =
+            typeDefStructure.typeAtom.atoms.get(0).getName() + "_" + i++;
+          rules.add(rc.theRule);
         }
-        rc.theRule.typeDefName =
-          typeDefStructure.typeAtom.atoms.get(0).getName() + "_" + i++;
-        rules.add(rc.theRule);
       }
     }
 

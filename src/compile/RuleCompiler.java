@@ -703,9 +703,13 @@ public class RuleCompiler {
     );/* 左辺の全てのアトムのリンクについてgetlink命令を発行する */
     gc.fixTypedProcesses();/* 型付きプロセス文脈を一意に決定する */
     gc.checkMembraneStatus();/* プロセス文脈のない膜やstableな膜の検査をする */
-    varcount = gc.varCount;
     compileNegatives();/* 否定条件のコンパイル */
     fixUniqOrder();/* uniq命令を最後に移動 */
+    if (theRule.isTypeDef) {
+      guard.add(new Instruction(Instruction.ALLOCSET, gc.varCount));
+      guard.add(new Instruction(Instruction.SUCCRETURN, gc.varCount++));
+    }
+    varcount = gc.varCount;
     guard.add(0, Instruction.spec(formals, varcount));
     guard.add(
       Instruction.jump(
