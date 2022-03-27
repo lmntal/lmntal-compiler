@@ -437,7 +437,6 @@ public class LMNParser {
         rule.guard.addAll(rule.body);
         rule.body.clear();
         rule.setText();
-        System.out.println(rule.getText());
         addSrcRuleToMem(rule, typeDef.mem);
         // RuleStructure ruleStructure = typeDef.mem.rules.get(
         //   typeDef.mem.rules.size() - 1

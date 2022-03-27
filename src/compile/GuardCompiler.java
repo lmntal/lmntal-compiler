@@ -7,6 +7,7 @@ import compile.structure.LinkOccurrence;
 import compile.structure.Membrane;
 import compile.structure.ProcessContext;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.stream.IntStream;
 import runtime.Env;
 import runtime.Instruction;
 import runtime.functor.Functor;
@@ -233,8 +235,18 @@ class GuardCompiler extends LHSCompiler {
    * <strike>将来的にはリンクオブジェクトをガード命令列の引数に渡すようにするかも知れない。</strike>
    * 将来的にはガード命令列はヘッド命令列にインライン展開される予定なので、
    * このメソッドで生成されるgetlinkは冗長命令の除去により消せる見込み。*/
-  void getLHSLinks() {
-    for (int i = 0; i < atoms.size(); i++) {
+  void getLHSLinks(boolean isTypeDef) {
+    if (isTypeDef) {
+      Atom atom = (Atom) atoms.get(0);
+      int atompath = atomToPath(atom);
+      int arity = atom.getArity();
+      linkPaths.put(
+        atompath,
+        IntStream.rangeClosed(varCount, varCount + arity - 1).toArray()
+      );
+      varCount += arity;
+    }
+    for (int i = isTypeDef ? 1 : 0; i < atoms.size(); i++) {
       Atom atom = (Atom) atoms.get(i);
       int atompath = atomToPath(atom);
       int arity = atom.getArity();
@@ -776,17 +788,13 @@ class GuardCompiler extends LHSCompiler {
           if (linkids == UNBOUND) linkids = varCount++;
           match.add(Instruction.subrule(linkids, 0, func.getName(), arglist));
 
-          System.out.println("checkpoint1");
-
           // System.out.println("identifiedCxtdefs: " + identifiedCxtdefs + " " + def1);
           if (!identifiedCxtdefs.contains(def1)) continue;
           // ground, hlgroundの属性取得
           Atom hlgroundAtom = cstr;
           int i = 0;
           Atom[] attrAtoms = new Atom[hlgroundAtom.args.length - 1];
-          System.out.println("checkpoint2");
           for (LinkOccurrence link : hlgroundAtom.args) {
-            System.out.println("checkpoint3");
             if (i != 0) {
               Atomic linkedAtom = link.buddy.atom;
               ContextDef d = ((ProcessContext) linkedAtom).def;
@@ -801,27 +809,21 @@ class GuardCompiler extends LHSCompiler {
             i++;
           }
 
-          // System.out.println("checkpoint4");
           // System.out.println(typedCxtTypes.get(def1));
           // System.out.println(hlgroundAttrs.get(def1));
           // System.out.println(hlgroundAttrs.get(def1).length);
           // System.out.println(attrAtoms.length);
           if (typedCxtTypes.get(def1) != GROUND_LINK_TYPE) {
-            System.out.println("checkpoint4-1");
             hlgroundAttrs.put(def1, attrAtoms);
-            System.out.println("checkpoint4-2");
           } else if (
             hlgroundAttrs.get(def1).length != 0 || attrAtoms.length != 0
           ) {
-            System.out.println("checkpoint4-3");
             error(
               "COMPILE ERROR: incompatible attributes in ground constraints"
             );
           }
-          System.out.println("checkpoint5");
           hlgroundAttrs.put(def1, attrAtoms);
           // System.out.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
-          System.out.println("typedCxtTypes: " + typedCxtTypes);
           checktypedefLink(func, def1);
         } else {
           error("COMPILE ERROR: unrecognized type constraint: " + cstr);
@@ -1058,22 +1060,22 @@ class GuardCompiler extends LHSCompiler {
     if (linkids == UNBOUND) {
       linkids = varCount++;
       //match.add(new Instruction(Instruction.NEWLIST, linkids));
-      for (int i = 0; i < def.lhsOcc.args.length; i++) {
-        //				Util.println("loadGroundLink "+def.lhsOcc.args[i].buddy.atom);
-        int[] paths = (int[]) linkPaths.get(
-          atomToPath(def.lhsOcc.args[i].buddy.atom)
-        );
-        //linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
-        //				linkids.set(i, paths[def.lhsOcc.args[i].buddy.pos]);
-        //				groundsrcs.put(def, linkids);
-        // match.add(
-        //   new Instruction(
-        //     Instruction.ADDTOLIST,
-        //     linkids,
-        //     paths[def.lhsOcc.args[i].buddy.pos]
-        //   )
-        // );
-      }
+      // for (int i = 0; i < def.lhsOcc.args.length; i++) {
+      //   //				Util.println("loadGroundLink "+def.lhsOcc.args[i].buddy.atom);
+      //   int[] paths = (int[]) linkPaths.get(
+      //     atomToPath(def.lhsOcc.args[i].buddy.atom)
+      //   );
+      //   //linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
+      //   //				linkids.set(i, paths[def.lhsOcc.args[i].buddy.pos]);
+      //   //				groundsrcs.put(def, linkids);
+      //   // match.add(
+      //   //   new Instruction(
+      //   //     Instruction.ADDTOLIST,
+      //   //     linkids,
+      //   //     paths[def.lhsOcc.args[i].buddy.pos]
+      //   //   )
+      //   // );
+      // }
       groundSrcs.put(def, linkids);
     }
     return linkids;

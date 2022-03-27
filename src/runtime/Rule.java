@@ -95,10 +95,15 @@ public final class Rule {
    * 命令列の詳細を出力する
    */
   public void showDetail() {
+    if (isTypeDef) {
+      Env.p("Compiled SubRule @" + typeDefName + this);
+      printInstructions(memMatch);
+      Env.p("");
+      return;
+    }
+
     if (hasUniq) {
       Env.p("Compiled Uniq Rule " + this);
-    } else if (isTypeDef) {
-      Env.p("Compiled SubRule @" + typeDefName + this);
     } else {
       Env.p("Compiled Rule " + this);
     }
