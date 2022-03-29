@@ -777,12 +777,33 @@ class GuardCompiler extends LHSCompiler {
           // typedCxtTypes.put(def1, GROUND_LINK_TYPE);
           // typedCxtTypes.put(def2, GROUND_LINK_TYPE);
           // idea from loadGroundLink
-          for (int i = 0; i < def1.lhsOcc.args.length; i++) {
-            int[] argelem = linkPaths.get(
-              atomToPath(def1.lhsOcc.args[i].buddy.atom)
-              //atomToPath(def1.lhsOcc.mem.atoms.get(0))
-            );
-            arglist.add(argelem[def1.lhsOcc.args[i].buddy.pos]);
+          if (Character.isUpperCase(def1.getName().charAt(1))) {
+            for (LinkOccurrence link : cstr.args) {
+              for (Atom atom : def1.lhsOcc.mem.atoms) {
+                for (int i = 0; i < atom.getArity(); i++) {
+                  if (
+                    atom
+                      .args[i].buddy.atom.getName()
+                      .equals(link.buddy.atom.getName())
+                  ) {
+                    int[] argelem = linkPaths.get(atomToPath(atom));
+                    arglist.add(argelem[i]);
+                  }
+                }
+              }
+            }
+            // int[] paths = (int[]) linkPaths.get(atomToPath(atom));
+            // for (LinkOccurrence link : cstr.args) {
+            //   arglist.add(paths[i]);
+            // }
+          } else {
+            for (int i = 0; i < def1.lhsOcc.args.length; i++) {
+              int[] argelem = linkPaths.get(
+                atomToPath(def1.lhsOcc.args[i].buddy.atom)
+                //atomToPath(def1.lhsOcc.mem.atoms.get(0))
+              );
+              arglist.add(argelem[def1.lhsOcc.args[i].buddy.pos]);
+            }
           }
           int linkids = groundToSrcPath(def1);
           if (linkids == UNBOUND) linkids = varCount++;
@@ -1287,11 +1308,15 @@ class GuardCompiler extends LHSCompiler {
         for (int i = 0; i < atom.args.length; i++) {
           //					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
           if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
-            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem) if ( // 反対側が右辺出現の時のみ追加
-              !def.lhsOcc.mem.typedProcessContexts.contains(
-                atom.args[i].buddy.atom
-              )
-            ) continue;
+            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem) {
+              if ( // 反対側が右辺出現の時のみ追加
+                !def.lhsOcc.mem.typedProcessContexts.contains(
+                  atom.args[i].buddy.atom
+                )
+              ) {
+                continue;
+              }
+            }
           } else { // 左辺出現が膜内
             if (
               !def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom)
