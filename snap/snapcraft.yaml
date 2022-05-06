@@ -31,5 +31,4 @@
   
   apps:
     lmntal-compiler:
-      command: $SNAP/lib/lmntal-compiler/bin/lmntal
-      plugs: [home]
+      command: lib/lmntal-compiler/bin/lmntal
