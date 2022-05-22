@@ -450,7 +450,7 @@ public class FrontEnd {
 
       if (Env.compileRule) {
         try {
-          List<Ruleset> rulesets = m.rulesets;
+          List<Ruleset> rulesets = m.rules.get(0).rightMem.rulesets;
           InterpretedRuleset r = (InterpretedRuleset) rulesets.get(0);
           r.rules.get(0).showDetail();
         } catch (Exception e) {
