@@ -1,9 +1,13 @@
 # LMNtal Compiler
 
-LMNtal のコンパイラです。
-バグ報告は <lmntal@ueda.info.waseda.ac.jp> までお願いします。
+This is an compiler of the
+[LMNtal (pronounced "elemental") ](https://www.ueda.info.waseda.ac.jp/lmntal) language.
 
----
+LMNtal is a programming and modeling language
+based on hierarchical graph rewriting.
+It was designed to be a substrate language of diverse computational models,
+especially those addressing concurrency,
+mobility and multiset rewriting.
 
 ## Getting started
 
@@ -22,14 +26,18 @@ ant
 
 ### Usage
 
-bin ディレクトリ以下のシェルスクリプトを実行することで使えます。
-詳しくは `--help` オプションで確認してください。
+You can use the compiler by running the shell script `bin/lmntal`.
+Please run it with `--help` option to get more detailed information.
 
 ```
 bin/lmntal --help
 ```
 
 ## Development
+
+Contributions are what make the open source community
+such an amazing place to learn, inspire, and create.
+Any contributions you make are **greatly appreciated**.
 
 ### Formatting
 
@@ -62,7 +70,7 @@ See <https://github.com/jhipster/prettier-java> for more detailed information.
     - RuleCompiler.java
     - RulesetCompiler.java
   - util/ # Some utility functions.
-  - type/ # A type checker of polarity of links (please refer Kudo's thesis).
+  - type/ # A type checker of the polarity of links (please refer Kudo's thesis).
   - runtime/ # The runtime in the past century.
 ```
 
@@ -91,6 +99,28 @@ See <https://github.com/jhipster/prettier-java> for more detailed information.
 10. doc  
     javadoc を docs ディレクトリに置く。
 
+### Testing
+
+Please test the compiler with the runtime [SLIM](https://github.com/lmntal/slim).
+
+```bash
+export LMNTAL_HOME=/path/to/the/compiler
+# e.g. export LMNTAL_HOME=/home/username/lmntal
+
+git clone https://github.com/lmntal/slim
+cd slim
+./autogen.sh
+./configure
+make
+make install
+
+make check
+```
+
 ### 公開に際して
 
 必要に応じて Env.LMNTAL_VERSION の値を修正すること。
+
+## Contact
+
+バグ報告は <lmntal@ueda.info.waseda.ac.jp> までお願いします。
