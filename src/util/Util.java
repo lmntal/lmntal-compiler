@@ -201,4 +201,13 @@ public abstract class Util {
   public static long getTime() {
     return System.nanoTime();
   }
+
+  /**
+   * <p>文字{@code c}が英数字であるか調べます。</p>
+   * @param c 調べる文字
+   * @return 文字{@code c}が英数字の場合{@code true}、そうでない場合{@code false}を返します。
+   */
+  public static boolean isAlphabetOrDigit(char c) {
+    return '0' <= c && c <= '9' || 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z';
+  }
 }
