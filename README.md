@@ -1,7 +1,7 @@
 # LMNtal Compiler
 
 LMNtal のコンパイラです。
-バグ報告は lmntal@ueda.info.waseda.ac.jp までお願いします。
+バグ報告は <lmntal@ueda.info.waseda.ac.jp> までお願いします。
 
 ---
 
@@ -15,14 +15,15 @@ LMNtal のコンパイラです。
 ### Installation
 
 ```
-$ git clone git@github.com:lmntal/lmntal-compiler.git
-$ cd lmntal-compiler
-$ ant
+git clone git@github.com:lmntal/lmntal-compiler.git
+cd lmntal-compiler
+ant
 ```
 
-### Using LMNtal Compiler
+### Usage
 
-bin ディレクトリ以下のシェルスクリプトを実行することで使えます。詳しくは`--help`オプションで確認してください。
+bin ディレクトリ以下のシェルスクリプトを実行することで使えます。
+詳しくは `--help` オプションで確認してください。
 
 ```
 bin/lmntal --help
@@ -40,6 +41,30 @@ npx prettier --write "**/*.java"
 ```
 
 See <https://github.com/jhipster/prettier-java> for more detailed information.
+
+### Directory structure
+
+```bash
+- src/
+  - compiler/
+    - parser/
+    - structure/
+    - util/
+    - Compactor.java
+    - CompileException.java
+    - Grouping.java
+    - GuardCompiler.java
+    - HeadCompiler.java
+    - LHSCompiler.java
+    - Module.java
+    - Optimizer.java
+    - README.md
+    - RuleCompiler.java
+    - RulesetCompiler.java
+  - util/ # Some utility functions.
+  - type/ # A type checker of polarity of links (please refer Kudo's thesis).
+  - runtime/ # The runtime in the past century.
+```
 
 ### build.xml
 
