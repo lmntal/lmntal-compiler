@@ -62,7 +62,7 @@ See <https://github.com/jhipster/prettier-java> for more detailed information.
     - RuleCompiler.java
     - RulesetCompiler.java
   - util/ # Some utility functions.
-  - type/ # A type checker of polarity of links (please refer Kudo's thesis).
+  - type/ # A type checker of the polarity of links (please refer Kudo's thesis).
   - runtime/ # The runtime in the past century.
 ```
 
@@ -90,6 +90,24 @@ See <https://github.com/jhipster/prettier-java> for more detailed information.
    8 で生成されるファイルの削除。
 10. doc  
     javadoc を docs ディレクトリに置く。
+
+### Testing
+
+Please test the compiler with the runtime [SLIM](https://github.com/lmntal/slim).
+
+```bash
+export LMNTAL_HOME=/path/to/the/compiler
+# e.g. export LMNTAL_HOME=/home/username/lmntal
+
+git clone https://github.com/lmntal/slim
+cd slim
+./autogen.sh
+./configure
+make
+make install
+
+make check
+```
 
 ### 公開に際して
 
