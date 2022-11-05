@@ -39,6 +39,8 @@ Contributions are what make the open source community
 such an amazing place to learn, inspire, and create.
 Any contributions you make are **greatly appreciated**.
 
+<img src = "https://contrib.rocks/image?repo=lmntal/lmntal-compiler"/>
+
 ### Formatting
 
 We are currently using prettier-java.
