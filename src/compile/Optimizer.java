@@ -309,6 +309,7 @@ public class Optimizer {
         }
         if (!referred) {
           match.remove(i);
+          i--;
           maxm--;
           for (int j = 0; j < maxb; j++) {
             if (body.get(j).getKind() == Instruction.FREEATOM) {
