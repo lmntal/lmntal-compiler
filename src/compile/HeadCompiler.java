@@ -576,6 +576,7 @@ class HeadCompiler extends LHSCompiler {
     memVisited.add(mem);
 
     List<Instruction> insts = list.insts;
+    boolean firstPath = insts.size() == 0;
 
     if (debug2) {
       Util.println(
@@ -585,7 +586,13 @@ class HeadCompiler extends LHSCompiler {
     int thismempath = memToPath(mem);
     for (Atom atom : mem.atoms) {
       if (!atom.functor.isActive() && !fFindDataAtoms) continue;
-      if (atomToPath(atom) != UNBOUND) continue;
+      if(debug) Util.println("insts.size() ... " + insts.size()); // ueda
+      if (atomToPath(atom) != UNBOUND) {
+	  if (firstPath) {
+	      emitNeqAtoms(mem, atom, atomToPath(atom), insts);
+	  }
+	  continue;
+      }
       // 見つかったアトムを変数に取得する
       int atompath = varCount++;
       insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
@@ -731,6 +738,7 @@ class HeadCompiler extends LHSCompiler {
         if (other == UNBOUND) continue;
         if (!otheratom.functor.equals(atom.functor)) continue;
         //if (otheratom == atom) continue;
+        if (otheratom == atom) continue;
         insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
         /* NEQATOMがある場合、同ファンクタのアトムにマッチされるが、branchで両方のアトムを起点とする命令列が出力されるため、connectは不要
 				  testmems[i].connect(otheratom, atom);
