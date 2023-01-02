@@ -586,8 +586,9 @@ class HeadCompiler extends LHSCompiler {
     int thismempath = memToPath(mem);
     for (Atom atom : mem.atoms) {
       if (!atom.functor.isActive() && !fFindDataAtoms) continue;
-      if(debug) Util.println("insts.size() ... " + insts.size()); // ueda
       if (atomToPath(atom) != UNBOUND) {
+          // a(X,Y), a(Y,X) :- ... （２つ目の a は deref で辿れている）が
+          // a(X,X) にマッチしないようにする
 	  if (firstPath) {
 	      emitNeqAtoms(mem, atom, atomToPath(atom), insts);
 	  }
