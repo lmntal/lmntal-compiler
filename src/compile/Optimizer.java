@@ -77,7 +77,7 @@ public class Optimizer {
     // TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
     //    if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop) {
     // allocatomReduce のために常に head と guard をくっつける
-    if(true) {
+    if (true) {
       //head と guard をくっつける
       inlineExpandTailJump(rule.memMatch);
       rule.guardLabel = null;

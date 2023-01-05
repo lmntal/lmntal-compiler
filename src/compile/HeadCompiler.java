@@ -587,14 +587,14 @@ class HeadCompiler extends LHSCompiler {
     for (Atom atom : mem.atoms) {
       if (!atom.functor.isActive() && !fFindDataAtoms) continue;
       if (atomToPath(atom) != UNBOUND) {
-          // a(X,Y), a(Y,X) :- ... （２つ目の a は deref で辿れている）が
-          // a(X,X) にマッチしないようにする
-          // compileMembrane は２回呼ばれることがあるが，
-	  // 最初のパスでNEQATOM命令を生成する
-	  if (firstPass) {
-	      emitNeqAtoms(mem, atom, atomToPath(atom), insts);
-	  }
-	  continue;
+        // a(X,Y), a(Y,X) :- ... （２つ目の a は deref で辿れている）が
+        // a(X,X) にマッチしないようにする
+        // compileMembrane は２回呼ばれることがあるが，
+        // 最初のパスでNEQATOM命令を生成する
+        if (firstPass) {
+          emitNeqAtoms(mem, atom, atomToPath(atom), insts);
+        }
+        continue;
       }
       // 見つかったアトムを変数に取得する
       int atompath = varCount++;
