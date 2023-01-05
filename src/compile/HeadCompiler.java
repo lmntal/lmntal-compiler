@@ -576,7 +576,7 @@ class HeadCompiler extends LHSCompiler {
     memVisited.add(mem);
 
     List<Instruction> insts = list.insts;
-    boolean firstPath = insts.size() == 0;
+    boolean firstPass = insts.size() == 0;
 
     if (debug2) {
       Util.println(
@@ -589,7 +589,9 @@ class HeadCompiler extends LHSCompiler {
       if (atomToPath(atom) != UNBOUND) {
           // a(X,Y), a(Y,X) :- ... （２つ目の a は deref で辿れている）が
           // a(X,X) にマッチしないようにする
-	  if (firstPath) {
+          // compileMembrane は２回呼ばれることがあるが，
+	  // 最初のパスでNEQATOM命令を生成する
+	  if (firstPass) {
 	      emitNeqAtoms(mem, atom, atomToPath(atom), insts);
 	  }
 	  continue;
