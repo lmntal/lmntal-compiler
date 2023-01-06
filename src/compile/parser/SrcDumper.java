@@ -11,7 +11,8 @@ public class SrcDumper {
   protected SrcDumper() {} //インスタンスはない
 
   public static String dumpLink(SrcLink link) {
-    return link.getName();
+    if (link instanceof SrcHyperLink) return "!" + link.getName(); //todo もっといい書き方はないか？
+    else return link.getName();
   }
 
   public static String dumpAtom(SrcAtom atom) {
