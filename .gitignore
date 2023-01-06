@@ -1,5 +1,22 @@
+
+# ignore vscode settings
+
+.vscode
+
+##############################
+
+# gitignore for node
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+##############################
+
 # files
-bin/
+bin/lmntal.jar
 classes/
 .settings/
 sample-input/
@@ -10,7 +27,7 @@ _errors_help_gen.txt
 
 *.class
 
-*.jar
+# *.jar
 *.zip
 *.tgz
 

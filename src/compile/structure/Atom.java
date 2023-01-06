@@ -1,5 +1,7 @@
 package compile.structure;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import runtime.functor.Functor;
 import runtime.functor.SymbolFunctor;
 
@@ -8,76 +10,72 @@ import runtime.functor.SymbolFunctor;
  * @author Takahiko Nagata
  * @date 2003/10/28
  */
-public class Atom extends Atomic
-{
-	/**
-	 * アトムのファンクタ
-	 */
-	public Functor functor;
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
+public class Atom extends Atomic {
 
-	/**
-	 * 型制約の場合：名前トークンの種類(定数単項アトム(unary)型の制約かどうかの判定に使う)
-	 */
-	public boolean isSelfEvaluated = false;
+  /**
+   * アトムのファンクタ
+   */
+  public Functor functor;
 
-	/**
-	 * コンストラクタ
-	 * @param mem このアトムの所属膜
-	 * @param functor ファンクタ
-	 */
-	public Atom(Membrane mem, Functor functor)
-	{
-		super(mem, functor.getArity());
-		this.functor = functor;
-	}
+  /**
+   * 型制約の場合：名前トークンの種類(定数単項アトム(unary)型の制約かどうかの判定に使う)
+   */
+  public boolean isSelfEvaluated = false;
 
-	/**
-	 * コンストラクタ
-	 * @param mem このアトムの所属膜
-	 * @param name アトム名を表す文字列
-	 * @param arity リンクの数
-	 */
-	public Atom(Membrane mem, String name, int arity)
-	{
-		this(mem, new SymbolFunctor(name, arity));
-	}
+  /**
+   * コンストラクタ
+   * @param mem このアトムの所属膜
+   * @param functor ファンクタ
+   */
+  public Atom(Membrane mem, Functor functor) {
+    super(mem, functor.getArity());
+    this.functor = functor;
+  }
 
-	public String toString()
-	{
-		if (args.length == 0) return functor.getQuotedAtomName();
+  /**
+   * コンストラクタ
+   * @param mem このアトムの所属膜
+   * @param name アトム名を表す文字列
+   * @param arity リンクの数
+   */
+  public Atom(Membrane mem, String name, int arity) {
+    this(mem, new SymbolFunctor(name, arity));
+  }
 
-		String argstext = "";
-		for (int i = 0; i < args.length; i++)
-		{
-			argstext += "," + args[i];
-		}
-		return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
-	}
+  public String toString() {
+    if (args.length == 0) return functor.getQuotedAtomName();
 
-	public String toStringAsTypeConstraint()
-	{
-		if (args.length == 0) return functor.getQuotedAtomName();
+    String argstext = "";
+    for (int i = 0; i < args.length; i++) {
+      argstext += "," + args[i];
+    }
+    return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
+  }
 
-		String argstext = "";
-		for (int i = 0; i < args.length; i++)
-		{
-			argstext += "," + ((ProcessContext)args[i].buddy.atom).getQualifiedName();
-		}
-		return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
-	}
+  public String toStringAsTypeConstraint() {
+    if (args.length == 0) return functor.getQuotedAtomName();
 
-	public String getPath()
-	{
-		return functor.getPath();
-	}
+    String argstext = "";
+    for (int i = 0; i < args.length; i++) {
+      argstext +=
+        "," + ((ProcessContext) args[i].buddy.atom).getQualifiedName();
+    }
+    return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
+  }
 
-	public String getName()
-	{
-		return functor.getName();
-	}
+  public String getPath() {
+    return functor.getPath();
+  }
 
-	public int hashCode()
-	{
-		return functor.hashCode();
-	}
+  public String getName() {
+    return functor.getName();
+  }
+
+  public int hashCode() {
+    return functor.hashCode();
+  }
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")" && pwd)/set_cp.sh"
+source "$(cd "$(dirname "$0")" && pwd)/set_cp_jar.sh"
 
 if [ -x /usr/bin/cygpath ]; then
 	CLASSPATH=`cygpath -wp "$CLASSPATH"`

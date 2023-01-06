@@ -24,6 +24,7 @@ parser code {:
 
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
+// 綴りの単項演算子 (lognot) は，現状の文法では lognot(a,a) などの曖昧性の排除が難しいので断念 (ueda)
 terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE, RBRACE_SLASH, RBRACE_AT, RBRACE_SLASH_AT,
 				RBRACE_UNDERBAR, RBRACE_UNDERBAR_SLASH,
@@ -31,7 +32,7 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE_ASTERISK,
 				COLON, PERIOD, BACKSLASH, GUARD, PROCVAR, RULEVAR, 
 				LBRACKET, RBRACKET, NEGATIVE, MOD, 
-				LOGAND, LOGIOR, LOGXOR, /*LOGNOT, ASH,*/ //ueda
+				LOGAND, LOGIOR, LOGXOR, /* LOGNOT, */ ASH,
 				HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
 				ASTERISK, SLASH, PLUS, MINUS, EXCLA, RULENAMESEP;
@@ -59,8 +60,8 @@ non terminal Object				Atom800;
 non terminal Object				Atom;
 
 // 現状: (a,b)と(a,b:-c)で衝突するため、項内でのAtomListの採用が保留となっている。
-non terminal Object				AtomList;
-non terminal Object				AtomListRest;
+// non terminal Object				AtomList;
+// non terminal Object				AtomListRest;
 
 non terminal SrcMembrane		Membrane;
 non terminal SrcMembrane		UnnamedMembrane;
@@ -74,7 +75,7 @@ non terminal LinkedList			ProcessList;
 non terminal LinkedList			NonemptyProcessList;
 non terminal LinkedList			WorldProcessList;
 non terminal LinkedList			NonemptyWorldProcessList;
-non terminal Object				List;
+non terminal SrcAtom			List;
 non terminal Object				ListCdr;
 non terminal LinkedList			BundleList;
 non terminal LinkedList			LinkList;
@@ -103,20 +104,9 @@ HyperLink ::=
 
 // 引数なしまたは引数ありのアトムの名前として使用できるリテラル
 FuncName ::=
-    ATOM_NAME:name
+//    ATOM_NAME:name
+    AtomName:name
       {: RESULT = new SrcName(name); :}
-  | MOD
-      {: RESULT = new SrcName("mod"); :}
-  | LOGAND
-      {: RESULT = new SrcName("logand"); :}
-  | LOGIOR
-      {: RESULT = new SrcName("logior"); :}
-  | LOGXOR
-      {: RESULT = new SrcName("logxor"); :}
-//  | LOGNOT
-//      {: RESULT = new SrcName("lognot"); :}
-//  | ASH
-//      {: RESULT = new SrcName("ash"); :}
   | QUOTED_STRING:name
       {: RESULT = new SrcName(name.toString(), SrcName.QUOTED); :}
   | SYMBOL_NAME:name
@@ -141,8 +131,8 @@ AtomName ::=
       {: RESULT = "logxor"; :}
 //  | LOGNOT
 //      {: RESULT = "lognot"; :}
-//  | ASH
-//      {: RESULT = "ash"; :}
+  | ASH
+      {: RESULT = "ash"; :}
 ;
 
 RuleName ::=
@@ -279,10 +269,10 @@ Atom400 ::=
       {: LinkedList list = new LinkedList();
          list.add(atom1); list.add(atom2);
          RESULT = new SrcAtom("logand", list); :}
-//  | Atom400:atom1 ASH Atom300:atom2
-//      {: LinkedList list = new LinkedList();
-//         list.add(atom1); list.add(atom2);
-//         RESULT = new SrcAtom("ash", list); :}
+  | Atom400:atom1 ASH Atom300:atom2
+      {: LinkedList list = new LinkedList();
+         list.add(atom1); list.add(atom2);
+         RESULT = new SrcAtom("ash", list); :}
 ;
 
 Atom500 ::=
@@ -380,23 +370,23 @@ ListCdr ::=
 ;
 
 // Atomをカンマで区切った列。現在未使用
-AtomList ::=
-    Atom:atom AtomList:atomlist
-      {: if (atomlist == null) { RESULT = atom; }
-         else {
-           LinkedList list = new LinkedList();
-           list.add(atom); list.add(atomlist);
-           RESULT = new SrcAtom(",", list);
-         }
-      :}
-;
+// AtomList ::=
+//    Atom:atom AtomList:atomlist
+//       {: if (atomlist == null) { RESULT = atom; }
+//          else {
+//            LinkedList list = new LinkedList();
+//            list.add(atom); list.add(atomlist);
+//            RESULT = new SrcAtom(",", list);
+//          }
+//       :}
+// ;
 
-AtomListRest ::=
-    RPAREN
-     {: RESULT = null; :}
-  | COMMA Atom:atom AtomListRest:atomlist
-     {: LinkedList list = new LinkedList(); list.add(atom); list.add(atomlist); RESULT = new SrcAtom(",", list); :}
-;
+// AtomListRest ::=
+//     RPAREN
+//      {: RESULT = null; :}
+//   | COMMA Atom:atom AtomListRest:atomlist
+//     {: LinkedList list = new LinkedList(); list.add(atom); list.add(atomlist); RESULT = new SrcAtom(",", list); :}
+// ;
 
 Membrane ::=
     UnnamedMembrane:mem

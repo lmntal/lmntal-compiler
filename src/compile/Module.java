@@ -4,6 +4,7 @@
  */
 package compile;
 
+import compile.structure.Membrane;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,11 +12,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import runtime.Ruleset;
 import util.Util;
-
-import compile.structure.Membrane;
 
 /**
  * モジュールシステムを実現するクラス。<br><br>
@@ -34,41 +32,42 @@ import compile.structure.Membrane;
  *
  */
 public class Module {
-    public static List<String> libPath = new ArrayList<>();
-    public static Map<String, Membrane> memNameTable = new HashMap<>();
-    public static Set<String> loaded = new HashSet<>();
 
-    /**
-     * 膜を名表に登録する。
-     * @param m
-     */
-    public static void regMemName(String name, Membrane m) {
-        memNameTable.put(name, m);
-    }
+  public static List<String> libPath = new ArrayList<>();
+  public static Map<String, Membrane> memNameTable = new HashMap<>();
+  public static Set<String> loaded = new HashSet<>();
 
-    /** モジュールが持つルールセット一覧を出力する。*/
-    public static void showModuleList() {
-        if (memNameTable.size() == 0) return;
+  /**
+   * 膜を名表に登録する。
+   * @param m
+   */
+  public static void regMemName(String name, Membrane m) {
+    memNameTable.put(name, m);
+  }
 
-        Util.println("Module");
-        Iterator<String> it = memNameTable.keySet().iterator();
-        while (it.hasNext()) {
-            String name = it.next();
-            Membrane mem = memNameTable.get(name);
-            name = name.replaceAll("\\\\", "\\\\\\\\");
-            name = name.replaceAll("'", "\\\\'");
-            name = name.replaceAll("\r", "\\\\r");
-            name = name.replaceAll("\n", "\\\\n");
-            Util.print("'" + name + "'");
-            Util.print(" {");
-            if (mem.rulesets.size() > 0) {
-                Iterator<Ruleset> it2 = mem.rulesets.iterator();
-                Util.print(it2.next());
-                while (it2.hasNext()) {
-                    System.out.print(", " + it2.next());
-                }
-            }
-            Util.println("}");
+  /** モジュールが持つルールセット一覧を出力する。*/
+  public static void showModuleList() {
+    if (memNameTable.size() == 0) return;
+
+    Util.println("Module");
+    Iterator<String> it = memNameTable.keySet().iterator();
+    while (it.hasNext()) {
+      String name = it.next();
+      Membrane mem = memNameTable.get(name);
+      name = name.replaceAll("\\\\", "\\\\\\\\");
+      name = name.replaceAll("'", "\\\\'");
+      name = name.replaceAll("\r", "\\\\r");
+      name = name.replaceAll("\n", "\\\\n");
+      Util.print("'" + name + "'");
+      Util.print(" {");
+      if (mem.rulesets.size() > 0) {
+        Iterator<Ruleset> it2 = mem.rulesets.iterator();
+        Util.print(it2.next());
+        while (it2.hasNext()) {
+          System.out.print(", " + it2.next());
         }
+      }
+      Util.println("}");
     }
+  }
 }

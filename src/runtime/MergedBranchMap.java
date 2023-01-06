@@ -1,8 +1,7 @@
 package runtime;
 
-import java.util.List;
 import java.util.HashMap;
-
+import java.util.List;
 import runtime.functor.Functor;
 
 /**
@@ -14,30 +13,31 @@ import runtime.functor.Functor;
  */
 
 public class MergedBranchMap {
-	/**
-	 * アクティブアトムのファンクタ⇒それに続く命令列のマップ
-	 */
-	public HashMap<Functor, List<Instruction>> branchMap;
-	
-	public MergedBranchMap(HashMap<Functor, List<Instruction>> bm){
-		branchMap = bm;
-	}
-	
-	/**
-	 * ファンクタに対応する命令列を返す
-	 * @param func アクティブアトムのファンクタ
-	 * @return　命令列
-	 */
-	public List<Instruction> getInsts(Functor func){
-		return branchMap.get(func);
-	}
-	
-	/**
-	 * マップにファンクタが含まれるかを確認
-	 * @param func　アクティブアトムのファンクタ
-	 * @return ファンクタが含まれるかどうか(boolean)
-	 */
-	public boolean containsKey(Functor func){
-		return branchMap.containsKey(func);
-	}
+
+  /**
+   * アクティブアトムのファンクタ⇒それに続く命令列のマップ
+   */
+  public HashMap<Functor, List<Instruction>> branchMap;
+
+  public MergedBranchMap(HashMap<Functor, List<Instruction>> bm) {
+    branchMap = bm;
+  }
+
+  /**
+   * ファンクタに対応する命令列を返す
+   * @param func アクティブアトムのファンクタ
+   * @return　命令列
+   */
+  public List<Instruction> getInsts(Functor func) {
+    return branchMap.get(func);
+  }
+
+  /**
+   * マップにファンクタが含まれるかを確認
+   * @param func　アクティブアトムのファンクタ
+   * @return ファンクタが含まれるかどうか(boolean)
+   */
+  public boolean containsKey(Functor func) {
+    return branchMap.containsKey(func);
+  }
 }

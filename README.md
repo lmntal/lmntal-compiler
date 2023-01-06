@@ -1,53 +1,130 @@
+# LMNtal Compiler
 
-LMNtal Compiler
-===============================
+This is an compiler of the
+[LMNtal (pronounced "elemental") ](https://www.ueda.info.waseda.ac.jp/lmntal) language.
 
-LMNtalのコンパイラです。
-バグ報告は lmntal@ueda.info.waseda.ac.jp までお願いします。
+LMNtal is a programming and modeling language
+based on hierarchical graph rewriting.
+It was designed to be a substrate language of diverse computational models,
+especially those addressing concurrency,
+mobility and multiset rewriting.
 
----
 ## Getting started
+
 ### Prerequisites
+
 - JDK 8 or higher version
 - Ant
+
 ### Installation
+
 ```
-$ git clone git@github.com:lmntal/lmntal-compiler.git
-$ cd lmntal-compiler
-$ ant
+git clone git@github.com:lmntal/lmntal-compiler.git
+cd lmntal-compiler
+ant
 ```
-### Using LMNtal Compiler
-binディレクトリ以下のシェルスクリプトを実行することで使えます。詳しくは`--help`オプションで確認してください。
+
+### Usage
+
+You can use the compiler by running the shell script `bin/lmntal`.
+Please run it with `--help` option to get more detailed information.
+
 ```
 bin/lmntal --help
 ```
 
 ## Development
 
+Contributions are what make the open source community
+such an amazing place to learn, inspire, and create.
+Any contributions you make are **greatly appreciated**.
+
+<a href="https://github.com/lmntal/lmntal-compiler/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=lmntal/lmntal-compiler"/>
+</a>
+
+### Formatting
+
+We are currently using prettier-java.
+
+```sh
+npm install # install prettier
+npx prettier --write "**/*.java"
+```
+
+See <https://github.com/jhipster/prettier-java> for more detailed information.
+
+### Directory structure
+
+```bash
+- src/
+  - compiler/
+    - parser/
+    - structure/
+    - util/
+    - Compactor.java
+    - CompileException.java
+    - Grouping.java
+    - GuardCompiler.java
+    - HeadCompiler.java
+    - LHSCompiler.java
+    - Module.java
+    - Optimizer.java
+    - README.md
+    - RuleCompiler.java
+    - RulesetCompiler.java
+  - util/ # Some utility functions.
+  - type/ # A type checker of the polarity of links (please refer Kudo's thesis).
+  - runtime/ # The runtime in the past century.
+```
+
 ### build.xml
 
-1. flex_* / bison_*  
-    lexer / parser の生成
+1. `flex_*` / `bison_*`  
+   lexer / parser の生成
 2. help  
-    Help.java （--help オプション指定時の出力を行うクラス）の生成
+   Help.java （--help オプション指定時の出力を行うクラス）の生成
 3. mkdir  
-    classesディレクトリの生成
+   classes ディレクトリの生成
 4. compile  
-    mkdirとhelpを実行してソースのコンパイルをする。classesディレクトリに置く。
+   mkdir と help を実行してソースのコンパイルをする。classes ディレクトリに置く。
 5. jar (default)  
-    compileを実行してbinディレクトリにlmntal.jarを置く。
+   compile を実行して bin ディレクトリに lmntal.jar を置く。
 6. archive  
-    公開用形式でアーカイブ (lmntal.tgz)。アーカイブするものは以下の通り。（矢印の右はアーカイブ内のパス）
-    bin/* (set_cp_jar.bat → set_cp.bat, set_cp_jar.sh → set_cp.sh)
-    sample/public/*.lmn → sample/*.lmn
+   公開用形式でアーカイブ (lmntal.tgz)。アーカイブするものは以下の通り。（矢印の右はアーカイブ内のパス）
+   `bin/*` (set_cp_jar.bat → set_cp.bat, set_cp_jar.sh → set_cp.sh)
+   `sample/public/*.lmn` → `sample/*.lmn`
 7. zip  
-    archiveのzipバージョン。lmntal.zipを生成する。
-8. dist  
-    help, jar, archiveを実行する。
+   archive の zip バージョン。lmntal.zip を生成する。
+8. dist
+   help, jar, archive を実行する。
 9. clean  
-    8で生成されるファイルの削除。
+   8 で生成されるファイルの削除。
 10. doc  
-    javadocをdocsディレクトリに置く。
+    javadoc を docs ディレクトリに置く。
+
+### Testing
+
+Please test the compiler with the runtime [SLIM](https://github.com/lmntal/slim).
+
+```bash
+export LMNTAL_HOME=/path/to/the/compiler
+# e.g. export LMNTAL_HOME=/home/username/lmntal
+
+git clone https://github.com/lmntal/slim
+cd slim
+./autogen.sh
+./configure
+make
+make install
+
+make check
+```
 
 ### 公開に際して
+
 必要に応じて Env.LMNTAL_VERSION の値を修正すること。
+
+## Contact
+
+バグ報告は <lmntal@ueda.info.waseda.ac.jp> までお願いします。
