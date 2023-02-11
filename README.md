@@ -45,14 +45,14 @@ Any contributions you make are **greatly appreciated**.
 
 ### Formatting
 
-We are currently using prettier-java.
+We are currently using google-java-format.
 
 ```sh
-npm install # install prettier
-npx prettier --write "**/*.java"
+wget https://github.com/google/google-java-format/releases/download/v1.15.0/google-java-format-1.15.0-all-deps.jar
+java -jar /path/to/google-java-format-1.15.0-all-deps.jar --replace [files...]
 ```
 
-See <https://github.com/jhipster/prettier-java> for more detailed information.
+See <https://github.com/google/google-java-format> for more detailed information.
 
 ### Directory structure
 
