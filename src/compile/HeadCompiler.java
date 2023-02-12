@@ -51,6 +51,8 @@ class HeadCompiler extends LHSCompiler {
   private HashMap<Membrane, ProcessContextEquation> proccxteqMap =
       new HashMap<>(); // Membrane -> ProcessContextEquation
 
+  int argNum = UNBOUND;
+
   protected final int linkToPath(int atomid, int pos) { // todo HeadCompilerの仕様に合わせる？GuardCompilerも。
     if (!linkPaths.containsKey(atomid)) return UNBOUND;
     return linkPaths.get(atomid)[pos];
@@ -305,9 +307,13 @@ class HeadCompiler extends LHSCompiler {
         if (debug) Util.println("proc5 " + atom);
         // リンク先のアトムを新しい変数に取得する (*A)
         int buddyatompath = varCount++;
-        insts.add(
-            new Instruction(
-                Instruction.DEREF, buddyatompath, atomToPath(atom), pos, buddylink.pos));
+        if (argNum != UNBOUND && atomToPath(atom) == -2) {
+          insts.add(new Instruction(Instruction.DEREFLINK, buddyatompath, pos + 1, buddylink.pos));
+        } else {
+          insts.add(
+              new Instruction(
+                  Instruction.DEREF, buddyatompath, atomToPath(atom), pos, buddylink.pos));
+        }
 
         // リンク先が他の等式右辺のアトムの場合（等式間リンクの場合）
         // 膜間の自由リンク管理アトム鎖の検査をし、膜階層がマッチするか検査を行う。
@@ -392,8 +398,13 @@ class HeadCompiler extends LHSCompiler {
 
         if (atomToPath(buddyatom) != UNBOUND) {
           // リンク先のアトムをすでに取得している場合
-          // lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
-          insts.add(new Instruction(Instruction.EQATOM, buddyatompath, atomToPath(buddyatom)));
+          if (atomToPath(buddyatom) == -2) {
+            insts.remove(insts.size() - 1);
+            insts.add(new Instruction(Instruction.ISPAIREDLINK, pos + 1, buddylink.pos + 1));
+          } else {
+            // lhs(<)->lhs(>), neg(<)->neg(>), neg->lhs なのでリンク先のアトムの同一性を確認
+            insts.add(new Instruction(Instruction.EQATOM, buddyatompath, atomToPath(buddyatom)));
+          }
           continue;
         }
 

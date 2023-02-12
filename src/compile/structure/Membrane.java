@@ -49,6 +49,9 @@ public final class Membrane {
   /** ルール(compile.structure.RuleStructure)のリスト */
   public List<RuleStructure> rules = new LinkedList<>();
 
+  /** 型定義(compile.structure.TypeDefStructure)のリスト */
+  public List<TypeDefStructure> typeDefs = new LinkedList<>();
+
   ////////////////////////////////////////////////////////////////
 
   /** アトム集団(compile.structure.Atom)のリスト */

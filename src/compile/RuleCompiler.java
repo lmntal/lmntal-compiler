@@ -103,7 +103,7 @@ public class RuleCompiler {
   /**
    * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルする
    */
-  public Rule compile() throws CompileException {
+  public Rule compile(boolean isTypeDef) throws CompileException {
     // System.out.println("compile() called: " + rs);
     liftupActiveAtoms(rs.leftMem);
     simplify();
@@ -111,6 +111,7 @@ public class RuleCompiler {
     sortGuardAtoms();
     theRule = new Rule(rs.leftMem.getFirstAtomName(), rs.toString());
     theRule.name = rs.name;
+    theRule.isTypeDef = isTypeDef;
 
     hc = new HeadCompiler(rs.leftMem);
     theRule.guardLabel = new InstructionList();
@@ -118,6 +119,10 @@ public class RuleCompiler {
     theRule.bodyLabel = new InstructionList();
     body = theRule.bodyLabel.insts;
     contLabel = (guard != null ? theRule.guardLabel : theRule.bodyLabel);
+
+    if (isTypeDef) {
+      hc.argNum = rs.leftMem.atoms.get(0).getArity();
+    }
 
     // 左辺膜のコンパイル
     compile_l();
@@ -146,12 +151,9 @@ public class RuleCompiler {
     theRule.guard = guard;
     theRule.body = body;
 
-    String ruleName = theRule.name;
-    if (theRule.name == null) {
-      ruleName = makeRuleName(rs.toString(), Env.showlongrulename, 4);
-    }
+    String ruleName =
+        theRule.name != null ? theRule.name : makeRuleName(rs.toString(), Env.showlongrulename, 4);
     theRule.body.add(1, Instruction.commit(ruleName, theRule.lineno));
-
     optimize();
     return theRule;
   }
@@ -188,6 +190,18 @@ public class RuleCompiler {
     theRule.memMatchLabel = hc.matchLabel;
     memMatch = hc.match;
     hc.memPaths.put(rs.leftMem, 0); // 本膜の変数番号は 0
+
+    if (theRule.isTypeDef) {
+      Atom typeName = rs.leftMem.atoms.get(0);
+      hc.varCount = typeName.getArity() + 1;
+      hc.atomPaths.put(typeName, -2);
+      // hc.linkPaths.put(
+      //   -2,
+      //   IntStream.rangeClosed(1, typeName.getArity()).toArray()
+      // );
+      hc.compileLinkedGroup(typeName, hc.matchLabel);
+    }
+
     hc.compileMembrane(rs.leftMem, hc.matchLabel);
     // 自由出現したデータアトムがないか検査する
     if (!hc.fFindDataAtoms) {
@@ -207,11 +221,18 @@ public class RuleCompiler {
     if (Env.hyperLinkOpt) {
       hc.compileSameProcessContext(rs.leftMem, hc.matchLabel); // seiji
     }
-    hc.match.add(0, Instruction.spec(1, hc.maxVarCount));
+    int arity = theRule.isTypeDef ? rs.leftMem.atoms.get(0).getArity() : 0;
+    int formals = arity + 1;
+    hc.match.add(0, Instruction.spec(formals, hc.maxVarCount));
     // jump命令群の生成
     List<Integer> memActuals = hc.getMemActuals();
     List<Integer> atomActuals = hc.getAtomActuals();
     List<Object> varActuals = hc.getVarActuals();
+    if (theRule.isTypeDef) {
+      for (int i = arity; i > 0; i--) {
+        varActuals.add(0, i);
+      }
+    }
     hc.match.add(Instruction.jump(contLabel, memActuals, atomActuals, varActuals));
   }
 
@@ -622,13 +643,17 @@ public class RuleCompiler {
     genLHSPaths();
     gc = new GuardCompiler(this, hc); /* 変数番号の正規化 */
     if (guard == null) return;
-    int formals = gc.varCount;
-    gc.getLHSLinks(); /* 左辺の全てのアトムのリンクについてgetlink命令を発行する */
+    int formals = theRule.isTypeDef ? gc.varCount + gc.atoms.get(0).getArity() : gc.varCount;
+    gc.getLHSLinks(theRule.isTypeDef); /* 左辺の全てのアトムのリンクについてgetlink命令を発行する */
     gc.fixTypedProcesses(); /* 型付きプロセス文脈を一意に決定する */
     gc.checkMembraneStatus(); /* プロセス文脈のない膜やstableな膜の検査をする */
-    varcount = gc.varCount;
     compileNegatives(); /* 否定条件のコンパイル */
     fixUniqOrder(); /* uniq命令を最後に移動 */
+    if (theRule.isTypeDef) {
+      guard.add(new Instruction(Instruction.ALLOCSET, gc.varCount));
+      guard.add(new Instruction(Instruction.SUCCRETURN, gc.varCount++));
+    }
+    varcount = gc.varCount;
     guard.add(0, Instruction.spec(formals, varcount));
     guard.add(
         Instruction.jump(

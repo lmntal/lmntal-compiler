@@ -6,9 +6,12 @@ package compile;
 import compile.structure.Atom;
 import compile.structure.Membrane;
 import compile.structure.RuleStructure;
+import compile.structure.TypeDefStructure;
 import java.util.ArrayList;
 import java.util.List;
 import runtime.Env;
+import runtime.Instruction;
+import runtime.InstructionList;
 import runtime.InterpretedRuleset;
 import runtime.Rule;
 import runtime.Ruleset;
@@ -65,13 +68,60 @@ public class RulesetCompiler {
       RuleCompiler rc = null;
       try {
         rc = new RuleCompiler(rs);
-        rc.compile();
+        rc.compile(false);
         // 2006.1.22 Ruleに行番号を渡す by inui
         rc.theRule.lineno = rs.lineno;
       } catch (CompileException e) {
         Env.p("    in " + rs.toString() + "\n");
       }
       rules.add(rc.theRule);
+    }
+
+    // typedef におけるサブルールをコンパイルする
+    for (TypeDefStructure typeDefStructure : mem.typeDefs) {
+      if (!mem.typeDefs.isEmpty()) {
+        Rule controlRule = new Rule();
+        Atom typeAtom = typeDefStructure.mem.rules.get(0).leftMem.atoms.get(0);
+        String typeName = typeAtom.getName();
+        int arity = typeAtom.getArity();
+        controlRule.typeDefName = typeName;
+        controlRule.isTypeDef = true;
+        controlRule.memMatch.add(Instruction.spec(arity + 1, arity + 2));
+        ArrayList<Integer> arglist = new ArrayList<>();
+        for (int i = 0; i <= arity; i++) {
+          arglist.add(i);
+        }
+        for (int i = 0; i < typeDefStructure.mem.rules.size(); i++) {
+          InstructionList subBranch = new InstructionList();
+          subBranch.insts.add(Instruction.subrule(arity + 1, 0, typeName + "_" + i, arglist));
+          subBranch.insts.add(new Instruction(Instruction.SUCCRETURN, arity + 1));
+          controlRule.memMatch.add(new Instruction(Instruction.BRANCH, subBranch));
+        }
+        controlRule.memMatch.add(new Instruction(Instruction.FAILRETURN));
+        rules.add(controlRule);
+      }
+
+      int i = 0;
+      for (RuleStructure rs : typeDefStructure.mem.rules) {
+        if (true) {
+          // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+          processMembrane(rs.leftMem); // 一応左辺も
+          processMembrane(rs.rightMem);
+
+          RuleCompiler rc = null;
+          try {
+            rc = new RuleCompiler(rs);
+            rc.compile(true);
+
+            // 2006.1.22 Ruleに行番号を渡す by inui
+            rc.theRule.lineno = rs.lineno;
+          } catch (CompileException e) {
+            Env.p("    in " + rs.toString() + "\n");
+          }
+          rc.theRule.typeDefName = typeDefStructure.typeAtom.atoms.get(0).getName() + "_" + i++;
+          rules.add(rc.theRule);
+        }
+      }
     }
 
     // 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする

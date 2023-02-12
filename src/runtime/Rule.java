@@ -43,6 +43,11 @@ public final class Rule {
   /** uniq制約を持つかどうか */
   public boolean hasUniq = false;
 
+  /** typedef の内容かどうか */
+  public boolean isTypeDef = false;
+
+  public String typeDefName = "";
+
   // todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 
   /**
@@ -90,6 +95,13 @@ public final class Rule {
    * 命令列の詳細を出力する
    */
   public void showDetail() {
+    if (isTypeDef) {
+      Env.p("Compiled Subrule @" + typeDefName + this);
+      printInstructions(memMatch);
+      Env.p("");
+      return;
+    }
+
     if (hasUniq) {
       Env.p("Compiled Uniq Rule " + this);
     } else {
