@@ -30,7 +30,7 @@ public final class Env {
   ////////////////////////////////////////////////////////////////
 
   /** 中間命令列を出力するモード。Java への変換や実行は行わない。 */
-  //public static boolean compileonly = true;
+  // public static boolean compileonly = true;
 
   /** 履歴つきfindatomを含む中間命令列を出力するモード。 */
   //	public static boolean findatom2 = false;
@@ -198,7 +198,7 @@ public final class Env {
    * @param o method name
    */
   public static void c(Object o) {
-    //d(">>> "+o);
+    // d(">>> "+o);
   }
 
   /**
@@ -262,6 +262,7 @@ public final class Env {
 
   /** 各推論の有効／無効 */
   public static boolean flgOccurrenceInference = false;
+
   public static boolean flgQuantityInference = true;
   public static boolean flgArgumentInference = true;
 
@@ -312,6 +313,7 @@ public final class Env {
   public static boolean compileRule = false;
 
   /** hyperlink */
-  public static boolean hyperLink = true; //seiji
-  public static boolean hyperLinkOpt = true; //seiji
+  public static boolean hyperLink = true; // seiji
+
+  public static boolean hyperLinkOpt = true; // seiji
 }

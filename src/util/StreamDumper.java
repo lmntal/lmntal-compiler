@@ -24,9 +24,7 @@ public class StreamDumper implements Runnable {
   }
 
   public void run() {
-    Util.println(
-      "StreamDumper: now starting dumping the console log of: " + processName
-    );
+    Util.println("StreamDumper: now starting dumping the console log of: " + processName);
 
     BufferedReader buff = new BufferedReader(new InputStreamReader(childIn));
 

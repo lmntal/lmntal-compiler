@@ -6,10 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public final class Rule {
 
   /** 膜主導ルール適用の命令列（memMatchLabel.insts）
@@ -80,10 +77,7 @@ public final class Rule {
    * パーザーで利用するコンストラクタ
    */
   public Rule(
-    InstructionList memMatchLabel,
-    InstructionList guardLabel,
-    InstructionList bodyLabel
-  ) {
+      InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel) {
     this.memMatchLabel = memMatchLabel;
     this.guardLabel = guardLabel;
     this.bodyLabel = bodyLabel;
