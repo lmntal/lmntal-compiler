@@ -33,11 +33,7 @@ public class DynamicCounts {
   public final StaticCounts generateCounts;
 
   public DynamicCounts(
-    StaticCounts removeCounts,
-    int multiple,
-    StaticCounts generateCounts,
-    VarCount applyCount
-  ) {
+      StaticCounts removeCounts, int multiple, StaticCounts generateCounts, VarCount applyCount) {
     this.mem = generateCounts.mem;
     this.multiple = multiple;
     this.applyCount = applyCount;

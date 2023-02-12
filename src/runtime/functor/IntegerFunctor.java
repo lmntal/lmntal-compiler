@@ -2,7 +2,6 @@ package runtime.functor;
 
 /** 整数アトム用の1引数ファンクタを表すクラス
  * @author n-kato */
-
 public class IntegerFunctor extends DataFunctor {
 
   private int value;

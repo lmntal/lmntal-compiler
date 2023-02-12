@@ -43,12 +43,12 @@ public class ArgumentInferer {
    * グローバルルート膜に対してのみ呼ばれる
    * @param top
    */
-  public ArgumentInferer(Membrane top) { //, ConstraintSet constraints){
+  public ArgumentInferer(Membrane top) { // , ConstraintSet constraints){
     RuleStructure tmprule = new RuleStructure(new Membrane(null), "tmp");
     tmprule.leftMem = new Membrane(null);
     tmprule.rightMem = top;
     this.rule = tmprule;
-    this.constraints = new ConstraintSet(); //constraints;
+    this.constraints = new ConstraintSet(); // constraints;
   }
 
   public void printAll() {
@@ -66,7 +66,7 @@ public class ArgumentInferer {
     // 全ての引数についてモード変数、型変数を振る
     inferArgumentRule(rule);
 
-    //プロセス文脈について処理する
+    // プロセス文脈について処理する
     processLinksOfProcessContexts();
 
     solvePathes();
@@ -77,12 +77,10 @@ public class ArgumentInferer {
    * プロセス文脈の引数について処理する
    */
   private void processLinksOfProcessContexts() throws TypeException {
-    for (ContextDef def : defs) for (Context rhsOcc : def.rhsOccs) if (
-      def.lhsOcc != null
-    ) processExplicitLinks(
-      (ProcessContext) def.lhsOcc,
-      (ProcessContext) rhsOcc
-    );
+    for (ContextDef def : defs)
+      for (Context rhsOcc : def.rhsOccs)
+        if (def.lhsOcc != null)
+          processExplicitLinks((ProcessContext) def.lhsOcc, (ProcessContext) rhsOcc);
   }
 
   /**
@@ -91,12 +89,9 @@ public class ArgumentInferer {
    *            free links already checked
    * @return free links in the process at mem
    */
-  private Set<LinkOccurrence> inferArgumentMembrane(
-    Membrane mem,
-    Set<LinkOccurrence> freelinks
-  )
-    throws TypeException {
-    //ルールについて走査する
+  private Set<LinkOccurrence> inferArgumentMembrane(Membrane mem, Set<LinkOccurrence> freelinks)
+      throws TypeException {
+    // ルールについて走査する
     for (RuleStructure rs : (List<RuleStructure>) mem.rules) {
       //			new ArgumentInferer(rs,constraints).infer();
       inferArgumentRule(rs);
@@ -110,21 +105,21 @@ public class ArgumentInferer {
     // この時点で、子孫膜に出現する全てのアトム／プロセス文脈について、局所リンクの処理は終わっている
 
     for (Atom atom : (List<Atom>) mem.atoms) {
-      if (TypeEnv.outOfPassiveAtom(atom) != TypeEnv.CONNECTOR) freelinks =
-        inferArgumentAtom(atom, freelinks); // '='/2だったら無視する
+      if (TypeEnv.outOfPassiveAtom(atom) != TypeEnv.CONNECTOR)
+        freelinks = inferArgumentAtom(atom, freelinks); // '='/2だったら無視する
     }
 
     // この時点で、子孫膜に出現する全てのアトム／プロセス文脈、およびこの膜のアトムの引数の処理は終わっている
     // つまり残るはこの膜に出現するプロセス文脈と、この膜の自由リンクのみ
 
-    //文脈定義を集める
+    // 文脈定義を集める
 
     // プロセス文脈
     for (ProcessContext pc : (List<ProcessContext>) mem.processContexts) {
       ContextDef def = pc.def;
       if (!defs.contains(def)) defs.add(def);
     }
-    //型付きプロセス文脈
+    // 型付きプロセス文脈
     for (ProcessContext tpc : (List<ProcessContext>) mem.typedProcessContexts) {
       ContextDef def = tpc.def;
       if (TypeEnv.dataTypeOfContextDef(def) == null) {
@@ -136,11 +131,10 @@ public class ArgumentInferer {
           ProcessContext budpc = (ProcessContext) b.atom;
           if (TypeEnv.dataTypeOfContextDef(budpc.def) != null) {
             throw new TypeException(
-              "output arguments connected each other. : " +
-              lo.atom.getName() +
-              " <=> " +
-              b.atom.getName()
-            );
+                "output arguments connected each other. : "
+                    + lo.atom.getName()
+                    + " <=> "
+                    + b.atom.getName());
           } else {
             freelinks.add(lo);
             continue;
@@ -163,26 +157,17 @@ public class ArgumentInferer {
    */
   private void inferArgumentRule(RuleStructure rule) throws TypeException {
     // 左辺／右辺それぞれについて型／モードを解決し、1回出現するリンクを集める
-    Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(
-      rule.leftMem,
-      new HashSet<>()
-    );
-    Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(
-      rule.rightMem,
-      new HashSet<>()
-    );
+    Set<LinkOccurrence> freelinksLeft = inferArgumentMembrane(rule.leftMem, new HashSet<>());
+    Set<LinkOccurrence> freelinksRight = inferArgumentMembrane(rule.rightMem, new HashSet<>());
     for (LinkOccurrence leftlink : freelinksLeft) {
       LinkOccurrence rightlink = TypeEnv.getRealBuddy(leftlink);
-      if (!freelinksRight.contains(rightlink)) throw new TypeException(
-        "link occurs once in a rule."
-      ); // リンクが左辺／右辺出現でないなら
+      if (!freelinksRight.contains(rightlink))
+        throw new TypeException("link occurs once in a rule."); // リンクが左辺／右辺出現でないなら
       if (leftlink.atom instanceof Atom) {
         addConstraintAboutLinks(1, rightlink, leftlink);
-      } else if (
-        rightlink.atom instanceof ProcessContext
-      ) throw new TypeException(
-        "SYNTAX ERROR : Process Context's link inherited."
-      ); else addConstraintAboutLinks(1, leftlink, rightlink);
+      } else if (rightlink.atom instanceof ProcessContext)
+        throw new TypeException("SYNTAX ERROR : Process Context's link inherited.");
+      else addConstraintAboutLinks(1, leftlink, rightlink);
     }
   }
 
@@ -194,11 +179,8 @@ public class ArgumentInferer {
    * @param freelinks
    * @return
    */
-  private Set<LinkOccurrence> inferArgumentAtom(
-    Atom atom,
-    Set<LinkOccurrence> freelinks
-  )
-    throws TypeException {
+  private Set<LinkOccurrence> inferArgumentAtom(Atom atom, Set<LinkOccurrence> freelinks)
+      throws TypeException {
     for (int i = 0; i < atom.args.length; i++) {
       LinkOccurrence lo = atom.args[i];
       LinkOccurrence b = TypeEnv.getRealBuddy(lo);
@@ -220,38 +202,34 @@ public class ArgumentInferer {
   }
 
   /** プロセス文脈の左辺／右辺出現のそれぞれの引数に対して同じであるという制約をかける */
-  private void processExplicitLinks(
-    ProcessContext lhsOcc,
-    ProcessContext rhsOcc
-  )
-    throws TypeException {
+  private void processExplicitLinks(ProcessContext lhsOcc, ProcessContext rhsOcc)
+      throws TypeException {
     for (int i = 0; i < lhsOcc.args.length; i++) {
       LinkOccurrence lhsPartner = TypeEnv.getRealBuddy(lhsOcc.args[i]);
       LinkOccurrence rhsPartner = TypeEnv.getRealBuddy(rhsOcc.args[i]);
       if (rhsPartner.atom instanceof Atom) {
-        if (TypeEnv.isLHSAtom((Atom) rhsPartner.atom)) addConstraintAboutLinks( //					addUnifyConstraint(-1,lhsPartner,rhsPartner);
-          -1,
-          lhsPartner,
-          rhsPartner
-        ); else addConstraintAboutLinks(1, lhsPartner, rhsPartner); //					addUnifyConstraint(1,lhsPartner,rhsPartner);
+        if (TypeEnv.isLHSAtom((Atom) rhsPartner.atom))
+          addConstraintAboutLinks( //					addUnifyConstraint(-1,lhsPartner,rhsPartner);
+              -1, lhsPartner, rhsPartner);
+        else
+          addConstraintAboutLinks(
+              1, lhsPartner, rhsPartner); // 					addUnifyConstraint(1,lhsPartner,rhsPartner);
       } else { // 右辺出現がプロセス文脈と継っている
         ProcessContext pc = (ProcessContext) rhsPartner.atom;
         Functor df = TypeEnv.dataTypeOfContextDef(pc.def);
         if (df == null) { // 型付きでない
           // そいつの左辺出現の相方をとってくる
-          LinkOccurrence partnerOfPartner = TypeEnv.getRealBuddy(
-            ((ProcessContext) rhsPartner.atom).def.lhsOcc.args[i]
-          );
+          LinkOccurrence partnerOfPartner =
+              TypeEnv.getRealBuddy(((ProcessContext) rhsPartner.atom).def.lhsOcc.args[i]);
           //					addUnifyConstraint(-1,lhsPartner, partnerOfPartner);
           if (partnerOfPartner.atom instanceof ProcessContext) {
-            throw new TypeException(
-              "SYNTAX ERROR : head PC connected each other."
-            );
+            throw new TypeException("SYNTAX ERROR : head PC connected each other.");
           }
           addConstraintAboutLinks(-1, lhsPartner, partnerOfPartner);
         } else {
           addConstraintAboutLinks(1, rhsPartner, lhsPartner);
-          //					LinkOccurrence partnerOfPartner = TypeEnv.getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
+          //					LinkOccurrence partnerOfPartner =
+          // TypeEnv.getRealBuddy(((ProcessContext)rhsPartner.atom).def.lhsOcc.args[i]);
           //					add
         }
       }
@@ -266,12 +244,8 @@ public class ArgumentInferer {
    * @param lo
    * @param b
    */
-  private void addConstraintAboutLinks(
-    int sign,
-    LinkOccurrence lo,
-    LinkOccurrence b
-  )
-    throws TypeException {
+  private void addConstraintAboutLinks(int sign, LinkOccurrence lo, LinkOccurrence b)
+      throws TypeException {
     // 型付きプロセス文脈で、データ型の時にはデータアトムとして扱う
     if (lo.atom instanceof ProcessContext) {
       ProcessContext pc = (ProcessContext) lo.atom;
@@ -280,48 +254,37 @@ public class ArgumentInferer {
     } else {
       int out = TypeEnv.outOfPassiveAtom((Atom) lo.atom);
       if (out == lo.pos) { // データアトムの出力引数
-        if (TypeEnv.outOfPassiveAtom((Atom) b.atom) == b.pos) if (
-          sign == -1
-        ) throw new TypeException( //!= TypeEnv.ACTIVE)
-          "output arguments connected each other. : " +
-          lo.atom.getName() +
-          " <=> " +
-          b.atom.getName() +
-          " in line " +
-          lo.atom.line
-        ); else {
-          // TODO データアトムの引数同士がルール左辺・右辺で受け継がれる場合はどうしたらいいんだろう
-          addUnifyConstraint(sign, lo, b);
-        } else addReceiveConstraint(-sign, b, ((Atom) lo.atom).functor);
+        if (TypeEnv.outOfPassiveAtom((Atom) b.atom) == b.pos)
+          if (sign == -1)
+            throw new TypeException( // != TypeEnv.ACTIVE)
+                "output arguments connected each other. : "
+                    + lo.atom.getName()
+                    + " <=> "
+                    + b.atom.getName()
+                    + " in line "
+                    + lo.atom.line);
+          else {
+            // TODO データアトムの引数同士がルール左辺・右辺で受け継がれる場合はどうしたらいいんだろう
+            addUnifyConstraint(sign, lo, b);
+          }
+        else addReceiveConstraint(-sign, b, ((Atom) lo.atom).functor);
       } else {
-        if (
-          TypeEnv.outOfPassiveAtom((Atom) b.atom) == b.pos
-        ) addConstraintAboutLinks(sign, b, lo); else addUnifyConstraint( //!= TypeEnv.ACTIVE)
-          sign,
-          lo,
-          b
-        );
+        if (TypeEnv.outOfPassiveAtom((Atom) b.atom) == b.pos) addConstraintAboutLinks(sign, b, lo);
+        else
+          addUnifyConstraint( // != TypeEnv.ACTIVE)
+              sign, lo, b);
       }
     }
   }
 
-  private void addUnifyConstraint(
-    int sign,
-    LinkOccurrence lo,
-    LinkOccurrence b
-  ) {
+  private void addUnifyConstraint(int sign, LinkOccurrence lo, LinkOccurrence b) {
     constraints.add(
-      new UnifyConstraint(
-        new PolarizedPath(1, new RootPath(lo)),
-        new PolarizedPath(sign, new RootPath(b))
-      )
-    );
+        new UnifyConstraint(
+            new PolarizedPath(1, new RootPath(lo)), new PolarizedPath(sign, new RootPath(b))));
   }
 
   private void addReceiveConstraint(int sign, LinkOccurrence b, Functor f) {
-    constraints.add(
-      new ReceiveConstraint(new PolarizedPath(sign, new RootPath(b)), f)
-    );
+    constraints.add(new ReceiveConstraint(new PolarizedPath(sign, new RootPath(b)), f));
   }
 
   /**
@@ -335,10 +298,7 @@ public class ArgumentInferer {
     }
     constraints.refreshReceivePassiveConstraints(unSolvedRPCs);
     for (UnifyConstraint uc : constraints.getUnifyConstraints()) {
-      uc.setPPathes(
-        solvePolarizedPath(uc.getPPath1()),
-        solvePolarizedPath(uc.getPPath2())
-      );
+      uc.setPPathes(solvePolarizedPath(uc.getPPath1()), solvePolarizedPath(uc.getPPath2()));
     }
   }
 
@@ -346,9 +306,8 @@ public class ArgumentInferer {
     Path p = pp.getPath();
     if (!(p instanceof RootPath)) {
       Util.println("fatal error in solving path.");
-      if (p instanceof ActiveAtomPath) Util.println(
-        "\tactive atom path"
-      ); else if (p instanceof TracingPath) Util.println("\ttracing path");
+      if (p instanceof ActiveAtomPath) Util.println("\tactive atom path");
+      else if (p instanceof TracingPath) Util.println("\ttracing path");
       return pp;
     }
     LinkOccurrence lo = ((RootPath) p).getTarget();
@@ -368,10 +327,7 @@ public class ArgumentInferer {
    *            argument of Atom (not Atomic)
    * @return
    */
-  private PolarizedPath getPolarizedPath(
-    Set<LinkOccurrence> traced,
-    LinkOccurrence lo
-  ) {
+  private PolarizedPath getPolarizedPath(Set<LinkOccurrence> traced, LinkOccurrence lo) {
     if (traced.contains(lo)) {
       // TODO この場合は1つ辿るとこまでのPathが得られるようにする
       return null;
@@ -380,33 +336,24 @@ public class ArgumentInferer {
     int out = TypeEnv.outOfPassiveAtom(atom);
     if (out == TypeEnv.ACTIVE) {
       return new PolarizedPath(
-        1,
-        new ActiveAtomPath(TypeEnv.getMemName(atom.mem), atom.functor, lo.pos)
-      );
+          1, new ActiveAtomPath(TypeEnv.getMemName(atom.mem), atom.functor, lo.pos));
     } else if (out == TypeEnv.CONNECTOR) {
       Util.println("fatal error in getting path.");
       return null;
     } else {
       LinkOccurrence tl = TypeEnv.getRealBuddy(atom.args[out]);
-      if (!(tl.atom instanceof Atom)) return new PolarizedPath(
-        1,
-        new RootPath(tl)
-      );
+      if (!(tl.atom instanceof Atom)) return new PolarizedPath(1, new RootPath(tl));
       Atom ta = (Atom) tl.atom;
       PolarizedPath pp = null;
 
       traced.add(lo);
       pp = getPolarizedPath(traced, tl);
       if (pp == null) return null;
-      if (
-        TypeEnv.isLHSAtom(atom) == TypeEnv.isLHSAtom(ta)
-      ) return new PolarizedPath(
-        pp.getSign(),
-        new TracingPath(pp.getPath(), atom.functor, lo.pos)
-      ); else return new PolarizedPath(
-        -pp.getSign(),
-        new TracingPath(pp.getPath(), atom.functor, lo.pos)
-      );
+      if (TypeEnv.isLHSAtom(atom) == TypeEnv.isLHSAtom(ta))
+        return new PolarizedPath(pp.getSign(), new TracingPath(pp.getPath(), atom.functor, lo.pos));
+      else
+        return new PolarizedPath(
+            -pp.getSign(), new TracingPath(pp.getPath(), atom.functor, lo.pos));
     }
   }
 }

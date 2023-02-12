@@ -1,17 +1,16 @@
 /**
  * Src*.javaの内容を出力する
  */
-
 package compile.parser;
 
 import java.util.LinkedList;
 
 public class SrcDumper {
 
-  protected SrcDumper() {} //インスタンスはない
+  protected SrcDumper() {} // インスタンスはない
 
   public static String dumpLink(SrcLink link) {
-    if (link instanceof SrcHyperLink) return "!" + link.getName(); //todo もっといい書き方はないか？
+    if (link instanceof SrcHyperLink) return "!" + link.getName(); // todo もっといい書き方はないか？
     else return link.getName();
   }
 
@@ -46,11 +45,9 @@ public class SrcDumper {
   public static String dumpRule(SrcRule rule) {
     String s = "(";
     if (rule.name != null) s += rule.name + " @@ ";
-    if (rule.getHead() != null && rule.getHead().size() > 0) s +=
-      dumpLinkedList(rule.getHead());
+    if (rule.getHead() != null && rule.getHead().size() > 0) s += dumpLinkedList(rule.getHead());
     s += " :- ";
-    if (rule.getGuard().size() > 0) s +=
-      dumpLinkedList(rule.getGuard()) + " | ";
+    if (rule.getGuard().size() > 0) s += dumpLinkedList(rule.getGuard()) + " | ";
     s += dumpLinkedList(rule.getBody()) + ")";
     return s;
   }

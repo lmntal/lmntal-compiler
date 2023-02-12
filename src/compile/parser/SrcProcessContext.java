@@ -9,10 +9,7 @@ import java.util.LinkedList;
 /**
  * ソースファイル中のプロセスコンテキストの表現
  */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 class SrcProcessContext extends SrcContext {
 
   /**

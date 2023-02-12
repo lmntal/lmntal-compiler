@@ -115,9 +115,7 @@ public class QuantityInferer {
     }
 
     // プロセス文脈が複数の膜から来ている場合、プロセスの独立性は絶たれる
-    if (lhss.size() > 1) countsset.collapseProcessIndependency(
-      TypeEnv.getMemName(rhs)
-    );
+    if (lhss.size() > 1) countsset.collapseProcessIndependency(TypeEnv.getMemName(rhs));
 
     switch (lhss.size()) {
       case 0: // プロセス文脈が出現しない膜
@@ -128,35 +126,34 @@ public class QuantityInferer {
       default: // 1個も2個も関係なく解析
         countsset.effectTarget.put(rhs, countsset.effectTarget.get(rhs.parent));
         inferMultiInheritedMembrane(lhss, rhs);
-      //		case 1 : // プロセス文脈が1個出現する膜
-      //			countsset.add(inferInheritedMembrane(((ProcessContext)rhs.processContexts.get(0)).def.lhsOcc.mem,rhs));
-      //			break;
-      //		default: // プロセス文脈が2個以上出現する膜
-      //			Set<Membrane> lhss = new HashSet<Membrane>();
-      //			for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.processContexts)){
-      //				ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
-      //				if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
-      //			}
-      //			countsset.add(inferMultiInheritedMembrane(lhss,rhs));
+        //		case 1 : // プロセス文脈が1個出現する膜
+        //
+        //	countsset.add(inferInheritedMembrane(((ProcessContext)rhs.processContexts.get(0)).def.lhsOcc.mem,rhs));
+        //			break;
+        //		default: // プロセス文脈が2個以上出現する膜
+        //			Set<Membrane> lhss = new HashSet<Membrane>();
+        //			for(ProcessContext rhsOcc : ((List<ProcessContext>)rhs.processContexts)){
+        //				ProcessContext lhsOcc = (ProcessContext)rhsOcc.def.lhsOcc;
+        //				if(!lhss.contains(lhsOcc.mem))lhss.add(lhsOcc.mem);
+        //			}
+        //			countsset.add(inferMultiInheritedMembrane(lhss,rhs));
     }
 
     /** プロセス文脈の分散が無いことを確認し、あればプロセス独立性を失う */
-    if (
-      !checkIndependency(rhs.processContexts, rhs) ||
-      !checkIndependency(rhs.typedProcessContexts, rhs)
-    ) countsset.collapseProcessUnderBounds(TypeEnv.getMemName(rhs));
+    if (!checkIndependency(rhs.processContexts, rhs)
+        || !checkIndependency(rhs.typedProcessContexts, rhs))
+      countsset.collapseProcessUnderBounds(TypeEnv.getMemName(rhs));
 
     /** ルール文脈の分散の有無を確認し、あればルールセット独立性を失う */
     for (RuleContext rc : rhs.ruleContexts) {
-      if (lhss.contains(rc.mem)) continue; else {
-        if (lhss.size() == 0) countsset.collapseRuleIndependency(rhs); else if ( // 生成膜であればその膜のみ // 継続膜等であれば効果対象において。
-          countsset.effectTarget.get(rhs) == null
-        ) {
+      if (lhss.contains(rc.mem)) continue;
+      else {
+        if (lhss.size() == 0) countsset.collapseRuleIndependency(rhs);
+        else if ( // 生成膜であればその膜のみ // 継続膜等であれば効果対象において。
+        countsset.effectTarget.get(rhs) == null) {
           countsset.collapseRulesIndependency(TypeEnv.getMemName(rhs));
         } // 効果対象が全ての膜であれば膜名について。
-        else countsset.collapseRuleIndependency(
-          countsset.effectTarget.get(rhs)
-        );
+        else countsset.collapseRuleIndependency(countsset.effectTarget.get(rhs));
       }
     }
 
@@ -191,10 +188,7 @@ public class QuantityInferer {
       if (TypeEnv.dataTypeOfContextDef(rhsOcc.def) != null) continue;
       Membrane lhsmem = ((ProcessContext) rhsOcc.def.lhsOcc).mem;
       if (lhsmem.processContexts.size() > 0) {
-        boolean ok = checkOccurrence(
-          lhsmem.processContexts.get(0).def.rhsOccs,
-          rhs
-        );
+        boolean ok = checkOccurrence(lhsmem.processContexts.get(0).def.rhsOccs, rhs);
         if (!ok) return false;
       }
       boolean okflg = true;
@@ -232,7 +226,7 @@ public class QuantityInferer {
    * @return
    */
   private void inferRuleRootMembrane(RuleStructure rule) {
-    //右辺から左辺を減算(解析結果を加算)
+    // 右辺から左辺を減算(解析結果を加算)
     VarCount vc = new VarCount();
     Count count = new Count(vc);
     StaticCounts rhsCounts = getCountsOfMem(1, rule.rightMem, count);
@@ -255,13 +249,8 @@ public class QuantityInferer {
     Count count = new Count(vc);
     StaticCounts rhsCounts = getCountsOfMem(1, rhs, count);
     StaticCounts lhsCounts = new StaticCounts(rhs);
-    for (Membrane lhs : lhss) lhsCounts.addAllCounts(
-      getCountsOfMem(-1, lhs, count)
-    );
-    countsset.add(
-      new DynamicCounts(lhsCounts, lhss.size(), rhsCounts, vc),
-      true
-    );
+    for (Membrane lhs : lhss) lhsCounts.addAllCounts(getCountsOfMem(-1, lhs, count));
+    countsset.add(new DynamicCounts(lhsCounts, lhss.size(), rhsCounts, vc), true);
   }
 
   /**
@@ -270,23 +259,17 @@ public class QuantityInferer {
    */
   private void inferGeneratedMembrane(Membrane mem) {
     VarCount vc = new VarCount();
-    vc.bind(new IntervalCount(1, 1)); //NumCount(1));
+    vc.bind(new IntervalCount(1, 1)); // NumCount(1));
     Count count = new Count(vc);
     countsset.add(getCountsOfMem(1, mem, count));
   }
 
   private StaticCounts getCountsOfMem(int sign, Membrane mem, Count count) {
     StaticCounts quantities = new StaticCounts(mem);
-    //アトムの解析結果
-    for (Atom atom : mem.atoms) quantities.addAtomCount(
-      atom,
-      (Count.mul(sign, count))
-    );
-    //子膜の解析結果
-    for (Membrane child : mem.mems) quantities.addMemCount(
-      child,
-      (Count.mul(sign, count))
-    );
+    // アトムの解析結果
+    for (Atom atom : mem.atoms) quantities.addAtomCount(atom, (Count.mul(sign, count)));
+    // 子膜の解析結果
+    for (Membrane child : mem.mems) quantities.addMemCount(child, (Count.mul(sign, count)));
     return quantities;
   }
   //	/**

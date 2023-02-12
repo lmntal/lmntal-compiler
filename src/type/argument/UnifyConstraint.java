@@ -7,10 +7,11 @@ package type.argument;
  * @author kudo
  *
  */
-public class UnifyConstraint /* implements Constraint */{
+public class UnifyConstraint /* implements Constraint */ {
 
   /** 等しいとするパス */
   private PolarizedPath pp1;
+
   private PolarizedPath pp2;
 
   public PolarizedPath getPPath1() {

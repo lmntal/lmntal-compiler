@@ -41,10 +41,8 @@ public class StaticCounts {
   }
 
   public void addAtomCount(Functor functor, Count count) {
-    if (!functorToCount.containsKey(functor)) functorToCount.put(
-      functor,
-      count
-    ); else {
+    if (!functorToCount.containsKey(functor)) functorToCount.put(functor, count);
+    else {
       Count atomcount = functorToCount.get(functor);
       functorToCount.put(functor, Count.sum(atomcount, count));
     }
@@ -60,10 +58,8 @@ public class StaticCounts {
   }
 
   public void addMemCount(String memname, Count count) {
-    if (!memnameToCount.containsKey(memname)) memnameToCount.put(
-      memname,
-      count
-    ); else {
+    if (!memnameToCount.containsKey(memname)) memnameToCount.put(memname, count);
+    else {
       Count memcount = memnameToCount.get(memname);
       memnameToCount.put(memname, Count.sum(memcount, count));
     }
@@ -75,14 +71,9 @@ public class StaticCounts {
    * @param com2
    */
   public void addAllCounts(StaticCounts com2) {
-    for (Functor f : com2.functorToCount.keySet()) addAtomCount(
-      f,
-      com2.functorToCount.get(f)
-    );
-    for (String name : com2.memnameToCount.keySet()) addMemCount(
-      name,
-      com2.memnameToCount.get(name)
-    );
+    for (Functor f : com2.functorToCount.keySet()) addAtomCount(f, com2.functorToCount.get(f));
+    for (String name : com2.memnameToCount.keySet())
+      addMemCount(name, com2.memnameToCount.get(name));
   }
 
   //	public void merge(StaticCounts som){
@@ -115,12 +106,8 @@ public class StaticCounts {
   public void removeUpperBounds() {
     VarCount infVar = new VarCount();
     infVar.bind(new IntervalCount(new NumCount(0), Count.INFINITY));
-    for (Functor f : functorToCount.keySet()) functorToCount
-      .get(f)
-      .add(1, infVar);
-    for (String name : memnameToCount.keySet()) memnameToCount
-      .get(name)
-      .add(1, infVar);
+    for (Functor f : functorToCount.keySet()) functorToCount.get(f).add(1, infVar);
+    for (String name : memnameToCount.keySet()) memnameToCount.get(name).add(1, infVar);
   }
 
   public void solveByCounts() {
@@ -141,14 +128,10 @@ public class StaticCounts {
    */
   public StaticCounts clone(VarCount oldvar, VarCount newvar) {
     StaticCounts cloned = new StaticCounts(mem);
-    for (Functor f : functorToCount.keySet()) cloned.addAtomCount(
-      f,
-      functorToCount.get(f).clone(oldvar, newvar)
-    );
-    for (String name : memnameToCount.keySet()) cloned.addMemCount(
-      name,
-      memnameToCount.get(name).clone(oldvar, newvar)
-    );
+    for (Functor f : functorToCount.keySet())
+      cloned.addAtomCount(f, functorToCount.get(f).clone(oldvar, newvar));
+    for (String name : memnameToCount.keySet())
+      cloned.addMemCount(name, memnameToCount.get(name).clone(oldvar, newvar));
     return cloned;
   }
 

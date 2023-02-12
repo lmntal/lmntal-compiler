@@ -45,9 +45,8 @@ public class ModeVar {
     if (value == 0) {
       value = s;
       buddy.value = -s;
-    } else if (value == s) return; else throw new TypeException(
-      "mode error " + value + " <=> " + s
-    );
+    } else if (value == s) return;
+    else throw new TypeException("mode error " + value + " <=> " + s);
   }
 
   public void add(Path path) {
@@ -69,31 +68,17 @@ public class ModeVar {
   }
 
   public String toString() {
-    return (
-      "[" +
-      (
-        value == 0
-          ? ("?" + (sign == 1 ? "+" : "-") + "(" + name + ")")
-          : value == 1 ? "+" : "-"
-      ) +
-      "]"
-    );
+    return ("["
+        + (value == 0 ? ("?" + (sign == 1 ? "+" : "-") + "(" + name + ")") : value == 1 ? "+" : "-")
+        + "]");
   }
 
   public String shortString() {
-    return (
-      value == 0
-        ? "<" + (sign == 1 ? "" : "-") + name + ">"
-        : (value == 1 ? "+" : "-")
-    );
+    return (value == 0 ? "<" + (sign == 1 ? "" : "-") + name + ">" : (value == 1 ? "+" : "-"));
   }
 
   public String shortStringLMNSyntax() {
-    return (
-      value == 0
-        ? "" + (sign == 1 ? "" : "-") + name + ""
-        : (value == 1 ? "+" : "-")
-    );
+    return (value == 0 ? "" + (sign == 1 ? "" : "-") + name + "" : (value == 1 ? "+" : "-"));
   }
 
   public boolean equals(Object o) {

@@ -20,10 +20,8 @@ public class IntervalCount {
   }
 
   public IntervalCount mul(int m) {
-    if (m >= 0) return new IntervalCount(
-      min.mul(m),
-      max.mul(m)
-    ); else return new IntervalCount(max.mul(m), min.mul(m));
+    if (m >= 0) return new IntervalCount(min.mul(m), max.mul(m));
+    else return new IntervalCount(max.mul(m), min.mul(m));
   }
 
   public IntervalCount add(IntervalCount f) {

@@ -58,9 +58,7 @@ public class UnifySolver {
    * TODO 型変数の束縛については、データ型を意識したものにする
    * @param receiveConstraintsSet
    */
-  public void solveTypeAndMode(
-    Collection<Set<ReceiveConstraint>> receiveConstraintsSet
-  ) {
+  public void solveTypeAndMode(Collection<Set<ReceiveConstraint>> receiveConstraintsSet) {
     for (Set<ReceiveConstraint> rcs : receiveConstraintsSet) {
       for (ReceiveConstraint rc : rcs) {
         PolarizedPath pp = rc.getPPath();
@@ -81,9 +79,7 @@ public class UnifySolver {
   public Set<TypeVarConstraint> getTypeVarConstraints() {
     Set<TypeVarConstraint> typeVarConstraints = new HashSet<>();
     for (Path p : pathToTV.keySet()) {
-      typeVarConstraints.add(
-        new TypeVarConstraint(p, getTypeVar(p), modeVarSet.getModeVar(p))
-      );
+      typeVarConstraints.add(new TypeVarConstraint(p, getTypeVar(p), modeVarSet.getModeVar(p)));
     }
     return typeVarConstraints;
   }

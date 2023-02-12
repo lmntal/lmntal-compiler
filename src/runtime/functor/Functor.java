@@ -12,27 +12,20 @@ import util.Util;
  * サブクラスはこれらの情報を取得する getName, getArity を実装する．
  * オブジェクトの生成は各サブクラスを new する他に build メソッドを使うことが出来る．
  */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public abstract class Functor {
 
   /**
    * 膜の内側の自由リンク管理アトムを表すファンクタ $in/2
    */
-  public static final Functor INSIDE_PROXY = new SpecialFunctor(
-    SpecialFunctor.INSIDE_PROXY_NAME,
-    2
-  );
+  public static final Functor INSIDE_PROXY =
+      new SpecialFunctor(SpecialFunctor.INSIDE_PROXY_NAME, 2);
 
   /**
    * 膜の外側の自由リンク管理アトムを表すファンクタ $out/2
    */
-  public static final Functor OUTSIDE_PROXY = new SpecialFunctor(
-    SpecialFunctor.OUTSIDE_PROXY_NAME,
-    2
-  );
+  public static final Functor OUTSIDE_PROXY =
+      new SpecialFunctor(SpecialFunctor.OUTSIDE_PROXY_NAME, 2);
 
   /**
    * $pにマッチしたプロセスの自由リンクのために一時的に使用されるアトム を表すファンクタ transient_inside_proxy
@@ -67,9 +60,7 @@ public abstract class Functor {
    * @return 改行文字を取り除いたファンクタ名
    */
   public String getQuotedFullyFunctorName() {
-    return quoteFunctorName(getName())
-      .replaceAll("\\\\r", "")
-      .replaceAll("\\\\n", "");
+    return quoteFunctorName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
   }
 
   private String quoteFunctorName(String text) {
@@ -97,16 +88,12 @@ public abstract class Functor {
    * @return クオートされた省略しないアトム名
    */
   public String getQuotedFullyAtomName() {
-    return quoteAtomName(getName())
-      .replaceAll("\\\\r", "")
-      .replaceAll("\\\\n", "");
+    return quoteAtomName(getName()).replaceAll("\\\\r", "").replaceAll("\\\\n", "");
   }
 
   protected String quoteAtomName(String text) {
     if (!text.matches("^([a-z0-9][A-Za-z0-9_]*|\\[\\])$")) {
-      if (
-        !text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")
-      ) {
+      if (!text.matches("^(-?[0-9]+|[+-]?[0-9]*\\.?[0-9]+([Ee][+-]?[0-9]+)?)$")) {
         text = quoteName(text);
       }
     }
@@ -124,9 +111,7 @@ public abstract class Functor {
   /** 適切に省略された表示名を取得 */
   protected String getAbbrName() {
     String full = getName();
-    return full.length() > Env.printLength
-      ? full.substring(0, Env.printLength - 2) + ".."
-      : full;
+    return full.length() > Env.printLength ? full.substring(0, Env.printLength - 2) + ".." : full;
   }
 
   /**
@@ -167,18 +152,20 @@ public abstract class Functor {
           int radix = 10;
           if (name.matches("\\+[0-9]+")) {
             name = name.substring(1);
-          } else if (name.matches("\\+0x[0-9a-fA-F]+")) { //+16進 2006.6.26 by inui
+          } else if (name.matches("\\+0x[0-9a-fA-F]+")) { // +16進 2006.6.26 by inui
             name = name.substring(3);
             radix = 16;
-          } else if (name.matches("0x[0-9a-fA-F]+")) { //16進 2006.6.26 by inui
+          } else if (name.matches("0x[0-9a-fA-F]+")) { // 16進 2006.6.26 by inui
             name = name.substring(2);
             radix = 16;
           }
           return new IntegerFunctor(Integer.parseInt(name, radix));
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
         try {
           return new FloatingFunctor(Double.parseDouble(name));
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
       } else if (nametype == SrcName.STRING || nametype == SrcName.QUOTED) {
         return new StringFunctor(name); // new
         // runtime.ObjectFunctor(name);
