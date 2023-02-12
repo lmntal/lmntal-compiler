@@ -5,7 +5,6 @@ import java.util.NoSuchElementException;
 
 /**
  * 指定された配列中の反復子が返す値を順に返す反復子
- *
  * @author Mizuno
  */
 public class NestedIterator<T> implements Iterator<T> {

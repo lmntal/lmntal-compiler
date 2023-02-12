@@ -5,14 +5,12 @@ import java.util.List;
 
 /**
  * compile.RulesetCompiler によって生成される。
- *
  * @author hara, nakajima, n-kato
  */
 public final class InterpretedRuleset extends Ruleset {
 
   /** このルールセットのローカルID */
   private int id;
-
   private static int lastId = 600;
 
   /** とりあえずルールの配列として実装 */
@@ -20,7 +18,6 @@ public final class InterpretedRuleset extends Ruleset {
 
   /** 編み上げ後の命令列 */
   public MergedBranchMap branchmap;
-
   public MergedBranchMap systemrulemap;
 
   /** 現在実行中のルール */
@@ -28,7 +25,10 @@ public final class InterpretedRuleset extends Ruleset {
 
   // private int backtracks, lockfailure;
 
-  /** RuleCompiler では、まず生成してからデータを入れ込む。 ので、特になにもしない */
+  /**
+   * RuleCompiler では、まず生成してからデータを入れ込む。
+   * ので、特になにもしない
+   */
   public InterpretedRuleset() {
     rules = new ArrayList<>();
     id = ++lastId;
@@ -36,15 +36,15 @@ public final class InterpretedRuleset extends Ruleset {
     systemrulemap = null;
   }
 
-  /** グローバルルールセットID（未定義の場合はnull） */
+  /** グローバルルールセットID（未定義の場合はnull）*/
   // private String globalRulesetID;
 
-  /** このルールセットのローカルIDを取得する。 */
+  /**このルールセットのローカルIDを取得する。*/
   public int getId() {
     return id;
   }
 
-  /** （仮） */
+  /**（仮）*/
   // 061129 okabe runtimeid 廃止による
   //	public String getGlobalRulesetID() {
   //		// todo ランタイムIDの有効期間を見直す

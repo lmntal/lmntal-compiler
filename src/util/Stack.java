@@ -18,11 +18,11 @@ public final class Stack {
 
   public synchronized void push(QueuedEntity entity) {
     if (entity.isQueued()) {
-      // タスクが、アトム主導テストに失敗した後で親膜のアトムスタックに積むとき、
-      // 他のスレッドがすでに他のスタックに積んでいる可能性がある。
-      // …が、システムコールアトムを実装しないとそう言う状況は発生しない。
-      // タスクが移動するのは、自分が管理する膜のアトムのみ。
-      // 子タスクは操作できないし、親タスクも（このタスクが本膜をロックしているので）操作できない。
+      //タスクが、アトム主導テストに失敗した後で親膜のアトムスタックに積むとき、
+      //他のスレッドがすでに他のスタックに積んでいる可能性がある。
+      //…が、システムコールアトムを実装しないとそう言う状況は発生しない。
+      //タスクが移動するのは、自分が管理する膜のアトムのみ。
+      //子タスクは操作できないし、親タスクも（このタスクが本膜をロックしているので）操作できない。
       Util.errPrintln("SYSTEM ERROR: enqueued entity is already in a queue");
       entity.dequeue();
     }
@@ -35,24 +35,24 @@ public final class Stack {
 
   /** スタックstackの内容をこのスタックの底に移動する */
   public synchronized void moveFrom(Stack stack) {
-    // stack は仮スタックであり、ルート膜をロックしているスレッド以外操作しいないので
-    // 排他制御の必要はない。
+    //stack は仮スタックであり、ルート膜をロックしているスレッド以外操作しいないので
+    //排他制御の必要はない。
 
     if (stack.isEmpty()) return;
     QueuedEntity oldFirst = head.next;
     QueuedEntity addedLast = stack.tail.prev;
 
-    // 先頭
+    //先頭
     head.next = stack.head.next;
     stack.head.next.prev = head;
 
-    // (引数に渡されたstackの)最後
+    //(引数に渡されたstackの)最後
     addedLast.next = oldFirst;
     oldFirst.prev = addedLast;
     stack.head.next = stack.tail;
     stack.tail.prev = stack.head;
 
-    // 途中
+    //途中
     for (QueuedEntity t = head.next; t != oldFirst; t = t.next) {
       t.stack = this;
     }

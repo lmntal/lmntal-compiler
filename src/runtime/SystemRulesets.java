@@ -5,7 +5,6 @@ import java.util.Iterator;
 
 /**
  * システムルールセットを管理する static クラス
- *
  * @author Mizuno
  */
 public final class SystemRulesets {
@@ -21,12 +20,11 @@ public final class SystemRulesets {
   public static void clear() {
     all.clear();
     userDefined.clear();
-    // all.add(GlobalSystemRuleset.getInstance());
+    //all.add(GlobalSystemRuleset.getInstance());
   }
 
   /**
    * ユーザー定義システムルールセットを登録する。
-   *
    * @param rs 登録するルールセット
    */
   public static void addUserDefinedSystemRuleset(Ruleset rs) {
@@ -36,7 +34,6 @@ public final class SystemRulesets {
 
   /**
    * ユーザー定義システムルールセットのイテレータを取得する
-   *
    * @return ユーザー定義システムルールセットのイテレータ
    */
   public static Iterator<Ruleset> userDefinedSystemRulesetIterator() {
@@ -45,7 +42,6 @@ public final class SystemRulesets {
 
   /**
    * システムルールセットのイテレータを取得する
-   *
    * @return システムルールセットのイテレータ
    */
   public static Iterator<Ruleset> iterator() {

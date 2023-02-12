@@ -11,10 +11,12 @@ import java.util.Map;
 import runtime.Instruction;
 import runtime.InstructionList;
 
-/** HeadCompiler, GuardCompilerの基底クラス */
+/**
+ * HeadCompiler, GuardCompilerの基底クラス
+ */
 abstract class LHSCompiler {
 
-  /** マッチング命令列（のラベル） */
+  /** マッチング命令列（のラベル）*/
   InstructionList matchLabel;
   /** matchLabel.insts */
   List<Instruction> match;
@@ -53,8 +55,10 @@ abstract class LHSCompiler {
   LHSCompiler() {}
 
   /**
-   * ガード否定条件およびボディのコンパイルで使うために、 thisを指定されたhcに対する正規化されたHeadCompilerとする。
-   * 正規化とは、左辺の全てのアトムおよび膜に対して、ガード/ボディ用の仮引数番号を 変数番号として左辺のマッチングを取り終わった内部状態を持つようにすることを意味する。
+   * ガード否定条件およびボディのコンパイルで使うために、
+   * thisを指定されたhcに対する正規化されたHeadCompilerとする。
+   * 正規化とは、左辺の全てのアトムおよび膜に対して、ガード/ボディ用の仮引数番号を
+   * 変数番号として左辺のマッチングを取り終わった内部状態を持つようにすることを意味する。
    */
   protected final void initNormalizedCompiler(HeadCompiler hc) {
     matchLabel = new InstructionList();
@@ -72,7 +76,10 @@ abstract class LHSCompiler {
     }
   }
 
-  /** 指定されたアトムに対してgetlinkを行い、変数番号をlinkpathsに登録する。 RISC化に伴い追加(mizuno) */
+  /**
+   * 指定されたアトムに対してgetlinkを行い、変数番号をlinkpathsに登録する。
+   * RISC化に伴い追加(mizuno)
+   */
   final void getLinks(int atompath, int arity, List<Instruction> insts) {
     int[] paths = new int[arity];
     for (int i = 0; i < arity; i++) {
@@ -83,7 +90,10 @@ abstract class LHSCompiler {
     // final int[] put = linkPaths.put(atompath, paths);
   }
 
-  /** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜引数列を返す。 具体的にはmemsに対応する変数番号のリストを格納したArrayListを返す。 */
+  /**
+   * 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜引数列を返す。
+   * 具体的にはmemsに対応する変数番号のリストを格納したArrayListを返す。
+   */
   List<Integer> getMemActuals() {
     List<Integer> args = new ArrayList<>();
     for (Membrane mem : mems) {
@@ -92,7 +102,10 @@ abstract class LHSCompiler {
     return args;
   }
 
-  /** 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜やアトム以外の引数列を返す。 具体的にはHeadCompilerは空のArrayListを返す。 */
+  /**
+   * 次の命令列（ヘッド命令列→ガード命令列→ボディ命令列）への膜やアトム以外の引数列を返す。
+   * 具体的にはHeadCompilerは空のArrayListを返す。
+   */
   List<Object> getVarActuals() {
     return new ArrayList<>();
   }

@@ -11,9 +11,10 @@ import java.io.InputStream;
 /**
  * ストリームからクラスをロードする。それだけ。
  *
- * <p>TODO キャッシュとかその他いろいろ
+ * TODO キャッシュとかその他いろいろ
  *
  * @author okabe
+ *
  */
 public class StreamClassLoader extends ClassLoader {
 

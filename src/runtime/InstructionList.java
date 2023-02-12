@@ -7,41 +7,64 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ラベル付き命令列を表すクラス。 先頭の命令として必ずspecを持つ。
+ * ラベル付き命令列を表すクラス。
+ * 先頭の命令として必ずspecを持つ。
  *
  * @author n-kato
  */
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 public class InstructionList implements Cloneable {
 
-  /** ラベル生成用整数値 */
+  /**
+   * ラベル生成用整数値
+   */
   private static int nextId = 100;
 
-  /** ラベル */
+  /**
+   * ラベル
+   */
   public String label;
 
-  /** 仮引数の個数 */
+  /**
+   * 仮引数の個数
+   */
   private int formals;
 
-  /** 局所変数の個数（仮引数の個数を含む） */
+  /**
+   * 局所変数の個数（仮引数の個数を含む）
+   */
   private int locals;
 
-  /** 命令列 (InstructionのList) */
-  @JsonIgnore public List<Instruction> insts = new ArrayList<>();
+  /**
+   * 命令列 (InstructionのList)
+   */
+  @JsonIgnore
+  public List<Instruction> insts = new ArrayList<>();
 
-  /** 親命令列またはnull */
+  /**
+   * 親命令列またはnull
+   */
   public InstructionList parent;
 
-  /** 未使用メソッド。 */
+  /**
+   * 未使用メソッド。
+   */
   public void setFormals(int formals) {}
 
-  /** 未使用メソッド。局所変数の個数を更新する。 */
+  /**
+   * 未使用メソッド。局所変数の個数を更新する。
+   */
   public void updateLocals(int locals) {
     if (this.locals < locals) this.locals = locals;
     //		if (parent != null) parent.updateLocals(locals);
   }
 
-  /** 親命令列が無いかどうか返す */
+  /**
+   * 親命令列が無いかどうか返す
+   */
   public boolean isRoot() {
     return parent == null;
   }
@@ -57,13 +80,17 @@ public class InstructionList implements Cloneable {
     this.parent = parent;
   }
 
-  /** パーザーで利用するコンストラクタ */
+  /**
+   * パーザーで利用するコンストラクタ
+   */
   public InstructionList(List<Instruction> insts) {
     this();
     this.insts = insts;
   }
 
-  /** パーザーで利用するコンストラクタ */
+  /**
+   * パーザーで利用するコンストラクタ
+   */
   public InstructionList(int id, List<Instruction> insts) {
     this(insts);
     setLabel(id);
@@ -71,7 +98,7 @@ public class InstructionList implements Cloneable {
 
   public void setLabel(int id) {
     this.label = "L" + id;
-    // もっと賢い方法はないものだろうか。
+    //もっと賢い方法はないものだろうか。
     if (nextId <= id) nextId = id + 1;
   }
 
@@ -85,7 +112,6 @@ public class InstructionList implements Cloneable {
 
   /**
    * 指定された命令列（InstructionのList）のクローンを作成する。
-   *
    * @param insts クローンを作成する命令列
    * @return 作成したクローン
    */
@@ -97,12 +123,16 @@ public class InstructionList implements Cloneable {
     return ret;
   }
 
-  /** 命令列の末尾に命令を追加する。 */
+  /**
+   * 命令列の末尾に命令を追加する。
+   */
   public void add(Instruction inst) {
     insts.add(inst);
   }
 
-  /** 命令列の指定の場所に命令を追加する。 */
+  /**
+   * 命令列の指定の場所に命令を追加する。
+   */
   public void add(int index, Instruction inst) {
     insts.add(index, inst);
   }

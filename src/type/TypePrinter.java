@@ -22,6 +22,7 @@ import type.quantity.QuantityInferer;
  * 型解析・推論結果を出力する
  *
  * @author kudo
+ *
  */
 class TypePrinter {
 
@@ -51,14 +52,18 @@ class TypePrinter {
         ActiveAtomPath aap = (ActiveAtomPath) p;
         String memname = aap.getMemName();
         sortedMemNames.add(memname);
-        if (!memnameToFunctorTypes.containsKey(memname))
-          memnameToFunctorTypes.put(memname, new HashMap<>());
-        Map<Functor, TypeVarConstraint[]> functorToArgumentTypes =
-            memnameToFunctorTypes.get(memname);
+        if (
+          !memnameToFunctorTypes.containsKey(memname)
+        ) memnameToFunctorTypes.put(memname, new HashMap<>());
+        Map<Functor, TypeVarConstraint[]> functorToArgumentTypes = memnameToFunctorTypes.get(
+          memname
+        );
         Functor f = aap.getFunctor();
         sortedFunctors.add(f);
-        if (!functorToArgumentTypes.containsKey(f))
-          functorToArgumentTypes.put(f, new TypeVarConstraint[f.getArity()]);
+        if (!functorToArgumentTypes.containsKey(f)) functorToArgumentTypes.put(
+          f,
+          new TypeVarConstraint[f.getArity()]
+        );
         TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
         argtypes[aap.getPos()] = tvc;
       }
@@ -83,7 +88,10 @@ class TypePrinter {
     }
   }
 
-  /** LMNtal syntax での型情報の表示 printAll メソッドを修正したもの */
+  /**
+   * LMNtal syntax での型情報の表示
+   * printAll メソッドを修正したもの
+   */
   void printAllLMNSyntax() {
     Env.p("typeInformation{ ");
 
@@ -98,8 +106,9 @@ class TypePrinter {
         // データアトム、コネクタは無視する
         if (TypeEnv.outOfPassiveFunctor(f) != TypeEnv.ACTIVE) continue;
 
-        Map<Functor, TypeVarConstraint[]> functorToArgumentTypes =
-            memnameToFunctorTypes.get(memname);
+        Map<Functor, TypeVarConstraint[]> functorToArgumentTypes = memnameToFunctorTypes.get(
+          memname
+        );
 
         boolean flagNoCount = false;
         if (fcs == null) flagNoCount = true;
@@ -108,7 +117,10 @@ class TypePrinter {
         if (!flagNoCount) {
           fc = fcs.functorToCount.get(f);
           if (fc == null) continue;
-          if (fc.min.compare(new NumCount(0)) == 0 && fc.max.compare(new NumCount(0)) == 0) {
+          if (
+            fc.min.compare(new NumCount(0)) == 0 &&
+            fc.max.compare(new NumCount(0)) == 0
+          ) {
             continue;
           }
         }
@@ -121,7 +133,10 @@ class TypePrinter {
         texp.append("), link( ");
 
         if (f.getArity() > 0) {
-          if (functorToArgumentTypes != null && functorToArgumentTypes.containsKey(f)) {
+          if (
+            functorToArgumentTypes != null &&
+            functorToArgumentTypes.containsKey(f)
+          ) {
             // 引数の型を表示
             TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
             for (int i = 0; i < argtypes.length; i++) {
@@ -137,8 +152,7 @@ class TypePrinter {
         }
         texp.append("), count = ");
 
-        if (flagNoCount) texp.append("null");
-        else texp.append(fc);
+        if (flagNoCount) texp.append("null"); else texp.append(fc);
 
         texp.append(". }.");
         Env.p(texp);
@@ -168,7 +182,11 @@ class TypePrinter {
     Env.p("}.");
   }
 
-  /** 型情報の表示 元々こちらが使われていたが上のメソッドを使うように修正 現在はどこからも使われていないが残しておく */
+  /**
+   * 型情報の表示
+   * 元々こちらが使われていたが上のメソッドを使うように修正
+   * 現在はどこからも使われていないが残しておく
+   */
   void printAll() {
     Env.p("Type Information : ");
     for (String memname : sortedMemNames) {
@@ -180,8 +198,9 @@ class TypePrinter {
         // データアトム、コネクタは無視する
         if (TypeEnv.outOfPassiveFunctor(f) != TypeEnv.ACTIVE) continue;
 
-        Map<Functor, TypeVarConstraint[]> functorToArgumentTypes =
-            memnameToFunctorTypes.get(memname);
+        Map<Functor, TypeVarConstraint[]> functorToArgumentTypes = memnameToFunctorTypes.get(
+          memname
+        );
 
         // if(fcs.functorToCount.containsKey(f)){
         boolean flagNoCount = false;
@@ -190,7 +209,10 @@ class TypePrinter {
         if (!flagNoCount) {
           fc = fcs.functorToCount.get(f);
           if (fc == null) continue;
-          if (fc.min.compare(new NumCount(0)) == 0 && fc.max.compare(new NumCount(0)) == 0) {
+          if (
+            fc.min.compare(new NumCount(0)) == 0 &&
+            fc.max.compare(new NumCount(0)) == 0
+          ) {
             continue;
           }
         }
@@ -199,7 +221,10 @@ class TypePrinter {
         texp.append("\t" + f.getQuotedAtomName());
         texp.append("(");
         if (f.getArity() > 0) {
-          if (functorToArgumentTypes != null && functorToArgumentTypes.containsKey(f)) {
+          if (
+            functorToArgumentTypes != null &&
+            functorToArgumentTypes.containsKey(f)
+          ) {
             // 引数の型を表示
             TypeVarConstraint[] argtypes = functorToArgumentTypes.get(f);
             for (int i = 0; i < argtypes.length; i++) {
@@ -215,8 +240,7 @@ class TypePrinter {
         }
         texp.append(") : ");
 
-        if (flagNoCount) texp.append("??");
-        else texp.append(fc);
+        if (flagNoCount) texp.append("??"); else texp.append(fc);
 
         Env.p(texp);
         // }
@@ -242,13 +266,14 @@ class TypePrinter {
     }
   }
 
-  /** ファンクタを名前順(辞書式)->引数数順でソートする */
+  /**
+   * ファンクタを名前順(辞書式)->引数数順でソートする
+   */
   class FunctorComparator implements Comparator<Functor> {
 
     public int compare(Functor f1, Functor f2) {
       int nc = f1.getName().compareTo(f2.getName());
-      if (nc != 0) return nc;
-      else {
+      if (nc != 0) return nc; else {
         return f1.getArity() - f2.getArity();
       }
     }

@@ -16,7 +16,6 @@ import runtime.SystemRulesets;
 
 /**
  * ルールセットを生成して返す。
- *
  * @author hara
  */
 public class RulesetCompiler {
@@ -24,7 +23,8 @@ public class RulesetCompiler {
   private RulesetCompiler() {}
 
   /**
-   * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。 メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
+   * 与えられた膜構造を生成するreactメソッドを実装するルールセットを生成する。
+   * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
    *
    * @param m 膜構造
    * @return (:-m)というルール1つだけからなるルールセット
@@ -43,10 +43,9 @@ public class RulesetCompiler {
   // }
 
   /**
-   * 与えられた膜の階層下にある全ての RuleStructure について、 対応する Rule を生成してその膜のルールセットに追加する。
-   *
+   * 与えられた膜の階層下にある全ての RuleStructure について、
+   * 対応する Rule を生成してその膜のルールセットに追加する。
    * <p>ルールをちょうど1つ持つ膜にはちょうど1つのルールセットが追加される。
-   *
    * @param mem 対象となる膜
    */
   public static void processMembrane(Membrane mem) {
@@ -67,7 +66,7 @@ public class RulesetCompiler {
       try {
         rc = new RuleCompiler(rs);
         rc.compile();
-        // 2006.1.22 Ruleに行番号を渡す by inui
+        //2006.1.22 Ruleに行番号を渡す by inui
         rc.theRule.lineno = rs.lineno;
       } catch (CompileException e) {
         Env.p("    in " + rs.toString() + "\n");
@@ -103,12 +102,13 @@ public class RulesetCompiler {
   }
 
   public static Ruleset compileRuleset(InterpretedRuleset rs) {
-    return rs; // 返すルールセットはそのまま。どうするのが良いのだろうか？
+    return rs; //返すルールセットはそのまま。どうするのが良いのだろうか？
   }
   /**
-   * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。 より正確に言うと、与えられた膜構造の内容に対応するプロセスを1回だけ生成するreactメソッドを
-   * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。 メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
-   *
+   * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
+   * より正確に言うと、与えられた膜構造の内容に対応するプロセスを1回だけ生成するreactメソッドを
+   * 実装するルールセットを唯一のルールセットとして持つ膜構造を生成する。
+   * メソッド実行中、膜構造内部にあるルール構造が再帰的にルールセットにコンパイルされる。
    * @param m 膜構造
    * @return 生成したルールセットを持つ膜構造
    */

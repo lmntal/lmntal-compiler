@@ -16,21 +16,20 @@ import runtime.Ruleset;
 import util.Util;
 
 /**
- * モジュールシステムを実現するクラス。<br>
- * <br>
+ * モジュールシステムを実現するクラス。<br><br>
+ *
  * 概要
  *
  * <ul>
- *   <li>モジュールの定義方法 module_name : { ... } (膜に名前をつける)
- *   <li>モジュールの使い方 module_name.name
- *   <li>モジュールの実態は名前つきの膜である。
- *   <li>「モジュールを使う」とは、現在の膜内にモジュールのルールを読み込んで、勝手に反応させることである。
- *       たいてい、モジュールのルールの左辺に含まれるアトムを書くことで反応させることになる。
- * </ul>
- *
- * <br>
+ * <li> モジュールの定義方法   module_name : { ... }  (膜に名前をつける)
+ * <li> モジュールの使い方     module_name.name
+ * <li> モジュールの実態は名前つきの膜である。
+ * <li> 「モジュールを使う」とは、現在の膜内にモジュールのルールを読み込んで、勝手に反応させることである。
+ * 		たいてい、モジュールのルールの左辺に含まれるアトムを書くことで反応させることになる。
+ * </ul><br>
  *
  * @author hara
+ *
  */
 public class Module {
 
@@ -40,14 +39,13 @@ public class Module {
 
   /**
    * 膜を名表に登録する。
-   *
    * @param m
    */
   public static void regMemName(String name, Membrane m) {
     memNameTable.put(name, m);
   }
 
-  /** モジュールが持つルールセット一覧を出力する。 */
+  /** モジュールが持つルールセット一覧を出力する。*/
   public static void showModuleList() {
     if (memNameTable.size() == 0) return;
 

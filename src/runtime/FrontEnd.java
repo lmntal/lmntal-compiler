@@ -1,12 +1,14 @@
 package runtime;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import compile.Module;
 import compile.Optimizer;
 import compile.RulesetCompiler;
 import compile.parser.LMNParser;
 import compile.parser.ParseException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -43,15 +45,13 @@ public class FrontEnd {
   }
 
   /**
-   * コマンドライン引数の処理
-   *
-   * <p>2011-10-04 追記 (shinobu): コマンドラインオプションのHelp用文字列の記述は 行コメントの冒頭を {@code "//@ "}
-   * とするように統一しました（help_gen.plも修正済み）
-   *
-   * <p>Help 出力を更新するには、Ant タスクの help を実行するか、端末上で <code>
-   * perl src/help_gen.pl &lt; src/runtime/FrontEnd.java &gt; src/runtime/Help.java</code><br>
-   * を実行します。
-   *
+   * <p>コマンドライン引数の処理</p>
+   * <p>
+   * 2011-10-04 追記 (shinobu): コマンドラインオプションのHelp用文字列の記述は
+   * 行コメントの冒頭を {@code "//@ "} とするように統一しました（help_gen.plも修正済み）</p>
+   * <p>Help 出力を更新するには、Ant タスクの help を実行するか、端末上で
+   * <code>perl src/help_gen.pl &lt; src/runtime/FrontEnd.java &gt; src/runtime/Help.java</code><br>
+   * を実行します。</p>
    * @param args 引数
    */
   private static void processOptions(String[] args) {
@@ -67,17 +67,17 @@ public class FrontEnd {
         } else { // オプション解釈部
           switch (args[i].charAt(1)) {
             case 'e':
-              // @ -e <LMNtal program>
-              // @ One liner code execution like Perl.
-              // @ Example: -e 'a,(a:-b)'
+              //@ -e <LMNtal program>
+              //@ One liner code execution like Perl.
+              //@ Example: -e 'a,(a:-b)'
               if (++i < args.length) {
                 Env.oneLine = true;
                 Env.oneLineCode = args[i];
               }
               break;
             case 'd':
-              // @ -d[<0-9>]
-              // @ Debug output level.
+              //@ -d[<0-9>]
+              //@ Debug output level.
               if (args[i].matches("-d[0-9]")) {
                 Env.debug = args[i].charAt(2) - '0';
               } else {
@@ -86,13 +86,13 @@ public class FrontEnd {
               // System.out.println("debug level " + Env.debug);
               break;
             case 'O':
-              // @ -O[<0-9>]  (-O=-O1)
-              // @ Optimization level.
-              // @ Intermediate instruction sequences are optimized.
-              // @ -O1 is equivalent to --optimize-reuse-atom, --optimize-reuse-mem,
-              // @  --optimize-guard-move.
-              // @ -O2 is equivalent to -O1 now.
-              // @ -O3 is equivalent to --O2 --optimize-inlining
+              //@ -O[<0-9>]  (-O=-O1)
+              //@ Optimization level.
+              //@ Intermediate instruction sequences are optimized.
+              //@ -O1 is equivalent to --optimize-reuse-atom, --optimize-reuse-mem,
+              //@  --optimize-guard-move.
+              //@ -O2 is equivalent to -O1 now.
+              //@ -O3 is equivalent to --O2 --optimize-inlining
               int level = -1;
               if (args[i].length() == 2) {
                 level = 1;
@@ -108,8 +108,8 @@ public class FrontEnd {
               }
               break;
             case 'v':
-              // @ -v[<0-9>]
-              // @ Verbose output level.
+              //@ -v[<0-9>]
+              //@ Verbose output level.
               if (args[i].matches("-v[0-9]")) {
                 Env.verbose = args[i].charAt(2) - '0';
               } else {
@@ -118,16 +118,16 @@ public class FrontEnd {
               // System.out.println("verbose level " + Env.verbose);
               break;
             case 'x':
-              // @ -x <name> <value>
-              // @ User defined option.
-              // @ <name> <value> description
-              // @ ===========================================================
-              // @ screen max         : full screen mode
-              // @ auto   on          : reaction auto proceed mode when GUI on
-              // @ dump   1           : indent mem (etc...)
-              // @ dump2  propertyfile: apply LMNtal prettyprinter
-              // @                      to output
-              // @ chorus filename    : output chorus file
+              //@ -x <name> <value>
+              //@ User defined option.
+              //@ <name> <value> description
+              //@ ===========================================================
+              //@ screen max         : full screen mode
+              //@ auto   on          : reaction auto proceed mode when GUI on
+              //@ dump   1           : indent mem (etc...)
+              //@ dump2  propertyfile: apply LMNtal prettyprinter
+              //@                      to output
+              //@ chorus filename    : output chorus file
               if (i + 2 < args.length) {
                 String name = i + 1 < args.length ? args[i + 1] : "";
                 String value = i + 2 < args.length ? args[i + 2] : "";
@@ -137,8 +137,8 @@ public class FrontEnd {
               break;
             case '-': // 文字列オプション
               if (args[i].equals("--args")) {
-                // @ --args
-                // @ give command-line options after this to LMNtal program.
+                //@ --args
+                //@ give command-line options after this to LMNtal program.
                 isSrcs = false;
               } else {
                 i = processLongOptions(args, i);
@@ -146,7 +146,9 @@ public class FrontEnd {
               break;
             default:
               Util.errPrintln("Invalid option: " + args[i]);
-              Util.errPrintln("Use option --help to see a long list of options.");
+              Util.errPrintln(
+                "Use option --help to see a long list of options."
+              );
               System.exit(1);
           }
         }
@@ -176,18 +178,19 @@ public class FrontEnd {
       //			//@ Output intermediate instruction sequence to be executed by SLIM.
       //			Env.compileonly = true;
     } else if (opt.equals("--charset")) {
-      // @ --charset
-      // @ Specify charset of LMNtal source code (the default charset is UTF-8).
+      //@ --charset
+      //@ Specify charset of LMNtal source code (the default charset is UTF-8).
       if (++i < args.length) {
         try {
           sourceCharset = Charset.forName(args[i]);
         } catch (UnsupportedCharsetException e) {
           System.err.println(
-              "Warning: '"
-                  + e.getCharsetName()
-                  + "' is not available (default charset '"
-                  + sourceCharset
-                  + "' is used)");
+            "Warning: '" +
+            e.getCharsetName() +
+            "' is not available (default charset '" +
+            sourceCharset +
+            "' is used)"
+          );
         }
       } else {
         System.err.println("Error: no argument was provided to '--charset'");
@@ -209,24 +212,29 @@ public class FrontEnd {
     //			Env.memtestonly = true;
     //		}
     else if (opt.equals("--help")) {
-      // @ --help
-      // @ Show usage (this).
+      //@ --help
+      //@ Show usage (this).
       Util.println("usage: java -jar lmntal.jar [options...] [filenames...]");
       Help.show();
       System.exit(0);
     } else if (opt.equals("--version")) {
-      // @ --version
-      // @ Show LMNtal compiler version.
+      //@ --version
+      //@ Show LMNtal compiler version.
       Util.println(
-          String.format("LMNtal Compiler %s (%s)", Env.LMNTAL_COMPILER_VERSION, Env.RELEASE_DATE));
+        String.format(
+          "LMNtal Compiler %s (%s)",
+          Env.LMNTAL_COMPILER_VERSION,
+          Env.RELEASE_DATE
+        )
+      );
       System.exit(0);
     } else if (opt.equals("--optimize-grouping")) {
-      // @ --optimize-grouping
-      // @ Group the head instructions. (EXPERIMENTAL)
+      //@ --optimize-grouping
+      //@ Group the head instructions. (EXPERIMENTAL)
       Optimizer.fGrouping = true;
     } else if (opt.equals("--optimize-guard-move")) {
-      // @ --optimize-guard-move
-      // @ Move up the guard instructions.
+      //@ --optimize-guard-move
+      //@ Move up the guard instructions.
       Optimizer.fGuardMove = true;
     }
     //		else if (opt.equals("--optimize-merging"))
@@ -239,12 +247,12 @@ public class FrontEnd {
     else if (opt.equals("--optimize-systemrulesetsinlining")) {
       Optimizer.fSystemRulesetsInlining = true;
     } else if (opt.equals("--optimize-inlining")) {
-      // @ --optimize-inlining
-      // @ Inlining tail jump.
+      //@ --optimize-inlining
+      //@ Inlining tail jump.
       Optimizer.fInlining = true;
     } else if (opt.equals("--optimize-loop")) {
-      // @ --optimize-loop
-      // @ Use loop instruction. (EXPERIMENTAL)
+      //@ --optimize-loop
+      //@ Use loop instruction. (EXPERIMENTAL)
       Optimizer.fLoop = true;
     }
     // アトム再利用は--use-swaplinkを使う
@@ -255,8 +263,8 @@ public class FrontEnd {
     //			Optimizer.fReuseAtom = true;
     //		}
     else if (opt.equals("--optimize-reuse-mem")) {
-      // @ --optimize-reuse-mem
-      // @ Reuse mems.
+      //@ --optimize-reuse-mem
+      //@ Reuse mems.
       Optimizer.fReuseMem = true;
     }
     //		else if (opt.equals("--optimize-slimoptimizer"))
@@ -267,23 +275,23 @@ public class FrontEnd {
       Env.preProcess0 = true;
     } else if (opt.equals("--stdin-lmn")) { // 2006.07.11
       // inui
-      // @ --stdin-lmn
-      // @ read LMNtal program from standard input
+      //@ --stdin-lmn
+      //@ read LMNtal program from standard input
       Env.stdinLMN = true;
     } else if (opt.equals("--showlongrulename")) {
       Env.showlongrulename = true;
     } else if (opt.equals("--dump-converted-rules")) {
-      // @ --show-converted_rules
-      // @ Dump converted rules
+      //@ --show-converted_rules
+      //@ Dump converted rules
       Env.dumpConvertedRules = true;
     } else if (opt.startsWith("--thread-max=")) {
-      // @ --thread-max=<integer>
-      // @ set <integer> as the upper limit of threads occured
-      // @ in leftside rules.
+      //@ --thread-max=<integer>
+      //@ set <integer> as the upper limit of threads occured
+      //@ in leftside rules.
       Env.threadMax = Integer.parseInt(args[i].substring(13));
     } else if (opt.equals("--debug")) {
-      // @ --debug
-      // @ run command-line debugger.
+      //@ --debug
+      //@ run command-line debugger.
       Env.debugOption = true;
     } else if (opt.equals("--type")) {
       // --type
@@ -327,39 +335,39 @@ public class FrontEnd {
       // -- --compile-rule
       // compile one rule (for SLIM model checking mode)
       Env.compileRule = true;
-      // Env.compileonly = true;
-    } else if (opt.equals("--hl") || opt.equals("--hl-opt")) { // seiji
-      // @ --hl, --hl-opt
-      // @ Use hyperlinks (HyperLMNtal).
+      //Env.compileonly = true;
+    } else if (opt.equals("--hl") || opt.equals("--hl-opt")) { //seiji
+      //@ --hl, --hl-opt
+      //@ Use hyperlinks (HyperLMNtal).
       Env.hyperLink = true;
       if (opt.equals("--hl-opt")) {
         Env.hyperLinkOpt = true;
       }
     } else if (opt.equals("--use-swaplink")) {
       // リンク操作に swaplink 命令を使用する (shinobu)
-      // @ --use-swaplink
-      // @ Use swaplink instruction to manipulate links.
+      //@ --use-swaplink
+      //@ Use swaplink instruction to manipulate links.
       Env.useSwapLink = true;
     } else if (opt.equals("--use-cyclelinks")) {
       // リンク操作に cyclelinks 命令を使用する (shinobu)
-      // @ --use-cyclelinks
-      // @ Use cyclelinks instruction to manipulate links.
+      //@ --use-cyclelinks
+      //@ Use cyclelinks instruction to manipulate links.
       Env.useCycleLinks = true;
     } else if (opt.equals("--use-atomlistop")) {
       // アトムリスト操作に必要な中間命令を出力する (aoyama)
-      // @ --use-atomlistop
-      // @ Output intermediate instructions to optimize execution by SLIM
-      // @ by dynamically modifying atomlist (a data structure in SLIM).
+      //@ --use-atomlistop
+      //@ Output intermediate instructions to optimize execution by SLIM
+      //@ by dynamically modifying atomlist (a data structure in SLIM).
       Env.useSwapLink = true;
       Env.useAtomListOP = true;
     } else if (opt.equals("--verbose-linkext")) {
       // swaplink/cyclelinks使用時において置換過程を出力する開発者用オプション (shinobu)
-      // @ --verbose-linkext
-      // @ (For developers) Output process of permutation by swaplink/cyclelinks.
+      //@ --verbose-linkext
+      //@ (For developers) Output process of permutation by swaplink/cyclelinks.
       Env.verboseLinkExt = true;
     } else if (opt.equals("--Wempty-head")) {
-      // @ --Wempty-head
-      // @ Warn if there are any rules that has an empty head.
+      //@ --Wempty-head
+      //@ Warn if there are any rules that has an empty head.
       Env.warnEmptyHead = true;
     } else if (opt.equals("--interpret")) {
       // DO NOTHING
@@ -375,7 +383,6 @@ public class FrontEnd {
 
   /**
    * 与えられた名前のファイルたちをくっつけたソースについて、一連の実行を行う。
-   *
    * @param files ソースファイル名のリスト（少なくとも1つの要素を含む）
    */
   private static void run(List<String> files) {
@@ -485,7 +492,6 @@ public class FrontEnd {
 
   /**
    * 中間命令列を出力する
-   *
    * @param m グローバル膜
    */
   //	private static void showIL(InterpretedRuleset rs, compile.structure.Membrane m)
@@ -497,11 +503,12 @@ public class FrontEnd {
   /**
    * プリプロセッサ0
    *
-   * <p>リンク<u> ... :- ... ==> リンク ... :- unary(リンク) | ...
+   * リンク<u> ... :- ... ==> リンク ... :- unary(リンク) | ...
    *
-   * <p>同様に、 u -> unary g -> ground s -> string i -> int
+   * 同様に、 u -> unary g -> ground s -> string i -> int
    *
-   * <p>例： a(Hah<u>), b(A<g>):-rhs. ==> a(Hah), b(A):-ground(A), unary(Hah), |rhs.
+   * 例： a(Hah<u>), b(A<g>):-rhs. ==> a(Hah), b(A):-ground(A), unary(Hah),
+   * |rhs.
    *
    * @param r
    * @return
@@ -520,11 +527,27 @@ public class FrontEnd {
 
       String b = s, a;
       {
-        for (a = b; ; b = a) {
-          a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<u>(.*?)\\:\\-(.*?)\\|", "$1$2:-unary($1), $3|");
-          a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<s>(.*?)\\:\\-(.*?)\\|", "$1$2:-string($1), $3|");
-          a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<i>(.*?)\\:\\-(.*?)\\|", "$1$2:-int($1), $3|");
-          a = a.replaceAll("([A-Z][0-9a-zA-Z]*)<g>(.*?)\\:\\-(.*?)\\|", "$1$2:-ground($1), $3|");
+        for (a = b;; b = a) {
+          a =
+            a.replaceAll(
+              "([A-Z][0-9a-zA-Z]*)<u>(.*?)\\:\\-(.*?)\\|",
+              "$1$2:-unary($1), $3|"
+            );
+          a =
+            a.replaceAll(
+              "([A-Z][0-9a-zA-Z]*)<s>(.*?)\\:\\-(.*?)\\|",
+              "$1$2:-string($1), $3|"
+            );
+          a =
+            a.replaceAll(
+              "([A-Z][0-9a-zA-Z]*)<i>(.*?)\\:\\-(.*?)\\|",
+              "$1$2:-int($1), $3|"
+            );
+          a =
+            a.replaceAll(
+              "([A-Z][0-9a-zA-Z]*)<g>(.*?)\\:\\-(.*?)\\|",
+              "$1$2:-ground($1), $3|"
+            );
           if (b.equals(a)) break; // "stable"
           // System.out.println(a);
         }

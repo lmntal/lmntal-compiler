@@ -17,9 +17,10 @@ import util.NestedIterator;
 import util.Util;
 
 /**
- * アトムの集合を管理するためのクラス。 要素はAtomクラスのインスタンスのみと仮定する。 Functorをキーとし、そのFunctorを持つアトムの集合を値とするMapを使って、
+ * アトムの集合を管理するためのクラス。
+ * 要素はAtomクラスのインスタンスのみと仮定する。
+ * Functorをキーとし、そのFunctorを持つアトムの集合を値とするMapを使って、
  * Functor毎にアトムを管理している。
- *
  * @author Mizuno
  */
 public final class AtomSet implements Iterable<Atom> {
@@ -48,7 +49,8 @@ public final class AtomSet implements Iterable<Atom> {
   /** 指定されたFunctorを持つアトムの数の取得 */
   public int getAtomCountOfFunctor(Functor f) {
     if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-      List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
+      List<Atom> l =
+        (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
       if (l == null) {
         return 0;
       } else {
@@ -79,21 +81,24 @@ public final class AtomSet implements Iterable<Atom> {
     return size == 0;
   }
 
-  /** この集合内にあるア トムの反復子を返す */
+  /** この集合内にあるア	トムの反復子を返す */
+
   @SuppressWarnings("unchecked")
   public Iterator<Atom> iterator() {
     return new NestedIterator<Atom>(
-        new Iterator[] {
-          getDataAtoms().iterator(),
-          new MultiMapIterator<>(getOuts()),
-          new MultiMapIterator<>(getAtoms()),
-        });
+      new Iterator[] {
+        getDataAtoms().iterator(),
+        new MultiMapIterator<>(getOuts()),
+        new MultiMapIterator<>(getAtoms()),
+      }
+    );
   }
 
   /** 与えられた名前を持つアトムの反復子を返す */
   public Iterator<Atom> iteratorOfFunctor(Functor f) {
     if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-      List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
+      List<Atom> l =
+        (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
       if (l == null) {
         return Util.NULL_ITERATOR;
       } else {
@@ -110,17 +115,22 @@ public final class AtomSet implements Iterable<Atom> {
   }
 
   /**
-   * アクティブアトムのFunctorの反復子を返す。 この集合内にあるアトムのFunctorは全てこの反復子を使って取得できるが、
+   * アクティブアトムのFunctorの反復子を返す。
+   * この集合内にあるアトムのFunctorは全てこの反復子を使って取得できるが、
    * この反復子で取得できるFunctorを持つアトムが必ずこの集合内にあるとは限らない。
    *
-   * <p>todo removeされた時に、アトム数が0になったFunctor除去するようにした方が良いか？ (n-kato)
-   * 膜のgcメソッド（コピーGCによるローカルidの振り直しを行う予定）に任せて放置していいと思います。 ただし、gcメソッドは現在呼ばれませんけど。
+   * todo removeされた時に、アトム数が0になったFunctor除去するようにした方が良いか？
+   * (n-kato) 膜のgcメソッド（コピーGCによるローカルidの振り直しを行う予定）に任せて放置していいと思います。
+   * ただし、gcメソッドは現在呼ばれませんけど。
    */
   public Iterator<Functor> activeFunctorIterator() {
     return getAtoms().keySet().iterator();
   }
 
-  /** この集合内の全てのアトムか格納されている配列を返す。 返される配列の実行時の型はAtom[]です。 */
+  /**
+   * この集合内の全てのアトムか格納されている配列を返す。
+   * 返される配列の実行時の型はAtom[]です。
+   */
   public Object[] toArray() {
     Object[] ret = new Atom[size];
     int index = 0;
@@ -134,7 +144,10 @@ public final class AtomSet implements Iterable<Atom> {
     return ret;
   }
 
-  /** この集合内の全てのアトムか格納されている配列を返す。 返される配列の実行時の型は引数に渡された配列の実行時の型と同じです。 */
+  /**
+   * この集合内の全てのアトムか格納されている配列を返す。
+   * 返される配列の実行時の型は引数に渡された配列の実行時の型と同じです。
+   */
   public Object[] toArray(Object[] a) {
     if (a.length < size) {
       a = (Object[]) Array.newInstance(a.getClass().getComponentType(), size);
@@ -152,14 +165,15 @@ public final class AtomSet implements Iterable<Atom> {
 
   /**
    * 指定されたアトムを追加する。
-   *
    * @return この集合が変更された場合はtrue
    */
   public boolean add(Atom atom) {
     Functor f = atom.getFunctor();
     List<Atom> l;
     if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-      Map<Functor, List<Atom>> map = f.isOutsideProxy() ? getOuts() : getAtoms();
+      Map<Functor, List<Atom>> map = f.isOutsideProxy()
+        ? getOuts()
+        : getAtoms();
       l = map.get(f);
       if (l == null) {
         l = new ArrayList<>();
@@ -176,7 +190,6 @@ public final class AtomSet implements Iterable<Atom> {
 
   /**
    * 指定されたアトムがあれば除去する。
-   *
    * @return この集合が変更された場合はtrue
    */
   public boolean remove(Atom atom) {
@@ -207,9 +220,7 @@ public final class AtomSet implements Iterable<Atom> {
 
   /**
    * 指定されたコレクション内の全ての要素をこの集合に追加する。
-   *
    * <p>現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。
-   *
    * @return この集合が変更された場合はtrue
    */
   public boolean addAll(Collection<Atom> c) {
@@ -218,7 +229,7 @@ public final class AtomSet implements Iterable<Atom> {
     while (it.hasNext()) {
       if (add(it.next())) {
         ret = true;
-        // addメソッドの中でsizeは変更している
+        //addメソッドの中でsizeは変更している
       }
     }
     return ret;
@@ -226,9 +237,7 @@ public final class AtomSet implements Iterable<Atom> {
 
   /**
    * 指定されたコレクション内の全ての要素をこの集合から除去する。
-   *
    * <p>現在は効率の悪い実装をしているので、頻繁に使うなら変更する必要がある。
-   *
    * @return この集合が変更された場合はtrue
    */
   public boolean removeAll(Collection<Atom> c) {
@@ -236,7 +245,7 @@ public final class AtomSet implements Iterable<Atom> {
     Iterator<Atom> it = c.iterator();
     while (it.hasNext()) {
       ret |= remove(it.next());
-      // removeメソッドの中でsizeは変更している
+      //removeメソッドの中でsizeは変更している
     }
     return ret;
   }
@@ -249,7 +258,7 @@ public final class AtomSet implements Iterable<Atom> {
     size = 0;
   }
 
-  /** デバッグ用出力 */
+  /**デバッグ用出力*/
   public void print() {
     Util.println("AtomSet: ");
     Iterator<Atom> it = iterator();
@@ -307,18 +316,20 @@ public final class AtomSet implements Iterable<Atom> {
     }
   }
 
-  /** このアトムセットがもう変更されない事を宣言する。 アトムセット間の比較を行う際の前準備と、ハッシュコードの計算を行う。 */
+  /**
+   * このアトムセットがもう変更されない事を宣言する。
+   * アトムセット間の比較を行う際の前準備と、ハッシュコードの計算を行う。
+   */
   public void freeze() {
     gc();
     /////////////////////////////////
     // non deterministic LMNtal
-    Comparator<Functor> sizeComparator =
-        new Comparator<Functor>() {
-          public int compare(Functor f0, Functor f1) {
-            return getAtoms().get(f0).size() - atoms.get(f1).size();
-          }
-        };
-    // 比較のための準備
+    Comparator<Functor> sizeComparator = new Comparator<Functor>() {
+      public int compare(Functor f0, Functor f1) {
+        return getAtoms().get(f0).size() - atoms.get(f1).size();
+      }
+    };
+    //比較のための準備
     List<Functor> funcs = new ArrayList<>();
     funcs.addAll(getAtoms().keySet());
     Collections.sort(funcs, sizeComparator);
@@ -383,7 +394,12 @@ public final class AtomSet implements Iterable<Atom> {
     return true;
   }
 
-  private boolean compare(Atom a1, Atom a2, HashMap<Atom, Atom> map, HashSet<Atom> checked2) {
+  private boolean compare(
+    Atom a1,
+    Atom a2,
+    HashMap<Atom, Atom> map,
+    HashSet<Atom> checked2
+  ) {
     if (!a1.getFunctor().equals(a2.getFunctor())) return false;
     if (map.containsKey(a1)) {
       return a2 == map.get(a1);

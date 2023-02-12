@@ -1,4 +1,7 @@
-/** ルールコンパイルでのエラー */
+/**
+ * ルールコンパイルでのエラー
+ */
+
 package compile;
 
 public class CompileException extends Exception {

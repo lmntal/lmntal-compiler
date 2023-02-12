@@ -35,11 +35,12 @@ public class TypeInferer {
     // ユーザ定義情報を取得する
     boolean typeDefined = false;
     List<Membrane> typedefmems = new ArrayList<>();
-    for (Membrane topmem : root.mems)
-      if (TypeEnv.getMemName(topmem).equals("typedef")) {
-        typedefmems.add(topmem);
-        break; // TODO 型定義膜が2つあったらどうする => マージ
-      }
+    for (Membrane topmem : root.mems) if (
+      TypeEnv.getMemName(topmem).equals("typedef")
+    ) {
+      typedefmems.add(topmem);
+      break; // TODO 型定義膜が2つあったらどうする => マージ
+    }
 
     TypeChecker tc = new TypeChecker();
     if (typedefmems.size() > 0) {
@@ -81,13 +82,13 @@ public class TypeInferer {
       tc.check(ai, qi);
     }
 
-    // 推論結果を出力する
+    //推論結果を出力する
     if (Env.flgShowConstraints) {
       TypePrinter tp;
       //			if(Env.flgArgumentInference && Env.flgQuantityInference){
       tp = new TypePrinter(ai, qi, ci);
       // printAll が使われていたが LMNtal Syntax で表示する printAllLMNSyntax メソッドに切り替え
-      // tp.printAll();
+      //tp.printAll();
       tp.printAllLMNSyntax();
       //			}
     }

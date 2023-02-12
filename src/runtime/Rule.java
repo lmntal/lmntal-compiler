@@ -6,15 +6,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
+@JsonAutoDetect(
+  fieldVisibility = Visibility.ANY,
+  getterVisibility = Visibility.NONE
+)
 public final class Rule {
 
-  /** 膜主導ルール適用の命令列（memMatchLabel.insts） 先頭の命令はspec[1,*]でなければならない。 */
+  /** 膜主導ルール適用の命令列（memMatchLabel.insts）
+   * 先頭の命令はspec[1,*]でなければならない。*/
   public List<Instruction> memMatch;
 
-  /** ガード命令列（guardLabel.insts）またはnull。 先頭の命令はspec[*,*]でなければならない。 */
+  /** ガード命令列（guardLabel.insts）またはnull。
+   * 先頭の命令はspec[*,*]でなければならない。*/
   public List<Instruction> guard;
-  /** ボディ命令列（bodyLabel.insts）またはnull。 先頭の命令はspec[*,*]でなければならない。 */
+  /** ボディ命令列（bodyLabel.insts）またはnull。
+   * 先頭の命令はspec[*,*]でなければならない。*/
   public List<Instruction> body;
 
   /** ラベル付き膜主導ルール適用命令列 */
@@ -28,7 +34,7 @@ public final class Rule {
   /** このルールの表示用文字列（省略なし） */
   public String fullText = "";
 
-  /** スレッドごとのベンチマーク結果 * */
+  /** スレッドごとのベンチマーク結果 **/
   public Map<Thread, Benchmark> bench;
 
   /** ルール名 */
@@ -42,14 +48,15 @@ public final class Rule {
 
   // todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 
-  /** ふつうのコンストラクタ。 */
+  /**
+   * ふつうのコンストラクタ。
+   */
   public Rule() {
     this("");
   }
 
   /**
    * ルール文字列つきコンストラクタ
-   *
    * @param text ルールの文字列表現
    */
   public Rule(String text) {
@@ -58,7 +65,6 @@ public final class Rule {
 
   /**
    * ルール文字列（省略なし）つきコンストラクタ
-   *
    * @param text ルールの文字列表現
    * @param fullText ルールの文字列表現（省略なし）
    */
@@ -70,9 +76,14 @@ public final class Rule {
     bench = new HashMap<>();
   }
 
-  /** パーザーで利用するコンストラクタ */
+  /**
+   * パーザーで利用するコンストラクタ
+   */
   public Rule(
-      InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel) {
+    InstructionList memMatchLabel,
+    InstructionList guardLabel,
+    InstructionList bodyLabel
+  ) {
     this.memMatchLabel = memMatchLabel;
     this.guardLabel = guardLabel;
     this.bodyLabel = bodyLabel;
@@ -81,7 +92,9 @@ public final class Rule {
     if (bodyLabel != null) body = bodyLabel.insts;
   }
 
-  /** 命令列の詳細を出力する */
+  /**
+   * 命令列の詳細を出力する
+   */
   public void showDetail() {
     if (hasUniq) {
       Env.p("Compiled Uniq Rule " + this);
