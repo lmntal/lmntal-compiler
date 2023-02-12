@@ -49,7 +49,7 @@ We are currently using google-java-format.
 
 ```sh
 wget https://github.com/google/google-java-format/releases/download/v1.15.0/google-java-format-1.15.0-all-deps.jar
-java -jar /path/to/google-java-format-1.15.0-all-deps.jar --replace [files...]
+java -jar /path/to/google-java-format-1.15.0-all-deps.jar --replace --skip-javadoc-formatting [files...]
 ```
 
 See <https://github.com/google/google-java-format> for more detailed information.
