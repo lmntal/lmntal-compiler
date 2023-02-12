@@ -1,6 +1,5 @@
 package compile.structure;
 
-
 /**
  * ソースコード中のルールの構造を表すクラス
  */
