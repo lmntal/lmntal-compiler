@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.LinkedList;
 
 /** ソースファイル中のアトム表現 */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 class SrcAtom {
 
   @JsonTypeInfo(use = Id.CLASS)

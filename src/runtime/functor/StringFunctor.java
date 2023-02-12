@@ -13,7 +13,7 @@ public class StringFunctor extends ObjectFunctor {
   }
 
   public String getQuotedAtomName() {
-    //ダブルクオートした名前を返す
+    // ダブルクオートした名前を返す
     String quotedAtomName = Util.quoteString(getName(), '\"');
     return quotedAtomName;
   }

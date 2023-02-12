@@ -22,8 +22,7 @@ public class TypeVar {
   private Set<Functor> passiveFunctors;
 
   public void addPassiveFunctor(Functor f) {
-    if (self().passiveFunctors == null) self().passiveFunctors =
-      new HashSet<>();
+    if (self().passiveFunctors == null) self().passiveFunctors = new HashSet<>();
     self().passiveFunctors.add(f);
     passiveFunctors = self().passiveFunctors;
   }
@@ -34,7 +33,8 @@ public class TypeVar {
   }
 
   public TypeVar self() {
-    if (realTypeVar == this) return this; else {
+    if (realTypeVar == this) return this;
+    else {
       realTypeVar = realTypeVar.self();
       return realTypeVar;
     }
@@ -43,7 +43,8 @@ public class TypeVar {
   public void unify(TypeVar tv) {
     TypeVar tvs = tv.self();
     TypeVar s = self();
-    if (tvs.id >= s.id) tvs.realTypeVar = s; else s.realTypeVar = tvs;
+    if (tvs.id >= s.id) tvs.realTypeVar = s;
+    else s.realTypeVar = tvs;
   }
 
   public boolean equals(Object o) {
@@ -58,16 +59,10 @@ public class TypeVar {
   }
 
   public String toString() {
-    return (
-      "'t" +
-      self().id +
-      "=" +
-      (
-        self().passiveFunctors == null
-          ? ("{?}")
-          : ("{" + stringOfPassiveFunctors() + "}")
-      )
-    );
+    return ("'t"
+        + self().id
+        + "="
+        + (self().passiveFunctors == null ? ("{?}") : ("{" + stringOfPassiveFunctors() + "}")));
   }
 
   private boolean showDetailOfDataFunctor = false;
@@ -80,7 +75,8 @@ public class TypeVar {
       dataTypes.add(typeNameOfFunctor(itf.next()));
       while (itf.hasNext()) {
         String tn = typeNameOfFunctor(itf.next());
-        if (dataTypes.contains(tn)) continue; else dataTypes.add(tn);
+        if (dataTypes.contains(tn)) continue;
+        else dataTypes.add(tn);
       }
       Iterator<String> itd = dataTypes.iterator();
       ret += itd.next();
@@ -98,7 +94,7 @@ public class TypeVar {
 
   private Set<String> typenames; // = new HashSet<String>();
 
-  public Set<String> getTypeName() { //throws TypeException{
+  public Set<String> getTypeName() { // throws TypeException{
     if (typenames == null) {
       typenames = new HashSet<>();
       if (self().passiveFunctors == null) {
@@ -122,31 +118,20 @@ public class TypeVar {
   }
 
   public String shortString() {
-    return (
-      "(" +
-      (
-        self().passiveFunctors == null
-          ? ("'t" + self().id)
-          : stringOfPassiveFunctors()
-      ) +
-      ")"
-    );
+    return ("("
+        + (self().passiveFunctors == null ? ("'t" + self().id) : stringOfPassiveFunctors())
+        + ")");
   }
 
   public String shortStringLMNSyntax() {
-    return (
-      "(" +
-      (
-        self().passiveFunctors == null
-          ? ("t" + self().id)
-          : stringOfPassiveFunctors()
-      ) +
-      ")"
-    );
+    return ("("
+        + (self().passiveFunctors == null ? ("t" + self().id) : stringOfPassiveFunctors())
+        + ")");
   }
 
   private String typeNameOfFunctor(Functor f) {
     String tn = TypeEnv.getTypeNameOfPassiveFunctor(f);
-    if (tn != null) return tn; else return f.toString();
+    if (tn != null) return tn;
+    else return f.toString();
   }
 }

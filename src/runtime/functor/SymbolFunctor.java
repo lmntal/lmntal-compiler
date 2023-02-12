@@ -53,11 +53,7 @@ public class SymbolFunctor extends Functor {
     // コンストラクタでinternしているので、==で比較できる。
     if (!(o instanceof SymbolFunctor)) return false;
     SymbolFunctor f = (SymbolFunctor) o;
-    return (
-      Objects.equals(f.path, path) &&
-      Objects.equals(f.name, name) &&
-      f.arity == arity
-    );
+    return (Objects.equals(f.path, path) && Objects.equals(f.name, name) && f.arity == arity);
   }
 
   /**
@@ -113,12 +109,10 @@ public class SymbolFunctor extends Functor {
   }
 
   public String toString() {
-    return (
-      (path == null ? "" : Util.quoteString(path, '\'') + ".") +
-      Util.quoteString(name, '\'') +
-      "_" +
-      getArity()
-    );
+    return ((path == null ? "" : Util.quoteString(path, '\'') + ".")
+        + Util.quoteString(name, '\'')
+        + "_"
+        + getArity());
   }
 
   /**

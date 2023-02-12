@@ -6,10 +6,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 /**
  * ソースファイル中のルールコンテキストの表現
  */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 class SrcRuleContext extends SrcContext {
 
   public SrcRuleContext() {}

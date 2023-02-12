@@ -31,25 +31,28 @@ public final class Collector {
     }
   }
 
-  public static final ICondition<Atomic> ALL = new ICondition<Atomic>() {
-    public boolean accept(Atomic anyAtomic) {
-      return true;
-    }
-  };
+  public static final ICondition<Atomic> ALL =
+      new ICondition<Atomic>() {
+        public boolean accept(Atomic anyAtomic) {
+          return true;
+        }
+      };
 
-  public static final ICondition<Atom> IS_UNIFY = new ICondition<Atom>() {
-    public boolean accept(Atom atom) {
-      return atom.functor.equals(Functor.UNIFY);
-    }
-  };
+  public static final ICondition<Atom> IS_UNIFY =
+      new ICondition<Atom>() {
+        public boolean accept(Atom atom) {
+          return atom.functor.equals(Functor.UNIFY);
+        }
+      };
 
   public static final ICondition<Atom> IS_NOT_UNIFY = new Not<>(IS_UNIFY);
 
-  public static final ICondition<ProcessContext> IS_TYPED = new ICondition<ProcessContext>() {
-    public boolean accept(ProcessContext pc) {
-      return pc.def.isTyped();
-    }
-  };
+  public static final ICondition<ProcessContext> IS_TYPED =
+      new ICondition<ProcessContext>() {
+        public boolean accept(ProcessContext pc) {
+          return pc.def.isTyped();
+        }
+      };
 
   private Collector() {}
 
@@ -84,20 +87,14 @@ public final class Collector {
    * @param cond 条件
    * @return 条件を満たすアトムの集合
    */
-  public static Set<Atom> collectAtoms(
-    Membrane mem,
-    ICondition<? super Atom> cond
-  ) {
+  public static Set<Atom> collectAtoms(Membrane mem, ICondition<? super Atom> cond) {
     Set<Atom> atoms = new HashSet<>();
     collectAtoms(atoms, mem, cond);
     return atoms;
   }
 
   private static void collectAtoms(
-    Set<? super Atom> destAtoms,
-    Membrane mem,
-    ICondition<? super Atom> cond
-  ) {
+      Set<? super Atom> destAtoms, Membrane mem, ICondition<? super Atom> cond) {
     for (Membrane submem : mem.mems) {
       collectAtoms(destAtoms, submem, cond);
     }
@@ -108,10 +105,7 @@ public final class Collector {
     }
   }
 
-  private static void collectTypedProcessContexts(
-    Set<? super ProcessContext> pcs,
-    Membrane mem
-  ) {
+  private static void collectTypedProcessContexts(Set<? super ProcessContext> pcs, Membrane mem) {
     for (Membrane submem : mem.mems) {
       collectTypedProcessContexts(pcs, submem);
     }

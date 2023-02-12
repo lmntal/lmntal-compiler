@@ -4,21 +4,17 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * ソース中のルールを表します
  */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 class SrcRule {
 
   public String name; // ルール名
-  public int lineno; //行番号 2006.1.22 by inui
+  public int lineno; // 行番号 2006.1.22 by inui
 
   @JsonTypeInfo(use = Id.CLASS)
   public LinkedList head; // ヘッドプロセス
@@ -32,7 +28,7 @@ class SrcRule {
   @JsonTypeInfo(use = Id.CLASS)
   public LinkedList guardNegatives; // ガード否定条件構文のリスト
 
-  private String text; //ルールのテキスト表現
+  private String text; // ルールのテキスト表現
 
   public SrcRule() {}
 
@@ -45,7 +41,7 @@ class SrcRule {
     this(name, head, new LinkedList(), body);
   }
 
-  //2006.1.22 by inui
+  // 2006.1.22 by inui
   /**
    * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します
    * @param head ヘッドのリスト
@@ -63,12 +59,7 @@ class SrcRule {
    * @param gurad ガードのリスト
    * @param body ボディのリスト
    */
-  public SrcRule(
-    String name,
-    LinkedList head,
-    LinkedList guard,
-    LinkedList body
-  ) {
+  public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body) {
     this.name = name;
     this.head = head;
     this.guard = guard;
@@ -77,7 +68,7 @@ class SrcRule {
     addHyperLinkConstraint(head, this.guard, body);
   }
 
-  //2006.1.22 by inui
+  // 2006.1.22 by inui
   /**
    * 指定されたヘッドルールとボディルールとガードでルールを初期化します
    * @param head ヘッドのリスト
@@ -85,18 +76,12 @@ class SrcRule {
    * @param body ボディのリスト
    * @param lineno 行番号
    */
-  public SrcRule(
-    String name,
-    LinkedList head,
-    LinkedList guard,
-    LinkedList body,
-    int lineno
-  ) {
+  public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body, int lineno) {
     this(name, head, guard, body);
     this.lineno = lineno;
   }
 
-  //2006/07/07 by kudo
+  // 2006/07/07 by kudo
   /**
    * 指定されたヘッドルールとボディルールとガードルールで初期化する。
    * simpagation ruleの構文に対して使われるコンストラクタ。
@@ -107,13 +92,7 @@ class SrcRule {
    * @param lineno 行番号
    */
   public SrcRule(
-    String name,
-    LinkedList head,
-    List head2,
-    LinkedList guard,
-    LinkedList body,
-    int lineno
-  ) {
+      String name, LinkedList head, List head2, LinkedList guard, LinkedList body, int lineno) {
     this.name = name;
     this.head = head;
     this.guard = (guard == null ? new LinkedList() : guard);
@@ -138,21 +117,13 @@ class SrcRule {
    *       a(!H:1,!H:2,!H:3) も同じになってしまうのは要改良．
    *       ueda
    */
-  public void addHyperLinkConstraint(
-    LinkedList head,
-    LinkedList guard,
-    LinkedList body
-  ) {
+  public void addHyperLinkConstraint(LinkedList head, LinkedList guard, LinkedList body) {
     LinkedList headhl = new LinkedList();
     addHyperLinkConstraintSub(head, guard, body, headhl);
   }
 
   private LinkedList addHyperLinkConstraintSub(
-    LinkedList head,
-    LinkedList guard,
-    LinkedList body,
-    LinkedList headhl
-  ) {
+      LinkedList head, LinkedList guard, LinkedList body, LinkedList headhl) {
     if (head != null) {
       for (Object o : head) {
         if (o instanceof SrcHyperLink) {
@@ -294,7 +265,8 @@ class SrcRule {
       } else if (o instanceof SrcContext) { // SrcLink, SrcLinkBundle, SrcRuleContext
         SrcLink sl = (SrcLink) o;
         ret.add(new SrcLink(sl.getName()));
-      } else if (o instanceof SrcRule) {} // ※左辺にルールは出現しない筈
+      } else if (o instanceof SrcRule) {
+      } // ※左辺にルールは出現しない筈
     }
     return ret;
   }

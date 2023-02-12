@@ -34,9 +34,7 @@ public class OccurrenceInferrer {
   public void printAll() {
     Env.p("--OCCURRENCE ANALYSIS");
     Env.p("---atom :");
-    Iterator<Set<AtomOccurrence>> itas = atomOccurrenceConstraintsMap
-      .values()
-      .iterator();
+    Iterator<Set<AtomOccurrence>> itas = atomOccurrenceConstraintsMap.values().iterator();
     while (itas.hasNext()) {
       Iterator<AtomOccurrence> itac = itas.next().iterator();
       while (itac.hasNext()) {
@@ -44,9 +42,7 @@ public class OccurrenceInferrer {
       }
     }
     Env.p("---membrane : ");
-    Iterator<Set<MembraneOccurrence>> itms = membraneOccurrenceConstraintsMap
-      .values()
-      .iterator();
+    Iterator<Set<MembraneOccurrence>> itms = membraneOccurrenceConstraintsMap.values().iterator();
     while (itms.hasNext()) {
       Iterator<MembraneOccurrence> itmc = itms.next().iterator();
       while (itmc.hasNext()) {
@@ -62,20 +58,15 @@ public class OccurrenceInferrer {
     Iterator<Atom> ita = mem.atoms.iterator();
     while (ita.hasNext()) {
       Atom atom = ita.next();
-      if (TypeEnv.outOfPassiveAtom(atom) == TypeEnv.ACTIVE) addAtomOccurrence(
-        new AtomOccurrence(TypeEnv.getMemName(mem), atom.functor)
-      );
+      if (TypeEnv.outOfPassiveAtom(atom) == TypeEnv.ACTIVE)
+        addAtomOccurrence(new AtomOccurrence(TypeEnv.getMemName(mem), atom.functor));
     }
     /** 子膜について出現制約を課し、走査 */
     Iterator<Membrane> itm = mem.mems.iterator();
     while (itm.hasNext()) {
       Membrane child = itm.next();
       addMembraneOccurrence(
-        new MembraneOccurrence(
-          TypeEnv.getMemName(mem),
-          TypeEnv.getMemName(child)
-        )
-      );
+          new MembraneOccurrence(TypeEnv.getMemName(mem), TypeEnv.getMemName(child)));
       inferOccurrenceMembrane(child);
     }
     /** ルールの左辺／右辺を走査 */

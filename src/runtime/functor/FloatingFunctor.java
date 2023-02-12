@@ -2,7 +2,6 @@ package runtime.functor;
 
 /** 浮動小数点数アトム用の1引数ファンクタを表すクラス
  * @author n-kato */
-
 public class FloatingFunctor extends DataFunctor {
 
   double value;
@@ -29,9 +28,7 @@ public class FloatingFunctor extends DataFunctor {
   }
 
   public boolean equals(Object o) {
-    return (
-      (o instanceof FloatingFunctor) && ((FloatingFunctor) o).value == value
-    );
+    return ((o instanceof FloatingFunctor) && ((FloatingFunctor) o).value == value);
   }
 
   @Override
