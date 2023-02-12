@@ -66,7 +66,7 @@ public class RulesetCompiler {
       try {
         rc = new RuleCompiler(rs);
         rc.compile();
-        //2006.1.22 Ruleに行番号を渡す by inui
+        // 2006.1.22 Ruleに行番号を渡す by inui
         rc.theRule.lineno = rs.lineno;
       } catch (CompileException e) {
         Env.p("    in " + rs.toString() + "\n");
@@ -102,7 +102,7 @@ public class RulesetCompiler {
   }
 
   public static Ruleset compileRuleset(InterpretedRuleset rs) {
-    return rs; //返すルールセットはそのまま。どうするのが良いのだろうか？
+    return rs; // 返すルールセットはそのまま。どうするのが良いのだろうか？
   }
   /**
    * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。

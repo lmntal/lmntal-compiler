@@ -25,7 +25,7 @@ public class QueuedEntity {
    */
   public void dequeue() {
     if (!isQueued()) {
-      //System.out.println("SYSTEM ERROR: dequeued entity is not in a queue");
+      // System.out.println("SYSTEM ERROR: dequeued entity is not in a queue");
       return;
     }
     try {
@@ -37,7 +37,7 @@ public class QueuedEntity {
         stack = null;
       }
     } catch (NullPointerException e) {
-      //非同期に除去されていたので、何もしない。
+      // 非同期に除去されていたので、何もしない。
     }
   }
 }
