@@ -1,9 +1,13 @@
 # LMNtal Compiler
 
-LMNtal のコンパイラです。
-バグ報告は lmntal@ueda.info.waseda.ac.jp までお願いします。
+This is an compiler of the
+[LMNtal (pronounced "elemental") ](https://www.ueda.info.waseda.ac.jp/lmntal) language.
 
----
+LMNtal is a programming and modeling language
+based on hierarchical graph rewriting.
+It was designed to be a substrate language of diverse computational models,
+especially those addressing concurrency,
+mobility and multiset rewriting.
 
 ## Getting started
 
@@ -15,14 +19,15 @@ LMNtal のコンパイラです。
 ### Installation
 
 ```
-$ git clone git@github.com:lmntal/lmntal-compiler.git
-$ cd lmntal-compiler
-$ ant
+git clone git@github.com:lmntal/lmntal-compiler.git
+cd lmntal-compiler
+ant
 ```
 
-### Using LMNtal Compiler
+### Usage
 
-bin ディレクトリ以下のシェルスクリプトを実行することで使えます。詳しくは`--help`オプションで確認してください。
+You can use the compiler by running the shell script `bin/lmntal`.
+Please run it with `--help` option to get more detailed information.
 
 ```
 bin/lmntal --help
@@ -30,16 +35,48 @@ bin/lmntal --help
 
 ## Development
 
+Contributions are what make the open source community
+such an amazing place to learn, inspire, and create.
+Any contributions you make are **greatly appreciated**.
+
+<a href="https://github.com/lmntal/lmntal-compiler/graphs/contributors">
+  <img src = "https://contrib.rocks/image?repo=lmntal/lmntal-compiler"/>
+</a>
+
 ### Formatting
 
-We are currently using prettier-java.
+We are currently using google-java-format.
 
 ```sh
-npm install # install prettier
-npx prettier --write "**/*.java"
+wget https://github.com/google/google-java-format/releases/download/v1.15.0/google-java-format-1.15.0-all-deps.jar
+java -jar /path/to/google-java-format-1.15.0-all-deps.jar --replace --skip-javadoc-formatting [files...]
 ```
 
-See <https://github.com/jhipster/prettier-java> for more detailed information.
+See <https://github.com/google/google-java-format> for more detailed information.
+
+### Directory structure
+
+```bash
+- src/
+  - compiler/
+    - parser/
+    - structure/
+    - util/
+    - Compactor.java
+    - CompileException.java
+    - Grouping.java
+    - GuardCompiler.java
+    - HeadCompiler.java
+    - LHSCompiler.java
+    - Module.java
+    - Optimizer.java
+    - README.md
+    - RuleCompiler.java
+    - RulesetCompiler.java
+  - util/ # Some utility functions.
+  - type/ # A type checker of the polarity of links (please refer Kudo's thesis).
+  - runtime/ # The runtime in the past century.
+```
 
 ### build.xml
 
@@ -66,6 +103,28 @@ See <https://github.com/jhipster/prettier-java> for more detailed information.
 10. doc  
     javadoc を docs ディレクトリに置く。
 
+### Testing
+
+Please test the compiler with the runtime [SLIM](https://github.com/lmntal/slim).
+
+```bash
+export LMNTAL_HOME=/path/to/the/compiler
+# e.g. export LMNTAL_HOME=/home/username/lmntal
+
+git clone https://github.com/lmntal/slim
+cd slim
+./autogen.sh
+./configure
+make
+make install
+
+make check
+```
+
 ### 公開に際して
 
 必要に応じて Env.LMNTAL_VERSION の値を修正すること。
+
+## Contact
+
+バグ報告は <lmntal@ueda.info.waseda.ac.jp> までお願いします。

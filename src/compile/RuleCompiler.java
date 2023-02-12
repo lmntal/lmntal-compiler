@@ -19,6 +19,7 @@ import runtime.Rule;
 import runtime.Ruleset;
 import runtime.functor.Functor;
 import runtime.functor.SymbolFunctor;
+import util.Util;
 
 /**
  * コンパイル時ルール構造（compile.structure.RuleStructure）を
@@ -1963,21 +1964,11 @@ public class RuleCompiler {
     throw new CompileException("SYSTEM ERROR");
   }
 
-  /**
-   * <p>文字{@code c}が英数字であるか調べます。</p>
-   * @param c 調べる文字
-   * @return 文字{@code c}が英数字の場合{@code true}、そうでない場合{@code false}を返します。
-   * TODO: このメソッドはここにあるべきではない
-   */
-  private static boolean isAlphabetOrDigit(char c) {
-    return '0' <= c && c <= '9' || 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z';
-  }
-
   private static String makeRuleName(String s, boolean fullName, int limit) {
     StringBuilder buf = new StringBuilder("_");
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
-      if (isAlphabetOrDigit(c) || c == '_') {
+      if (Util.isAlphabetOrDigit(c) || c == '_') {
         buf.append(c);
       }
       if (!fullName && buf.length() > limit) {

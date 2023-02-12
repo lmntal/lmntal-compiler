@@ -1,5 +1,7 @@
 package runtime.functor;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import compile.parser.SrcName;
 import runtime.Env;
 import util.Util;
@@ -10,6 +12,7 @@ import util.Util;
  * サブクラスはこれらの情報を取得する getName, getArity を実装する．
  * オブジェクトの生成は各サブクラスを new する他に build メソッドを使うことが出来る．
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public abstract class Functor {
 
   /**

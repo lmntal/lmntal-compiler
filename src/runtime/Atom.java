@@ -1,5 +1,7 @@
 package runtime;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import runtime.functor.Functor;
 import util.QueuedEntity;
 
@@ -7,6 +9,7 @@ import util.QueuedEntity;
  * アトムクラス。ローカル・リモートに関わらずこのクラスのインスタンスを使用する。
  * @author Mizuno
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public final class Atom extends QueuedEntity {
 
   /** 所属膜。AbstractMembraneとそのサブクラスが変更してよい。

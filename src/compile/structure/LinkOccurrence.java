@@ -1,5 +1,7 @@
 package compile.structure;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * ソースコード中のリンクまたはリンク束の各出現を表す。<br>
  * {@link runtime.Link} と違って、{@code LinkOccurrence.atom} はこちら側のアトムオブジェクトが入っている。
@@ -14,7 +16,7 @@ public final class LinkOccurrence {
   /**
    * このリンクが所属するアトムオブジェクト
    */
-  public Atomic atom;
+  @JsonIgnore public Atomic atom;
 
   /**
    * このリンクが所属するアトムにおけるこのリンクの引数番号
@@ -24,7 +26,7 @@ public final class LinkOccurrence {
   /**
    * 2回しか出現しない場合に、もう片方の出現を保持する
    */
-  public LinkOccurrence buddy = null;
+  @JsonIgnore public LinkOccurrence buddy = null;
 
   /**
    * リンク出現を生成する。

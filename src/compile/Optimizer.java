@@ -301,6 +301,7 @@ public class Optimizer {
         }
         if (!referred) {
           match.remove(i);
+          i--;
           maxm--;
           for (int j = 0; j < maxb; j++) {
             if (body.get(j).getKind() == Instruction.FREEATOM) {
@@ -1407,7 +1408,7 @@ public class Optimizer {
               //						end
               if (beforeVar.get(beforeAtom).equals(atomVarMap2.get(beforeAtom))) {
                 Integer t1 = (Integer) inherit.get(t);
-                Integer t2 = (Integer) outToBeforeVar.get(t1);
+                // Integer t2 = (Integer) outToBeforeVar.get(t1);
                 //							loopIterator.set(new Instruction(Instruction.DEREFLINK, inst.getIntArg1(),
                 // t2.intValue(), inst.getIntArg4()));
 

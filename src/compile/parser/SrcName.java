@@ -1,5 +1,7 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import util.Util;
 
 /**
@@ -14,6 +16,7 @@ import util.Util;
  * <p>
  * runtime.Functorから参照するためにpublicクラスに変更してみた。
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public class SrcName {
 
   /** 名前トークンが表す文字列 */
@@ -28,6 +31,8 @@ public class SrcName {
   public static final int STRING = 2; // "aaa" "AAA" "12" "-12" "3.14" "-3.14e-1"
   public static final int QUOTED = 3; // [:aaa:] [:AAA:] [:12:] [:-12:] [:3.14:] [:-3.14e-1:]
   public static final int PATHED = 4; // module.p module:p
+
+  public SrcName() {}
 
   /**
    * 標準の名前トークンの表現を生成する。

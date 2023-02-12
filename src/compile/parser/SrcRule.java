@@ -1,18 +1,29 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * ソース中のルールを表します
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 class SrcRule {
 
   public String name; // ルール名
   public int lineno; // 行番号 2006.1.22 by inui
   public LinkedList head; // ヘッドプロセス
+
+  @JsonTypeInfo(use = Id.CLASS)
   public LinkedList body; // ボディプロセス
+
+  @JsonTypeInfo(use = Id.CLASS)
   public LinkedList guard; // ガードプロセス
+
+  @JsonTypeInfo(use = Id.CLASS)
   public LinkedList guardNegatives; // ガード否定条件構文のリスト
 
   private String text; // ルールのテキスト表現

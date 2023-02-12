@@ -1,5 +1,7 @@
 package util;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,6 +16,7 @@ import runtime.functor.SymbolFunctor;
  * @author mizuno
  * 汎用ユーティリティメソッド・定数を集めたクラス
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public abstract class Util {
 
   public static Functor DOT = new SymbolFunctor(".", 3);
@@ -194,5 +197,14 @@ public abstract class Util {
 
   public static long getTime() {
     return System.nanoTime();
+  }
+
+  /**
+   * <p>文字{@code c}が英数字であるか調べます。</p>
+   * @param c 調べる文字
+   * @return 文字{@code c}が英数字の場合{@code true}、そうでない場合{@code false}を返します。
+   */
+  public static boolean isAlphabetOrDigit(char c) {
+    return '0' <= c && c <= '9' || 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z';
   }
 }

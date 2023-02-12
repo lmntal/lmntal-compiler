@@ -1,5 +1,7 @@
 package compile.structure;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * ソースコード中のリンク列を持つ構造を表す抽象クラス。
  * アトム、アトム集団、コンテキストなどの親クラス。
@@ -11,7 +13,7 @@ public abstract class Atomic {
   /**
    * 所属膜
    */
-  public Membrane mem = null;
+  @JsonIgnore public Membrane mem = null;
 
   /**
    * アトムのリンク列（またはアトム集団のリンク束列）

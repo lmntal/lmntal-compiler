@@ -1,5 +1,6 @@
 package compile.structure;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +14,7 @@ public final class RuleStructure {
   /**
    * 所属膜。コンパイル時につかう
    */
-  public Membrane parent;
+  @JsonIgnore public Membrane parent;
 
   /**
    * ルール名

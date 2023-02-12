@@ -1,5 +1,8 @@
 package runtime;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +12,7 @@ import java.util.List;
  *
  * @author n-kato
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public class InstructionList implements Cloneable {
 
   /**
@@ -34,7 +38,7 @@ public class InstructionList implements Cloneable {
   /**
    * 命令列 (InstructionのList)
    */
-  public List<Instruction> insts = new ArrayList<>();
+  @JsonIgnore public List<Instruction> insts = new ArrayList<>();
 
   /**
    * 親命令列またはnull

@@ -87,7 +87,7 @@ abstract class LHSCompiler {
       insts.add(new Instruction(Instruction.GETLINK, varCount, atompath, i));
       varCount++;
     }
-    final int[] put = linkPaths.put(atompath, paths);
+    // final int[] put = linkPaths.put(atompath, paths);
   }
 
   /**

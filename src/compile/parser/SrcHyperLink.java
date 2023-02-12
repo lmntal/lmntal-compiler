@@ -1,8 +1,12 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
 /**
  * ソースファイル中のリンク表現
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 class SrcHyperLink extends SrcLink {
 
   /**
@@ -10,6 +14,8 @@ class SrcHyperLink extends SrcLink {
    * 属性なしの場合は空文字列
    */
   protected SrcName attr;
+
+  public SrcHyperLink() {}
 
   /**
    * 指定された名前のリンクを作成します

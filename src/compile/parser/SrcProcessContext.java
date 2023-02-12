@@ -1,16 +1,22 @@
 package compile.parser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.LinkedList;
 
 /**
  * ソースファイル中のプロセスコンテキストの表現
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 class SrcProcessContext extends SrcContext {
 
   /**
    * 明示的な引数列
    * <p>利用側でLinkedListを生成して代入すること
    */
+  @JsonTypeInfo(use = Id.CLASS)
   public LinkedList args = null;
 
   /** リンク束 */
@@ -21,6 +27,8 @@ class SrcProcessContext extends SrcContext {
 
   /** リンク名 */
   public String linkName = null;
+
+  public SrcProcessContext() {}
 
   /**
    * 指定された名前をもつ引数無しのプロセスコンテキストを作成する

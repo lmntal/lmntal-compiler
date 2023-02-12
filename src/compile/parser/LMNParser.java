@@ -76,6 +76,15 @@ public class LMNParser {
   public Membrane parse() throws ParseException {
     // LinkedList srcProcess = parseSrc();
     SrcRule initRule = parseSrc(); // プロセス構造を生成するルール
+    // try {
+    //   ObjectMapper mapper = new ObjectMapper();
+    //   mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    //   String json = mapper.writeValueAsString(initRule);
+    //   initRule = mapper.readValue(json, SrcRule.class);
+    //   System.err.println(json);
+    // } catch (Exception e) {
+    //   System.err.println(e);
+    // }
     setRuleText(initRule);
     Membrane mem = new Membrane(null);
     expander.incorporateSignSymbols(initRule.body);
@@ -121,9 +130,7 @@ public class LMNParser {
 
   /** ルールのテキスト表現を決定する */
   private void setRuleText(LinkedList process) {
-    ListIterator it = process.listIterator();
-    while (it.hasNext()) {
-      Object obj = it.next();
+    for (Object obj : process) {
       if (obj instanceof SrcAtom) {
         setRuleText(((SrcAtom) obj).getProcess());
       } else if (obj instanceof SrcMembrane) {
@@ -176,9 +183,8 @@ public class LMNParser {
    * @param mem 追加先の膜
    */
   void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
-    Iterator it = list.iterator();
-    while (it.hasNext()) {
-      addObjectToMem(it.next(), mem);
+    for (Object obj : list) {
+      addObjectToMem(obj, mem);
     }
   }
 
@@ -190,9 +196,8 @@ public class LMNParser {
   private void addObjectToMem(Object obj, Membrane mem) throws ParseException {
     // リスト
     if (obj instanceof LinkedList) {
-      Iterator it = ((LinkedList) obj).iterator();
-      while (it.hasNext()) {
-        addObjectToMem(it.next(), mem);
+      for (Object elem : (LinkedList) obj) {
+        addObjectToMem(elem, mem);
       }
     }
     // アトム
@@ -345,7 +350,7 @@ public class LMNParser {
       }
       if (sProc.bundle != null) pc.setBundleName(sProc.bundle.getQualifiedName());
       if (Env.hyperLinkOpt) {
-          /*seiji--*/
+        /*seiji--*/
         pc.linkName = sProc.getLinkName();
         if (sProc.hasSameNameList()) {
           if (pc.getSameNameList() == null) pc.sameNameList = new LinkedList();
@@ -443,9 +448,7 @@ public class LMNParser {
    *
    */
   private void assertLHSRules(List procs) throws ParseException {
-    Iterator it = procs.iterator();
-    while (it.hasNext()) {
-      Object obj = it.next();
+    for (Object obj : procs) {
       if (obj instanceof SrcRule) {
         SrcRule sr = (SrcRule) obj;
         throw new ParseException("SYNTAX ERROR: rule head has some rules at line " + sr.lineno);
@@ -505,9 +508,8 @@ public class LMNParser {
       HashMap freeLinks = addProxies(submem);
       // 子膜の自由リンクに対してプロキシを追加する
       HashMap newFreeLinks = new HashMap();
-      Iterator it2 = freeLinks.keySet().iterator();
-      while (it2.hasNext()) {
-        LinkOccurrence freeLink = (LinkOccurrence) freeLinks.get(it2.next());
+      for (Object link : freeLinks.keySet()) {
+        LinkOccurrence freeLink = (LinkOccurrence) freeLinks.get(link);
         // 子膜の自由リンク名 freeLink.name に対して、膜間リンク名 proxyLinkName を決定する。
         // 通常はXに対して、1^Xとする。
         // Xがmemの局所リンクであり、1^Xをmem内ですでに使用した場合は、1^^Xとする。
@@ -553,11 +555,9 @@ public class LMNParser {
 
   /** ガード否定条件に対してaddProxiesを呼ぶ */
   private void addProxiesToGuardNegatives(RuleStructure rule) {
-    Iterator it = rule.guardNegatives.iterator();
-    while (it.hasNext()) {
-      Iterator it2 = ((LinkedList) it.next()).iterator();
-      while (it2.hasNext()) {
-        ProcessContextEquation eq = (ProcessContextEquation) it2.next();
+    for (Object guardNegative : rule.guardNegatives) {
+      for (Object pCtxEq : (LinkedList) guardNegative) {
+        ProcessContextEquation eq = (ProcessContextEquation) pCtxEq;
         addProxies(eq.mem);
       }
     }
@@ -651,12 +651,10 @@ public class LMNParser {
    * </ul>
    * <p>ガードコンパイルで実際に使うときには、等式間リンクに対して、自由リンク管理アトムの鎖を適宜補うこと。*/
   void coupleGuardNegativeLinks(RuleStructure rule) {
-    Iterator it = rule.guardNegatives.iterator();
-    while (it.hasNext()) {
+    for (Object obj1 : rule.guardNegatives) {
       HashMap interlinks = new HashMap(); // 等式間リンクおよびガード匿名リンクの一覧
-      Iterator it2 = ((LinkedList) it.next()).iterator();
-      while (it2.hasNext()) {
-        ProcessContextEquation eq = (ProcessContextEquation) it2.next();
+      for (Object obj2 : ((LinkedList) obj1)) {
+        ProcessContextEquation eq = (ProcessContextEquation) obj2;
         // 等式右辺の自由リンク出現の一覧を取得する
         Membrane mem = eq.mem;
         HashMap rhsfreelinks = mem.freeLinks;
@@ -665,7 +663,7 @@ public class LMNParser {
         HashMap rhscxtfreelinks = new HashMap(); // この等式右辺トップレベル$ppの自由リンク集合
         for (int i = 0; i < a.args.length; i++) {
           LinkOccurrence lhslnk = a.args[i];
-          String linkname = lhslnk.name;
+          // String linkname = lhslnk.name;
           if (rhsfreelinks.containsKey(lhslnk.name)) {
             // 両辺に出現する場合: ( {$p[X]} :- \+($p=(a(X),$pp)) | ... )
             LinkOccurrence rhslnk = (LinkOccurrence) rhsfreelinks.get(lhslnk.name);
@@ -677,9 +675,8 @@ public class LMNParser {
           }
         }
         removeClosedLinks(rhsfreelinks);
-        Iterator it3 = rhsfreelinks.keySet().iterator();
-        while (it3.hasNext()) {
-          String linkname = (String) it3.next();
+        for (Object obj3 : rhsfreelinks.keySet()) {
+          String linkname = (String) obj3;
           LinkOccurrence lnk = (LinkOccurrence) rhsfreelinks.get(linkname);
           // 右辺にのみ出現する場合:
           // ( ... :- \+($p=a(X),$q=b(X)) | ... ) => 等式間リンクは、2回目の出現のとき閉じられる
@@ -731,23 +728,20 @@ public class LMNParser {
     HashMap lhsFreeLinks = rule.leftMem.freeLinks;
     HashMap rhsFreeLinks = rule.rightMem.freeLinks;
     HashMap links = new HashMap();
-    Iterator it = lhsFreeLinks.keySet().iterator();
-    while (it.hasNext()) {
-      String linkname = (String) it.next();
+    for (Object obj : lhsFreeLinks.keySet()) {
+      String linkname = (String) obj;
       LinkOccurrence lhsocc = (LinkOccurrence) lhsFreeLinks.get(linkname);
       addLinkOccurrence(links, lhsocc);
     }
-    it = rhsFreeLinks.keySet().iterator();
-    while (it.hasNext()) {
-      String linkname = (String) it.next();
+    for (Object obj : rhsFreeLinks.keySet()) {
+      String linkname = (String) obj;
       LinkOccurrence rhsocc = (LinkOccurrence) rhsFreeLinks.get(linkname);
       addLinkOccurrence(links, rhsocc);
     }
     removeClosedLinks(links);
     if (!links.isEmpty()) {
-      it = links.keySet().iterator();
-      while (it.hasNext()) {
-        LinkOccurrence link = (LinkOccurrence) links.get(it.next());
+      for (Object obj : links.keySet()) {
+        LinkOccurrence link = (LinkOccurrence) links.get(obj);
         //				error("SYNTAX ERROR: rule with free variable: "+ link.name + "\n    in " + rule);
         error("SYNTAX ERROR: rule with free variable: " + link.name + ", at line " + rule.lineno);
         LinkedList process = new LinkedList();
