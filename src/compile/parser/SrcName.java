@@ -64,7 +64,7 @@ public class SrcName {
       case QUOTED:
         return "[:" + name + ":]";
       default:
-        //中置記法のアトムも通常の記法になってしまうので、特殊名はクォートしておく。
+        // 中置記法のアトムも通常の記法になってしまうので、特殊名はクォートしておく。
         String path, n;
         int pos = name.indexOf('.');
         if (pos > 0) {
@@ -74,8 +74,7 @@ public class SrcName {
           path = null;
           n = name;
         }
-        if (!n.matches("^([a-z0-9][A-Za-z0-9_]*)$")) n =
-          Util.quoteString(name, '\'');
+        if (!n.matches("^([a-z0-9][A-Za-z0-9_]*)$")) n = Util.quoteString(name, '\'');
         return (path == null ? "" : path + ".") + n;
     }
   }

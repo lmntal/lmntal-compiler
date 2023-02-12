@@ -90,7 +90,7 @@ public class InstructionList implements Cloneable {
 
   public void setLabel(int id) {
     this.label = "L" + id;
-    //もっと賢い方法はないものだろうか。
+    // もっと賢い方法はないものだろうか。
     if (nextId <= id) nextId = id + 1;
   }
 

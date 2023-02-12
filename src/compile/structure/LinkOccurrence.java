@@ -43,22 +43,11 @@ public final class LinkOccurrence {
   }
 
   public String getInformativeText() {
-    return (
-      toString() +
-      "(" +
-      atom.getName() +
-      "/" +
-      atom.getArity() +
-      "," +
-      pos +
-      ")"
-    );
+    return (toString() + "(" + atom.getName() + "/" + atom.getArity() + "," + pos + ")");
   }
 
   public boolean equals(Object o) {
-    return (
-      o == this || o instanceof LinkOccurrence && equals((LinkOccurrence) o)
-    );
+    return (o == this || o instanceof LinkOccurrence && equals((LinkOccurrence) o));
   }
 
   public boolean equals(LinkOccurrence l) {

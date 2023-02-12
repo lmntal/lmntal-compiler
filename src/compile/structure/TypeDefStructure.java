@@ -1,6 +1,5 @@
 package compile.structure;
 
-import java.util.LinkedList;
 
 /**
  * ソースコード中のルールの構造を表すクラス

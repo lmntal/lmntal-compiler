@@ -118,12 +118,7 @@ class SrcAtom {
   }
 
   public SrcAtom clone() {
-    return new SrcAtom(
-      srcname.clone(),
-      (LinkedList) process.clone(),
-      line,
-      column
-    );
+    return new SrcAtom(srcname.clone(), (LinkedList) process.clone(), line, column);
   }
 
   public String toString() {

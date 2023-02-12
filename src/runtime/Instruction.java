@@ -22,8 +22,7 @@ import util.Util;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@interface LMNtalIL {
-}
+@interface LMNtalIL {}
 
 /*
  * <p><b>注意</b>　方法4の文書に対して、「ロックしたまま実行膜スタックに積む」という操作
@@ -94,17 +93,15 @@ public class Instruction implements Cloneable {
   /**
    * ダミーの命令
    */
-  @LMNtalIL
-  public static final int DUMMY = -1;
+  @LMNtalIL public static final int DUMMY = -1;
 
   /**
    * 未定義の命令
    */
-  @LMNtalIL
-  public static final int UNDEF = 0;
+  @LMNtalIL public static final int UNDEF = 0;
 
-  ///** 命令の最大種類数。命令の種類を表す値はこれより小さな数にすること。*/
-  //private static final int END_OF_INSTRUCTION = 1024;
+  /// ** 命令の最大種類数。命令の種類を表す値はこれより小さな数にすること。*/
+  // private static final int END_OF_INSTRUCTION = 1024;
 
   // アトムに関係する出力する基本ガード命令 (1--5)
   // deref     [-dstatom, srcatom, srcpos, dstpos]
@@ -119,8 +116,7 @@ public class Instruction implements Cloneable {
    * アトム$srcatomの第srcpos引数のリンク先が第dstpos引数に接続していることを確認したら、
    * リンク先のアトムへの参照を$dstatomに代入する。
    */
-  @LMNtalIL
-  public static final int DEREF = 1;
+  @LMNtalIL public static final int DEREF = 1;
 
   static {
     setArgType(DEREF, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_INT, ARG_INT));
@@ -134,8 +130,7 @@ public class Instruction implements Cloneable {
    * <p>引き続き$dstatomが、単項アトム（整数なども含む）や自由リンク管理アトムと
    * マッチするかどうか検査する場合に使用することができる。
    */
-  @LMNtalIL
-  public static final int DEREFATOM = 2;
+  @LMNtalIL public static final int DEREFATOM = 2;
 
   static {
     setArgType(DEREFATOM, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_INT));
@@ -148,8 +143,7 @@ public class Instruction implements Cloneable {
    * リンク$srclink先が第dstpos引数に接続していることを確認したら、
    * リンク先のアトムへの参照を$dstatomに代入する。
    */
-  @LMNtalIL
-  public static final int DEREFLINK = 3;
+  @LMNtalIL public static final int DEREFLINK = 3;
 
   static {
     setArgType(DEREFLINK, new ArgType(true, ARG_ATOM, ARG_VAR, ARG_INT));
@@ -160,8 +154,7 @@ public class Instruction implements Cloneable {
    *
    * <br>反復するガード命令<br>
    * 膜$srcmemにあってファンクタfuncrefを持つアトムへの参照を次々に$dstatomに代入する。*/
-  @LMNtalIL
-  public static final int FINDATOM = 4;
+  @LMNtalIL public static final int FINDATOM = 4;
 
   static {
     setArgType(FINDATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));
@@ -187,8 +180,7 @@ public class Instruction implements Cloneable {
    * （この検査はRuby版ではneqmem命令で行っていた）。
    * <p>膜の外からのリンクで初めて特定された膜への参照を取得するために使用される。
    */
-  @LMNtalIL
-  public static final int LOCKMEM = 5;
+  @LMNtalIL public static final int LOCKMEM = 5;
 
   static {
     setArgType(LOCKMEM, new ArgType(true, ARG_MEM, ARG_ATOM, ARG_OBJ));
@@ -204,8 +196,7 @@ public class Instruction implements Cloneable {
    * 取得したロックは、後続の命令列がその膜に対して失敗したときに解放される。
    * <p><b>注意</b>　ロック取得に失敗した場合と、その膜が存在していなかった場合とは区別できない。
    */
-  @LMNtalIL
-  public static final int ANYMEM = 6;
+  @LMNtalIL public static final int ANYMEM = 6;
 
   static {
     setArgType(ANYMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT, ARG_OBJ));
@@ -219,8 +210,7 @@ public class Instruction implements Cloneable {
    * 取得したロックは、後続の命令列が失敗したときに解放される。
    * <p>アトム主導テストで、主導するアトムによって特定された膜のロックを取得するために使用される。
    */
-  @LMNtalIL
-  public static final int LOCK = 7;
+  @LMNtalIL public static final int LOCK = 7;
 
   static {
     setArgType(LOCK, new ArgType(false, ARG_MEM));
@@ -243,8 +233,7 @@ public class Instruction implements Cloneable {
    * アトム$srcatomが（ロックされた）膜$dstmemに所属することを確認する。
    * <p><b>注意</b>　Ruby版ではgetmemで参照を取得した後でeqmemを行っていた。
    */
-  @LMNtalIL
-  public static final int TESTMEM = 10;
+  @LMNtalIL public static final int TESTMEM = 10;
 
   static {
     setArgType(TESTMEM, new ArgType(false, ARG_MEM, ARG_ATOM));
@@ -256,8 +245,7 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * 膜$srcmemにルールが存在しないことを確認する。
    */
-  @LMNtalIL
-  public static final int NORULES = 11;
+  @LMNtalIL public static final int NORULES = 11;
 
   static {
     setArgType(NORULES, new ArgType(false, ARG_MEM));
@@ -269,8 +257,7 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * 膜$srcmemの自由リンク数がcountであることを確認する。
    */
-  @LMNtalIL
-  public static final int NFREELINKS = 12;
+  @LMNtalIL public static final int NFREELINKS = 12;
 
   static {
     setArgType(NFREELINKS, new ArgType(false, ARG_MEM, ARG_INT));
@@ -282,8 +269,7 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * 膜$srcmemの自由リンク管理アトム以外のアトム数がcountであることを確認する。
    */
-  @LMNtalIL
-  public static final int NATOMS = 13;
+  @LMNtalIL public static final int NATOMS = 13;
 
   static {
     setArgType(NATOMS, new ArgType(false, ARG_MEM, ARG_INT));
@@ -295,8 +281,7 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * 膜$srcmemの自由リンク管理アトム以外のアトム数が$countfuncの値であることを確認する。
    */
-  @LMNtalIL
-  public static final int NATOMSINDIRECT = 14;
+  @LMNtalIL public static final int NATOMSINDIRECT = 14;
 
   static {
     setArgType(NATOMSINDIRECT, new ArgType(false, ARG_MEM, ARG_VAR));
@@ -308,8 +293,7 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * 膜$srcmemの子膜の数がcountであることを確認する。
    */
-  @LMNtalIL
-  public static final int NMEMS = 15;
+  @LMNtalIL public static final int NMEMS = 15;
 
   static {
     setArgType(NMEMS, new ArgType(false, ARG_MEM, ARG_INT));
@@ -324,8 +308,7 @@ public class Instruction implements Cloneable {
    * $mem1と$mem2が同一の膜を参照していることを確認する。
    * <p><b>注意</b> Ruby版のeqから分離
    */
-  @LMNtalIL
-  public static final int EQMEM = 17;
+  @LMNtalIL public static final int EQMEM = 17;
 
   static {
     setArgType(EQMEM, new ArgType(false, ARG_MEM, ARG_MEM));
@@ -339,8 +322,7 @@ public class Instruction implements Cloneable {
    * <p><b>注意</b> Ruby版のneqから分離
    * <p><font color=red><b>この命令は不要かも知れない</b></font>
    */
-  @LMNtalIL
-  public static final int NEQMEM = 18;
+  @LMNtalIL public static final int NEQMEM = 18;
 
   static {
     setArgType(NEQMEM, new ArgType(false, ARG_MEM, ARG_MEM));
@@ -352,8 +334,7 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * 膜$srcmemとその子孫の全ての膜の実行が停止していることを確認する。
    */
-  @LMNtalIL
-  public static final int STABLE = 19;
+  @LMNtalIL public static final int STABLE = 19;
 
   static {
     setArgType(STABLE, new ArgType(false, ARG_MEM));
@@ -373,8 +354,7 @@ public class Instruction implements Cloneable {
    * アトム$srcatomがファンクタfuncrefを持つことを確認する。
    * <p>getfunc[tmp,srcatom];loadfunc[func,funcref];eqfunc[tmp,func] と同じ。
    */
-  @LMNtalIL
-  public static final int FUNC = 20;
+  @LMNtalIL public static final int FUNC = 20;
 
   static {
     setArgType(FUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));
@@ -388,8 +368,7 @@ public class Instruction implements Cloneable {
    * <p>典型的には、プロセス文脈の明示的な自由リンクの出現アトムが$inside_proxyでないことを確認するために使われる。
    * <p>getfunc[tmp,srcatom];loadfunc[func,funcref];neqfunc[tmp,func] と同じ。
    */
-  @LMNtalIL
-  public static final int NOTFUNC = 21;
+  @LMNtalIL public static final int NOTFUNC = 21;
 
   static {
     setArgType(NOTFUNC, new ArgType(false, ARG_ATOM, ARG_OBJ));
@@ -402,8 +381,7 @@ public class Instruction implements Cloneable {
    * $atom1と$atom2が同一のアトムを参照していることを確認する。
    * <p><b>注意</b> Ruby版のeqから分離
    */
-  @LMNtalIL
-  public static final int EQATOM = 22;
+  @LMNtalIL public static final int EQATOM = 22;
 
   static {
     setArgType(EQATOM, new ArgType(false, ARG_ATOM, ARG_ATOM));
@@ -416,8 +394,7 @@ public class Instruction implements Cloneable {
    * $atom1と$atom2が異なるアトムを参照していることを確認する。
    * <p><b>注意</b> Ruby版のneqから分離
    */
-  @LMNtalIL
-  public static final int NEQATOM = 23;
+  @LMNtalIL public static final int NEQATOM = 23;
 
   static {
     setArgType(NEQATOM, new ArgType(false, ARG_ATOM, ARG_ATOM));
@@ -430,8 +407,7 @@ public class Instruction implements Cloneable {
    * $atom1と$atom2が同じファンクタを持つことを確認する。
    * <p>getfunc[func1,atom1];getfunc[func2,atom2];eqfunc[func1,func2]と同じ。
    */
-  @LMNtalIL
-  public static final int SAMEFUNC = 24;
+  @LMNtalIL public static final int SAMEFUNC = 24;
 
   static {
     setArgType(SAMEFUNC, new ArgType(false, ARG_ATOM, ARG_ATOM));
@@ -453,8 +429,7 @@ public class Instruction implements Cloneable {
    * <p>単項アトムでない型付きプロセス文脈は、リンクオブジェクトを使って操作する。
    * <p>derefatom[dstatom,srcatom,srcpos];getfunc[dstfunc,dstatom]と同じなので廃止？
    */
-  @LMNtalIL
-  public static final int DEREFFUNC = 25;
+  @LMNtalIL public static final int DEREFFUNC = 25;
 
   static {
     setArgType(DEREFFUNC, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));
@@ -466,8 +441,7 @@ public class Instruction implements Cloneable {
    * <br>出力する失敗しない拡張ガード命令<br>
    * アトム$atomのファンクタへの参照を$funcに代入する。
    */
-  @LMNtalIL
-  public static final int GETFUNC = 26;
+  @LMNtalIL public static final int GETFUNC = 26;
 
   static {
     setArgType(GETFUNC, new ArgType(true, ARG_VAR, ARG_ATOM));
@@ -479,8 +453,7 @@ public class Instruction implements Cloneable {
    * <br>出力する失敗しない拡張ガード命令<br>
    * ファンクタfuncrefへの参照を$funcに代入する。
    */
-  @LMNtalIL
-  public static final int LOADFUNC = 27;
+  @LMNtalIL public static final int LOADFUNC = 27;
 
   static {
     setArgType(LOADFUNC, new ArgType(true, ARG_VAR, ARG_OBJ));
@@ -494,8 +467,7 @@ public class Instruction implements Cloneable {
    * <br>型付き拡張用ガード命令<br>
    * ファンクタ$func1と$func2が等しいことを確認する。
    */
-  @LMNtalIL
-  public static final int EQFUNC = 28;
+  @LMNtalIL public static final int EQFUNC = 28;
 
   static {
     setArgType(EQFUNC, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -507,8 +479,7 @@ public class Instruction implements Cloneable {
    * <br>型付き拡張用ガード命令<br>
    * ファンクタ$func1と$func2が異なることを確認する。
    */
-  @LMNtalIL
-  public static final int NEQFUNC = 29;
+  @LMNtalIL public static final int NEQFUNC = 29;
 
   static {
     setArgType(NEQFUNC, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -531,8 +502,7 @@ public class Instruction implements Cloneable {
    * （膜$srcmemにあってファンクタ$funcを持つ）アトム$srcatomを現在の膜から取り出す。
    * 実行アトムスタックは操作しない。
    */
-  @LMNtalIL
-  public static final int REMOVEATOM = 30;
+  @LMNtalIL public static final int REMOVEATOM = 30;
 
   static {
     setArgType(REMOVEATOM, new ArgType(false, ARG_ATOM, ARG_MEM, ARG_OBJ));
@@ -545,8 +515,7 @@ public class Instruction implements Cloneable {
    * 膜$srcmemにファンクタfuncrefを持つ新しいアトム作成し、参照を$dstatomに代入する。
    * アトムはまだ実行アトムスタックには積まれない。
    */
-  @LMNtalIL
-  public static final int NEWATOM = 31;
+  @LMNtalIL public static final int NEWATOM = 31;
 
   static {
     setArgType(NEWATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_OBJ));
@@ -561,8 +530,7 @@ public class Instruction implements Cloneable {
    * アトムを他の計算ノードで積んでいる場合、輸出表の整合性は大丈夫か調べる。
    * → 輸出表は作らないことにしたので大丈夫。
    */
-  @LMNtalIL
-  public static final int FREEATOM = 35;
+  @LMNtalIL public static final int FREEATOM = 35;
 
   static {
     setArgType(FREEATOM, new ArgType(false, ARG_ATOM));
@@ -581,8 +549,7 @@ public class Instruction implements Cloneable {
    * ファンクタfuncrefを持つ所属膜を持たない新しいアトム作成し、参照を$dstatomに代入する。
    * <p>ガード検査で使われる定数アトムを生成するために使用される。
    */
-  @LMNtalIL
-  public static final int ALLOCATOM = 40;
+  @LMNtalIL public static final int ALLOCATOM = 40;
 
   static {
     setArgType(ALLOCATOM, new ArgType(true, ARG_ATOM, ARG_OBJ));
@@ -595,8 +562,7 @@ public class Instruction implements Cloneable {
    * ファンクタ$funcを持つ所属膜を持たない新しいアトムを作成し、参照を$dstatomに代入する。
    * <p>ガード検査で使われる定数アトムを生成するために使用される。
    */
-  @LMNtalIL
-  public static final int ALLOCATOMINDIRECT = 41;
+  @LMNtalIL public static final int ALLOCATOMINDIRECT = 41;
 
   static {
     setArgType(ALLOCATOMINDIRECT, new ArgType(true, ARG_ATOM, ARG_VAR));
@@ -612,8 +578,7 @@ public class Instruction implements Cloneable {
    * <p>getfunc[func,srcatom];newatomindirect[dstatom,mem,func]と同じ。よって廃止？
    * copygroundtermに移行すべきかもしれない。
    */
-  @LMNtalIL
-  public static final int COPYATOM = 42;
+  @LMNtalIL public static final int COPYATOM = 42;
 
   static {
     setArgType(COPYATOM, new ArgType(true, ARG_ATOM, ARG_MEM, ARG_ATOM));
@@ -625,8 +590,7 @@ public class Instruction implements Cloneable {
    * <br>ボディ命令<br>
    * （所属膜を持たない）アトム$atomを膜$dstmemに所属させる。
    */
-  @LMNtalIL
-  public static final int ADDATOM = 43;
+  @LMNtalIL public static final int ADDATOM = 43;
 
   static {
     setArgType(ADDATOM, new ArgType(false, ARG_MEM, ARG_ATOM));
@@ -653,8 +617,7 @@ public class Instruction implements Cloneable {
    * <strike>膜$srcmemはロック時に実行膜スタックから除去されているため、実行膜スタックは操作しない。</strike>
    * 実行膜スタックに積まれている場合は除去する。
    */
-  @LMNtalIL
-  public static final int REMOVEMEM = 50;
+  @LMNtalIL public static final int REMOVEMEM = 50;
 
   static {
     setArgType(REMOVEMEM, new ArgType(false, ARG_MEM, ARG_MEM));
@@ -668,8 +631,7 @@ public class Instruction implements Cloneable {
    *  $dstmemに代入し、活性化する。
    * この場合の活性化は、$srcmemと同じ実行膜スタックに積むことを意味する。
    */
-  @LMNtalIL
-  public static final int NEWMEM = 51;
+  @LMNtalIL public static final int NEWMEM = 51;
 
   static {
     setArgType(NEWMEM, new ArgType(true, ARG_MEM, ARG_MEM, ARG_INT));
@@ -681,8 +643,7 @@ public class Instruction implements Cloneable {
    * <br>最適化用ボディ命令<br>
    * 親膜を持たない新しい膜を作成し、参照を$dstmemに代入する。
    */
-  @LMNtalIL
-  public static final int ALLOCMEM = 52;
+  @LMNtalIL public static final int ALLOCMEM = 52;
 
   static {
     setArgType(ALLOCMEM, new ArgType(true, ARG_MEM));
@@ -699,8 +660,7 @@ public class Instruction implements Cloneable {
    * 空文字列の場合は、newmemと同じだがロックされた状態で作られる。
    * <p>newmemと違い、このルート膜のロックは明示的に解放しなければならない。
    */
-  @LMNtalIL
-  public static final int NEWROOT = 53;
+  @LMNtalIL public static final int NEWROOT = 53;
 
   static {
     setArgType(NEWROOT, new ArgType(true, ARG_MEM, ARG_MEM, ARG_ATOM, ARG_INT));
@@ -718,8 +678,7 @@ public class Instruction implements Cloneable {
    * <p><b>注意</b>　Ruby版のpourから名称変更
    * <p>moveCellsFromメソッドを呼び出す。
    */
-  @LMNtalIL
-  public static final int MOVECELLS = 54;
+  @LMNtalIL public static final int MOVECELLS = 54;
 
   static {
     setArgType(MOVECELLS, new ArgType(false, ARG_MEM, ARG_MEM));
@@ -733,8 +692,7 @@ public class Instruction implements Cloneable {
    * <p>アトムがアクティブかどうかを判断するには、
    * ファンクタを動的検査する方法と、2つのグループのアトムがあるとして所属膜が管理する方法がある。
    */
-  @LMNtalIL
-  public static final int ENQUEUEALLATOMS = 55;
+  @LMNtalIL public static final int ENQUEUEALLATOMS = 55;
 
   static {
     setArgType(ENQUEUEALLATOMS, new ArgType(false, ARG_MEM));
@@ -747,8 +705,7 @@ public class Instruction implements Cloneable {
    * 膜$srcmemを廃棄する。
    * <p>$srcmemがどの膜にも属さず、かつスタックに積まれていないことを表す。
    */
-  @LMNtalIL
-  public static final int FREEMEM = 56;
+  @LMNtalIL public static final int FREEMEM = 56;
 
   static {
     setArgType(FREEMEM, new ArgType(false, ARG_MEM));
@@ -765,8 +722,7 @@ public class Instruction implements Cloneable {
    * <p>newmemと違い、$srcmemのロックは明示的に解放しなければならない。
    * <p>moveToメソッドを呼び出す。
    */
-  @LMNtalIL
-  public static final int ADDMEM = 57;
+  @LMNtalIL public static final int ADDMEM = 57;
 
   static {
     setArgType(ADDMEM, new ArgType(false, ARG_MEM, ARG_MEM));
@@ -780,8 +736,7 @@ public class Instruction implements Cloneable {
    * ルート膜でない場合、親膜と同じ実行膜スタックに積むことを意味する。
    * すでに実行膜スタックまたは仮の実行膜スタックに積まれている場合は、何もしない。
    */
-  @LMNtalIL
-  public static final int ENQUEUEMEM = 58;
+  @LMNtalIL public static final int ENQUEUEMEM = 58;
 
   static {
     setArgType(ENQUEUEMEM, new ArgType(false, ARG_MEM));
@@ -794,8 +749,7 @@ public class Instruction implements Cloneable {
    * 膜$dstmemの名前を文字列（またはnull）nameに設定する。
    * <p>現在、膜の名前の使用目的は表示用のみ。いずれ、膜名に対するマッチングができるようになるはず。
    */
-  @LMNtalIL
-  public static final int SETMEMNAME = 60;
+  @LMNtalIL public static final int SETMEMNAME = 60;
 
   static {
     setArgType(SETMEMNAME, new ArgType(false, ARG_MEM, ARG_OBJ));
@@ -815,8 +769,7 @@ public class Instruction implements Cloneable {
    * アトム$atomの第pos引数に格納されたリンクオブジェクトへの参照を$linkに代入する。
    * <p>典型的には、$atomはルールヘッドに存在する。
    */
-  @LMNtalIL
-  public static final int GETLINK = 63;
+  @LMNtalIL public static final int GETLINK = 63;
 
   static {
     setArgType(GETLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));
@@ -829,8 +782,7 @@ public class Instruction implements Cloneable {
    * アトム$atomの第pos引数を指すリンクオブジェクトを生成し、参照を$linkに代入する。
    * <p>典型的には、$atomはルールボディに存在する。
    */
-  @LMNtalIL
-  public static final int ALLOCLINK = 64;
+  @LMNtalIL public static final int ALLOCLINK = 64;
 
   static {
     setArgType(ALLOCLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));
@@ -853,14 +805,10 @@ public class Instruction implements Cloneable {
    * <p><b>注意</b>　Ruby版の片方向から仕様変更された。
    * <p>alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]と同じ。
    */
-  @LMNtalIL
-  public static final int NEWLINK = 65;
+  @LMNtalIL public static final int NEWLINK = 65;
 
   static {
-    setArgType(
-      NEWLINK,
-      new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM)
-    );
+    setArgType(NEWLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));
   }
 
   /**
@@ -874,14 +822,10 @@ public class Instruction implements Cloneable {
    * <p>getlink[link2,atom2,pos2];inheritlink[atom1,pos1,link2,mem]と同じ。
    * <p>alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。
    */
-  @LMNtalIL
-  public static final int RELINK = 66;
+  @LMNtalIL public static final int RELINK = 66;
 
   static {
-    setArgType(
-      RELINK,
-      new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM)
-    );
+    setArgType(RELINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));
   }
 
   /**
@@ -897,14 +841,10 @@ public class Instruction implements Cloneable {
    * <p>典型的には、$atom1と$atom2はいずれもルールヘッドに存在する。
    * <p>getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem]と同じ。
    */
-  @LMNtalIL
-  public static final int UNIFY = 67;
+  @LMNtalIL public static final int UNIFY = 67;
 
   static {
-    setArgType(
-      UNIFY,
-      new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM)
-    );
+    setArgType(UNIFY, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT, ARG_MEM));
   }
 
   /**
@@ -917,14 +857,10 @@ public class Instruction implements Cloneable {
    * <p>$link2は再利用されるため、実行後は$link2は廃棄しなければならない。
    * <p>alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem]と同じ。
    */
-  @LMNtalIL
-  public static final int INHERITLINK = 68;
+  @LMNtalIL public static final int INHERITLINK = 68;
 
   static {
-    setArgType(
-      INHERITLINK,
-      new ArgType(false, ARG_ATOM, ARG_INT, ARG_VAR, ARG_MEM)
-    );
+    setArgType(INHERITLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_VAR, ARG_MEM));
   }
 
   /**
@@ -938,8 +874,7 @@ public class Instruction implements Cloneable {
    * <p>実行後$link1および$link2は無効なリンクオブジェクトとなるため、参照を使用してはならない。
    * <p>基底項データ型のコンパイルで使用される。
    */
-  @LMNtalIL
-  public static final int UNIFYLINKS = 69;
+  @LMNtalIL public static final int UNIFYLINKS = 69;
 
   static {
     setArgType(UNIFYLINKS, new ArgType(false, ARG_VAR, ARG_VAR, ARG_MEM));
@@ -958,8 +893,7 @@ public class Instruction implements Cloneable {
    * $srcmemを通る無関係な自由リンク管理アトムを自動削除する。
    * <p>removememの直後に同じ膜に対して呼ばれる。
    */
-  @LMNtalIL
-  public static final int REMOVEPROXIES = 70;
+  @LMNtalIL public static final int REMOVEPROXIES = 70;
 
   static {
     setArgType(REMOVEPROXIES, new ArgType(false, ARG_MEM));
@@ -972,8 +906,7 @@ public class Instruction implements Cloneable {
    * 膜$srcmem（本膜）を通過している無関係な自由リンク管理アトムを除去する。
    * <p>removeproxiesが全て終わった後で呼ばれる。
    */
-  @LMNtalIL
-  public static final int REMOVETOPLEVELPROXIES = 71;
+  @LMNtalIL public static final int REMOVETOPLEVELPROXIES = 71;
 
   static {
     setArgType(REMOVETOPLEVELPROXIES, new ArgType(false, ARG_MEM));
@@ -986,8 +919,7 @@ public class Instruction implements Cloneable {
    * 指定された膜間に自由リンク管理アトムを自動挿入する。
    * <p>addmemが全て終わった後で呼ばれる。
    */
-  @LMNtalIL
-  public static final int INSERTPROXIES = 72;
+  @LMNtalIL public static final int INSERTPROXIES = 72;
 
   static {
     setArgType(INSERTPROXIES, new ArgType(false, ARG_MEM, ARG_MEM));
@@ -1000,8 +932,7 @@ public class Instruction implements Cloneable {
    * 膜$srcmem（本膜）に残された"star"アトムを除去する。
    * <p>insertproxiesが全て終わった後で呼ばれる。
    */
-  @LMNtalIL
-  public static final int REMOVETEMPORARYPROXIES = 73;
+  @LMNtalIL public static final int REMOVETEMPORARYPROXIES = 73;
 
   static {
     setArgType(REMOVETEMPORARYPROXIES, new ArgType(false, ARG_MEM));
@@ -1019,8 +950,7 @@ public class Instruction implements Cloneable {
    * ルールセットrulesetを膜$dstmemにコピーする。
    * <p>この膜のアクティブアトムは再エンキューすべきである。
    */
-  @LMNtalIL
-  public static final int LOADRULESET = 75;
+  @LMNtalIL public static final int LOADRULESET = 75;
 
   static {
     setArgType(LOADRULESET, new ArgType(false, ARG_MEM, ARG_OBJ));
@@ -1033,8 +963,7 @@ public class Instruction implements Cloneable {
    * 膜$srcmemにある全てのルールを膜$dstmemにコピーする。
    * <p><b>注意</b>　Ruby版のinheritrulesから名称変更
    */
-  @LMNtalIL
-  public static final int COPYRULES = 76;
+  @LMNtalIL public static final int COPYRULES = 76;
 
   static {
     setArgType(COPYRULES, new ArgType(false, ARG_MEM, ARG_MEM));
@@ -1046,8 +975,7 @@ public class Instruction implements Cloneable {
    * <br>ボディ命令<br>
    * 膜$dstmemにある全てのルールを消去する。
    */
-  @LMNtalIL
-  public static final int CLEARRULES = 77;
+  @LMNtalIL public static final int CLEARRULES = 77;
 
   static {
     setArgType(CLEARRULES, new ArgType(false, ARG_MEM));
@@ -1059,8 +987,7 @@ public class Instruction implements Cloneable {
    * <br>ボディ命令<br>
    * ルールセットrulesetを膜$dstmemにコピーする。
    */
-  @LMNtalIL
-  public static final int LOADMODULE = 78;
+  @LMNtalIL public static final int LOADMODULE = 78;
 
   static {
     setArgType(LOADMODULE, new ArgType(false, ARG_MEM, ARG_OBJ));
@@ -1082,8 +1009,7 @@ public class Instruction implements Cloneable {
    * (2005/01/13 従来のAtom.idからの参照を変更)
    * というMapオブジェクトとして,dstmapに入れる.
    **/
-  @LMNtalIL
-  public static final int COPYCELLS = 82;
+  @LMNtalIL public static final int COPYCELLS = 82;
 
   static {
     setArgType(COPYCELLS, new ArgType(true, ARG_VAR, ARG_MEM, ARG_MEM));
@@ -1096,8 +1022,7 @@ public class Instruction implements Cloneable {
    * 再帰的にロックされた膜$srcmemを破棄する。
    * この膜や子孫の膜をルート膜とするタスクは強制終了する。
    */
-  @LMNtalIL
-  public static final int DROPMEM = 83;
+  @LMNtalIL public static final int DROPMEM = 83;
 
   static {
     setArgType(DROPMEM, new ArgType(false, ARG_MEM));
@@ -1109,8 +1034,7 @@ public class Instruction implements Cloneable {
    * srclinkのリンク先のアトムのコピーを$srcmapより得て、
    * そのアトムをリンク先とする-dstlinkを作って返す。
    */
-  @LMNtalIL
-  public static final int LOOKUPLINK = 84;
+  @LMNtalIL public static final int LOOKUPLINK = 84;
 
   static {
     setArgType(LOOKUPLINK, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
@@ -1125,8 +1049,7 @@ public class Instruction implements Cloneable {
    * その場合には'='アトムを挿入する。
    * 挿入したアトムを$dstsetに追加する。
    */
-  @LMNtalIL
-  public static final int INSERTCONNECTORS = 85;
+  @LMNtalIL public static final int INSERTCONNECTORS = 85;
 
   static {
     setArgType(INSERTCONNECTORS, new ArgType(true, ARG_VAR, ARG_VARS, ARG_MEM));
@@ -1144,8 +1067,7 @@ public class Instruction implements Cloneable {
    * 挿入したアトムを$dstsetに追加する。
    * この命令は型付きプロセス文脈の複製に伴い発行される．
    */
-  @LMNtalIL
-  public static final int INSERTCONNECTORSINNULL = 86;
+  @LMNtalIL public static final int INSERTCONNECTORSINNULL = 86;
 
   static {
     setArgType(INSERTCONNECTORSINNULL, new ArgType(true, ARG_VAR, ARG_VARS));
@@ -1158,8 +1080,7 @@ public class Instruction implements Cloneable {
    * 削除し、リンクをつなぎなおす。<strike>$memはコピー先の膜。</strike>
    * 膜引数は廃止(2006/09/21)
    */
-  @LMNtalIL
-  public static final int DELETECONNECTORS = 87;
+  @LMNtalIL public static final int DELETECONNECTORS = 87;
 
   static {
     setArgType(DELETECONNECTORS, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -1206,14 +1127,10 @@ public class Instruction implements Cloneable {
    * ただしbodyはrulerefのボディ命令列で、先頭の命令はspec[formals,locals]
    * <p>（未使用命令）
    */
-  @LMNtalIL
-  public static final int REACT = 1200;
+  @LMNtalIL public static final int REACT = 1200;
 
   static {
-    setArgType(
-      REACT,
-      new ArgType(false, ARG_OBJ, ARG_VARS, ARG_VARS, ARG_VARS)
-    );
+    setArgType(REACT, new ArgType(false, ARG_OBJ, ARG_VARS, ARG_VARS, ARG_VARS));
   }
 
   /**
@@ -1229,14 +1146,10 @@ public class Instruction implements Cloneable {
    *    branch      [body] と同じ。
    * ただしbodyはinstructionlistの命令列で、先頭の命令はspec[formals,locals]
    */
-  @LMNtalIL
-  public static final int JUMP = 200;
+  @LMNtalIL public static final int JUMP = 200;
 
   static {
-    setArgType(
-      JUMP,
-      new ArgType(false, ARG_LABEL, ARG_VARS, ARG_VARS, ARG_VARS)
-    );
+    setArgType(JUMP, new ArgType(false, ARG_LABEL, ARG_VARS, ARG_VARS, ARG_VARS));
   }
 
   /**
@@ -1246,10 +1159,9 @@ public class Instruction implements Cloneable {
    * 現在の実引数ベクタでルールrulerefに対するマッチングが成功したことを表す。
    * 処理系は、この命令に到達するまでに行った全ての分岐履歴を忘却してよい。
    */
-  @LMNtalIL
-  public static final int COMMIT = 201;
+  @LMNtalIL public static final int COMMIT = 201;
 
-  //static {setArgType(COMMIT, new ArgType(false, ARG_OBJ));}
+  // static {setArgType(COMMIT, new ArgType(false, ARG_OBJ));}
   /**
    * 変更版 commit [rulename, lineno]
    * トレースとデバッガに必要な情報を保持する.
@@ -1268,8 +1180,7 @@ public class Instruction implements Cloneable {
    * 変数ベクタの内容を再定義する。新しい変数番号は、膜、アトム、その他の順番で0から振り直される。
    * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
    */
-  @LMNtalIL
-  public static final int RESETVARS = 202;
+  @LMNtalIL public static final int RESETVARS = 202;
 
   static {
     setArgType(RESETVARS, new ArgType(false, ARG_VARS, ARG_VARS, ARG_VARS));
@@ -1286,8 +1197,7 @@ public class Instruction implements Cloneable {
    * <b>注意</b>　memargs[0]は本膜が予約しているため変更してはならない。
    * <p>（未使用命令）
    */
-  @LMNtalIL
-  public static final int CHANGEVARS = 1202;
+  @LMNtalIL public static final int CHANGEVARS = 1202;
 
   static {
     setArgType(CHANGEVARS, new ArgType(false, ARG_VARS, ARG_VARS, ARG_VARS));
@@ -1298,8 +1208,7 @@ public class Instruction implements Cloneable {
    * 仮引数と局所変数の個数を宣言する。
    * 局所変数の個数が不足している場合、変数ベクタを拡張する。
    */
-  @LMNtalIL
-  public static final int SPEC = 203;
+  @LMNtalIL public static final int SPEC = 203;
 
   static {
     setArgType(SPEC, new ArgType(false, ARG_INT, ARG_INT));
@@ -1315,8 +1224,7 @@ public class Instruction implements Cloneable {
    * <p><b>注意</b>　proceedなしで命令列の終端まで進んだ場合、
    * その命令列の実行は失敗したものとする仕様が採用された。
    */
-  @LMNtalIL
-  public static final int PROCEED = 204;
+  @LMNtalIL public static final int PROCEED = 204;
 
   static {
     setArgType(PROCEED, new ArgType(false));
@@ -1328,8 +1236,7 @@ public class Instruction implements Cloneable {
    * proceedと同じ。マッチングとボディの命令が統合されたことに伴って廃止される予定。
    * <p>典型的には、否定条件にマッチしたことを表すために使用される。
    */
-  @LMNtalIL
-  public static final int STOP = 205;
+  @LMNtalIL public static final int STOP = 205;
 
   static {
     setArgType(STOP, new ArgType(false));
@@ -1343,8 +1250,7 @@ public class Instruction implements Cloneable {
    * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、branchの次の命令に進む。
    * 引数実行中にproceed命令を実行した場合、ここで終了する。
    */
-  @LMNtalIL
-  public static final int BRANCH = 206;
+  @LMNtalIL public static final int BRANCH = 206;
 
   static {
     setArgType(BRANCH, new ArgType(false, ARG_LABEL));
@@ -1358,8 +1264,7 @@ public class Instruction implements Cloneable {
    * 引数実行中に失敗した場合、引数実行中に取得したロックを解放し、loopの次の命令に進む。
    * 引数実行中にproceed命令を実行した場合、このloop命令の実行を繰り返す。
    */
-  @LMNtalIL
-  public static final int LOOP = 207;
+  @LMNtalIL public static final int LOOP = 207;
 
   static {
     setArgType(LOOP, new ArgType(false, ARG_INSTS));
@@ -1374,8 +1279,7 @@ public class Instruction implements Cloneable {
    * 引数実行中にproceed命令を実行した場合、次の命令に進む。
    * <p>将来、明示的な引数付きのプロセス文脈のコンパイルに使用するために予約。
    */
-  @LMNtalIL
-  public static final int RUN = 208;
+  @LMNtalIL public static final int RUN = 208;
 
   static {
     setArgType(RUN, new ArgType(false, ARG_INSTS));
@@ -1390,8 +1294,7 @@ public class Instruction implements Cloneable {
    * 引数実行中にproceed命令を実行した場合、この命令が失敗する。
    * <p>将来、否定条件のコンパイルに使用するために予約。
    */
-  @LMNtalIL
-  public static final int NOT = 209;
+  @LMNtalIL public static final int NOT = 209;
 
   static {
     setArgType(NOT, new ArgType(false, ARG_LABEL));
@@ -1407,8 +1310,7 @@ public class Instruction implements Cloneable {
    * <br>ボディ命令<br>
    * 所属膜がsrcmemのアトム$atomに対して、Cのコールバック関数を呼び出す
    */
-  @LMNtalIL
-  public static final int CALLBACK = 213;
+  @LMNtalIL public static final int CALLBACK = 213;
 
   static {
     setArgType(CALLBACK, new ArgType(false, ARG_MEM, ARG_ATOM));
@@ -1425,8 +1327,7 @@ public class Instruction implements Cloneable {
    * 型付きプロセス文脈 Links... に対して、過去にこの組み合わせで反応が起きていたら失敗する。
    * 起きていなかったら履歴にこの組み合わせを記録して成功する。
    */
-  @LMNtalIL
-  public static final int UNIQ = 214;
+  @LMNtalIL public static final int UNIQ = 214;
 
   static {
     setArgType(UNIQ, new ArgType(false, ARG_VARS));
@@ -1444,8 +1345,7 @@ public class Instruction implements Cloneable {
    * 2つのリンクlink1とlink2に対して、
    * それらが同じ形状の基底項プロセスであることを確認する。
    */
-  @LMNtalIL
-  public static final int EQGROUND = 216;
+  @LMNtalIL public static final int EQGROUND = 216;
 
   static {
     setArgType(EQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -1459,8 +1359,7 @@ public class Instruction implements Cloneable {
    * 2つのリンクlink1とlink2に対して、
    * それらが同じ形状の基底項プロセスでないことを確認する。
    */
-  @LMNtalIL
-  public static final int NEQGROUND = 217;
+  @LMNtalIL public static final int NEQGROUND = 217;
 
   static {
     setArgType(NEQGROUND, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -1477,14 +1376,10 @@ public class Instruction implements Cloneable {
    * 属性をもたないハイパーリンクやattrs に指定されていない属性のハイパーリンクは
    * コピーされない．
    */
-  @LMNtalIL
-  public static final int COPYGROUND = 218;
+  @LMNtalIL public static final int COPYGROUND = 218;
 
   static {
-    setArgType(
-      COPYGROUND,
-      new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM, ARG_OBJS)
-    );
+    setArgType(COPYGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM, ARG_OBJS));
   }
 
   /**
@@ -1493,8 +1388,7 @@ public class Instruction implements Cloneable {
    * $srcmemに属する（基底項プロセスを指す）リンク列$srclinklistを現在の膜から取り出す。
    * 実行アトムスタックは操作しない。
    */
-  @LMNtalIL
-  public static final int REMOVEGROUND = 219;
+  @LMNtalIL public static final int REMOVEGROUND = 219;
 
   static {
     setArgType(REMOVEGROUND, new ArgType(false, ARG_VAR, ARG_MEM));
@@ -1505,8 +1399,7 @@ public class Instruction implements Cloneable {
    *
    * 基底項プロセス$srclinklistがどの膜にも属さず、かつスタックに積まれていないことを表す。
    */
-  @LMNtalIL
-  public static final int FREEGROUND = 220;
+  @LMNtalIL public static final int FREEGROUND = 220;
 
   static {
     setArgType(FREEGROUND, new ArgType(false, ARG_VAR));
@@ -1533,14 +1426,10 @@ public class Instruction implements Cloneable {
    *
    * groundには膜は含まれないことになったので、上記は不要
    */
-  @LMNtalIL
-  public static final int ISGROUND = 221;
+  @LMNtalIL public static final int ISGROUND = 221;
 
   static {
-    setArgType(
-      ISGROUND,
-      new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS)
-    );
+    setArgType(ISGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS));
   }
 
   /**
@@ -1549,8 +1438,7 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * アトム$atomが1引数のアトムであることを確認する。
    */
-  @LMNtalIL
-  public static final int ISUNARY = 222;
+  @LMNtalIL public static final int ISUNARY = 222;
 
   static {
     setArgType(ISUNARY, new ArgType(false, ARG_ATOM));
@@ -1562,14 +1450,11 @@ public class Instruction implements Cloneable {
    * <br>ガード命令<br>
    * アトム$atomが整数アトムであることを確認する。
    */
-  @LMNtalIL
-  public static final int ISINT = 225;
+  @LMNtalIL public static final int ISINT = 225;
 
-  @LMNtalIL
-  public static final int ISFLOAT = 226;
+  @LMNtalIL public static final int ISFLOAT = 226;
 
-  @LMNtalIL
-  public static final int ISSTRING = 227;
+  @LMNtalIL public static final int ISSTRING = 227;
 
   static {
     setArgType(ISINT, new ArgType(false, ARG_ATOM));
@@ -1589,11 +1474,9 @@ public class Instruction implements Cloneable {
    * <br>最適化用ガード命令<br>
    * ファンクタ$funcが整数ファンクタであることを確認する。
    */
-  @LMNtalIL
-  public static final int ISINTFUNC = ISINT + OPT;
+  @LMNtalIL public static final int ISINTFUNC = ISINT + OPT;
 
-  @LMNtalIL
-  public static final int ISFLOATFUNC = ISFLOAT + OPT;
+  @LMNtalIL public static final int ISFLOATFUNC = ISFLOAT + OPT;
 
   static {
     setArgType(ISINTFUNC, new ArgType(false, ARG_VAR));
@@ -1612,8 +1495,7 @@ public class Instruction implements Cloneable {
    * $stringatomに代入する。
    * ただし、Translator を利用した場合、同一ソースのInlineコードで定義されたクラスに関しては単純名を取得する。(2005/10/17 Mizuno )
    */
-  @LMNtalIL
-  public static final int GETCLASS = 228;
+  @LMNtalIL public static final int GETCLASS = 228;
 
   static {
     setArgType(GETCLASS, new ArgType(true, ARG_ATOM, ARG_ATOM));
@@ -1626,8 +1508,7 @@ public class Instruction implements Cloneable {
    *
    * 新しいリンクのリストを作る
    */
-  @LMNtalIL
-  public static final int NEWLIST = 242;
+  @LMNtalIL public static final int NEWLIST = 242;
 
   static {
     setArgType(NEWLIST, new ArgType(true, ARG_VAR));
@@ -1639,8 +1520,7 @@ public class Instruction implements Cloneable {
    * $srcをリスト$dstlistの最後に追加する
    * ( 2006/09/13 kudo )
    */
-  @LMNtalIL
-  public static final int ADDTOLIST = 243;
+  @LMNtalIL public static final int ADDTOLIST = 243;
 
   static {
     setArgType(ADDTOLIST, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -1651,8 +1531,7 @@ public class Instruction implements Cloneable {
    *
    * $listからpos番目の要素を$dstに取得する
    */
-  @LMNtalIL
-  public static final int GETFROMLIST = 244;
+  @LMNtalIL public static final int GETFROMLIST = 244;
 
   static {
     setArgType(GETFROMLIST, new ArgType(true, ARG_VAR, ARG_VAR, ARG_INT));
@@ -1666,8 +1545,7 @@ public class Instruction implements Cloneable {
    *
    * 新たなhyperlinkを生成し, link先に接続することを示す
    */
-  @LMNtalIL
-  public static final int NEWHLINK = 250;
+  @LMNtalIL public static final int NEWHLINK = 250;
 
   static {
     setArgType(NEWHLINK, new ArgType(true, ARG_VAR));
@@ -1687,8 +1565,7 @@ public class Instruction implements Cloneable {
    *
    * link先に接続する構造がhyperlinkであることをチェックすることを示す
    */
-  @LMNtalIL
-  public static final int ISHLINK = 257;
+  @LMNtalIL public static final int ISHLINK = 257;
 
   static {
     setArgType(ISHLINK, new ArgType(false, ARG_VAR));
@@ -1699,8 +1576,7 @@ public class Instruction implements Cloneable {
    *
    * hyperlinkの要素数をatomに返すことを示す
    */
-  @LMNtalIL
-  public static final int GETNUM = 264;
+  @LMNtalIL public static final int GETNUM = 264;
 
   static {
     setArgType(GETNUM, new ArgType(true, ARG_VAR, ARG_VAR));
@@ -1711,8 +1587,7 @@ public class Instruction implements Cloneable {
    *
    * 膜memにあるunify_atom{@code ><}に対してhyperlinkの併合操作を行なうことを示す
    */
-  @LMNtalIL
-  public static final int UNIFYHLINKS = 268;
+  @LMNtalIL public static final int UNIFYHLINKS = 268;
 
   static {
     setArgType(UNIFYHLINKS, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -1725,14 +1600,11 @@ public class Instruction implements Cloneable {
    * アトム番号atom2(価数=lenght2)の第arg2引数の型付きプロセス文脈と同名であることを示す
    * 必ず(atom1,arg1)がオリジナル、(atom2,arg2)が新たに生成された名前になるよう配置されている
    */
-  @LMNtalIL
-  public static final int FINDPROCCXT = 300;
+  @LMNtalIL public static final int FINDPROCCXT = 300;
 
   static {
     setArgType(
-      FINDPROCCXT,
-      new ArgType(false, ARG_ATOM, ARG_INT, ARG_INT, ARG_ATOM, ARG_INT, ARG_INT)
-    );
+        FINDPROCCXT, new ArgType(false, ARG_ATOM, ARG_INT, ARG_INT, ARG_ATOM, ARG_INT, ARG_INT));
   }
 
   ///////////////////////////////////////////////////////////////////////
@@ -1747,14 +1619,10 @@ public class Instruction implements Cloneable {
    * attrsに指定されていない属性のハイパーリンクのコピーしない。
    *
    */
-  @LMNtalIL
-  public static final int COPYHLGROUND = 280;
+  @LMNtalIL public static final int COPYHLGROUND = 280;
 
   static {
-    setArgType(
-      COPYHLGROUND,
-      new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM, ARG_OBJS)
-    );
+    setArgType(COPYHLGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_MEM, ARG_OBJS));
   }
 
   /**
@@ -1763,8 +1631,7 @@ public class Instruction implements Cloneable {
    * mem内のsrclistの接続先の、attrsを属性としたhlground型の構造を削除する。
    * attrsに指定されていない属性のハイパーリンクは削除しない。
    */
-  @LMNtalIL
-  public static final int REMOVEHLGROUND = 281;
+  @LMNtalIL public static final int REMOVEHLGROUND = 281;
 
   static {
     setArgType(REMOVEHLGROUND, new ArgType(false, ARG_VAR, ARG_MEM, ARG_OBJS));
@@ -1776,8 +1643,7 @@ public class Instruction implements Cloneable {
    * srclistの接続先のattrsを属性としたhlground型の構造のメモリを解放する。
    * attrsに指定されていない属性のハイパーリンクのメモリの解放しない。
    */
-  @LMNtalIL
-  public static final int FREEHLGROUND = 282;
+  @LMNtalIL public static final int FREEHLGROUND = 282;
 
   static {
     setArgType(FREEHLGROUND, new ArgType(false, ARG_VAR, ARG_OBJS));
@@ -1789,14 +1655,10 @@ public class Instruction implements Cloneable {
    * srclistに含まれるリンク群に接続している構造が、attrsを属性としたhlground型であることを検査し、探索したアトムの個数を natomsに格納する。
    * attrsに指定されていない属性のハイパーリンクは探索しない。探索中に膜やavoidlistに含まれるリンク群に遭遇したときは完全には失敗とならず、マッチするものだけを対象に処理する。
    */
-  @LMNtalIL
-  public static final int ISHLGROUND = 283;
+  @LMNtalIL public static final int ISHLGROUND = 283;
 
   static {
-    setArgType(
-      ISHLGROUND,
-      new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS)
-    );
+    setArgType(ISHLGROUND, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR, ARG_OBJS));
   }
 
   /**
@@ -1804,8 +1666,7 @@ public class Instruction implements Cloneable {
    *
    * 新たな属性付きhyperlinkを生成し, link先に接続することを示す。
    */
-  @LMNtalIL
-  public static final int NEWHLINKWITHATTR = 284;
+  @LMNtalIL public static final int NEWHLINKWITHATTR = 284;
 
   static {
     setArgType(NEWHLINKWITHATTR, new ArgType(true, ARG_VAR, ARG_OBJ));
@@ -1816,8 +1677,7 @@ public class Instruction implements Cloneable {
    *
    * ハイパーリンクの属性を取得する
    */
-  @LMNtalIL
-  public static final int GETATTRATOM = 285;
+  @LMNtalIL public static final int GETATTRATOM = 285;
 
   static {
     setArgType(GETATTRATOM, new ArgType(true, ARG_VAR, ARG_VAR));
@@ -1828,8 +1688,7 @@ public class Instruction implements Cloneable {
    *
    * アトム$atomの第pos引数に格納されたリンクオブジェクトへの参照を$linkに代入する。
    */
-  @LMNtalIL
-  public static final int HYPERGETLINK = 286;
+  @LMNtalIL public static final int HYPERGETLINK = 286;
 
   static {
     setArgType(HYPERGETLINK, new ArgType(true, ARG_VAR, ARG_ATOM, ARG_INT));
@@ -1846,36 +1705,26 @@ public class Instruction implements Cloneable {
    * 整数アトムの加算結果を表す所属膜を持たない整数アトムを生成し、$dstintatomに代入する。
    * <p>idivおよびimodに限り失敗する。
    */
-  @LMNtalIL
-  public static final int IADD = 400;
+  @LMNtalIL public static final int IADD = 400;
 
-  @LMNtalIL
-  public static final int ISUB = 401;
+  @LMNtalIL public static final int ISUB = 401;
 
-  @LMNtalIL
-  public static final int IMUL = 402;
+  @LMNtalIL public static final int IMUL = 402;
 
-  @LMNtalIL
-  public static final int IDIV = 403;
+  @LMNtalIL public static final int IDIV = 403;
 
-  @LMNtalIL
-  public static final int INEG = 404;
+  @LMNtalIL public static final int INEG = 404;
 
-  @LMNtalIL
-  public static final int IMOD = 405;
+  @LMNtalIL public static final int IMOD = 405;
 
   //	@LMNtalIL public static final int INOT = 410;
-  @LMNtalIL
-  public static final int IAND = 411;
+  @LMNtalIL public static final int IAND = 411;
 
-  @LMNtalIL
-  public static final int IOR = 412;
+  @LMNtalIL public static final int IOR = 412;
 
-  @LMNtalIL
-  public static final int IXOR = 413;
+  @LMNtalIL public static final int IXOR = 413;
 
-  @LMNtalIL
-  public static final int ISAL = 414;
+  @LMNtalIL public static final int ISAL = 414;
 
   static {
     setArgType(IADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
@@ -1925,20 +1774,15 @@ public class Instruction implements Cloneable {
    * 整数ファンクタの加算結果を表す整数ファンクタを生成し、$dstintfuncに代入する。
    * <p>idivfuncおよびimodfuncに限り失敗する。
    */
-  @LMNtalIL
-  public static final int IADDFUNC = IADD + OPT;
+  @LMNtalIL public static final int IADDFUNC = IADD + OPT;
 
-  @LMNtalIL
-  public static final int ISUBFUNC = ISUB + OPT;
+  @LMNtalIL public static final int ISUBFUNC = ISUB + OPT;
 
-  @LMNtalIL
-  public static final int IMULFUNC = IMUL + OPT;
+  @LMNtalIL public static final int IMULFUNC = IMUL + OPT;
 
-  @LMNtalIL
-  public static final int IDIVFUNC = IDIV + OPT;
+  @LMNtalIL public static final int IDIVFUNC = IDIV + OPT;
 
-  @LMNtalIL
-  public static final int IMODFUNC = IMOD + OPT;
+  @LMNtalIL public static final int IMODFUNC = IMOD + OPT;
 
   static {
     setArgType(IADDFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
@@ -1968,23 +1812,17 @@ public class Instruction implements Cloneable {
    * <br>整数用の組み込みガード命令<br>
    * 整数アトムの値の大小比較が成り立つことを確認する。
    */
-  @LMNtalIL
-  public static final int ILT = 420;
+  @LMNtalIL public static final int ILT = 420;
 
-  @LMNtalIL
-  public static final int ILE = 421;
+  @LMNtalIL public static final int ILE = 421;
 
-  @LMNtalIL
-  public static final int IGT = 422;
+  @LMNtalIL public static final int IGT = 422;
 
-  @LMNtalIL
-  public static final int IGE = 423;
+  @LMNtalIL public static final int IGE = 423;
 
-  @LMNtalIL
-  public static final int IEQ = 424;
+  @LMNtalIL public static final int IEQ = 424;
 
-  @LMNtalIL
-  public static final int INE = 425;
+  @LMNtalIL public static final int INE = 425;
 
   static {
     setArgType(ILT, new ArgType(false, ARG_ATOM, ARG_ATOM));
@@ -2016,17 +1854,13 @@ public class Instruction implements Cloneable {
    * <br>整数用の最適化用組み込みガード命令<br>
    * 整数ファンクタの値の大小比較が成り立つことを確認する。
    */
-  @LMNtalIL
-  public static final int ILTFUNC = ILT + OPT;
+  @LMNtalIL public static final int ILTFUNC = ILT + OPT;
 
-  @LMNtalIL
-  public static final int ILEFUNC = ILE + OPT;
+  @LMNtalIL public static final int ILEFUNC = ILE + OPT;
 
-  @LMNtalIL
-  public static final int IGTFUNC = IGT + OPT;
+  @LMNtalIL public static final int IGTFUNC = IGT + OPT;
 
-  @LMNtalIL
-  public static final int IGEFUNC = IGE + OPT;
+  @LMNtalIL public static final int IGEFUNC = IGE + OPT;
 
   static {
     setArgType(ILTFUNC, new ArgType(false, ARG_VAR, ARG_VAR));
@@ -2045,20 +1879,15 @@ public class Instruction implements Cloneable {
   }
 
   // 浮動小数点数用の組み込みボディ命令 (600--619+OPT)
-  @LMNtalIL
-  public static final int FADD = 600;
+  @LMNtalIL public static final int FADD = 600;
 
-  @LMNtalIL
-  public static final int FSUB = 601;
+  @LMNtalIL public static final int FSUB = 601;
 
-  @LMNtalIL
-  public static final int FMUL = 602;
+  @LMNtalIL public static final int FMUL = 602;
 
-  @LMNtalIL
-  public static final int FDIV = 603;
+  @LMNtalIL public static final int FDIV = 603;
 
-  @LMNtalIL
-  public static final int FNEG = 604;
+  @LMNtalIL public static final int FNEG = 604;
 
   static {
     setArgType(FADD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
@@ -2081,23 +1910,17 @@ public class Instruction implements Cloneable {
   }
 
   // 浮動小数点数用の組み込みガード命令 (620--629+OPT)
-  @LMNtalIL
-  public static final int FLT = 620;
+  @LMNtalIL public static final int FLT = 620;
 
-  @LMNtalIL
-  public static final int FLE = 621;
+  @LMNtalIL public static final int FLE = 621;
 
-  @LMNtalIL
-  public static final int FGT = 622;
+  @LMNtalIL public static final int FGT = 622;
 
-  @LMNtalIL
-  public static final int FGE = 623;
+  @LMNtalIL public static final int FGE = 623;
 
-  @LMNtalIL
-  public static final int FEQ = 624;
+  @LMNtalIL public static final int FEQ = 624;
 
-  @LMNtalIL
-  public static final int FNE = 625;
+  @LMNtalIL public static final int FNE = 625;
 
   static {
     setArgType(FLT, new ArgType(false, ARG_ATOM, ARG_ATOM));
@@ -2124,11 +1947,9 @@ public class Instruction implements Cloneable {
   }
 
   // int と float の相互変換の組み込みガード命令 (630--639+OPT)
-  @LMNtalIL
-  public static final int FLOAT2INT = 630;
+  @LMNtalIL public static final int FLOAT2INT = 630;
 
-  @LMNtalIL
-  public static final int INT2FLOAT = 631;
+  @LMNtalIL public static final int INT2FLOAT = 631;
 
   static {
     setArgType(FLOAT2INT, new ArgType(true, ARG_ATOM, ARG_ATOM));
@@ -2138,11 +1959,9 @@ public class Instruction implements Cloneable {
     setArgType(INT2FLOAT, new ArgType(true, ARG_ATOM, ARG_ATOM));
   }
 
-  @LMNtalIL
-  public static final int FLOAT2INTFUNC = FLOAT2INT + OPT;
+  @LMNtalIL public static final int FLOAT2INTFUNC = FLOAT2INT + OPT;
 
-  @LMNtalIL
-  public static final int INT2FLOATFUNC = INT2FLOAT + OPT;
+  @LMNtalIL public static final int INT2FLOATFUNC = INT2FLOAT + OPT;
 
   static {
     setArgType(FLOAT2INTFUNC, new ArgType(true, ARG_VAR, ARG_VAR));
@@ -2152,15 +1971,14 @@ public class Instruction implements Cloneable {
     setArgType(INT2FLOATFUNC, new ArgType(true, ARG_VAR, ARG_VAR));
   }
 
-  //グループ化に関する命令
+  // グループ化に関する命令
   /**
    * group [subinsts]
    *
    * subinsts 内部の命令列
    * sakurai
    */
-  @LMNtalIL
-  public static final int GROUP = 2000;
+  @LMNtalIL public static final int GROUP = 2000;
 
   static {
     setArgType(GROUP, new ArgType(false, ARG_INSTS));
@@ -2172,8 +1990,7 @@ public class Instruction implements Cloneable {
    * atom1 が atom2 のサブクラスかどうかを判定する
    * 2006.6.30 by inui
    */
-  @LMNtalIL
-  public static final int SUBCLASS = 3000;
+  @LMNtalIL public static final int SUBCLASS = 3000;
 
   static {
     setArgType(SUBCLASS, new ArgType(false, ARG_ATOM, ARG_ATOM));
@@ -2184,22 +2001,17 @@ public class Instruction implements Cloneable {
    *
    * アトム $atom1 の第 $pos1 引数の接続先とアトム $atom2 の第 $pos2 引数の接続先を交換する
    */
-  @LMNtalIL
-  public static final int SWAPLINK = 88;
+  @LMNtalIL public static final int SWAPLINK = 88;
 
   static {
-    setArgType(
-      SWAPLINK,
-      new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT)
-    );
+    setArgType(SWAPLINK, new ArgType(false, ARG_ATOM, ARG_INT, ARG_ATOM, ARG_INT));
   }
 
   /**
    * cyclelinks [alist, plist]
    * アトムリスト $alist と番号リスト $plist によって表されるアトム引数列について、その接続先に対して巡回置換を行う
    */
-  @LMNtalIL
-  public static final int CYCLELINKS = 89;
+  @LMNtalIL public static final int CYCLELINKS = 89;
 
   static {
     setArgType(CYCLELINKS, new ArgType(false, ARG_VARS, ARG_VARS));
@@ -2210,8 +2022,7 @@ public class Instruction implements Cloneable {
    *
    * アトム $atom の第 $pos 引数の接続先の情報をNULLにする命令。SLIM専用で、swaplink命令と併用して使われる。(2014/6/5 by aoyama)
    */
-  @LMNtalIL
-  public static final int CLEARLINK = 90;
+  @LMNtalIL public static final int CLEARLINK = 90;
 
   static {
     setArgType(CLEARLINK, new ArgType(false, ARG_ATOM, ARG_INT));
@@ -2222,8 +2033,7 @@ public class Instruction implements Cloneable {
    *
    * SLIM専用の最適化命令。$mem 中のアトム $atom をそのファンクタのアトムリストのheadに持ってくる。--use-atomlistopのオプションが必須。(2014/6/8 by aoyama)
    */
-  @LMNtalIL
-  public static final int HEADATOM = 91;
+  @LMNtalIL public static final int HEADATOM = 91;
 
   static {
     setArgType(HEADATOM, new ArgType(false, ARG_ATOM, ARG_MEM));
@@ -2234,8 +2044,7 @@ public class Instruction implements Cloneable {
    *
    * SLIM専用の最適化命令。$mem 中のアトム $atom の前にある部分アトムリストをアトムリストのtailにつなぎ替える。--use-atomlistopのオプションが必須。(2014/6/8 by aoyama)
    */
-  @LMNtalIL
-  public static final int TAILATOMLIST = 92;
+  @LMNtalIL public static final int TAILATOMLIST = 92;
 
   static {
     setArgType(TAILATOMLIST, new ArgType(false, ARG_ATOM, ARG_MEM));
@@ -2248,7 +2057,6 @@ public class Instruction implements Cloneable {
    * リンク link1 及びリンク link2 が直接繋がっているとき, 成功する.
    * そうでなければ失敗する.
    */
-
   public static final int ISPAIREDLINK = 980;
 
   static {
@@ -2298,7 +2106,6 @@ public class Instruction implements Cloneable {
    * CSLMNtalによる型制約実装のための中間命令
    * ルール内にユーザー定義型のガードが現れた場合subrule命令を発行し、対象の型検査を行う
    */
-
   public static final int SUBRULE = 999;
 
   static {
@@ -2439,12 +2246,7 @@ public class Instruction implements Cloneable {
    * @param atomactuals アトム実引数のリスト。アトムの変数番号からなる。
    * @param varactuals その他の実引数のリスト。その他の変数番号からなる。
    */
-  public static Instruction react(
-    Rule r,
-    List memactuals,
-    List atomactuals,
-    List varactuals
-  ) {
+  public static Instruction react(Rule r, List memactuals, List atomactuals, List varactuals) {
     Instruction i = new Instruction(REACT);
     i.add(r);
     i.add(memactuals);
@@ -2461,11 +2263,7 @@ public class Instruction implements Cloneable {
    * @param varactuals その他の実引数のリスト。その他の変数番号からなる。
    */
   public static Instruction jump(
-    InstructionList insts,
-    List memactuals,
-    List atomactuals,
-    List varactuals
-  ) {
+      InstructionList insts, List memactuals, List atomactuals, List varactuals) {
     Instruction i = new Instruction(JUMP);
     i.add(insts);
     i.add(memactuals);
@@ -2490,11 +2288,7 @@ public class Instruction implements Cloneable {
   }
 
   /** resetvars 命令を生成する */
-  public static Instruction resetvars(
-    List memargs,
-    List atomargs,
-    List varargs
-  ) {
+  public static Instruction resetvars(List memargs, List atomargs, List varargs) {
     Instruction i = new Instruction(RESETVARS);
     i.add(memargs);
     i.add(atomargs);
@@ -2512,12 +2306,7 @@ public class Instruction implements Cloneable {
     return anymem(dstmem, srcmem, 0, name);
   }
 
-  public static Instruction anymem(
-    int dstmem,
-    int srcmem,
-    int kind,
-    String name
-  ) {
+  public static Instruction anymem(int dstmem, int srcmem, int kind, String name) {
     return new Instruction(ANYMEM, dstmem, srcmem, kind, (Object) name);
   }
 
@@ -2545,13 +2334,7 @@ public class Instruction implements Cloneable {
   }
 
   /** newlink 命令を生成する */
-  public static Instruction newlink(
-    int atom1,
-    int pos1,
-    int atom2,
-    int pos2,
-    int mem1
-  ) {
+  public static Instruction newlink(int atom1, int pos1, int atom2, int pos2, int mem1) {
     return new Instruction(NEWLINK, atom1, pos1, atom2, pos2, mem1);
   }
 
@@ -2578,12 +2361,7 @@ public class Instruction implements Cloneable {
    * @param typename
    * @param arglist
    */
-  public static Instruction subrule(
-    int retset,
-    int memi,
-    String typename,
-    List arglist
-  ) {
+  public static Instruction subrule(int retset, int memi, String typename, List arglist) {
     Instruction i = new Instruction(SUBRULE);
     i.add(retset);
     i.add(memi);
@@ -2683,14 +2461,24 @@ public class Instruction implements Cloneable {
     add(arg4);
   }
 
-  public Instruction(
-    int kind,
-    int arg1,
-    int arg2,
-    int arg3,
-    int arg4,
-    Object arg5
-  ) {
+  public Instruction(int kind, int arg1, int arg2, int arg3, int arg4, Object arg5) {
+    this.kind = kind;
+    add(arg1);
+    add(arg2);
+    add(arg3);
+    add(arg4);
+    add(arg5);
+  }
+
+  public Instruction(int kind, Object arg1, Object arg2, Object arg3, Object arg4) {
+    this.kind = kind;
+    add(arg1);
+    add(arg2);
+    add(arg3);
+    add(arg4);
+  }
+
+  public Instruction(int kind, int arg1, int arg2, int arg3, int arg4, int arg5) {
     this.kind = kind;
     add(arg1);
     add(arg2);
@@ -2700,44 +2488,7 @@ public class Instruction implements Cloneable {
   }
 
   public Instruction(
-    int kind,
-    Object arg1,
-    Object arg2,
-    Object arg3,
-    Object arg4
-  ) {
-    this.kind = kind;
-    add(arg1);
-    add(arg2);
-    add(arg3);
-    add(arg4);
-  }
-
-  public Instruction(
-    int kind,
-    int arg1,
-    int arg2,
-    int arg3,
-    int arg4,
-    int arg5
-  ) {
-    this.kind = kind;
-    add(arg1);
-    add(arg2);
-    add(arg3);
-    add(arg4);
-    add(arg5);
-  }
-
-  public Instruction(
-    int kind,
-    int arg1,
-    int arg2,
-    int arg3,
-    int arg4,
-    int arg5,
-    int arg6
-  ) { //seiji
+      int kind, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) { // seiji
     this.kind = kind;
     add(arg1);
     add(arg2);
@@ -2754,10 +2505,10 @@ public class Instruction implements Cloneable {
       this.kind = f.getInt(null);
       this.data = data;
       return;
-    } catch (NoSuchFieldException ignored) {} catch (
-      IllegalAccessException ignored
-    ) {}
-    //例外発生時
+    } catch (NoSuchFieldException ignored) {
+    } catch (IllegalAccessException ignored) {
+    }
+    // 例外発生時
     throw new RuntimeException("invalid instruction name : " + name);
   }
 
@@ -2784,9 +2535,7 @@ public class Instruction implements Cloneable {
 
   private static void setArgType(int kind, ArgType argtype) {
     if (argTypeTable.containsKey(kind)) {
-      throw new RuntimeException(
-        "setArgType for '" + kind + "' was called more than once"
-      );
+      throw new RuntimeException("setArgType for '" + kind + "' was called more than once");
     }
     argTypeTable.put(kind, argtype);
   }
@@ -2803,40 +2552,32 @@ public class Instruction implements Cloneable {
 
     ArgType(boolean output, int arg1) {
       this.output = output;
-      type = new int[] { arg1 };
+      type = new int[] {arg1};
     }
 
     ArgType(boolean output, int arg1, int arg2) {
       this.output = output;
-      type = new int[] { arg1, arg2 };
+      type = new int[] {arg1, arg2};
     }
 
     ArgType(boolean output, int arg1, int arg2, int arg3) {
       this.output = output;
-      type = new int[] { arg1, arg2, arg3 };
+      type = new int[] {arg1, arg2, arg3};
     }
 
     ArgType(boolean output, int arg1, int arg2, int arg3, int arg4) {
       this.output = output;
-      type = new int[] { arg1, arg2, arg3, arg4 };
+      type = new int[] {arg1, arg2, arg3, arg4};
     }
 
     ArgType(boolean output, int arg1, int arg2, int arg3, int arg4, int arg5) {
       this.output = output;
-      type = new int[] { arg1, arg2, arg3, arg4, arg5 };
+      type = new int[] {arg1, arg2, arg3, arg4, arg5};
     }
 
-    ArgType(
-      boolean output,
-      int arg1,
-      int arg2,
-      int arg3,
-      int arg4,
-      int arg5,
-      int arg6
-    ) {
+    ArgType(boolean output, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {
       this.output = output;
-      type = new int[] { arg1, arg2, arg3, arg4, arg5, arg6 };
+      type = new int[] {arg1, arg2, arg3, arg4, arg5, arg6};
     }
   }
 
@@ -2892,10 +2633,7 @@ public class Instruction implements Cloneable {
    * @param list 書き換える命令列
    * @param map 変数の対応表。
    */
-  public static void changeAtomVar(
-    List<Instruction> list,
-    Map<Integer, Integer> map
-  ) {
+  public static void changeAtomVar(List<Instruction> list, Map<Integer, Integer> map) {
     for (Instruction inst : list) {
       ArgType argtype = argTypeTable.get(inst.getKind());
       for (int i = 0; i < inst.data.size(); i++) {
@@ -2915,10 +2653,7 @@ public class Instruction implements Cloneable {
    * @param list 書き換える命令列
    * @param map 変数の対応表。
    */
-  public static void changeMemVar(
-    List<Instruction> list,
-    Map<Integer, Integer> map
-  ) {
+  public static void changeMemVar(List<Instruction> list, Map<Integer, Integer> map) {
     for (Instruction inst : list) {
       ArgType argtype = argTypeTable.get(inst.getKind());
       for (int i = 0; i < inst.data.size(); i++) {
@@ -2938,10 +2673,7 @@ public class Instruction implements Cloneable {
    * @param list 書き換える命令列
    * @param map 変数の対応表。
    */
-  public static void changeOtherVar(
-    List<Instruction> list,
-    Map<Integer, Integer> map
-  ) {
+  public static void changeOtherVar(List<Instruction> list, Map<Integer, Integer> map) {
     for (Instruction inst : list) {
       ArgType argtype = argTypeTable.get(inst.getKind());
       for (int i = 0; i < inst.data.size(); i++) {
@@ -2961,10 +2693,7 @@ public class Instruction implements Cloneable {
    * @param list 書き換える命令列
    * @param map 変数の対応表。
    */
-  public static void applyVarRewriteMap(
-    List<Instruction> list,
-    Map<Integer, Integer> map
-  ) {
+  public static void applyVarRewriteMap(List<Instruction> list, Map<Integer, Integer> map) {
     for (Instruction inst : list) {
       ArgType argtype = argTypeTable.get(inst.getKind());
       for (int i = 0; i < inst.data.size(); i++) {
@@ -2998,10 +2727,7 @@ public class Instruction implements Cloneable {
 
   /** 命令列後半部分に対して変数番号を付け替える */
   public static void applyVarRewriteMapFrom(
-    List<Instruction> list,
-    Map<Integer, Integer> map,
-    int start
-  ) {
+      List<Instruction> list, Map<Integer, Integer> map, int start) {
     applyVarRewriteMap(list.subList(start, list.size()), map);
   }
 
@@ -3013,11 +2739,7 @@ public class Instruction implements Cloneable {
    * @param pos 書き換える引数番号
    * @param map 書き換えマップ
    */
-  private static void changeArg(
-    Instruction inst,
-    int pos,
-    Map<Integer, Integer> map
-  ) {
+  private static void changeArg(Instruction inst, int pos, Map<Integer, Integer> map) {
     Integer id = (Integer) inst.data.get(pos - 1);
     if (map.containsKey(id)) {
       inst.data.set(pos - 1, map.get(id));
@@ -3051,15 +2773,14 @@ public class Instruction implements Cloneable {
             break;
           case ARG_LABEL:
             if (inst.getKind() == JUMP) break; // JUMP命令のLABEL引数はただのラベルなので除外
-            count +=
-              getVarUseCount(((InstructionList) inst.getArg(i)).insts, varnum);
+            count += getVarUseCount(((InstructionList) inst.getArg(i)).insts, varnum);
             break;
           case ARG_INSTS:
-            count +=
-              getVarUseCount(((InstructionList) inst.getArg(i)).insts, varnum);
+            count += getVarUseCount(((InstructionList) inst.getArg(i)).insts, varnum);
             break;
           case ARG_VARS:
-            if (inst.getKind() == RESETVARS) break; // <strike>RESETVARS命令のVARS引数はただのラベルなので除外</strike>
+            if (inst.getKind() == RESETVARS)
+              break; // <strike>RESETVARS命令のVARS引数はただのラベルなので除外</strike>
             Iterator it2 = ((List) inst.data.get(i)).iterator();
             while (it2.hasNext()) {
               if (it2.next().equals(varnum)) count++;
@@ -3075,11 +2796,7 @@ public class Instruction implements Cloneable {
    * @param list   命令列
    * @param varnum 変数番号
    * @param start  開始位置 */
-  public static int getVarUseCountFrom(
-    List<Instruction> list,
-    Integer varnum,
-    int start
-  ) {
+  public static int getVarUseCountFrom(List<Instruction> list, Integer varnum, int start) {
     return getVarUseCount(list.subList(start, list.size()), varnum);
   }
 
@@ -3179,8 +2896,8 @@ public class Instruction implements Cloneable {
    * <p>処理系開発が収束した頃に、もっと効率のよい別の構造で置き換えてもよい。 */
   private static HashMap<Integer, String> instructionTable = new HashMap<>();
 
-  //インスタンス生成時にスタックオーバーフローを起こしたので修正しました。 by Mizuno
-  //ExceptionInInitializerError がおきてたので修正 by hara
+  // インスタンス生成時にスタックオーバーフローを起こしたので修正しました。 by Mizuno
+  // ExceptionInInitializerError がおきてたので修正 by hara
   static {
     try {
       Instruction inst = new Instruction();
@@ -3189,18 +2906,15 @@ public class Instruction implements Cloneable {
         Field f = fields[i];
         // 追加。hara
         if (!f.getType().isPrimitive()) continue;
-        if (f.getName().startsWith("ARG_")) continue; //added by mizuno
-        if (f.getName().equals("depth")) continue; //added by n-kato, todo make local
+        if (f.getName().startsWith("ARG_")) continue; // added by mizuno
+        if (f.getName().equals("depth")) continue; // added by n-kato, todo make local
         int kind = f.getInt(inst);
         if (
-          /*kind != LOCAL
-				 && okabe*/f.getType().getName().equals("int") &&
-          Modifier.isStatic(f.getModifiers())
-        ) {
+        /*kind != LOCAL
+        && okabe*/ f.getType().getName().equals("int")
+            && Modifier.isStatic(f.getModifiers())) {
           if (instructionTable.containsKey(kind)) {
-            Util.errPrintln(
-              "WARNING: collision detected at instruction kind number: " + kind
-            );
+            Util.errPrintln("WARNING: collision detected at instruction kind number: " + kind);
           }
           instructionTable.put(kind, f.getName().toLowerCase());
         }
@@ -3223,10 +2937,8 @@ public class Instruction implements Cloneable {
         // アノテーションを使った判別。
         // 静的初期化ブロック内のフィールド名による判別に代わる方法。
         // もちろん、ゆくゆくはリフレクションに頼らない方法にしたい。
-        if (
-          !Modifier.isStatic(f.getModifiers()) ||
-          !f.isAnnotationPresent(LMNtalIL.class)
-        ) continue;
+        if (!Modifier.isStatic(f.getModifiers()) || !f.isAnnotationPresent(LMNtalIL.class))
+          continue;
 
         Class<?> type = f.getType();
         if (!type.getName().equals("int")) continue;
@@ -3236,18 +2948,12 @@ public class Instruction implements Cloneable {
           String name = f.getName().toLowerCase();
           if (idToName.containsKey(id)) {
             System.err.printf(
-              "conflict(Name:%s) - ID %d is already defined as %s.\n",
-              name,
-              id,
-              idToName.get(id)
-            );
+                "conflict(Name:%s) - ID %d is already defined as %s.\n",
+                name, id, idToName.get(id));
           } else if (nameToId.containsKey(name)) {
             System.err.printf(
-              "conflict(ID:%d) - Name %s is already used for ID %d.\n",
-              id,
-              name,
-              nameToId.get(name)
-            );
+                "conflict(ID:%d) - Name %s is already used for ID %d.\n",
+                id, name, nameToId.get(name));
           } else {
             idToName.put(id, name);
             nameToId.put(name, id);
@@ -3301,7 +3007,7 @@ public class Instruction implements Cloneable {
    */
   public String toString() {
     depth++;
-    //nakajima版2004-01-21
+    // nakajima版2004-01-21
     StringBuilder buffer = new StringBuilder();
     String instName = getInstructionString(kind);
     int spaces = 15;
@@ -3338,11 +3044,7 @@ public class Instruction implements Cloneable {
       }
     }
 
-    if (
-      kind != Instruction.JUMP &&
-      data.size() >= 1 &&
-      data.get(0) instanceof InstructionList
-    ) {
+    if (kind != Instruction.JUMP && data.size() >= 1 && data.get(0) instanceof InstructionList) {
       List insts = ((InstructionList) data.get(0)).insts;
       if (insts.size() == 0) {
         buffer.append("[]");
@@ -3350,7 +3052,7 @@ public class Instruction implements Cloneable {
         buffer.append("[[\n");
         int i;
         for (i = 0; i < insts.size() - 1; i++) {
-          //アトム主導テストの命令列を見やすく(?)する sakurai
+          // アトム主導テストの命令列を見やすく(?)する sakurai
           //					if(((Instruction)insts.get(i)).getKind() == Instruction.GROUP
           //						|| ((Instruction)insts.get(i)).getKind() == Instruction.COMMIT){
           //						buffer.append("\n");
@@ -3358,7 +3060,7 @@ public class Instruction implements Cloneable {
           buffer.append("                ");
           for (int j = 0; j < depth; j++) buffer.append("  ");
           buffer.append(insts.get(i));
-          //TODO 出力引数だったらインデントを下げる.
+          // TODO 出力引数だったらインデントを下げる.
           buffer.append("\n");
         }
         buffer.append("                ");
@@ -3376,7 +3078,7 @@ public class Instruction implements Cloneable {
     }
 
     buffer.append("[");
-    //パーズできるようにエスケープ by mizuno
+    // パーズできるようにエスケープ by mizuno
     for (int i = 0; i < data.size(); i++) {
       if (i != 0) buffer.append(", ");
       Object o = data.get(i);

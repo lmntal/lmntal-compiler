@@ -16,12 +16,12 @@ public final class ProcessContext extends Context {
   /**
    * 分離した同名型付きプロセス文脈の名前を格納
    */
-  public LinkedList sameNameList = null; //seiji
+  public LinkedList sameNameList = null; // seiji
 
   /**
    * リンク名
    */
-  public String linkName = null; //seiji
+  public String linkName = null; // seiji
 
   /**
    * コンストラクタ
@@ -46,13 +46,7 @@ public final class ProcessContext extends Context {
   public String toString() {
     String argstext = "";
     if (bundle == null || bundle.name.matches("\\*[A-Z_].*")) { // TODO: (buddy!=null)かどうかで判定すべきである
-      argstext =
-        "[" +
-        Arrays
-          .asList(args)
-          .toString()
-          .replaceAll("^.|.$", "")
-          .replaceAll(", ", ",");
+      argstext = "[" + Arrays.asList(args).toString().replaceAll("^.|.$", "").replaceAll(", ", ",");
       if (bundle != null) argstext += "|" + bundle;
       argstext += "]";
     }
@@ -62,18 +56,18 @@ public final class ProcessContext extends Context {
   /**
    * 同名プロセス文脈の分離により新たに生成された名前を格納しているリストを返す
    */
-  public LinkedList getSameNameList() { //seiji
+  public LinkedList getSameNameList() { // seiji
     return sameNameList;
   }
 
   /**
    * 同名プロセス文脈の分離を行なっているか否か
    */
-  public boolean hasSameName() { //seiji
+  public boolean hasSameName() { // seiji
     return sameNameList != null;
   }
 
-  public String getLinkName() { //seiji
+  public String getLinkName() { // seiji
     return linkName;
   }
 }

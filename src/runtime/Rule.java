@@ -79,10 +79,7 @@ public final class Rule {
    * パーザーで利用するコンストラクタ
    */
   public Rule(
-    InstructionList memMatchLabel,
-    InstructionList guardLabel,
-    InstructionList bodyLabel
-  ) {
+      InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel) {
     this.memMatchLabel = memMatchLabel;
     this.guardLabel = guardLabel;
     this.bodyLabel = bodyLabel;

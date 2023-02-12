@@ -54,14 +54,11 @@ public class FixedCounts {
     for (Functor f : mergedFunctors) {
       IntervalCount fc1 = functorToCount.get(f);
       IntervalCount fc2 = fcs.functorToCount.get(f);
-      if (fc1 == null && fc2 != null) functorToCount.put(
-        f,
-        fc2.or0()
-      ); else if ( // 片方にしかない場合
-        fc1 != null && fc2 == null
-      ) functorToCount.put(f, fc1.or0()); else if ( // 片方にしかない場合
-        fc1 != null && fc2 != null
-      ) functorToCount.put(f, fc1.or(fc2));
+      if (fc1 == null && fc2 != null) functorToCount.put(f, fc2.or0());
+      else if ( // 片方にしかない場合
+      fc1 != null && fc2 == null) functorToCount.put(f, fc1.or0());
+      else if ( // 片方にしかない場合
+      fc1 != null && fc2 != null) functorToCount.put(f, fc1.or(fc2));
     }
     Set<String> mergedNames = new HashSet<>();
     mergedNames.addAll(memnameToCount.keySet());
@@ -69,16 +66,9 @@ public class FixedCounts {
     for (String name : mergedNames) {
       IntervalCount fc1 = memnameToCount.get(name);
       IntervalCount fc2 = fcs.memnameToCount.get(name);
-      if (fc1 == null && fc2 != null) memnameToCount.put(
-        name,
-        fc2.or0()
-      ); else if (fc1 != null && fc2 == null) memnameToCount.put(
-        name,
-        fc1.or0()
-      ); else if (fc1 != null && fc2 != null) memnameToCount.put(
-        name,
-        fc1.or(fc2)
-      );
+      if (fc1 == null && fc2 != null) memnameToCount.put(name, fc2.or0());
+      else if (fc1 != null && fc2 == null) memnameToCount.put(name, fc1.or0());
+      else if (fc1 != null && fc2 != null) memnameToCount.put(name, fc1.or(fc2));
     }
   }
 
@@ -93,9 +83,7 @@ public class FixedCounts {
   }
 
   public <Key> void addCounts(
-    Map<Key, IntervalCount> countmap1,
-    Map<Key, IntervalCount> countmap2
-  ) {
+      Map<Key, IntervalCount> countmap1, Map<Key, IntervalCount> countmap2) {
     for (Key key : countmap2.keySet()) {
       if (countmap1.containsKey(key)) {
         IntervalCount oldfc = countmap1.get(key);
@@ -108,13 +96,13 @@ public class FixedCounts {
 
   public void print() {
     Env.p(
-      "----atoms of " + TypeEnv.getMemName(mem)
-      /* + "(" + multiple + ") :"*/
-    );
+        "----atoms of " + TypeEnv.getMemName(mem)
+        /* + "(" + multiple + ") :"*/
+        );
     for (Functor f : functorToCount.keySet()) {
       Env.p(f + ":" + functorToCount.get(f));
     }
-    Env.p("----mems of " + TypeEnv.getMemName(mem)/*+ "(" + multiple + ") :"*/);
+    Env.p("----mems of " + TypeEnv.getMemName(mem) /*+ "(" + multiple + ") :"*/);
     for (String m : memnameToCount.keySet()) {
       Env.p(m + ":" + memnameToCount.get(m));
     }

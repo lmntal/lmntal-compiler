@@ -55,8 +55,7 @@ public class Atom extends Atomic {
 
     String argstext = "";
     for (int i = 0; i < args.length; i++) {
-      argstext +=
-        "," + ((ProcessContext) args[i].buddy.atom).getQualifiedName();
+      argstext += "," + ((ProcessContext) args[i].buddy.atom).getQualifiedName();
     }
     return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
   }

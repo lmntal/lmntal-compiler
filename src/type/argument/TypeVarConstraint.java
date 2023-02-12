@@ -55,13 +55,11 @@ public class TypeVarConstraint {
   }
 
   public String toString() {
-    return (
-      fixLength(p.toStringWithOutAnonMem(), 15) +
-      " : mode=" +
-      (fixLength(mv.toString(), 12)) +
-      ", type=" +
-      tv
-    );
+    return (fixLength(p.toStringWithOutAnonMem(), 15)
+        + " : mode="
+        + (fixLength(mv.toString(), 12))
+        + ", type="
+        + tv);
   }
 
   public String shortString() {

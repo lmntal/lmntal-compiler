@@ -48,9 +48,8 @@ public class ModeVarSet {
    */
   public void add(int sign, Path p1, Path p2) throws TypeException {
     // 同一パスに対しモードが逆に設定されている
-    if ((sign == -1) && p1.equals(p2)) throw new TypeException(
-      "mode error (same path with in/out) : " + p1 + " <=> " + p2
-    );
+    if ((sign == -1) && p1.equals(p2))
+      throw new TypeException("mode error (same path with in/out) : " + p1 + " <=> " + p2);
     ModeVar ms1 = getModeVarOfPath(p1);
     ModeVar ms2 = getModeVarOfPath(p2);
     // 両方に既にモード変数が振られている
@@ -60,31 +59,32 @@ public class ModeVarSet {
         // 振られたモード変数が同じなら何もしない
         if (ms1 == ms2) return;
         // 振られたモード変数が相方なら衝突
-        else if (ms1 == ms2.buddy) throw new TypeException(
-          "mode error :" + p1 + " <=> " + p2
-        ); else merge(ms1, ms2);
+        else if (ms1 == ms2.buddy) throw new TypeException("mode error :" + p1 + " <=> " + p2);
+        else merge(ms1, ms2);
       }
       // 符号が逆なら
       else if (sign == -1) {
         // 振られたモード変数が相方なら何もしない
         if (ms1 == ms2.buddy) return;
         // 振られたモード変数が同じなら衝突
-        else if (ms1 == ms2) throw new TypeException(
-          "mode error :" + p1 + " <=> " + p2
-        ); else merge(ms1, ms2.buddy);
+        else if (ms1 == ms2) throw new TypeException("mode error :" + p1 + " <=> " + p2);
+        else merge(ms1, ms2.buddy);
       }
     }
-    //片方しか振られていない場合、もう片方は相方を振る
+    // 片方しか振られていない場合、もう片方は相方を振る
     else if (ms1 != null && ms2 == null) {
-      if (sign == 1) ms1.add(p2); else ms1.buddy.add(p2);
+      if (sign == 1) ms1.add(p2);
+      else ms1.buddy.add(p2);
     } else if (ms2 != null && ms1 == null) {
-      if (sign == 1) ms2.add(p1); else ms2.buddy.add(p1);
+      if (sign == 1) ms2.add(p1);
+      else ms2.buddy.add(p1);
     }
-    //両方振られていない場合、新しいものを作る
+    // 両方振られていない場合、新しいものを作る
     else {
       ModeVar nms = newModeVar();
       nms.add(p1);
-      if (sign == 1) nms.add(p2); else nms.buddy.add(p2);
+      if (sign == 1) nms.add(p2);
+      else nms.buddy.add(p2);
     }
   }
 
@@ -100,7 +100,7 @@ public class ModeVarSet {
   private static int modeid = 0;
 
   private String newModeVarName() {
-    return /*"'" +*/"m" + (modeid++);
+    return /*"'" +*/ "m" + (modeid++);
   }
 
   /**

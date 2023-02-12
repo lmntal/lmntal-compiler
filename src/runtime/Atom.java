@@ -40,38 +40,34 @@ public final class Atom extends QueuedEntity {
   public Atom(Membrane mem, Functor functor) {
     this.mem = mem;
     this.functor = functor;
-    if (functor.getArity() > 0) args = new Link[functor.getArity()]; else args =
-      null;
+    if (functor.getArity() > 0) args = new Link[functor.getArity()];
+    else args = null;
     id = lastId++;
   }
 
   public void setFunctor(Functor newFunctor) {
     if (args == null) {
       if (newFunctor.getArity() != 0) {
-        throw new RuntimeException(
-          "SYSTEM ERROR: insufficient link vector length"
-        );
+        throw new RuntimeException("SYSTEM ERROR: insufficient link vector length");
       }
     } else if (newFunctor.getArity() > args.length) {
-      throw new RuntimeException(
-        "SYSTEM ERROR: insufficient link vector length"
-      );
+      throw new RuntimeException("SYSTEM ERROR: insufficient link vector length");
     }
     functor = newFunctor;
   }
 
   /** ファンクタ名を設定する。 */
-  //public void setName(String name)
-  //{
-  //setFunctor(name, getFunctor().getArity());
-  //}
+  // public void setName(String name)
+  // {
+  // setFunctor(name, getFunctor().getArity());
+  // }
 
   /** ファンクタを設定する。
    * AtomSetを更新するため、膜のalterAtomFunctorメソッドを呼ぶ。*/
-  //public void setFunctor(String name, int arity)
-  //{
-  //mem.alterAtomFunctor(this, new SymbolFunctor(name, arity));
-  //}
+  // public void setFunctor(String name, int arity)
+  // {
+  // mem.alterAtomFunctor(this, new SymbolFunctor(name, arity));
+  // }
 
   public String toString() {
     return functor.getName();

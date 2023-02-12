@@ -11,7 +11,6 @@ import runtime.functor.Functor;
  * @author sakurai
  *
  */
-
 public class MergedBranchMap {
 
   /**

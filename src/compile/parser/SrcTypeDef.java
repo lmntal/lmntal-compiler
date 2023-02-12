@@ -1,7 +1,6 @@
 package compile.parser;
 
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * ソース中の型定義を表します
@@ -16,12 +15,7 @@ class SrcTypeDef {
 
   private String text; // typedef 構文のテキスト表現
 
-  public SrcTypeDef(
-    SrcName name,
-    LinkedList links,
-    LinkedList processlist,
-    int lineno
-  ) {
+  public SrcTypeDef(SrcName name, LinkedList links, LinkedList processlist, int lineno) {
     this.typeName = new SrcAtom(name, links);
     this.rules = processlist;
     this.lineno = lineno;

@@ -9,7 +9,6 @@ import compile.structure.RuleStructure;
 import compile.structure.TypeDefStructure;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 import runtime.Env;
 import runtime.Instruction;
 import runtime.InstructionList;
@@ -70,7 +69,7 @@ public class RulesetCompiler {
       try {
         rc = new RuleCompiler(rs);
         rc.compile(false);
-        //2006.1.22 Ruleに行番号を渡す by inui
+        // 2006.1.22 Ruleに行番号を渡す by inui
         rc.theRule.lineno = rs.lineno;
       } catch (CompileException e) {
         Env.p("    in " + rs.toString() + "\n");
@@ -94,15 +93,9 @@ public class RulesetCompiler {
         }
         for (int i = 0; i < typeDefStructure.mem.rules.size(); i++) {
           InstructionList subBranch = new InstructionList();
-          subBranch.insts.add(
-            Instruction.subrule(arity + 1, 0, typeName + "_" + i, arglist)
-          );
-          subBranch.insts.add(
-            new Instruction(Instruction.SUCCRETURN, arity + 1)
-          );
-          controlRule.memMatch.add(
-            new Instruction(Instruction.BRANCH, subBranch)
-          );
+          subBranch.insts.add(Instruction.subrule(arity + 1, 0, typeName + "_" + i, arglist));
+          subBranch.insts.add(new Instruction(Instruction.SUCCRETURN, arity + 1));
+          controlRule.memMatch.add(new Instruction(Instruction.BRANCH, subBranch));
         }
         controlRule.memMatch.add(new Instruction(Instruction.FAILRETURN));
         rules.add(controlRule);
@@ -120,13 +113,12 @@ public class RulesetCompiler {
             rc = new RuleCompiler(rs);
             rc.compile(true);
 
-            //2006.1.22 Ruleに行番号を渡す by inui
+            // 2006.1.22 Ruleに行番号を渡す by inui
             rc.theRule.lineno = rs.lineno;
           } catch (CompileException e) {
             Env.p("    in " + rs.toString() + "\n");
           }
-          rc.theRule.typeDefName =
-            typeDefStructure.typeAtom.atoms.get(0).getName() + "_" + i++;
+          rc.theRule.typeDefName = typeDefStructure.typeAtom.atoms.get(0).getName() + "_" + i++;
           rules.add(rc.theRule);
         }
       }
@@ -160,7 +152,7 @@ public class RulesetCompiler {
   }
 
   public static Ruleset compileRuleset(InterpretedRuleset rs) {
-    return rs; //返すルールセットはそのまま。どうするのが良いのだろうか？
+    return rs; // 返すルールセットはそのまま。どうするのが良いのだろうか？
   }
   /**
    * 与えられた膜構造を生成するルール1つだけを要素に持つ膜を生成する。
