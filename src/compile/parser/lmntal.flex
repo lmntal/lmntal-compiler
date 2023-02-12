@@ -105,6 +105,7 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	"}*"				{ return symbol(sym.RBRACE_ASTERISK); }
 	":"					{ return symbol(sym.COLON); }
 	":-"				{ return symbol(sym.RULE, new Integer(yyline+1)); }
+	";"					{ return symbol(sym.SEMICOLON); }
 	"\\"				{ return symbol(sym.BACKSLASH); }
 	"."					{ return symbol(sym.PERIOD); }
 	"|"					{ return symbol(sym.GUARD); }
