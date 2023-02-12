@@ -36,11 +36,17 @@ class GuardCompiler extends LHSCompiler {
   HashMap<ContextDef, Integer> groundSrcs = new HashMap<>();
   /** 膜(Membrane) -> (その膜に存在するground型付きプロセス文脈定義(ContextDef) -> 構成アトム数)というマップ */
   HashMap<Membrane, HashMap<ContextDef, Integer>> memToGroundSizes = new HashMap<>();
-  /** ソース出現が特定された型付きプロセス文脈定義のセット
-   * <p>identifiedCxtdefs.contains(x) は、左辺に出現するかまたはloadedであることを表す。*/
+  /**
+   * ソース出現が特定された型付きプロセス文脈定義のセット
+   *
+   * <p>identifiedCxtdefs.contains(x) は、左辺に出現するかまたはloadedであることを表す。
+   */
   HashSet<ContextDef> identifiedCxtdefs = new HashSet<>();
-  /** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
-   * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
+  /**
+   * 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
+   *
+   * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。
+   */
   List<ContextDef> typedCxtDefs = new ArrayList<>();
   /** newアトム -> newアトムの引数の接続先アトム一覧 */
   HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<>(); // hlgroundattr@onuma
@@ -119,29 +125,22 @@ class GuardCompiler extends LHSCompiler {
       // putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));
       putLibrary("hlink", 1, 1, array(ISHLINK));
       putLibrary("num", 2, 1, array(ISHLINK, Instruction.GETNUM, ISINT));
-      //putLibrary("name"      , 1, 1, array(ISNAME));
-      //putLibrary("coname"    , 1, 1, array(ISCONAME));
-      //putLibrary("setconame" , 2, 1, array(ISNAME, Instruction.SETCONAME, ISINT));
-      //putLibrary("!"         , 2, 1, array(ISNAME, Instruction.SETCONAME, ISINT));
-      //putLibrary("hasconame" , 1, 1, array(ISNAME, Instruction.HASCONAME));
-      //putLibrary("nhasconame", 1, 1, array(ISNAME, Instruction.NHASCONAME));
-      //putLibrary("getconame" , 2, 1, array(ISNAME, Instruction.GETCONAME, ISINT));
-      //putLibrary("getname"   , 2, 1, array(ISCONAME, Instruction.GETNAME, ISINT));
-      //putLibrary("><"        , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYHLINK, ISINT));
-      //putLibrary("and"       , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYCONAMEAND, ISINT));
-      //putLibrary("or"        , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYCONAMEOR, ISINT));
+      // putLibrary("name"      , 1, 1, array(ISNAME));
+      // putLibrary("coname"    , 1, 1, array(ISCONAME));
+      // putLibrary("setconame" , 2, 1, array(ISNAME, Instruction.SETCONAME, ISINT));
+      // putLibrary("!"         , 2, 1, array(ISNAME, Instruction.SETCONAME, ISINT));
+      // putLibrary("hasconame" , 1, 1, array(ISNAME, Instruction.HASCONAME));
+      // putLibrary("nhasconame", 1, 1, array(ISNAME, Instruction.NHASCONAME));
+      // putLibrary("getconame" , 2, 1, array(ISNAME, Instruction.GETCONAME, ISINT));
+      // putLibrary("getname"   , 2, 1, array(ISCONAME, Instruction.GETNAME, ISINT));
+      // putLibrary("><"        , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYHLINK, ISINT));
+      // putLibrary("and"       , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYCONAMEAND, ISINT));
+      // putLibrary("or"        , 3, 2, array(ISNAME, ISNAME, Instruction.UNIFYCONAMEOR, ISINT));
     }
   }
 
-  /**
-   * 名前、アリティによって表される {@code input} 入力ガード制約にコンパイル済みコードを定義する。
-   */
-  private static void putLibrary(
-    String name,
-    int arity,
-    int input,
-    int[] instructions
-  ) {
+  /** 名前、アリティによって表される {@code input} 入力ガード制約にコンパイル済みコードを定義する。 */
+  private static void putLibrary(String name, int arity, int input, int[] instructions) {
     Map<Functor, int[]> target = null;
     switch (input) {
       case 0:
@@ -179,13 +178,16 @@ class GuardCompiler extends LHSCompiler {
     typedProcessContexts = rc.rs.typedProcessContexts;
 
     putLibrary("string", 1, 1, array(ISSTRING));
-    //guardLibrary2.put(new SymbolFunctor("class",2), new int[]{0,      ISSTRING,Instruction.INSTANCEOF});
-    //guardLibrary1.put(new SymbolFunctor("class", 2), new int[]{0,              Instruction.GETCLASS,  ISSTRING});
+    // guardLibrary2.put(new SymbolFunctor("class",2), new int[]{0,
+    // ISSTRING,Instruction.INSTANCEOF});
+    // guardLibrary1.put(new SymbolFunctor("class", 2), new int[]{0,
+    // Instruction.GETCLASS,  ISSTRING});
   }
 
-  /** initNormalizedCompiler呼び出し後に呼ばれる。
-   * 左辺関係型付き$pに対して、ガード用の仮引数番号を
-   * 変数番号として左辺関係型付き$pのマッチングを取り終わった内部状態を持つようにする。*/
+  /**
+   * initNormalizedCompiler呼び出し後に呼ばれる。 左辺関係型付き$pに対して、ガード用の仮引数番号を
+   * 変数番号として左辺関係型付き$pのマッチングを取り終わった内部状態を持つようにする。
+   */
   // private final void initNormalizedGuardCompiler(GuardCompiler gc) {
   // 	identifiedCxtdefs = (HashSet<ContextDef>)gc.identifiedCxtdefs.clone();
   // 	typedCxtDataTypes = (HashMap<ContextDef, Integer>)gc.typedCxtDataTypes.clone();
@@ -195,9 +197,11 @@ class GuardCompiler extends LHSCompiler {
   // 	varCount = gc.varCount;	// 重複
   // }
 
-  /** ガード否定条件のコンパイルで使うためにthisに対する正規化されたGuardCompilerを作成して返す。
+  /**
+   * ガード否定条件のコンパイルで使うためにthisに対する正規化されたGuardCompilerを作成して返す。
    * 正規化とは、左辺の全てのアトム/膜および左辺関係型付き$pに対して、ガード/ボディ用の仮引数番号を
-   * 変数番号として左辺と左辺関係型制約のマッチングを取り終わった内部状態を持つようにすることを意味する。*/
+   * 変数番号として左辺と左辺関係型制約のマッチングを取り終わった内部状態を持つようにすることを意味する。
+   */
   // private final GuardCompiler getNormalizedGuardCompiler() {
   // 	GuardCompiler gc = new GuardCompiler(rc,this);
   // 	gc.initNormalizedGuardCompiler(this);
@@ -205,16 +209,13 @@ class GuardCompiler extends LHSCompiler {
   // }
   //
 
-  /**
-   * プロセス文脈のない膜やstableな膜の検査を行う。
-   * RISC化に伴い、ヘッドコンパイラから移動してきた。 by mizuno
-   */
+  /** プロセス文脈のない膜やstableな膜の検査を行う。 RISC化に伴い、ヘッドコンパイラから移動してきた。 by mizuno */
   void checkMembraneStatus() {
     // プロセス文脈がないときは、アトムと子膜の個数がマッチすることを確認する
     for (int i = 0; i < mems.size(); i++) {
       Membrane mem = (Membrane) mems.get(i);
       int mempath = memToPath(mem);
-      if (mempath == 0) continue; //本膜に対しては何もしない
+      if (mempath == 0) continue; // 本膜に対しては何もしない
       if (mem.processContexts.isEmpty()) {
         countAtomsOfMembrane(mem);
         match.add(new Instruction(Instruction.NMEMS, mempath, mem.mems.size()));
@@ -229,10 +230,11 @@ class GuardCompiler extends LHSCompiler {
     }
   }
 
-  /** 引数に渡されたアトムのリンクに対してgetlinkを行い、変数番号を登録する。(RISC化)
-   * <strike>将来的にはリンクオブジェクトをガード命令列の引数に渡すようにするかも知れない。</strike>
-   * 将来的にはガード命令列はヘッド命令列にインライン展開される予定なので、
-   * このメソッドで生成されるgetlinkは冗長命令の除去により消せる見込み。*/
+  /**
+   * 引数に渡されたアトムのリンクに対してgetlinkを行い、変数番号を登録する。(RISC化)
+   * <strike>将来的にはリンクオブジェクトをガード命令列の引数に渡すようにするかも知れない。</strike> 将来的にはガード命令列はヘッド命令列にインライン展開される予定なので、
+   * このメソッドで生成されるgetlinkは冗長命令の除去により消せる見込み。
+   */
   void getLHSLinks() {
     for (int i = 0; i < atoms.size(); i++) {
       Atom atom = (Atom) atoms.get(i);
@@ -242,13 +244,9 @@ class GuardCompiler extends LHSCompiler {
       for (int j = 0; j < arity; j++) {
         paths[j] = varCount;
         if (!atom.args[j].name.startsWith("!")) { // hlground hypergetlink
-          match.add(
-            new Instruction(Instruction.GETLINK, varCount, atompath, j)
-          );
+          match.add(new Instruction(Instruction.GETLINK, varCount, atompath, j));
         } else {
-          match.add(
-            new Instruction(Instruction.HYPERGETLINK, varCount, atompath, j)
-          );
+          match.add(new Instruction(Instruction.HYPERGETLINK, varCount, atompath, j));
         }
         varCount++;
       }
@@ -256,10 +254,7 @@ class GuardCompiler extends LHSCompiler {
     }
   }
 
-  /**
-   * 型付きプロセス文脈が表すプロセスを一意に決定する。
-   * このメソッドは長い。
-   */
+  /** 型付きプロセス文脈が表すプロセスを一意に決定する。 このメソッドは長い。 */
   void fixTypedProcesses() throws CompileException {
     // STEP 1 - 左辺に出現する型付きプロセス文脈を特定されたものとしてマークする。
     identifiedCxtdefs = new HashSet<>();
@@ -277,9 +272,9 @@ class GuardCompiler extends LHSCompiler {
         for (int i = 0; i < def.lhsOcc.args.length; i++) {
           if (!atomPaths.containsKey(def.lhsOcc.args[i].buddy.atom)) {
             error(
-              "COMPILE ERROR: a partner atom is required for the head occurrence of typed process context: " +
-              def.getName()
-            );
+                "COMPILE ERROR: a partner atom is required for the head occurrence of typed process"
+                    + " context: "
+                    + def.getName());
           }
         }
       } else if (def.lhsMem != null) {
@@ -302,19 +297,14 @@ class GuardCompiler extends LHSCompiler {
       // uniq, not_uniq を最初に（少なくともint, unary などの前に）処理する
       List<Atom> tmpFirst = new LinkedList<>();
       List<Atom> tmpLast = new LinkedList<>();
-      for (Iterator<Atom> it = cstrs.iterator(); it.hasNext();) {
+      for (Iterator<Atom> it = cstrs.iterator(); it.hasNext(); ) {
         Atom a = it.next();
-        if (
-          a.functor.getName().endsWith("uniq") ||
-          a.functor.getName().equals("custom")
-        ) {
+        if (a.functor.getName().endsWith("uniq") || a.functor.getName().equals("custom")) {
           tmpFirst.add(a);
           it.remove();
         }
-        if (
-          a.functor.getName().startsWith("custom") ||
-          a.functor.getName().equals("new")
-          // || a.functor.getName().equals("make")
+        if (a.functor.getName().startsWith("custom") || a.functor.getName().equals("new")
+        // || a.functor.getName().equals("make")
         ) {
           tmpLast.add(a);
           it.remove();
@@ -328,22 +318,17 @@ class GuardCompiler extends LHSCompiler {
     boolean changed;
     do {
       changed = false;
-      FixType:for (
-        ListIterator<Atom> lit = cstrs.listIterator();
-        lit.hasNext();
-      ) {
+      FixType:
+      for (ListIterator<Atom> lit = cstrs.listIterator(); lit.hasNext(); ) {
         Atom cstr = lit.next();
         Functor func = cstr.functor;
 
         ContextDef def1 = null;
         ContextDef def2 = null;
         ContextDef def3 = null;
-        if (func.getArity() > 0) def1 =
-          ((ProcessContext) cstr.args[0].buddy.atom).def;
-        if (func.getArity() > 1) def2 =
-          ((ProcessContext) cstr.args[1].buddy.atom).def;
-        if (func.getArity() > 2) def3 =
-          ((ProcessContext) cstr.args[2].buddy.atom).def;
+        if (func.getArity() > 0) def1 = ((ProcessContext) cstr.args[0].buddy.atom).def;
+        if (func.getArity() > 1) def2 = ((ProcessContext) cstr.args[1].buddy.atom).def;
+        if (func.getArity() > 2) def3 = ((ProcessContext) cstr.args[2].buddy.atom).def;
 
         if (func.equals("unary", 1)) {
           if (!identifiedCxtdefs.contains(def1)) continue;
@@ -357,9 +342,7 @@ class GuardCompiler extends LHSCompiler {
         // 	checkGroundLink(def1);
         // }
         // else if (func.getName().equals("hlground"))
-        else if (
-          func.getName().equals("ground") || func.getName().equals("hlground")
-        ) {
+        else if (func.getName().equals("ground") || func.getName().equals("hlground")) {
           // System.out.println("identifiedCxtdefs: " + identifiedCxtdefs + " " + def1);
           if (!identifiedCxtdefs.contains(def1)) continue;
           // ground, hlgroundの属性取得
@@ -383,12 +366,8 @@ class GuardCompiler extends LHSCompiler {
 
           if (typedCxtTypes.get(def1) != GROUND_LINK_TYPE) {
             hlgroundAttrs.put(def1, attrAtoms);
-          } else if (
-            hlgroundAttrs.get(def1).length != 0 || attrAtoms.length != 0
-          ) {
-            error(
-              "COMPILE ERROR: incompatible attributes in ground constraints"
-            );
+          } else if (hlgroundAttrs.get(def1).length != 0 || attrAtoms.length != 0) {
+            error("COMPILE ERROR: incompatible attributes in ground constraints");
           }
           hlgroundAttrs.put(def1, attrAtoms);
           // System.out.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
@@ -398,8 +377,7 @@ class GuardCompiler extends LHSCompiler {
         // ガードインライン
         else if (func.getName().startsWith("custom_")) {
           boolean hasError = false;
-          if (func.getName().length() < 7 + func.getArity() + 1) hasError =
-            true;
+          if (func.getName().length() < 7 + func.getArity() + 1) hasError = true;
           boolean[] isIn = new boolean[func.getArity()];
           if (func.getName().charAt(7 + isIn.length) != '_') hasError = true;
           for (int i = 0; i < isIn.length; i++) {
@@ -411,12 +389,11 @@ class GuardCompiler extends LHSCompiler {
             String mo = "";
             for (int i = 0; i < isIn.length; i++) mo += "?";
             error(
-              "Guard " +
-              func.getName() +
-              " should be custom_" +
-              mo +
-              "_xxxx. (? : 'i' when input, 'o' when output)"
-            );
+                "Guard "
+                    + func.getName()
+                    + " should be custom_"
+                    + mo
+                    + "_xxxx. (? : 'i' when input, 'o' when output)");
           }
 
           for (int k = 0; k < cstr.args.length; k++) {
@@ -451,9 +428,7 @@ class GuardCompiler extends LHSCompiler {
             if (typedCxtTypes.get(defK) != GROUND_LINK_TYPE) {
               hlgroundAttrs.put(defK, new Atom[0]); // hyperlink attributes not handled
             } else if (hlgroundAttrs.get(defK).length != 0) {
-              error(
-                "COMPILE ERROR: incompatible attributes in ground constraints"
-              );
+              error("COMPILE ERROR: incompatible attributes in ground constraints");
             }
 
             checkGroundLink(defK);
@@ -473,17 +448,15 @@ class GuardCompiler extends LHSCompiler {
           if (!identifiedCxtdefs.contains(def1)) continue;
           if (!identifiedCxtdefs.contains(def2)) continue;
 
-          //groundの否定にした。(2006-02-18 by kudo)
+          // groundの否定にした。(2006-02-18 by kudo)
           // .. :- unary(A),A\=B | ..
-          //の場合、Bがgroundで構わない。Aがunaryで、かつBが異なる構造の時に反応する。
-          //この点は、==とは違う。==の場合、そもそも同じ型でなければマッチしないため。
-          //Bがunaryの時に限定したければ、unary(B)を書き加えればよい。
-          //(何も考えずに実装したらそうなったのだが、結果的に一番柔軟で直感的な形だと思う。)
-          if (
-            !GROUND_ALLOWED ||
-            typedCxtTypes.get(def1) == UNARY_ATOM_TYPE ||
-            typedCxtTypes.get(def2) == UNARY_ATOM_TYPE
-          ) {
+          // の場合、Bがgroundで構わない。Aがunaryで、かつBが異なる構造の時に反応する。
+          // この点は、==とは違う。==の場合、そもそも同じ型でなければマッチしないため。
+          // Bがunaryの時に限定したければ、unary(B)を書き加えればよい。
+          // (何も考えずに実装したらそうなったのだが、結果的に一番柔軟で直感的な形だと思う。)
+          if (!GROUND_ALLOWED
+              || typedCxtTypes.get(def1) == UNARY_ATOM_TYPE
+              || typedCxtTypes.get(def2) == UNARY_ATOM_TYPE) {
             int atomid1 = loadUnaryAtom(def1);
             int atomid2 = loadUnaryAtom(def2);
             match.add(new Instruction(Instruction.ISUNARY, atomid1));
@@ -497,16 +470,12 @@ class GuardCompiler extends LHSCompiler {
             if (typedCxtTypes.get(def1) != GROUND_LINK_TYPE) {
               hlgroundAttrs.put(def1, new Atom[0]); // hyperlink attributes not handled
             } else if (hlgroundAttrs.get(def1).length != 0) {
-              error(
-                "COMPILE ERROR: incompatible attributes in ground constraints"
-              );
+              error("COMPILE ERROR: incompatible attributes in ground constraints");
             }
             if (typedCxtTypes.get(def2) != GROUND_LINK_TYPE) {
               hlgroundAttrs.put(def2, new Atom[0]); // for eqground constraint
             } else if (hlgroundAttrs.get(def2).length != 0) {
-              error(
-                "COMPILE ERROR: incompatible attributes in ground constraints"
-              );
+              error("COMPILE ERROR: incompatible attributes in ground constraints");
             }
             checkGroundLink(def1);
             checkGroundLink(def2);
@@ -529,12 +498,8 @@ class GuardCompiler extends LHSCompiler {
           }
           // todo: Instruction.INSTANCEOF
           int classnameAtomid = varCount++;
-          match.add(
-            new Instruction(Instruction.GETCLASS, classnameAtomid, atomid1)
-          );
-          match.add(
-            new Instruction(Instruction.SUBCLASS, classnameAtomid, atomid2)
-          );
+          match.add(new Instruction(Instruction.GETCLASS, classnameAtomid, atomid1));
+          match.add(new Instruction(Instruction.SUBCLASS, classnameAtomid, atomid2));
         } else if (func.isInteger()) {
           bindToFunctor(def1, func);
           typedCxtDataTypes.put(def1, ISINT);
@@ -627,18 +592,14 @@ class GuardCompiler extends LHSCompiler {
           List<Functor> attrs = getHlgroundAttrs(newArgAtoms);
 
           int atomid = varCount++;
-          match.add(
-            new Instruction(Instruction.NEWHLINKWITHATTR, atomid, attrs.get(0))
-          );
+          match.add(new Instruction(Instruction.NEWHLINKWITHATTR, atomid, attrs.get(0)));
           bindToUnaryAtom(def1, atomid);
           typedCxtDataTypes.put(def1, Instruction.ISHLINK);
           if (identifiedCxtdefs.contains(def1)) {
             int funcid2 = varCount++;
             match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid));
             int atomid1 = varCount++;
-            match.add(
-              new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2)
-            );
+            match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
             typedCxtSrcs.put(def1, atomid1);
             typedCxtDefs.add(def1);
             identifiedCxtdefs.add(def1);
@@ -650,19 +611,12 @@ class GuardCompiler extends LHSCompiler {
           if (!identifiedCxtdefs.contains(def2)) continue;
           int atomid1 = loadUnaryAtom(def1);
           int dstatomid = varCount++;
-          if (
-            desc[0] != 0 &&
-            (
-              !typedCxtDataTypes.containsKey(def1) ||
-              desc[0] != typedCxtDataTypes.get(def1)
-            )
-          ) {
+          if (desc[0] != 0
+              && (!typedCxtDataTypes.containsKey(def1) || desc[0] != typedCxtDataTypes.get(def1))) {
             match.add(new Instruction(desc[0], atomid1));
             typedCxtDataTypes.put(def1, desc[0]);
           }
-          match.add(
-            new Instruction(Instruction.GETATTRATOM, dstatomid, atomid1)
-          );
+          match.add(new Instruction(Instruction.GETATTRATOM, dstatomid, atomid1));
           int atomid2 = loadUnaryAtom(def2);
           match.add(new Instruction(Instruction.SAMEFUNC, dstatomid, atomid2));
         } else if (guardLibrary0.containsKey(func)) { // 0入力制約//seiji
@@ -675,9 +629,7 @@ class GuardCompiler extends LHSCompiler {
             int funcid2 = varCount++;
             match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid));
             int atomid1 = varCount++;
-            match.add(
-              new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2)
-            );
+            match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
             typedCxtSrcs.put(def1, atomid1);
             typedCxtDefs.add(def1);
             identifiedCxtdefs.add(def1);
@@ -687,13 +639,8 @@ class GuardCompiler extends LHSCompiler {
           int[] desc = guardLibrary1.get(func);
           if (!identifiedCxtdefs.contains(def1)) continue;
           int atomid1 = loadUnaryAtom(def1);
-          if (
-            desc[0] != 0 &&
-            (
-              !typedCxtDataTypes.containsKey(def1) ||
-              desc[0] != typedCxtDataTypes.get(def1)
-            )
-          ) {
+          if (desc[0] != 0
+              && (!typedCxtDataTypes.containsKey(def1) || desc[0] != typedCxtDataTypes.get(def1))) {
             match.add(new Instruction(desc[0], atomid1));
             typedCxtDataTypes.put(def1, desc[0]);
           }
@@ -709,7 +656,7 @@ class GuardCompiler extends LHSCompiler {
             int atomid2;
             if (desc[1] == -1) { // 単項 + と +. だけ特別扱い
               atomid2 = atomid1;
-              //bindToUnaryAtom 内で、実際に使うアトムを生成している。
+              // bindToUnaryAtom 内で、実際に使うアトムを生成している。
             } else {
               //								if (func.equals(new SymbolFunctor("getconame", 2))) // getconame制約のための処理
               //									match.add(new Instruction(Instruction.HASCONAME, atomid1));
@@ -727,10 +674,10 @@ class GuardCompiler extends LHSCompiler {
           if (!identifiedCxtdefs.contains(def1)) continue;
           if (!identifiedCxtdefs.contains(def2)) continue;
 
-          //Util.println("st");
+          // Util.println("st");
           int atomid1 = loadUnaryAtom(def1);
           int atomid2 = loadUnaryAtom(def2);
-          //Util.println("end");
+          // Util.println("end");
 
           Integer t1 = typedCxtDataTypes.get(def1);
           if (desc[0] != 0 && (t1 == null || desc[0] != t1)) {
@@ -779,12 +726,12 @@ class GuardCompiler extends LHSCompiler {
 
   private boolean GROUND_ALLOWED = true;
 
-  /** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。*/
+  /** 制約 X=Y または X==Y を処理する。ただしdef2は特定されていなければならない。 */
   private void processEquivalenceConstraint(ContextDef def1, ContextDef def2)
-    throws CompileException {
+      throws CompileException {
     boolean checkNeeded =
-      (typedCxtTypes.get(def1) == null && typedCxtTypes.get(def2) == null); // 型付きであることの検査が必要かどうか
-    //boolean GROUND_ALLOWED = true;
+        (typedCxtTypes.get(def1) == null && typedCxtTypes.get(def2) == null); // 型付きであることの検査が必要かどうか
+    // boolean GROUND_ALLOWED = true;
     // GROUND_ALLOWED のとき (unary = ?) は (? = unary) として処理する（ただし?はgroundまたはnull）
     // System.out.println("X=Y handling, typedCxtTypes: " + typedCxtTypes);
     if (GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE) {
@@ -795,7 +742,7 @@ class GuardCompiler extends LHSCompiler {
       }
     }
     if (GROUND_ALLOWED && typedCxtTypes.get(def2) != UNARY_ATOM_TYPE) { // (? = ground)
-      //if(checkNeeded){
+      // if(checkNeeded){
 
       // System.out.println("X=Y being handled: " + typedCxtTypes.get(def1)
       // + " " + typedCxtTypes.get(def2));
@@ -812,7 +759,7 @@ class GuardCompiler extends LHSCompiler {
 
       checkGroundLink(def1);
       checkGroundLink(def2);
-      //}
+      // }
       int linkid1 = loadGroundLink(def1);
       int linkid2 = loadGroundLink(def2);
 
@@ -826,9 +773,7 @@ class GuardCompiler extends LHSCompiler {
         int funcid2 = varCount++;
         match.add(new Instruction(Instruction.GETFUNC, funcid2, atomid2));
         int atomid1 = varCount++;
-        match.add(
-          new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2)
-        );
+        match.add(new Instruction(Instruction.ALLOCATOMINDIRECT, atomid1, funcid2));
         typedCxtSrcs.put(def1, atomid1);
         typedCxtDefs.add(def1);
         identifiedCxtdefs.add(def1);
@@ -852,8 +797,7 @@ class GuardCompiler extends LHSCompiler {
   }
 
   /** 型付きプロセス文脈defを1引数ファンクタfuncで束縛する */
-  private void bindToFunctor(ContextDef def, Functor func)
-    throws CompileException {
+  private void bindToFunctor(ContextDef def, Functor func) throws CompileException {
     if (!identifiedCxtdefs.contains(def)) {
       identifiedCxtdefs.add(def);
       int atomid = varCount++;
@@ -867,13 +811,7 @@ class GuardCompiler extends LHSCompiler {
         LinkOccurrence srclink = def.lhsOcc.args[0].buddy; // defのソース出現を指すアトム側の引数
         atomid = varCount++;
         match.add(
-          new Instruction(
-            Instruction.DEREFATOM,
-            atomid,
-            atomToPath(srclink.atom),
-            srclink.pos
-          )
-        );
+            new Instruction(Instruction.DEREFATOM, atomid, atomToPath(srclink.atom), srclink.pos));
         typedCxtSrcs.put(def, atomid);
         typedCxtDefs.add(def);
         match.add(new Instruction(Instruction.FUNC, atomid, func));
@@ -898,13 +836,8 @@ class GuardCompiler extends LHSCompiler {
         loadedatomid = varCount++;
         //				Util.println("bindToUnaryAtom " + srclink.atom);
         match.add(
-          new Instruction(
-            Instruction.DEREFATOM,
-            loadedatomid,
-            atomToPath(srclink.atom),
-            srclink.pos
-          )
-        );
+            new Instruction(
+                Instruction.DEREFATOM, loadedatomid, atomToPath(srclink.atom), srclink.pos));
         typedCxtSrcs.put(def, loadedatomid);
         typedCxtDefs.add(def);
         match.add(new Instruction(Instruction.SAMEFUNC, atomid, loadedatomid));
@@ -921,10 +854,11 @@ class GuardCompiler extends LHSCompiler {
     typedCxtTypes.put(def, UNARY_ATOM_TYPE);
   }
 
-  /** 型付きプロセス文脈defの（特定されている）ソース出現の
-   * （明示的な自由リンクが出現する）アトムを取得する。
-   * また、このアトムが1引数であると仮定して、型情報を更新する。
-   * @return 取得したアトムの変数番号 */
+  /**
+   * 型付きプロセス文脈defの（特定されている）ソース出現の （明示的な自由リンクが出現する）アトムを取得する。 また、このアトムが1引数であると仮定して、型情報を更新する。
+   *
+   * @return 取得したアトムの変数番号
+   */
   private int loadUnaryAtom(ContextDef def) throws CompileException {
     int atomid = typedcxtToSrcPath(def);
     if (atomid == UNBOUND) {
@@ -932,13 +866,7 @@ class GuardCompiler extends LHSCompiler {
       LinkOccurrence srclink = def.lhsOcc.args[0].buddy;
       atomid = varCount++;
       match.add(
-        new Instruction(
-          Instruction.DEREFATOM,
-          atomid,
-          atomToPath(srclink.atom),
-          srclink.pos
-        )
-      );
+          new Instruction(Instruction.DEREFATOM, atomid, atomToPath(srclink.atom), srclink.pos));
       typedCxtSrcs.put(def, atomid);
       typedCxtDefs.add(def);
       getLinks(atomid, 1, match);
@@ -947,12 +875,12 @@ class GuardCompiler extends LHSCompiler {
     return atomid;
   }
 
-  /** 型付プロセス文脈defの（特定されている）ソース出現のリンクを取得する。
-   *  それらをリスト変数に格納する．
-   *  その変数番号をgroundsrcsに追加する。
-   *  型情報を更新する。
-   *  @param def プロセス文脈定義
-   *  @return リンクリストの変数番号 */
+  /**
+   * 型付プロセス文脈defの（特定されている）ソース出現のリンクを取得する。 それらをリスト変数に格納する． その変数番号をgroundsrcsに追加する。 型情報を更新する。
+   *
+   * @param def プロセス文脈定義
+   * @return リンクリストの変数番号
+   */
   private int loadGroundLink(ContextDef def) {
     //		ArrayList linkids = groundToSrcPath(def);
     int linkids = groundToSrcPath(def);
@@ -961,42 +889,36 @@ class GuardCompiler extends LHSCompiler {
       match.add(new Instruction(Instruction.NEWLIST, linkids));
       for (int i = 0; i < def.lhsOcc.args.length; i++) {
         //				Util.println("loadGroundLink "+def.lhsOcc.args[i].buddy.atom);
-        int[] paths = (int[]) linkPaths.get(
-          atomToPath(def.lhsOcc.args[i].buddy.atom)
-        );
-        //linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
+        int[] paths = (int[]) linkPaths.get(atomToPath(def.lhsOcc.args[i].buddy.atom));
+        // linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
         //				linkids.set(i, paths[def.lhsOcc.args[i].buddy.pos]);
         //				groundsrcs.put(def, linkids);
         match.add(
-          new Instruction(
-            Instruction.ADDTOLIST,
-            linkids,
-            paths[def.lhsOcc.args[i].buddy.pos]
-          )
-        );
+            new Instruction(Instruction.ADDTOLIST, linkids, paths[def.lhsOcc.args[i].buddy.pos]));
       }
       groundSrcs.put(def, linkids);
     }
     return linkids;
   }
 
-  //左辺の膜(Membrane) -> その膜のアトムが入ったsetを指す変数番号(Integer)
+  // 左辺の膜(Membrane) -> その膜のアトムが入ったsetを指す変数番号(Integer)
   //	HashMap memToAtomSetPath = new HashMap();
 
-  //左辺の膜(Membrane) -> その膜のアトムの明示的な自由リンクが入ったlistを指す変数番号(Integer)
+  // 左辺の膜(Membrane) -> その膜のアトムの明示的な自由リンクが入ったlistを指す変数番号(Integer)
   //	HashMap memToLinkListPath = new HashMap();
 
-  /** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
-   *  @param def プロセス文脈定義 */
+  /**
+   * 型付プロセス文脈defが、基底項プロセスかどうか検査する。
+   *
+   * @param def プロセス文脈定義
+   */
   // (ueda) extended ground（ハイパーリンクの局所性も検査）は checkHLGroundLink に委ねる
   private void checkGroundLink(ContextDef def) {
     // System.out.println("checkGroundLink, typedCxtTypes: " + def + " " + typedCxtTypes.get(def));
 
-    if (
-      typedCxtTypes.get(def) != UNARY_ATOM_TYPE &&
-      typedCxtTypes.get(def) != GROUND_LINK_TYPE &&
-      typedCxtTypes.get(def) != HLGROUND_LINK_TYPE
-    ) {
+    if (typedCxtTypes.get(def) != UNARY_ATOM_TYPE
+        && typedCxtTypes.get(def) != GROUND_LINK_TYPE
+        && typedCxtTypes.get(def) != HLGROUND_LINK_TYPE) {
       typedCxtTypes.put(def, GROUND_LINK_TYPE);
       //			int linkid = loadGroundLink(def);
       //			ArrayList linkids = loadGroundLink(def);
@@ -1014,21 +936,16 @@ class GuardCompiler extends LHSCompiler {
         //				Util.println("checkGroundLink"+atom);
         int[] paths = (int[]) linkPaths.get(atomToPath(atom));
         for (int i = 0; i < atom.args.length; i++) {
-          //					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
+          //					match.add(new
+          // Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
           if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
-            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem) if ( // 反対側が右辺出現の時のみ追加
-              !def.lhsOcc.mem.typedProcessContexts.contains(
-                atom.args[i].buddy.atom
-              )
-            ) continue;
+            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem)
+              if ( // 反対側が右辺出現の時のみ追加
+              !def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom)) continue;
           } else { // 左辺出現が膜内
-            if (
-              !def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom)
-            ) if ( // 反対側がプロセス文脈の引数の時のみ追加
-              !def.lhsOcc.mem.typedProcessContexts.contains(
-                atom.args[i].buddy.atom
-              )
-            ) continue;
+            if (!def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom))
+              if ( // 反対側がプロセス文脈の引数の時のみ追加
+              !def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom)) continue;
           }
           boolean flgNotAdd = false; // その引数を避けるべきリストに「加えない」場合true
           for (int j = 0; j < def.lhsOcc.args.length; j++) {
@@ -1039,9 +956,7 @@ class GuardCompiler extends LHSCompiler {
             }
           }
           if (!flgNotAdd) {
-            match.add(
-              new Instruction(Instruction.ADDTOLIST, srclinklistpath, paths[i])
-            );
+            match.add(new Instruction(Instruction.ADDTOLIST, srclinklistpath, paths[i]));
           }
         }
       }
@@ -1051,19 +966,15 @@ class GuardCompiler extends LHSCompiler {
       List<Functor> attrs = new ArrayList<>();
       int natom = varCount++;
       match.add(
-        new Instruction(
-          Instruction.ISGROUND,
-          natom,
-          linkids,
-          srclinklistpath,
-          attrs
-        )
-      ); //,memToPath(def.lhsOcc.mem)));
+          new Instruction(
+              Instruction.ISGROUND,
+              natom,
+              linkids,
+              srclinklistpath,
+              attrs)); // ,memToPath(def.lhsOcc.mem)));
       rc.hasISGROUND = false;
-      if (!memToGroundSizes.containsKey(def.lhsOcc.mem)) memToGroundSizes.put(
-        def.lhsOcc.mem,
-        new HashMap<>()
-      );
+      if (!memToGroundSizes.containsKey(def.lhsOcc.mem))
+        memToGroundSizes.put(def.lhsOcc.mem, new HashMap<>());
       memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
     } else {
       // System.out.println("typedCxtTypes contained: " + def);
@@ -1071,19 +982,20 @@ class GuardCompiler extends LHSCompiler {
     return;
   }
 
-  /** 型付プロセス文脈defが、基底項プロセスかどうか検査する。
-   *  @param def プロセス文脈定義 */
+  /**
+   * 型付プロセス文脈defが、基底項プロセスかどうか検査する。
+   *
+   * @param def プロセス文脈定義
+   */
   // hlground型および属性付きground型
   private void checkHLGroundLink(Functor func, ContextDef def) {
-    Object linktype =
-      (func.getName().equals("ground") ? GROUND_LINK_TYPE : HLGROUND_LINK_TYPE);
-    // System.out.println("checkHLGroundLink, typedCxtTypes: " + def + " " + typedCxtTypes.get(def));
+    Object linktype = (func.getName().equals("ground") ? GROUND_LINK_TYPE : HLGROUND_LINK_TYPE);
+    // System.out.println("checkHLGroundLink, typedCxtTypes: " + def + " " +
+    // typedCxtTypes.get(def));
 
-    if (
-      typedCxtTypes.get(def) != UNARY_ATOM_TYPE &&
-      typedCxtTypes.get(def) != GROUND_LINK_TYPE &&
-      typedCxtTypes.get(def) != HLGROUND_LINK_TYPE
-    ) {
+    if (typedCxtTypes.get(def) != UNARY_ATOM_TYPE
+        && typedCxtTypes.get(def) != GROUND_LINK_TYPE
+        && typedCxtTypes.get(def) != HLGROUND_LINK_TYPE) {
       typedCxtTypes.put(def, linktype);
       //			int linkid = loadGroundLink(def);
       //			ArrayList linkids = loadGroundLink(def);
@@ -1101,21 +1013,16 @@ class GuardCompiler extends LHSCompiler {
         //				Util.println("checkGroundLink"+atom);
         int[] paths = (int[]) linkPaths.get(atomToPath(atom));
         for (int i = 0; i < atom.args.length; i++) {
-          //					match.add(new Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
+          //					match.add(new
+          // Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
           if (def.lhsOcc.mem.parent == null) { // 左辺出現がルール最外部
-            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem) if ( // 反対側が右辺出現の時のみ追加
-              !def.lhsOcc.mem.typedProcessContexts.contains(
-                atom.args[i].buddy.atom
-              )
-            ) continue;
+            if (atom.args[i].buddy.atom.mem != rc.rs.rightMem)
+              if ( // 反対側が右辺出現の時のみ追加
+              !def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom)) continue;
           } else { // 左辺出現が膜内
-            if (
-              !def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom)
-            ) if ( // 反対側がプロセス文脈の引数の時のみ追加
-              !def.lhsOcc.mem.typedProcessContexts.contains(
-                atom.args[i].buddy.atom
-              )
-            ) continue;
+            if (!def.lhsOcc.mem.processContexts.contains(atom.args[i].buddy.atom))
+              if ( // 反対側がプロセス文脈の引数の時のみ追加
+              !def.lhsOcc.mem.typedProcessContexts.contains(atom.args[i].buddy.atom)) continue;
           }
           boolean flgNotAdd = false; // その引数を避けるべきリストに「加えない」場合true
           for (int j = 0; j < def.lhsOcc.args.length; j++) {
@@ -1126,9 +1033,7 @@ class GuardCompiler extends LHSCompiler {
             }
           }
           if (!flgNotAdd) {
-            match.add(
-              new Instruction(Instruction.ADDTOLIST, srclinklistpath, paths[i])
-            );
+            match.add(new Instruction(Instruction.ADDTOLIST, srclinklistpath, paths[i]));
           }
         }
       }
@@ -1138,18 +1043,13 @@ class GuardCompiler extends LHSCompiler {
       Atom[] atoms = hlgroundAttrs.get(def); // hlgroundの属性
       List<Functor> attrs = getHlgroundAttrs(atoms);
       int natom = varCount++;
-      int inst =
-        (
-          func.getName().equals("ground")
-            ? Instruction.ISGROUND
-            : Instruction.ISHLGROUND
-        );
-      match.add(new Instruction(inst, natom, linkids, srclinklistpath, attrs)); //,memToPath(def.lhsOcc.mem)));
+      int inst = (func.getName().equals("ground") ? Instruction.ISGROUND : Instruction.ISHLGROUND);
+      match.add(
+          new Instruction(
+              inst, natom, linkids, srclinklistpath, attrs)); // ,memToPath(def.lhsOcc.mem)));
       rc.hasISGROUND = false;
-      if (!memToGroundSizes.containsKey(def.lhsOcc.mem)) memToGroundSizes.put(
-        def.lhsOcc.mem,
-        new HashMap<>()
-      );
+      if (!memToGroundSizes.containsKey(def.lhsOcc.mem))
+        memToGroundSizes.put(def.lhsOcc.mem, new HashMap<>());
       memToGroundSizes.get(def.lhsOcc.mem).put(def, natom);
     } else {
       // System.out.println("typedCxtTypes contained: " + def);
@@ -1159,79 +1059,63 @@ class GuardCompiler extends LHSCompiler {
 
   /**
    * unary型に制約されたプロセス文脈が左辺に出現し、1引数であることを確認する．
+   *
    * @param def
    * @throws CompileException
    */
-  private void checkUnaryProcessContext(ContextDef def)
-    throws CompileException {
-    if (def.lhsOcc == null) error(
-      "COMPILE ERROR: unary type process context must occur in LHS"
-    ); else if (def.lhsOcc.args.length != 1) error(
-      "COMPILE ERROR: unary type process context must have exactly one argument : " +
-      def.lhsOcc
-    );
+  private void checkUnaryProcessContext(ContextDef def) throws CompileException {
+    if (def.lhsOcc == null) error("COMPILE ERROR: unary type process context must occur in LHS");
+    else if (def.lhsOcc.args.length != 1)
+      error(
+          "COMPILE ERROR: unary type process context must have exactly one argument : "
+              + def.lhsOcc);
   }
 
   /**
-   * 膜内のアトム数を数える。$pが無いことが条件。
-   * ground,unaryについてもきちんと考える。
+   * 膜内のアトム数を数える。$pが無いことが条件。 ground,unaryについてもきちんと考える。
    *
    * @param mem 数をチェックする膜
    */
   private void countAtomsOfMembrane(Membrane mem) {
     if (!memToGroundSizes.containsKey(mem)) { // 厳しくRISC化するなら、natomsも分けるべきか
       match.add(
-        new Instruction(
-          Instruction.NATOMS,
-          memToPath(mem),
-          mem.getNormalAtomCount() + mem.typedProcessContexts.size()
-        )
-      );
+          new Instruction(
+              Instruction.NATOMS,
+              memToPath(mem),
+              mem.getNormalAtomCount() + mem.typedProcessContexts.size()));
     } else {
       Map<ContextDef, Integer> gmap = memToGroundSizes.get(mem);
-      //普通のアトムの個数と、unaryの個数
-      int ausize =
-        mem.getNormalAtomCount() +
-        mem.typedProcessContexts.size() -
-        gmap.size();
+      // 普通のアトムの個数と、unaryの個数
+      int ausize = mem.getNormalAtomCount() + mem.typedProcessContexts.size() - gmap.size();
       int ausfunc = varCount++;
       match.add(
-        new Instruction(
-          Instruction.LOADFUNC,
-          ausfunc,
-          new runtime.functor.IntegerFunctor(ausize)
-        )
-      );
-      //各groundについて、isground命令で貰ってきたground構成アトム数を足していく
+          new Instruction(
+              Instruction.LOADFUNC, ausfunc, new runtime.functor.IntegerFunctor(ausize)));
+      // 各groundについて、isground命令で貰ってきたground構成アトム数を足していく
       int allfunc = ausfunc;
       for (ContextDef def : gmap.keySet()) {
         int natomfp = gmap.get(def);
         int newfunc = varCount++;
-        match.add(
-          new Instruction(Instruction.IADDFUNC, newfunc, allfunc, natomfp)
-        );
+        match.add(new Instruction(Instruction.IADDFUNC, newfunc, allfunc, natomfp));
         allfunc = newfunc;
       }
-      match.add(
-        new Instruction(Instruction.NATOMSINDIRECT, memToPath(mem), allfunc)
-      );
+      match.add(new Instruction(Instruction.NATOMSINDIRECT, memToPath(mem), allfunc));
     }
   }
 
   ////////////////////////////////////////////////////////////////
 
-  /** HeadCompiler.getAtomActualsのオーバーライド。
-   * GuardCompilerは現状では、atomsに対応する変数番号のリストの後に、
-   * typedcxtdefsのうちUNARY_ATOM_TYPEであるようなものの変数番号のリストをつなげたArrayListを返す。*/
+  /**
+   * HeadCompiler.getAtomActualsのオーバーライド。 GuardCompilerは現状では、atomsに対応する変数番号のリストの後に、
+   * typedcxtdefsのうちUNARY_ATOM_TYPEであるようなものの変数番号のリストをつなげたArrayListを返す。
+   */
   List<Integer> getAtomActuals() {
     List<Integer> args = new ArrayList<>();
     for (int i = 0; i < atoms.size(); i++) {
       args.add(atomPaths.get(atoms.get(i)));
     }
     for (ContextDef def : typedCxtDefs) {
-      if (typedCxtTypes.get(def) == UNARY_ATOM_TYPE) args.add(
-        typedcxtToSrcPath(def)
-      );
+      if (typedCxtTypes.get(def) == UNARY_ATOM_TYPE) args.add(typedcxtToSrcPath(def));
     }
     return args;
   }

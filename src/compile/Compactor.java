@@ -11,10 +11,9 @@ import runtime.InstructionList;
 import runtime.Rule;
 
 /**
- * 命令列の長さに関する最適化を行うクラスメソッドを持つクラス。開発時用。
- * RISC化された命令列の可読性を高めるために使うかもしれない。
- * RISC化テスト用のexpandメソッドも持つ。
+ * 命令列の長さに関する最適化を行うクラスメソッドを持つクラス。開発時用。 RISC化された命令列の可読性を高めるために使うかもしれない。 RISC化テスト用のexpandメソッドも持つ。
  * 命令セットのRISC化に一役買う予定。
+ *
  * @author n-kato
  */
 public class Compactor {
@@ -26,10 +25,10 @@ public class Compactor {
     compactInstructionList(rule.body);
   }
 
-  /** 命令列を最適化する（予定）*/
+  /** 命令列を最適化する（予定） */
   public static void compactInstructionList(List<Instruction> insts) {
-    //if (true) return;
-    //List insts = label.insts;
+    // if (true) return;
+    // List insts = label.insts;
     Instruction spec = insts.get(0);
     int formals = spec.getIntArg1();
     int varcount = spec.getIntArg2();
@@ -54,141 +53,81 @@ public class Compactor {
       Instruction inst = insts.get(i);
       //			060831okabe			int modify = (inst.getKind() >= Instruction.LOCAL ? Instruction.LOCAL : 0);
       switch (inst.getKind()) {
-        // inheritlink [atom1,pos1,link2,mem1]
-        // ==> alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem1]
+          // inheritlink [atom1,pos1,link2,mem1]
+          // ==> alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem1]
         case Instruction.INHERITLINK:
           insts.remove(i);
           insts.add(
-            i,
-            new Instruction(
-              Instruction.ALLOCLINK,
-              varcount,
-              inst.getIntArg1(),
-              inst.getIntArg2()
-            )
-          );
-          insts.add(
-            i + 1,
-            new Instruction(Instruction.UNIFYLINKS, varcount, inst.getIntArg3())
-          );
+              i,
+              new Instruction(
+                  Instruction.ALLOCLINK, varcount, inst.getIntArg1(), inst.getIntArg2()));
+          insts.add(i + 1, new Instruction(Instruction.UNIFYLINKS, varcount, inst.getIntArg3()));
           if (inst.data.size() == 4) insts.get(i + 1).data.add(inst.getArg4());
           varcount += 1;
           size += 1;
           i += 1;
           continue;
-        // unify[atom1,pos1,atom2,pos2,mem1]
-        // ==> getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
+          // unify[atom1,pos1,atom2,pos2,mem1]
+          // ==> getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
         case Instruction.UNIFY:
           insts.remove(i);
           insts.add(
-            i,
-            new Instruction(
-              Instruction.GETLINK,
-              varcount,
-              inst.getIntArg1(),
-              inst.getIntArg2()
-            )
-          );
+              i,
+              new Instruction(Instruction.GETLINK, varcount, inst.getIntArg1(), inst.getIntArg2()));
           insts.add(
-            i + 1,
-            new Instruction(
-              Instruction.GETLINK,
-              varcount + 1,
-              inst.getIntArg3(),
-              inst.getIntArg4()
-            )
-          );
-          insts.add(
-            i + 2,
-            new Instruction(Instruction.UNIFYLINKS, varcount, varcount + 1)
-          );
+              i + 1,
+              new Instruction(
+                  Instruction.GETLINK, varcount + 1, inst.getIntArg3(), inst.getIntArg4()));
+          insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS, varcount, varcount + 1));
           if (inst.data.size() == 5) insts.get(i + 2).data.add(inst.getArg5());
           varcount += 2;
           size += 2;
           i += 2;
           continue;
-        // newlink[atom1,pos1,atom2,pos2,mem1]
-        // ==> alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
+          // newlink[atom1,pos1,atom2,pos2,mem1]
+          // ==>
+          // alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
         case Instruction.NEWLINK:
           insts.remove(i);
           insts.add(
-            i,
-            new Instruction(
-              Instruction.ALLOCLINK,
-              varcount,
-              inst.getIntArg1(),
-              inst.getIntArg2()
-            )
-          );
+              i,
+              new Instruction(
+                  Instruction.ALLOCLINK, varcount, inst.getIntArg1(), inst.getIntArg2()));
           insts.add(
-            i + 1,
-            new Instruction(
-              Instruction.ALLOCLINK,
-              varcount + 1,
-              inst.getIntArg3(),
-              inst.getIntArg4()
-            )
-          );
-          insts.add(
-            i + 2,
-            new Instruction(Instruction.UNIFYLINKS, varcount, varcount + 1)
-          );
+              i + 1,
+              new Instruction(
+                  Instruction.ALLOCLINK, varcount + 1, inst.getIntArg3(), inst.getIntArg4()));
+          insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS, varcount, varcount + 1));
           if (inst.data.size() == 5) insts.get(i + 2).data.add(inst.getArg5());
           varcount += 2;
           size += 2;
           i += 2;
           continue;
-        // relink[atom1,pos1,atom2,pos2,mem1]
-        // ==> alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
+          // relink[atom1,pos1,atom2,pos2,mem1]
+          // ==> alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
         case Instruction.RELINK:
           insts.remove(i);
           insts.add(
-            i,
-            new Instruction(
-              Instruction.ALLOCLINK,
-              varcount,
-              inst.getIntArg1(),
-              inst.getIntArg2()
-            )
-          );
+              i,
+              new Instruction(
+                  Instruction.ALLOCLINK, varcount, inst.getIntArg1(), inst.getIntArg2()));
           insts.add(
-            i + 1,
-            new Instruction(
-              Instruction.GETLINK,
-              varcount + 1,
-              inst.getIntArg3(),
-              inst.getIntArg4()
-            )
-          );
-          insts.add(
-            i + 2,
-            new Instruction(Instruction.UNIFYLINKS, varcount, varcount + 1)
-          );
+              i + 1,
+              new Instruction(
+                  Instruction.GETLINK, varcount + 1, inst.getIntArg3(), inst.getIntArg4()));
+          insts.add(i + 2, new Instruction(Instruction.UNIFYLINKS, varcount, varcount + 1));
           if (inst.data.size() == 5) insts.get(i + 2).data.add(inst.getArg5());
           varcount += 2;
           size += 2;
           i += 2;
           continue;
-        // samefunc[atom1,atom2]
-        // ==> getfunc[func1,atom1];getfunc[func2,atom2];eqfunc[func1,func2]
+          // samefunc[atom1,atom2]
+          // ==> getfunc[func1,atom1];getfunc[func2,atom2];eqfunc[func1,func2]
         case Instruction.SAMEFUNC:
           insts.remove(i);
-          insts.add(
-            i,
-            new Instruction(Instruction.GETFUNC, varcount, inst.getIntArg1())
-          );
-          insts.add(
-            i + 1,
-            new Instruction(
-              Instruction.GETFUNC,
-              varcount + 1,
-              inst.getIntArg2()
-            )
-          );
-          insts.add(
-            i + 2,
-            new Instruction(Instruction.EQFUNC, varcount, varcount + 1)
-          );
+          insts.add(i, new Instruction(Instruction.GETFUNC, varcount, inst.getIntArg1()));
+          insts.add(i + 1, new Instruction(Instruction.GETFUNC, varcount + 1, inst.getIntArg2()));
+          insts.add(i + 2, new Instruction(Instruction.EQFUNC, varcount, varcount + 1));
           varcount += 2;
           size += 2;
           i += 2;
@@ -209,37 +148,24 @@ public class Compactor {
 
       // getlink[!link1,atom1,pos1];getlink[!link2,atom2,pos2];unifylinks[!link1,!link2(,mem1)]
       // ==> unify[atom1,pos1,atom2,pos2(,mem1)]
-      if (
-        inst0.getKind() == Instruction.GETLINK &&
-        inst1.getKind() == Instruction.GETLINK &&
-        inst2.getKind() == Instruction.UNIFYLINKS &&
-        inst0.getIntArg1() == inst2.getIntArg1() &&
-        inst1.getIntArg1() == inst2.getIntArg2() &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst0.getArg1(),
-          i + 3
-        ) ==
-        0 &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst1.getArg1(),
-          i + 3
-        ) ==
-        0
-      ) {
+      if (inst0.getKind() == Instruction.GETLINK
+          && inst1.getKind() == Instruction.GETLINK
+          && inst2.getKind() == Instruction.UNIFYLINKS
+          && inst0.getIntArg1() == inst2.getIntArg1()
+          && inst1.getIntArg1() == inst2.getIntArg2()
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst0.getArg1(), i + 3) == 0
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst1.getArg1(), i + 3) == 0) {
         insts.remove(i);
         insts.remove(i);
         insts.remove(i);
         inst =
-          new Instruction(
-            Instruction.UNIFY,
-            inst0.getIntArg2(),
-            inst0.getIntArg3(),
-            inst1.getIntArg2(),
-            inst1.getIntArg3(),
-            inst2.getIntArg3()
-          );
+            new Instruction(
+                Instruction.UNIFY,
+                inst0.getIntArg2(),
+                inst0.getIntArg3(),
+                inst1.getIntArg2(),
+                inst1.getIntArg3(),
+                inst2.getIntArg3());
         insts.add(i, inst);
         size -= 2;
         continue;
@@ -247,37 +173,24 @@ public class Compactor {
 
       // alloclink[!link1,atom1,pos1];alloclink[!link2,atom2,pos2];unifylinks[!link1,!link2(,mem1)]
       // ==> newlink[atom1,pos1,atom2,pos2(,mem1)]
-      if (
-        inst0.getKind() == Instruction.ALLOCLINK &&
-        inst1.getKind() == Instruction.ALLOCLINK &&
-        inst2.getKind() == Instruction.UNIFYLINKS &&
-        inst0.getIntArg1() == inst2.getIntArg1() &&
-        inst1.getIntArg1() == inst2.getIntArg2() &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst0.getArg1(),
-          i + 3
-        ) ==
-        0 &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst1.getArg1(),
-          i + 3
-        ) ==
-        0
-      ) {
+      if (inst0.getKind() == Instruction.ALLOCLINK
+          && inst1.getKind() == Instruction.ALLOCLINK
+          && inst2.getKind() == Instruction.UNIFYLINKS
+          && inst0.getIntArg1() == inst2.getIntArg1()
+          && inst1.getIntArg1() == inst2.getIntArg2()
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst0.getArg1(), i + 3) == 0
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst1.getArg1(), i + 3) == 0) {
         insts.remove(i);
         insts.remove(i);
         insts.remove(i);
         inst =
-          new Instruction(
-            Instruction.NEWLINK,
-            inst0.getIntArg2(),
-            inst0.getIntArg3(),
-            inst1.getIntArg2(),
-            inst1.getIntArg3(),
-            inst2.getIntArg3()
-          );
+            new Instruction(
+                Instruction.NEWLINK,
+                inst0.getIntArg2(),
+                inst0.getIntArg3(),
+                inst1.getIntArg2(),
+                inst1.getIntArg3(),
+                inst2.getIntArg3());
         insts.add(i, inst);
         size -= 2;
         continue;
@@ -285,37 +198,24 @@ public class Compactor {
 
       // alloclink[!link1,atom1,pos1];getlink[!link2,atom2,pos2];unifylinks[!link1,!link2(,mem1)]
       // ==> relink[atom1,pos1,atom2,pos2(,mem1)]
-      if (
-        inst0.getKind() == Instruction.ALLOCLINK &&
-        inst1.getKind() == Instruction.GETLINK &&
-        inst2.getKind() == Instruction.UNIFYLINKS &&
-        inst0.getIntArg1() == inst2.getIntArg1() &&
-        inst1.getIntArg1() == inst2.getIntArg2() &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst0.getArg1(),
-          i + 3
-        ) ==
-        0 &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst1.getArg1(),
-          i + 3
-        ) ==
-        0
-      ) {
+      if (inst0.getKind() == Instruction.ALLOCLINK
+          && inst1.getKind() == Instruction.GETLINK
+          && inst2.getKind() == Instruction.UNIFYLINKS
+          && inst0.getIntArg1() == inst2.getIntArg1()
+          && inst1.getIntArg1() == inst2.getIntArg2()
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst0.getArg1(), i + 3) == 0
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst1.getArg1(), i + 3) == 0) {
         insts.remove(i);
         insts.remove(i);
         insts.remove(i);
         inst =
-          new Instruction(
-            Instruction.RELINK,
-            inst0.getIntArg2(),
-            inst0.getIntArg3(),
-            inst1.getIntArg2(),
-            inst1.getIntArg3(),
-            inst2.getIntArg3()
-          );
+            new Instruction(
+                Instruction.RELINK,
+                inst0.getIntArg2(),
+                inst0.getIntArg3(),
+                inst1.getIntArg2(),
+                inst1.getIntArg3(),
+                inst2.getIntArg3());
         insts.add(i, inst);
         size -= 2;
         continue;
@@ -323,37 +223,24 @@ public class Compactor {
 
       // getlink[!link1,atom1,pos1];alloclink[!link2,atom2,pos2];unifylinks[!link2,!link1(,mem2)]
       // ==> relink[atom2,pos2,atom1,pos1(,mem2)]
-      if (
-        inst0.getKind() == Instruction.GETLINK &&
-        inst1.getKind() == Instruction.ALLOCLINK &&
-        inst2.getKind() == Instruction.UNIFYLINKS &&
-        inst0.getIntArg1() == inst2.getIntArg2() &&
-        inst1.getIntArg1() == inst2.getIntArg1() &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst0.getArg1(),
-          i + 3
-        ) ==
-        0 &&
-        Instruction.getVarUseCountFrom(
-          insts,
-          (Integer) inst1.getArg1(),
-          i + 3
-        ) ==
-        0
-      ) {
+      if (inst0.getKind() == Instruction.GETLINK
+          && inst1.getKind() == Instruction.ALLOCLINK
+          && inst2.getKind() == Instruction.UNIFYLINKS
+          && inst0.getIntArg1() == inst2.getIntArg2()
+          && inst1.getIntArg1() == inst2.getIntArg1()
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst0.getArg1(), i + 3) == 0
+          && Instruction.getVarUseCountFrom(insts, (Integer) inst1.getArg1(), i + 3) == 0) {
         insts.remove(i);
         insts.remove(i);
         insts.remove(i);
         inst =
-          new Instruction(
-            Instruction.RELINK,
-            inst1.getIntArg2(),
-            inst1.getIntArg3(),
-            inst0.getIntArg2(),
-            inst0.getIntArg3(),
-            inst2.getIntArg3()
-          );
+            new Instruction(
+                Instruction.RELINK,
+                inst1.getIntArg2(),
+                inst1.getIntArg3(),
+                inst0.getIntArg2(),
+                inst0.getIntArg3(),
+                inst2.getIntArg3());
         insts.add(i, inst);
         size -= 2;
         continue;
@@ -407,11 +294,7 @@ public class Compactor {
     return renumberLocalsSub(insts.subList(1, size), locals, varcount);
   }
 
-  public static int renumberLocalsSub(
-    List<Instruction> insts,
-    int locals,
-    int varcount
-  ) {
+  public static int renumberLocalsSub(List<Instruction> insts, int locals, int varcount) {
     int max = 0;
     for (int i = 0; i < insts.size(); i++) {
       Instruction inst = insts.get(i);
@@ -432,6 +315,7 @@ public class Compactor {
 
   /**
    * 命令列 insts の begin 番地以降について、変数番号 isrc と locals の出現をすべて交換する。
+   *
    * @param isrc
    * @param locals
    * @param varcount
@@ -439,12 +323,7 @@ public class Compactor {
    * @param begin
    */
   static void renumberLocalsSub2(
-    int isrc,
-    int locals,
-    int varcount,
-    List<Instruction> insts,
-    int begin
-  ) {
+      int isrc, int locals, int varcount, List<Instruction> insts, int begin) {
     Integer src = isrc;
     Integer dst = locals;
     Integer tmp = varcount;
@@ -462,29 +341,28 @@ public class Compactor {
   ////////////////////////////////////////////////////////////////
   // CISC化用
 
-  /** UnifyLinks命令の引数に渡されるリンクの取得をできるだけ遅延する（仮）
-   * <p>とりあえず取得命令がALLOCLINKまたはLOOKUPLINKのときのみ機能する。*/
+  /**
+   * UnifyLinks命令の引数に渡されるリンクの取得をできるだけ遅延する（仮）
+   *
+   * <p>とりあえず取得命令がALLOCLINKまたはLOOKUPLINKのときのみ機能する。
+   */
   public static void packUnifyLinks(List<Instruction> insts) {
-    for (int i = insts.size(); --i >= 1;) {
+    for (int i = insts.size(); --i >= 1; ) {
       Instruction inst = insts.get(i);
       if (inst.getKind() == Instruction.UNIFYLINKS) {
         int stopper = i;
-        for (int k = i; --k >= 1;) {
+        for (int k = i; --k >= 1; ) {
           Instruction inst2 = insts.get(k);
           switch (inst2.getKind()) {
             case Instruction.ALLOCLINK:
             case Instruction.LOOKUPLINK:
-              if (
-                inst2.getIntArg1() == inst.getIntArg1() ||
-                inst2.getIntArg1() == inst.getIntArg2()
-              ) {
+              if (inst2.getIntArg1() == inst.getIntArg1()
+                  || inst2.getIntArg1() == inst.getIntArg2()) {
                 delayAllocLinkInstruction(insts, k, stopper);
                 // 1回目のinst2がinstの第2引数リンク生成であり、inst直前に移動できた場合、
                 // 2回目のinst2は1回目のinst2を追い越さないようにする
-                if (
-                  inst2.getIntArg1() == inst.getIntArg2() &&
-                  insts.get(stopper - 1) == inst2
-                ) stopper--;
+                if (inst2.getIntArg1() == inst.getIntArg2() && insts.get(stopper - 1) == inst2)
+                  stopper--;
               }
           }
         }
@@ -492,12 +370,8 @@ public class Compactor {
     }
   }
 
-  /** insts[i]のALLOCLINK/LOOKUPLINK命令をできるだけ遅延する。ただしinsts[stopper]は追い越さない。*/
-  public static void delayAllocLinkInstruction(
-    List<Instruction> insts,
-    int i,
-    int stopper
-  ) {
+  /** insts[i]のALLOCLINK/LOOKUPLINK命令をできるだけ遅延する。ただしinsts[stopper]は追い越さない。 */
+  public static void delayAllocLinkInstruction(List<Instruction> insts, int i, int stopper) {
     Instruction inst = insts.get(i);
     while (++i < stopper) {
       // insts[i - 1]はALLOCLINK/LOOKUPLINK命令
@@ -505,25 +379,25 @@ public class Compactor {
 
       //     ALLOCLINK[link0,...];alloclink[link1,atom1,pos1]
       // ==> alloclink[link1,atom1,pos1];ALLOCLINK[link0,...]
-      if (inst2.getKind() == Instruction.ALLOCLINK) {}
+      if (inst2.getKind() == Instruction.ALLOCLINK) {
+      }
       //	   ALLOCLINK[link0,...];unifylinks[link1,link2(,mem1)]
       // ==> unifylinks[link1,link2(,mem1)];ALLOCLINK[link0,...]
       // if link0 != link1 && link0 != link2
-      else if (
-        inst2.getKind() == Instruction.UNIFYLINKS &&
-        inst.getIntArg1() != inst2.getIntArg1() &&
-        inst.getIntArg1() != inst2.getIntArg2()
-      ) {}
+      else if (inst2.getKind() == Instruction.UNIFYLINKS
+          && inst.getIntArg1() != inst2.getIntArg1()
+          && inst.getIntArg1() != inst2.getIntArg2()) {
+      }
       //	   ALLOCLINK[link0,...];getlink[link1,atom1,pos1]
       // ==> getlink[link1,atom1,pos1];ALLOCLINK[link0,...]
-      else if (inst2.getKind() == Instruction.GETLINK) {}
+      else if (inst2.getKind() == Instruction.GETLINK) {
+      }
       //	   ALLOCLINK[link0,...];lookuplink[link2,set1,link1]
       // ==> lookuplink[link2,set1,link1];ALLOCLINK[link0,...]
       // if link0 != link1
-      else if (
-        inst2.getKind() == Instruction.LOOKUPLINK &&
-        inst.getIntArg1() != inst2.getIntArg3()
-      ) {} else break;
+      else if (inst2.getKind() == Instruction.LOOKUPLINK
+          && inst.getIntArg1() != inst2.getIntArg3()) {
+      } else break;
 
       insts.remove(i - 1);
       insts.add(i, inst);
@@ -532,14 +406,17 @@ public class Compactor {
 
   ////////////////////////////////////////////////////////////////
 
-  /** 共通部分式を除去する
-   * @return changed */
+  /**
+   * 共通部分式を除去する
+   *
+   * @return changed
+   */
   public static boolean eliminateCommonSubexpressions(List<Instruction> insts) {
     boolean changed = false;
     for (int i1 = insts.size() - 1; i1 >= 0; i1--) {
       Instruction inst1 = insts.get(i1);
       if (!inst1.hasSideEffect() && !inst1.hasControlEffect()) {
-        //取得命令
+        // 取得命令
         for (int i2 = i1 + 1; i2 < insts.size(); i2++) {
           Instruction inst2 = insts.get(i2);
           if (inst2.hasSideEffect()) {
@@ -547,10 +424,7 @@ public class Compactor {
           }
           if (sameTypeAndSameInputArgs(inst1, inst2, true)) {
             Map<Integer, Integer> varChangeMap = new HashMap<>();
-            varChangeMap.put(
-              (Integer) inst2.getArg1(),
-              (Integer) inst1.getArg1()
-            );
+            varChangeMap.put((Integer) inst2.getArg1(), (Integer) inst1.getArg1());
             insts.remove(i2);
             i2--;
             Instruction.applyVarRewriteMap(insts, varChangeMap);
@@ -559,7 +433,7 @@ public class Compactor {
         }
       } else {
         switch (inst1.getKind()) {
-          //検査命令
+            // 検査命令
           case Instruction.EQATOM:
           case Instruction.EQMEM:
           case Instruction.EQFUNC:
@@ -581,7 +455,7 @@ public class Compactor {
             for (int i2 = i1 + 1; i2 < insts.size(); i2++) {
               Instruction inst2 = (Instruction) insts.get(i2);
               if (inst2.hasSideEffect()) {
-                break; //for
+                break; // for
               }
               if (sameTypeAndSameInputArgs(inst1, inst2, false)) {
                 insts.remove(i2);
@@ -589,21 +463,16 @@ public class Compactor {
                 changed = true;
               }
             }
-            break; //switch
+            break; // switch
         }
       }
     }
     return changed;
   }
 
-  /**
-   * ２つの命令が、同じ種類で、同じ入力引数を持つかどうかを検査する。
-   */
+  /** ２つの命令が、同じ種類で、同じ入力引数を持つかどうかを検査する。 */
   private static boolean sameTypeAndSameInputArgs(
-    Instruction inst1,
-    Instruction inst2,
-    boolean hasOutputArg
-  ) {
+      Instruction inst1, Instruction inst2, boolean hasOutputArg) {
     if (inst1.getKind() != inst2.getKind()) {
       return false;
     }
@@ -615,24 +484,18 @@ public class Compactor {
     return true;
   }
 
-  /** 冗長な命令を除去する
-   * @return changed */
-  public static boolean eliminateRedundantInstructions(
-    List<Instruction> insts
-  ) {
+  /**
+   * 冗長な命令を除去する
+   *
+   * @return changed
+   */
+  public static boolean eliminateRedundantInstructions(List<Instruction> insts) {
     boolean changed = false;
-    for (int i = insts.size(); --i >= 1;) {
+    for (int i = insts.size(); --i >= 1; ) {
       Instruction inst = insts.get(i);
       // getlink[!link,atom,pos] ==> ; など
       if (!inst.hasSideEffect() && !inst.hasControlEffect()) {
-        if (
-          Instruction.getVarUseCountFrom(
-            insts,
-            (Integer) inst.getArg1(),
-            i + 1
-          ) ==
-          0
-        ) {
+        if (Instruction.getVarUseCountFrom(insts, (Integer) inst.getArg1(), i + 1) == 0) {
           insts.remove(i);
           i++;
           changed = true;
@@ -640,7 +503,7 @@ public class Compactor {
         }
       }
       switch (inst.getKind()) {
-        // eqfunc[func,func] ==> ; など
+          // eqfunc[func,func] ==> ; など
         case Instruction.EQATOM:
         case Instruction.EQMEM:
         case Instruction.EQFUNC:

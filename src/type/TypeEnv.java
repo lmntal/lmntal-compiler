@@ -81,9 +81,8 @@ public final class TypeEnv {
     if (f instanceof FloatingFunctor) return "float";
     if (f instanceof StringFunctor) return "string";
     if (f instanceof ObjectFunctor) return "java-object";
-    if (functorToTypeName.containsKey(f)) return (String) functorToTypeName.get(
-      f
-    ); else return null;
+    if (functorToTypeName.containsKey(f)) return (String) functorToTypeName.get(f);
+    else return null;
   }
 
   /** 左辺膜および左辺出現膜の集合 */
@@ -101,7 +100,7 @@ public final class TypeEnv {
     // 全ての右辺膜について、
   }
 
-  /** 型付きプロセス文脈定義 -> データ型*/
+  /** 型付きプロセス文脈定義 -> データ型 */
   private static Map<ContextDef, Functor> def2type = new HashMap<>();
 
   public static Functor dataTypeOfContextDef(ContextDef cd) {
@@ -136,49 +135,41 @@ public final class TypeEnv {
       } else if (guard.functor.equals(new SymbolFunctor("class", 2))) {
         ProcessContext tpc = (ProcessContext) guard.args[0].buddy.atom;
         constrainTPC(tpc.def, classf);
-      } else if (
-        guard.functor.equals(new SymbolFunctor("=:=", 2)) ||
-        guard.functor.equals(new SymbolFunctor("=\\=", 2)) ||
-        guard.functor.equals(new SymbolFunctor(">", 2)) ||
-        guard.functor.equals(new SymbolFunctor("<", 2)) ||
-        guard.functor.equals(new SymbolFunctor(">=", 2)) ||
-        guard.functor.equals(new SymbolFunctor("=<", 2))
-      ) {
+      } else if (guard.functor.equals(new SymbolFunctor("=:=", 2))
+          || guard.functor.equals(new SymbolFunctor("=\\=", 2))
+          || guard.functor.equals(new SymbolFunctor(">", 2))
+          || guard.functor.equals(new SymbolFunctor("<", 2))
+          || guard.functor.equals(new SymbolFunctor(">=", 2))
+          || guard.functor.equals(new SymbolFunctor("=<", 2))) {
         ProcessContext tpc = (ProcessContext) guard.args[0].buddy.atom;
         constrainTPC(tpc.def, intf);
         tpc = (ProcessContext) guard.args[1].buddy.atom;
         constrainTPC(tpc.def, intf);
-      } else if (
-        guard.functor.equals(new SymbolFunctor("+", 3)) ||
-        guard.functor.equals(new SymbolFunctor("-", 3)) ||
-        guard.functor.equals(new SymbolFunctor("*", 3)) ||
-        guard.functor.equals(new SymbolFunctor("/", 3)) ||
-        guard.functor.equals(new SymbolFunctor("mod", 3))
-      ) {
+      } else if (guard.functor.equals(new SymbolFunctor("+", 3))
+          || guard.functor.equals(new SymbolFunctor("-", 3))
+          || guard.functor.equals(new SymbolFunctor("*", 3))
+          || guard.functor.equals(new SymbolFunctor("/", 3))
+          || guard.functor.equals(new SymbolFunctor("mod", 3))) {
         ProcessContext tpc = (ProcessContext) guard.args[0].buddy.atom;
         constrainTPC(tpc.def, intf);
         tpc = (ProcessContext) guard.args[1].buddy.atom;
         constrainTPC(tpc.def, intf);
         tpc = (ProcessContext) guard.args[2].buddy.atom;
         constrainTPC(tpc.def, intf);
-      } else if (
-        guard.functor.equals(new SymbolFunctor("=:=.", 2)) ||
-        guard.functor.equals(new SymbolFunctor("=\\=.", 2)) ||
-        guard.functor.equals(new SymbolFunctor(">.", 2)) ||
-        guard.functor.equals(new SymbolFunctor("<.", 2)) ||
-        guard.functor.equals(new SymbolFunctor(">=.", 2)) ||
-        guard.functor.equals(new SymbolFunctor("=<.", 2))
-      ) {
+      } else if (guard.functor.equals(new SymbolFunctor("=:=.", 2))
+          || guard.functor.equals(new SymbolFunctor("=\\=.", 2))
+          || guard.functor.equals(new SymbolFunctor(">.", 2))
+          || guard.functor.equals(new SymbolFunctor("<.", 2))
+          || guard.functor.equals(new SymbolFunctor(">=.", 2))
+          || guard.functor.equals(new SymbolFunctor("=<.", 2))) {
         ProcessContext tpc = (ProcessContext) guard.args[0].buddy.atom;
         constrainTPC(tpc.def, floatf);
         tpc = (ProcessContext) guard.args[1].buddy.atom;
         constrainTPC(tpc.def, floatf);
-      } else if (
-        guard.functor.equals(new SymbolFunctor("+.", 3)) ||
-        guard.functor.equals(new SymbolFunctor("-.", 3)) ||
-        guard.functor.equals(new SymbolFunctor("*.", 3)) ||
-        guard.functor.equals(new SymbolFunctor("/.", 3))
-      ) {
+      } else if (guard.functor.equals(new SymbolFunctor("+.", 3))
+          || guard.functor.equals(new SymbolFunctor("-.", 3))
+          || guard.functor.equals(new SymbolFunctor("*.", 3))
+          || guard.functor.equals(new SymbolFunctor("/.", 3))) {
         ProcessContext tpc = (ProcessContext) guard.args[0].buddy.atom;
         constrainTPC(tpc.def, floatf);
         tpc = (ProcessContext) guard.args[1].buddy.atom;
@@ -188,10 +179,8 @@ public final class TypeEnv {
       }
     }
     for (Atom guard : guardmem.atoms) {
-      if (
-        guard.functor.equals(new SymbolFunctor("=", 2)) ||
-        guard.functor.equals(new SymbolFunctor("==", 2))
-      ) {
+      if (guard.functor.equals(new SymbolFunctor("=", 2))
+          || guard.functor.equals(new SymbolFunctor("==", 2))) {
         ProcessContext tpc1 = (ProcessContext) guard.args[0].buddy.atom;
         ProcessContext tpc2 = (ProcessContext) guard.args[0].buddy.atom;
         if (def2type.get(tpc1.def) != null) {
@@ -203,19 +192,18 @@ public final class TypeEnv {
     }
   }
 
-  private static void constrainTPC(ContextDef cd, Functor datatype)
-    throws TypeException {
+  private static void constrainTPC(ContextDef cd, Functor datatype) throws TypeException {
     Functor df = def2type.get(cd);
-    if (df == null) def2type.put(cd, datatype); else if (
-      df.equals(datatype)
-    ) return; else throw new TypeException(
-      "Typed Process Context is constrained two process type. : " + cd.getName()
-    );
+    if (df == null) def2type.put(cd, datatype);
+    else if (df.equals(datatype)) return;
+    else
+      throw new TypeException(
+          "Typed Process Context is constrained two process type. : " + cd.getName());
   }
 
   /**
-   * 左辺出現膜を$lhsmemsに登録する
-   * 本膜の膜名を所属膜の膜名とする
+   * 左辺出現膜を$lhsmemsに登録する 本膜の膜名を所属膜の膜名とする
+   *
    * @param mem
    */
   private static void collectLHSMemsAndNames(List<RuleStructure> rules) {
@@ -224,6 +212,7 @@ public final class TypeEnv {
 
   /**
    * 左辺出現膜を$lhsmemsに登録する
+   *
    * @param rule
    */
   private static void collectLHSMemsAndNames(RuleStructure rule) {
@@ -231,13 +220,13 @@ public final class TypeEnv {
     memToName.put(rule.leftMem, rule.parent.name);
     memToName.put(rule.rightMem, rule.parent.name);
     //		 左辺にルールは出現しない
-    for (RuleStructure rhsrule : (
-      (List<RuleStructure>) rule.rightMem.rules
-    )) collectLHSMemsAndNames(rhsrule);
+    for (RuleStructure rhsrule : ((List<RuleStructure>) rule.rightMem.rules))
+      collectLHSMemsAndNames(rhsrule);
   }
 
   /**
    * 左辺出現膜を$lhsmemsに登録する
+   *
    * @param mem 左辺出現膜
    */
   private static void collectLHSMem(Membrane mem) {
@@ -265,21 +254,19 @@ public final class TypeEnv {
     if (lo.buddy.atom instanceof Atom) {
       Atom a = (Atom) lo.buddy.atom;
       int o = TypeEnv.outOfPassiveAtom(a);
-      if (o == TypeEnv.CONNECTOR) return getRealBuddy(
-        a.args[1 - lo.buddy.pos]
-      ); else return lo.buddy;
+      if (o == TypeEnv.CONNECTOR) return getRealBuddy(a.args[1 - lo.buddy.pos]);
+      else return lo.buddy;
     } else return lo.buddy;
   }
 
   public static final String ANNONYMOUS = "??";
 
-  /**
-   * ルールの本膜については所属膜の名前を返す
-   */
+  /** ルールの本膜については所属膜の名前を返す */
   public static String getMemName(Membrane mem) {
     String registered = memToName.get(mem);
     if (registered == null) {
-      if (mem.name == null) return ANNONYMOUS; else return mem.name;
+      if (mem.name == null) return ANNONYMOUS;
+      else return mem.name;
     } else return registered;
   }
 }

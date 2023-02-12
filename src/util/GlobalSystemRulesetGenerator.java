@@ -11,13 +11,13 @@ import runtime.Rule;
 import runtime.functor.Functor;
 import runtime.functor.SymbolFunctor;
 
-/** システムルールセット
- * <p>todo インスタンスを誰が生成するのか決める</p>
+/**
+ * システムルールセット
  *
- * システムルールセットのモジュール化：
- * system_ruleset アトムがある膜の直属のルールセットはシステムルールセットであることにする。
+ * <p>todo インスタンスを誰が生成するのか決める システムルールセットのモジュール化： system_ruleset
+ * アトムがある膜の直属のルールセットはシステムルールセットであることにする。
  *
- * {system_ruleset, (a:-b)}, {{{{{{a}}}}}}    {@literal -->} {{{{{{b}}}}}}
+ * <p>{system_ruleset, (a:-b)}, {{{{{{a}}}}}} {@literal -->} {{{{{{b}}}}}}
  *
  * @author n-kato, hara
  */
@@ -34,9 +34,7 @@ public final class GlobalSystemRulesetGenerator {
     List<Instruction> insts = rule.memMatch;
     // match
     insts.add(new Instruction(Instruction.SPEC, 1, 6));
-    insts.add(
-      new Instruction(Instruction.FINDATOM, 1, 0, Functor.OUTSIDE_PROXY)
-    );
+    insts.add(new Instruction(Instruction.FINDATOM, 1, 0, Functor.OUTSIDE_PROXY));
     insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
     insts.add(new Instruction(Instruction.LOCKMEM, 3, 2));
     insts.add(new Instruction(Instruction.DEREFATOM, 4, 2, 1));
@@ -47,7 +45,7 @@ public final class GlobalSystemRulesetGenerator {
     insts.add(new Instruction(Instruction.REMOVEATOM, 2, 3));
     insts.add(new Instruction(Instruction.REMOVEATOM, 4, 3));
     insts.add(new Instruction(Instruction.REMOVEATOM, 5, 0));
-    insts.add(new Instruction(Instruction.UNIFY, 1, 1, 5, 1, 0)); //n-kato 2006-09-07
+    insts.add(new Instruction(Instruction.UNIFY, 1, 1, 5, 1, 0)); // n-kato 2006-09-07
     insts.add(new Instruction(Instruction.PROCEED));
     ruleset.rules.add(rule);
     //
@@ -58,9 +56,7 @@ public final class GlobalSystemRulesetGenerator {
     insts = rule.memMatch;
     // match
     insts.add(new Instruction(Instruction.SPEC, 1, 6));
-    insts.add(
-      new Instruction(Instruction.FINDATOM, 1, 0, Functor.OUTSIDE_PROXY)
-    );
+    insts.add(new Instruction(Instruction.FINDATOM, 1, 0, Functor.OUTSIDE_PROXY));
     insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 1));
     insts.add(new Instruction(Instruction.FUNC, 2, Functor.OUTSIDE_PROXY));
     insts.add(new Instruction(Instruction.DEREFATOM, 3, 2, 0));
@@ -68,18 +64,10 @@ public final class GlobalSystemRulesetGenerator {
     insts.add(new Instruction(Instruction.DEREFATOM, 5, 1, 0));
     insts.add(new Instruction(Instruction.TESTMEM, 4, 5));
     // react
-    insts.add(
-      new Instruction(Instruction.REMOVEATOM, 1, 0, Functor.OUTSIDE_PROXY)
-    );
-    insts.add(
-      new Instruction(Instruction.REMOVEATOM, 2, 0, Functor.OUTSIDE_PROXY)
-    );
-    insts.add(
-      new Instruction(Instruction.REMOVEATOM, 3, 4, Functor.INSIDE_PROXY)
-    );
-    insts.add(
-      new Instruction(Instruction.REMOVEATOM, 5, 4, Functor.INSIDE_PROXY)
-    );
+    insts.add(new Instruction(Instruction.REMOVEATOM, 1, 0, Functor.OUTSIDE_PROXY));
+    insts.add(new Instruction(Instruction.REMOVEATOM, 2, 0, Functor.OUTSIDE_PROXY));
+    insts.add(new Instruction(Instruction.REMOVEATOM, 3, 4, Functor.INSIDE_PROXY));
+    insts.add(new Instruction(Instruction.REMOVEATOM, 5, 4, Functor.INSIDE_PROXY));
     insts.add(new Instruction(Instruction.UNIFY, 3, 1, 5, 1, 4)); // memo: 本質的にリモートのUNIFY
     insts.add(new Instruction(Instruction.ENQUEUEMEM, 4)); // ここでは子膜の活性化が必要
     insts.add(new Instruction(Instruction.PROCEED));
@@ -132,15 +120,18 @@ public final class GlobalSystemRulesetGenerator {
 
   /**
    * LMNtalプログラムテキストをコンパイルし、含まれるルール列を指定したルールセットに追加する。
+   *
    * @param ruleset 追加先のルールセット
-   * @param text （トップレベルにルール列を含む）LMNtalプログラムテキスト */
+   * @param text （トップレベルにルール列を含む）LMNtalプログラムテキスト
+   */
   static void compileAndLoadRules(InterpretedRuleset ruleset, String text) {
     Reader src = new StringReader(text);
     compile.parser.LMNParser lp = new compile.parser.LMNParser(src);
     compile.structure.Membrane m = null;
     try {
       m = lp.parse();
-    } catch (Exception ignored) {}
+    } catch (Exception ignored) {
+    }
     // todo 下記コードは明らかに不自然なので、InterpretedRuleset（のリストまたはそれを持つ
     // コンパイル時膜構造）を生成するだけのメソッドをRulesetCompilerに作る。
     // InterpretedRuleset ir = (InterpretedRuleset)compile.RulesetCompiler.compileMembrane(m);
@@ -156,9 +147,7 @@ public final class GlobalSystemRulesetGenerator {
   }
 
   /**
-   * 仮メソッド。
-   * 指定されたInterpretedRulesetに対して、integerモジュール相当の内容を追加するために使用される。
-   * 【注意】整数演算を無効にするオプションがあってもよい。
+   * 仮メソッド。 指定されたInterpretedRulesetに対して、integerモジュール相当の内容を追加するために使用される。 【注意】整数演算を無効にするオプションがあってもよい。
    */
   static Rule buildBinOpRule(String name, int typechecker, int op) {
     // 1:'+'(X,Y,Res), 2:$x[X], 3:$y[Y] :- int($x),int($y), (4:$z)=$x+$y | 5:$z[Res].
@@ -169,9 +158,7 @@ public final class GlobalSystemRulesetGenerator {
     List<Instruction> insts = rule.memMatch, insts2 = rule.body;
     // match
     insts.add(new Instruction(Instruction.SPEC, 1, 5));
-    insts.add(
-      new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor(name, 3))
-    );
+    insts.add(new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor(name, 3)));
     insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
     insts.add(new Instruction(typechecker, 2));
     insts.add(new Instruction(Instruction.DEREFATOM, 3, 1, 1));
@@ -204,9 +191,7 @@ public final class GlobalSystemRulesetGenerator {
     Rule rule = new Rule();
     List<Instruction> insts = rule.memMatch;
     insts.add(new Instruction(Instruction.SPEC, 1, 0));
-    insts.add(
-      new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor("+", 2))
-    );
+    insts.add(new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor("+", 2)));
     insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
     insts.add(new Instruction(Instruction.ISINT, 2));
     insts.add(new Instruction(Instruction.GETFUNC, 3, 2));
@@ -215,9 +200,7 @@ public final class GlobalSystemRulesetGenerator {
     return rule;
   }
 
-  /**
-   * 仮メソッド。
-   */
+  /** 仮メソッド。 */
   static Rule buildUnaryPlusRule(String name, int typechecker) {
     Rule rule = new Rule(name);
     rule.bodyLabel = new InstructionList();
@@ -226,9 +209,7 @@ public final class GlobalSystemRulesetGenerator {
     List<Instruction> insts = rule.memMatch, insts2 = rule.body;
     // match
     insts.add(new Instruction(Instruction.SPEC, 1, 5));
-    insts.add(
-      new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor(name, 2))
-    );
+    insts.add(new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor(name, 2)));
     insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
     insts.add(new Instruction(typechecker, 2));
     insts.add(new Instruction(Instruction.GETFUNC, 4, 2));
@@ -254,9 +235,7 @@ public final class GlobalSystemRulesetGenerator {
     return rule;
   }
 
-  /**
-   * 仮メソッド。
-   */
+  /** 仮メソッド。 */
   static Rule buildUnaryOpRule(String name, int typechecker, int op) {
     // 1:float(X,Res), 2:$x[X] :- int($x), (3:$y)=float($x) | 4:$y[Res].
     Rule rule = new Rule(name);
@@ -266,9 +245,7 @@ public final class GlobalSystemRulesetGenerator {
     List<Instruction> insts = rule.memMatch, insts2 = rule.body;
     // match
     insts.add(new Instruction(Instruction.SPEC, 1, 4));
-    insts.add(
-      new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor(name, 2))
-    );
+    insts.add(new Instruction(Instruction.FINDATOM, 1, 0, new SymbolFunctor(name, 2)));
     insts.add(new Instruction(Instruction.DEREFATOM, 2, 1, 0));
     insts.add(new Instruction(typechecker, 2));
     insts.add(new Instruction(op, 3, 2));
@@ -299,37 +276,19 @@ public final class GlobalSystemRulesetGenerator {
     ruleset.rules.add(buildBinOpRule("-", Instruction.ISINT, Instruction.ISUB));
     ruleset.rules.add(buildBinOpRule("*", Instruction.ISINT, Instruction.IMUL));
     ruleset.rules.add(buildBinOpRule("/", Instruction.ISINT, Instruction.IDIV));
-    ruleset.rules.add(
-      buildBinOpRule("mod", Instruction.ISINT, Instruction.IMOD)
-    );
+    ruleset.rules.add(buildBinOpRule("mod", Instruction.ISINT, Instruction.IMOD));
 
-    ruleset.rules.add(
-      buildBinOpRule("+.", Instruction.ISFLOAT, Instruction.FADD)
-    );
-    ruleset.rules.add(
-      buildBinOpRule("-.", Instruction.ISFLOAT, Instruction.FSUB)
-    );
-    ruleset.rules.add(
-      buildBinOpRule("*.", Instruction.ISFLOAT, Instruction.FMUL)
-    );
-    ruleset.rules.add(
-      buildBinOpRule("/.", Instruction.ISFLOAT, Instruction.FDIV)
-    );
+    ruleset.rules.add(buildBinOpRule("+.", Instruction.ISFLOAT, Instruction.FADD));
+    ruleset.rules.add(buildBinOpRule("-.", Instruction.ISFLOAT, Instruction.FSUB));
+    ruleset.rules.add(buildBinOpRule("*.", Instruction.ISFLOAT, Instruction.FMUL));
+    ruleset.rules.add(buildBinOpRule("/.", Instruction.ISFLOAT, Instruction.FDIV));
 
     ruleset.rules.add(buildUnaryPlusRule("+", Instruction.ISINT));
     ruleset.rules.add(buildUnaryPlusRule("+.", Instruction.ISFLOAT));
-    ruleset.rules.add(
-      buildUnaryOpRule("-", Instruction.ISINT, Instruction.INEG)
-    );
-    ruleset.rules.add(
-      buildUnaryOpRule("-.", Instruction.ISFLOAT, Instruction.FNEG)
-    );
-    ruleset.rules.add(
-      buildUnaryOpRule("int", Instruction.ISFLOAT, Instruction.FLOAT2INT)
-    );
-    ruleset.rules.add(
-      buildUnaryOpRule("float", Instruction.ISINT, Instruction.INT2FLOAT)
-    );
+    ruleset.rules.add(buildUnaryOpRule("-", Instruction.ISINT, Instruction.INEG));
+    ruleset.rules.add(buildUnaryOpRule("-.", Instruction.ISFLOAT, Instruction.FNEG));
+    ruleset.rules.add(buildUnaryOpRule("int", Instruction.ISFLOAT, Instruction.FLOAT2INT));
+    ruleset.rules.add(buildUnaryOpRule("float", Instruction.ISINT, Instruction.INT2FLOAT));
     //		// 1:cp(A,B,C), 2:$n[A] :- unary($n) | $3:$n[B], $4:$n[C].
     //		// reuse { 2->4 }
     //		rule = new Rule();
