@@ -1797,6 +1797,8 @@ public class Instruction implements Cloneable {
 
   @LMNtalIL public static final int IMODFUNC = IMOD + OPT;
 
+  @LMNtalIL public static final int IABSFUNC = IABS + OPT;
+
   static {
     setArgType(IADDFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
   }
@@ -1815,6 +1817,10 @@ public class Instruction implements Cloneable {
 
   static {
     setArgType(IMODFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
+  }
+
+  static {
+    setArgType(IABSFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
   }
 
   // 整数用の組み込みガード命令 (420--429+OPT)
