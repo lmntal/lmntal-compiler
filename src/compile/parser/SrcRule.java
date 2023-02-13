@@ -15,8 +15,6 @@ class SrcRule {
 
   public String name; // ルール名
   public int lineno; // 行番号 2006.1.22 by inui
-
-  @JsonTypeInfo(use = Id.CLASS)
   public LinkedList head; // ヘッドプロセス
 
   @JsonTypeInfo(use = Id.CLASS)
@@ -29,8 +27,6 @@ class SrcRule {
   public LinkedList guardNegatives; // ガード否定条件構文のリスト
 
   private String text; // ルールのテキスト表現
-
-  public SrcRule() {}
 
   /**
    * 指定されたヘッドルールとボディルールと空のガードでルールを初期化します

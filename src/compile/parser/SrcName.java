@@ -83,4 +83,8 @@ public class SrcName {
         return (path == null ? "" : path + ".") + n;
     }
   }
+
+  public SrcName clone() {
+    return new SrcName(name, type);
+  }
 }

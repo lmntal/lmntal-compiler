@@ -17,23 +17,25 @@ public class SrcDumper {
   public static String dumpAtom(SrcAtom atom) {
     String s = atom.getSourceName();
     if (atom.getProcess().size() > 0) {
-      s += "(" + dumpLinkedList(atom.getProcess()) + ")";
+      s += "(" + dumpLinkedList(atom.getProcess(), ", ") + ")";
     }
     return s;
   }
 
-  public static String dumpLinkedList(LinkedList list) {
+  public static String dumpLinkedList(LinkedList list, String sep) {
     if (list == null || list.size() == 0) return "";
     String s = "";
     s += dump(list.get(0));
-    for (int i = 1; i < list.size(); i++) s += ", " + dump(list.get(i));
+    for (int i = 1; i < list.size(); i++) {
+      s += sep + dump(list.get(i));
+    }
     return s;
   }
 
   public static String dumpMembrane(SrcMembrane mem) {
     String name = mem.name == null ? "" : mem.name;
     String s = name + "{";
-    if (mem.getProcess().size() > 0) s += dumpLinkedList(mem.getProcess());
+    if (mem.getProcess().size() > 0) s += dumpLinkedList(mem.getProcess(), ", ");
     s += "}";
     if (mem.kind == 1) s += "_";
     if (mem.stable) s += "/";
@@ -45,10 +47,11 @@ public class SrcDumper {
   public static String dumpRule(SrcRule rule) {
     String s = "(";
     if (rule.name != null) s += rule.name + " @@ ";
-    if (rule.getHead() != null && rule.getHead().size() > 0) s += dumpLinkedList(rule.getHead());
+    if (rule.getHead() != null && rule.getHead().size() > 0)
+      s += dumpLinkedList(rule.getHead(), ", ");
     s += " :- ";
-    if (rule.getGuard().size() > 0) s += dumpLinkedList(rule.getGuard()) + " | ";
-    s += dumpLinkedList(rule.getBody()) + ")";
+    if (rule.getGuard().size() > 0) s += dumpLinkedList(rule.getGuard(), ", ") + " | ";
+    s += dumpLinkedList(rule.getBody(), ", ") + ". )";
     return s;
   }
 
@@ -56,7 +59,7 @@ public class SrcDumper {
     String s = "$" + p.getName();
     if (p.args != null || p.bundle != null) {
       s += "[";
-      if (p.args.size() > 0) s += dumpLinkedList(p.args);
+      if (p.args.size() > 0) s += dumpLinkedList(p.args, ", ");
       if (p.bundle != null) s += "|" + p.bundle.getQualifiedName();
       s += "]";
     }
@@ -65,6 +68,12 @@ public class SrcDumper {
 
   public static String dumpRuleContext(SrcRuleContext p) {
     String s = "@" + p.getName();
+    return s;
+  }
+
+  public static String dumpTypeDef(SrcTypeDef typedef) {
+    String s = "typedef " + dumpAtom(typedef.getTypeAtom());
+    s += " { " + dumpLinkedList(typedef.getRules(), ". ") + ". }";
     return s;
   }
 
@@ -82,7 +91,9 @@ public class SrcDumper {
     } else if (obj instanceof SrcRuleContext) {
       return dumpRuleContext((SrcRuleContext) obj);
     } else if (obj instanceof LinkedList) {
-      return dumpLinkedList((LinkedList) obj);
+      return dumpLinkedList((LinkedList) obj, ", ");
+    } else if (obj instanceof SrcTypeDef) {
+      return dumpTypeDef((SrcTypeDef) obj);
     }
     return "";
   }

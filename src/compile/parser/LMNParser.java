@@ -14,6 +14,7 @@ import compile.structure.ProcessContext;
 import compile.structure.ProcessContextEquation;
 import compile.structure.RuleContext;
 import compile.structure.RuleStructure;
+import compile.structure.TypeDefStructure;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,6 +141,10 @@ public class LMNParser {
         SrcRule rule = (SrcRule) obj;
         rule.setText();
         setRuleText(rule.body);
+      } else if (obj instanceof SrcTypeDef) {
+        SrcTypeDef typeDef = (SrcTypeDef) obj;
+        typeDef.setText();
+        setRuleText(typeDef.getRules());
       }
     }
   }
@@ -214,6 +219,8 @@ public class LMNParser {
     // ルールコンテキスト
     else if (obj instanceof SrcRuleContext) {
       addSrcRuleContextToMem((SrcRuleContext) obj, mem);
+    } else if (obj instanceof SrcTypeDef) {
+      addSrcTypeDefToMem((SrcTypeDef) obj, mem);
     }
     // リンク
     else if (obj instanceof SrcLink) {
@@ -313,9 +320,11 @@ public class LMNParser {
     }
 
     // [4] アトムとアトム集団を識別する
-    if (arity > 0 && allbundles) mem.aggregates.add(atom);
-    else if (arity == 0 || alllinks) mem.atoms.add(atom);
-    else {
+    if (arity > 0 && allbundles) {
+      mem.aggregates.add(atom);
+    } else if (arity == 0 || alllinks) {
+      mem.atoms.add(atom);
+    } else {
       error("SYNTAX ERROR: arguments of an atom contain both of links and bundles");
     }
   }
@@ -341,7 +350,7 @@ public class LMNParser {
       }
       if (sProc.bundle != null) pc.setBundleName(sProc.bundle.getQualifiedName());
       if (Env.hyperLinkOpt) {
-          /*seiji--*/
+        /*seiji--*/
         pc.linkName = sProc.getLinkName();
         if (sProc.hasSameNameList()) {
           if (pc.getSameNameList() == null) pc.sameNameList = new LinkedList();
@@ -406,6 +415,35 @@ public class LMNParser {
   }
 
   /**
+   * typedef 構文を膜に追加する
+   * @param sTypeDef 追加したい typedef 構文
+   * @param mem 追加先の膜
+   */
+  private void addSrcTypeDefToMem(SrcTypeDef sTypeDef, Membrane mem) throws ParseException {
+    TypeDefStructure typeDef = new TypeDefStructure(mem, sTypeDef.getLineNo());
+    addSrcAtomToMem(sTypeDef.getTypeAtom(), typeDef.typeAtom);
+    for (Object obj : sTypeDef.rules) {
+      if (obj instanceof SrcRule) {
+        SrcRule rule = (SrcRule) obj;
+        rule.head.addFirst(sTypeDef.typeName.clone());
+        rule.guard.addAll(rule.body);
+        rule.body.clear();
+        rule.setText();
+        addSrcRuleToMem(rule, typeDef.mem);
+      } else if (obj instanceof SrcAtom) {
+        LinkedList atoms = new LinkedList<>();
+        atoms.add(sTypeDef.typeName.clone());
+        atoms.add(obj);
+        SrcRule rule = new SrcRule("", atoms, new LinkedList<>());
+        rule.setText();
+        addSrcRuleToMem(rule, typeDef.mem);
+      }
+    }
+
+    mem.typeDefs.add(typeDef);
+  }
+
+  /**
    * アトム展開されたソース膜に対してルールが無いことを確認する
    *
    */
@@ -428,8 +466,9 @@ public class LMNParser {
       throws ParseException {
     for (List<List> list1 : sNegatives) {
       List<ProcessContextEquation> neg = new LinkedList<>();
-      for (Object obj : list1) {
-        LinkedList sPair = (LinkedList) obj;
+      ListIterator it2 = list1.listIterator();
+      while (it2.hasNext()) {
+        LinkedList sPair = (LinkedList) it2.next();
         String cxtname = ((SrcProcessContext) sPair.getFirst()).getQualifiedName();
         if (!names.containsKey(cxtname)) {
           error(
@@ -534,9 +573,10 @@ public class LMNParser {
     // 同じ膜レベルのリンク結合を行う
     HashMap links = new HashMap();
     List[] lists = {mem.atoms, mem.processContexts, mem.typedProcessContexts};
-    for (List list : lists) {
-      for (Object obj : list) {
-        Atomic a = (Atomic) obj;
+    for (int i = 0; i < lists.length; i++) {
+      Iterator it = lists[i].iterator();
+      while (it.hasNext()) {
+        Atomic a = (Atomic) it.next();
         for (int j = 0; j < a.args.length; j++) {
           if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
             addLinkOccurrence(links, a.args[j]);
@@ -587,8 +627,9 @@ public class LMNParser {
 
   /** 膜memの自由リンクを膜内で閉じる（構文エラーからの復帰用） */
   public void closeFreeLinks(Membrane mem) {
-    for (Object obj : mem.freeLinks.keySet()) {
-      LinkOccurrence link = mem.freeLinks.get(obj);
+    Iterator<String> it = mem.freeLinks.keySet().iterator();
+    while (it.hasNext()) {
+      LinkOccurrence link = mem.freeLinks.get(it.next());
       warning("WARNING: global singleton link: " + link.name + " at line " + link.atom.line);
       LinkedList process = new LinkedList();
       process.add(new SrcLink(link.name));
@@ -660,9 +701,10 @@ public class LMNParser {
 
       // {$p[A|*V]} :- \+($p=(f(B),$pp[A,B|*W])) | ... //
 
+      Iterator it3 = interlinks.keySet().iterator();
       anonymouslink:
-      for (Object obj3 : interlinks.keySet()) {
-        String linkname = (String) obj3;
+      while (it3.hasNext()) {
+        String linkname = (String) it3.next();
         LinkOccurrence lnk = (LinkOccurrence) interlinks.get(linkname);
         if (lnk.atom.mem.processContexts.isEmpty()) {
           warning(
@@ -1906,6 +1948,7 @@ class SyntaxExpander {
       } else if (obj instanceof SrcContext) {
         error("SYNTAX ERROR: process/rule context must occur in a rule: " + obj);
         it.remove();
+      } else if (obj instanceof SrcTypeDef) {
       } else {
         error("SYNTAX ERROR: illegal object outside a rule: " + obj);
         it.remove();

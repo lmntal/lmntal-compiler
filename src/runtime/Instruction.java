@@ -140,6 +140,19 @@ public class Instruction implements Cloneable {
   }
 
   /**
+   * dereflink [-dstatom, srclink, dstpos]
+   *
+   * <br><strong><font color="#ff0000">出力するガード命令</font></strong><br>
+   * リンク$srclink先が第dstpos引数に接続していることを確認したら、
+   * リンク先のアトムへの参照を$dstatomに代入する。
+   */
+  @LMNtalIL public static final int DEREFLINK = 3;
+
+  static {
+    setArgType(DEREFLINK, new ArgType(true, ARG_ATOM, ARG_VAR, ARG_INT));
+  }
+
+  /**
    * findatom [-dstatom, srcmem, funcref]
    *
    * <br>反復するガード命令<br>
@@ -2040,6 +2053,68 @@ public class Instruction implements Cloneable {
     setArgType(TAILATOMLIST, new ArgType(false, ARG_ATOM, ARG_MEM));
   }
 
+  /**
+   * ispairedlink [link1, link2]
+   *
+   * CSLMNtalによる型制約実装のためのガード中間命令
+   * リンク link1 及びリンク link2 が直接繋がっているとき, 成功する.
+   * そうでなければ失敗する.
+   */
+  public static final int ISPAIREDLINK = 980;
+
+  static {
+    setArgType(ISPAIREDLINK, new ArgType(false, ARG_VAR, ARG_VAR));
+  }
+
+  /**
+   * succreturn [retset]
+   *
+   * CSLMNtalによる型制約実装のための中間命令
+   * レジスタのリスト retset を呼び出し元の subrule 命令で指定したレジスタへ代入し, 呼び出し元へ制御を移す.
+   */
+  public static final int SUCCRETURN = 990;
+
+  static {
+    setArgType(SUCCRETURN, new ArgType(false, ARG_VAR));
+  }
+
+  /**
+   * failreturn []
+   *
+   * CSLMNtalによる型制約実装のための中間命令
+   * 呼び出し元の subrule 命令へ制御を移す.
+   * 呼び出し元の subrule 命令は失敗となる.
+   */
+  public static final int FAILRETURN = 991;
+
+  static {
+    setArgType(FAILRETURN, new ArgType(false));
+  }
+
+  /**
+   * allocset [set]
+   *
+   * CSLMNtalによる型制約実装のための中間命令
+   * レジスタのリスト set をメモリに確保する.
+   */
+  public static final int ALLOCSET = 992;
+
+  static {
+    setArgType(ALLOCSET, new ArgType(true, ARG_VAR));
+  }
+
+  /**
+   * subrule [-retset, memi, typename, arglist]
+   *
+   * CSLMNtalによる型制約実装のための中間命令
+   * ルール内にユーザー定義型のガードが現れた場合subrule命令を発行し、対象の型検査を行う
+   */
+  public static final int SUBRULE = 999;
+
+  static {
+    setArgType(SUBRULE, new ArgType(true, ARG_VAR, ARG_INT, ARG_OBJ, ARG_VARS));
+  }
+
   /** 命令の種類を取得する。*/
   public int getKind() {
     return kind;
@@ -2281,6 +2356,21 @@ public class Instruction implements Cloneable {
     InstructionList label = new InstructionList();
     label.add(new Instruction(PROCEED));
     return new Instruction(Instruction.NOT, label);
+  }
+
+  /** subrule命令を生成する
+   * @param retset
+   * @param memi
+   * @param typename
+   * @param arglist
+   */
+  public static Instruction subrule(int retset, int memi, String typename, List arglist) {
+    Instruction i = new Instruction(SUBRULE);
+    i.add(retset);
+    i.add(memi);
+    i.add(typename);
+    i.add(arglist);
+    return i;
   }
 
   // コンストラクタ
@@ -2627,7 +2717,9 @@ public class Instruction implements Cloneable {
             ListIterator li = ((List) inst.data.get(i)).listIterator();
             while (li.hasNext()) {
               Object varnum = li.next();
-              if (map.containsKey(varnum)) li.set(map.get(varnum));
+              if (map.containsKey(varnum)) {
+                li.set(map.get(varnum));
+              }
             }
             break;
         }
