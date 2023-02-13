@@ -12,10 +12,7 @@ import java.util.List;
  *
  * @author n-kato
  */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public class InstructionList implements Cloneable {
 
   /**
@@ -41,8 +38,7 @@ public class InstructionList implements Cloneable {
   /**
    * 命令列 (InstructionのList)
    */
-  @JsonIgnore
-  public List<Instruction> insts = new ArrayList<>();
+  @JsonIgnore public List<Instruction> insts = new ArrayList<>();
 
   /**
    * 親命令列またはnull
@@ -98,7 +94,7 @@ public class InstructionList implements Cloneable {
 
   public void setLabel(int id) {
     this.label = "L" + id;
-    //もっと賢い方法はないものだろうか。
+    // もっと賢い方法はないものだろうか。
     if (nextId <= id) nextId = id + 1;
   }
 

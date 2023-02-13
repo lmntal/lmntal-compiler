@@ -29,9 +29,8 @@ public class NumCount extends ValueCount {
   }
 
   public int compare(ValueCount vc) {
-    if (vc instanceof InfinityCount) return -vc.compare(this); else return (
-      value - ((NumCount) vc).value
-    );
+    if (vc instanceof InfinityCount) return -vc.compare(this);
+    else return (value - ((NumCount) vc).value);
   }
   //	public FixedCount or(ValueCount vc){
   //		if(vc instanceof NumCount){

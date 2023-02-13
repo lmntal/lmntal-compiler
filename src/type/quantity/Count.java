@@ -25,7 +25,8 @@ public class Count {
 
   public String toString() {
     int size = varToMultiple.keySet().size();
-    if (size == 0) return "0"; else {
+    if (size == 0) return "0";
+    else {
       Iterator<VarCount> itv = varToMultiple.keySet().iterator();
       VarCount vc = itv.next();
       Integer i = varToMultiple.get(vc);
@@ -40,10 +41,8 @@ public class Count {
   }
 
   public void add(int multiple, VarCount vc) {
-    if (!varToMultiple.containsKey(vc)) varToMultiple.put(
-      vc,
-      multiple
-    ); else varToMultiple.put(vc, varToMultiple.get(vc) + multiple);
+    if (!varToMultiple.containsKey(vc)) varToMultiple.put(vc, multiple);
+    else varToMultiple.put(vc, varToMultiple.get(vc) + multiple);
   }
 
   public static Count sum(Count sc1, Count sc2) {
@@ -54,10 +53,9 @@ public class Count {
     for (VarCount v : vs) {
       Integer i1 = sc1.varToMultiple.get(v);
       Integer i2 = sc2.varToMultiple.get(v);
-      if (i1 == null) newmap.put(v, i2); else if (i2 == null) newmap.put(
-        v,
-        i1
-      ); else newmap.put(v, i1 + i2);
+      if (i1 == null) newmap.put(v, i2);
+      else if (i2 == null) newmap.put(v, i1);
+      else newmap.put(v, i1 + i2);
     }
     return new Count(newmap);
   }

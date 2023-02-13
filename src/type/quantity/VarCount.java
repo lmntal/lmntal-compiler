@@ -27,9 +27,7 @@ public class VarCount {
   }
 
   public IntervalCount evaluate() {
-    if (bound == null) Util.errPrintln(
-      "fatal error. this var isn't bind : RV" + id
-    );
+    if (bound == null) Util.errPrintln("fatal error. this var isn't bind : RV" + id);
     return bound;
   }
 }

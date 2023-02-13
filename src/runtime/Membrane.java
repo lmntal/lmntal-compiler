@@ -36,6 +36,7 @@ public final class Membrane extends QueuedEntity {
   protected List<Ruleset> rulesets = new ArrayList<>();
   /** 膜のタイプ */
   protected int kind = 0;
+
   public static final int KIND_ND = 2;
   /** trueならばこの膜以下に適用できるルールが無い */
   protected boolean stable = false;
@@ -55,9 +56,9 @@ public final class Membrane extends QueuedEntity {
   String name = null;
 
   public boolean equalName(String s) {
-    if (name == null && s == null) return true; else if (
-      name != null && name != null
-    ) return name.equals(s); else return false;
+    if (name == null && s == null) return true;
+    else if (name != null && name != null) return name.equals(s);
+    else return false;
   }
 
   public String getName() {
@@ -169,7 +170,7 @@ public final class Membrane extends QueuedEntity {
   public void changeKind(int k) {
     kind = k;
     if (kind == KIND_ND) {
-      //非決定的実行膜は、普通の方法では実行しない
+      // 非決定的実行膜は、普通の方法では実行しない
       dequeue();
       toStable();
     }
@@ -230,9 +231,9 @@ public final class Membrane extends QueuedEntity {
   /** 子膜のコピーを取得 */
   public HashSet<Membrane> getMemCopy() {
     return new HashSet<>(mems);
-    //RandomSet s = new RandomSet();
-    //s.addAll(mems);
-    //return s;
+    // RandomSet s = new RandomSet();
+    // s.addAll(mems);
+    // return s;
   }
 
   /** この膜にあるアトムの反復子を取得する */
@@ -308,7 +309,7 @@ public final class Membrane extends QueuedEntity {
    * @param m2hc mの子膜からハッシュコードへのマップ。子膜のハッシュコード算出を繰り返さないために使う。
    */
   private static int calculate(Membrane m, Map<Membrane, Integer> m2hc) {
-    //System.out.println("membrane:" + m);
+    // System.out.println("membrane:" + m);
     final long MAX_VALUE = Integer.MAX_VALUE;
     /*
      * add: m内の分子のハッシュコードが加算されていく変数
@@ -327,9 +328,11 @@ public final class Membrane extends QueuedEntity {
      * toCalculate:現在計算中の分子内の未処理アトムまたは子膜の集合
      * calculated:現在計算中の分子内の処理済アトムまたは子膜の集合
      */
-    Set<QueuedEntity> contents = new HashSet<>(), toCalculate = new HashSet<>(), calculated = new HashSet<>();
+    Set<QueuedEntity> contents = new HashSet<>(),
+        toCalculate = new HashSet<>(),
+        calculated = new HashSet<>();
 
-    for (Iterator<Atom> i = m.atomIterator(); i.hasNext();) {
+    for (Iterator<Atom> i = m.atomIterator(); i.hasNext(); ) {
       a = i.next();
       if (a.getFunctor().isOutsideProxy() || a.getFunctor().isInsideProxy()) {
         continue;
@@ -337,14 +340,14 @@ public final class Membrane extends QueuedEntity {
       contents.add(a);
     }
 
-    for (Iterator<Membrane> i = m.memIterator(); i.hasNext();) {
+    for (Iterator<Membrane> i = m.memIterator(); i.hasNext(); ) {
       mm = i.next();
       contents.add(mm);
       m2hc.put(mm, calculate(mm, m2hc));
     }
 
     while (!contents.isEmpty()) {
-      //System.out.println("uncalculated:" + contents);
+      // System.out.println("uncalculated:" + contents);
       q = contents.iterator().next();
       contents.remove(q);
 
@@ -419,10 +422,7 @@ public final class Membrane extends QueuedEntity {
 
           // この膜から膜の外部へのリンクを処理する
           Link link = null;
-          for (
-            Iterator<Atom> i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY);
-            i.hasNext();
-          ) {
+          for (Iterator<Atom> i = mt.atomIteratorOfFunctor(Functor.INSIDE_PROXY); i.hasNext(); ) {
             Atom inside = i.next();
             // この膜外部の（プロキシでない）リンク先アトムまでトレース
             int s = 0;
@@ -468,7 +468,7 @@ public final class Membrane extends QueuedEntity {
         mol_mult %= MAX_VALUE;
       }
       mol = mol_add ^ mol_mult;
-      //System.out.println("molecule: " + calculated + " = " + mol);
+      // System.out.println("molecule: " + calculated + " = " + mol);
       /* ハッシュコードを算出した分子を計算対象から取り除く */
       contents.removeAll(calculated);
 
@@ -478,7 +478,8 @@ public final class Membrane extends QueuedEntity {
       mult %= MAX_VALUE;
     }
 
-    //System.out.println("membrane:" + m + " = " + (mult^add) + " (mult=" + mult + ", add=" + add + ")");
+    // System.out.println("membrane:" + m + " = " + (mult^add) + " (mult=" + mult + ", add=" + add +
+    // ")");
     return (int) (mult ^ add);
   }
 }

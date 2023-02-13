@@ -14,8 +14,7 @@ public final class RuleStructure {
   /**
    * 所属膜。コンパイル時につかう
    */
-  @JsonIgnore
-  public Membrane parent;
+  @JsonIgnore public Membrane parent;
 
   /**
    * ルール名
@@ -31,8 +30,7 @@ public final class RuleStructure {
    * 左辺が空のときの警告を抑制するかどうか
    * @deprecated
    */
-  @Deprecated
-  public boolean fSuppressEmptyHeadWarning = false;
+  @Deprecated public boolean fSuppressEmptyHeadWarning = false;
 
   /**
    * Headを格納する膜
@@ -95,7 +93,7 @@ public final class RuleStructure {
     this.text = text;
   }
 
-  //2006.1.22 by inui
+  // 2006.1.22 by inui
   /**
    * コンストラクタ
    * @param mem 所属膜

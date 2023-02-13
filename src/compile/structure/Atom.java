@@ -10,10 +10,7 @@ import runtime.functor.SymbolFunctor;
  * @author Takahiko Nagata
  * @date 2003/10/28
  */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public class Atom extends Atomic {
 
   /**
@@ -61,8 +58,7 @@ public class Atom extends Atomic {
 
     String argstext = "";
     for (int i = 0; i < args.length; i++) {
-      argstext +=
-        "," + ((ProcessContext) args[i].buddy.atom).getQualifiedName();
+      argstext += "," + ((ProcessContext) args[i].buddy.atom).getQualifiedName();
     }
     return functor.getQuotedFunctorName() + "(" + argstext.substring(1) + ")";
   }

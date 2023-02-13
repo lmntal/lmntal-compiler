@@ -11,18 +11,9 @@ class FunctorKindAndArgumentMap {
 
   Multimap<FunctorAndArgument, FunctorAndArgument> map;
 
-  private static FunctorAndArgument INTEGER = new FunctorAndArgument(
-    new IntegerFunctor(0),
-    0
-  );
-  private static FunctorAndArgument STRING = new FunctorAndArgument(
-    new StringFunctor(""),
-    0
-  );
-  private static FunctorAndArgument FLOATING = new FunctorAndArgument(
-    new FloatingFunctor(0),
-    0
-  );
+  private static FunctorAndArgument INTEGER = new FunctorAndArgument(new IntegerFunctor(0), 0);
+  private static FunctorAndArgument STRING = new FunctorAndArgument(new StringFunctor(""), 0);
+  private static FunctorAndArgument FLOATING = new FunctorAndArgument(new FloatingFunctor(0), 0);
 
   FunctorKindAndArgumentMap() {
     map = new Multimap<>();

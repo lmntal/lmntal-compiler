@@ -6,6 +6,7 @@ package type.argument;
  */
 public interface Path {
   int hashCode();
+
   boolean equals(Object o);
 
   String toStringWithOutAnonMem();

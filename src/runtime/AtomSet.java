@@ -49,8 +49,7 @@ public final class AtomSet implements Iterable<Atom> {
   /** 指定されたFunctorを持つアトムの数の取得 */
   public int getAtomCountOfFunctor(Functor f) {
     if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-      List<Atom> l =
-        (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
+      List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
       if (l == null) {
         return 0;
       } else {
@@ -82,23 +81,20 @@ public final class AtomSet implements Iterable<Atom> {
   }
 
   /** この集合内にあるア	トムの反復子を返す */
-
   @SuppressWarnings("unchecked")
   public Iterator<Atom> iterator() {
     return new NestedIterator<Atom>(
-      new Iterator[] {
-        getDataAtoms().iterator(),
-        new MultiMapIterator<>(getOuts()),
-        new MultiMapIterator<>(getAtoms()),
-      }
-    );
+        new Iterator[] {
+          getDataAtoms().iterator(),
+          new MultiMapIterator<>(getOuts()),
+          new MultiMapIterator<>(getAtoms()),
+        });
   }
 
   /** 与えられた名前を持つアトムの反復子を返す */
   public Iterator<Atom> iteratorOfFunctor(Functor f) {
     if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-      List<Atom> l =
-        (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
+      List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
       if (l == null) {
         return Util.NULL_ITERATOR;
       } else {
@@ -171,9 +167,7 @@ public final class AtomSet implements Iterable<Atom> {
     Functor f = atom.getFunctor();
     List<Atom> l;
     if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
-      Map<Functor, List<Atom>> map = f.isOutsideProxy()
-        ? getOuts()
-        : getAtoms();
+      Map<Functor, List<Atom>> map = f.isOutsideProxy() ? getOuts() : getAtoms();
       l = map.get(f);
       if (l == null) {
         l = new ArrayList<>();
@@ -229,7 +223,7 @@ public final class AtomSet implements Iterable<Atom> {
     while (it.hasNext()) {
       if (add(it.next())) {
         ret = true;
-        //addメソッドの中でsizeは変更している
+        // addメソッドの中でsizeは変更している
       }
     }
     return ret;
@@ -245,7 +239,7 @@ public final class AtomSet implements Iterable<Atom> {
     Iterator<Atom> it = c.iterator();
     while (it.hasNext()) {
       ret |= remove(it.next());
-      //removeメソッドの中でsizeは変更している
+      // removeメソッドの中でsizeは変更している
     }
     return ret;
   }
@@ -324,12 +318,13 @@ public final class AtomSet implements Iterable<Atom> {
     gc();
     /////////////////////////////////
     // non deterministic LMNtal
-    Comparator<Functor> sizeComparator = new Comparator<Functor>() {
-      public int compare(Functor f0, Functor f1) {
-        return getAtoms().get(f0).size() - atoms.get(f1).size();
-      }
-    };
-    //比較のための準備
+    Comparator<Functor> sizeComparator =
+        new Comparator<Functor>() {
+          public int compare(Functor f0, Functor f1) {
+            return getAtoms().get(f0).size() - atoms.get(f1).size();
+          }
+        };
+    // 比較のための準備
     List<Functor> funcs = new ArrayList<>();
     funcs.addAll(getAtoms().keySet());
     Collections.sort(funcs, sizeComparator);
@@ -394,12 +389,7 @@ public final class AtomSet implements Iterable<Atom> {
     return true;
   }
 
-  private boolean compare(
-    Atom a1,
-    Atom a2,
-    HashMap<Atom, Atom> map,
-    HashSet<Atom> checked2
-  ) {
+  private boolean compare(Atom a1, Atom a2, HashMap<Atom, Atom> map, HashSet<Atom> checked2) {
     if (!a1.getFunctor().equals(a2.getFunctor())) return false;
     if (map.containsKey(a1)) {
       return a2 == map.get(a1);

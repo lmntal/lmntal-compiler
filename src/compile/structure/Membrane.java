@@ -49,6 +49,9 @@ public final class Membrane {
   /** ルール(compile.structure.RuleStructure)のリスト */
   public List<RuleStructure> rules = new LinkedList<>();
 
+  /** 型定義(compile.structure.TypeDefStructure)のリスト */
+  public List<TypeDefStructure> typeDefs = new LinkedList<>();
+
   ////////////////////////////////////////////////////////////////
 
   /** アトム集団(compile.structure.Atom)のリスト */
@@ -120,17 +123,13 @@ public final class Membrane {
     list.addAll(processContexts);
     list.addAll(ruleContexts);
     list.addAll(typedProcessContexts);
-    //return list.toString().replaceAll("^.|.$","");
+    // return list.toString().replaceAll("^.|.$","");
     return Env.parray(list, ", ");
   }
 
   public String toString() {
     String ret =
-      "{ " +
-      toStringWithoutBrace() +
-      " }" +
-      (kind == 1 ? "_" : "") +
-      (stable ? "/" : "");
+        "{ " + toStringWithoutBrace() + " }" + (kind == 1 ? "_" : "") + (stable ? "/" : "");
     if (pragmaAtHost != null) {
       ret += "@" + ((ProcessContext) pragmaAtHost).getQualifiedName();
     }
@@ -184,9 +183,9 @@ public final class Membrane {
 
     // 直属のルールそれぞれについて、その左辺膜と右辺膜のルールセットを表示
     for (RuleStructure rs : rules) {
-      //Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
+      // Env.p("About rule structure (LEFT): "+rs.leftMem+" of "+rs);
       rs.leftMem.showAllRules();
-      //Env.p("About rule structure (RIGHT): "+rs.rightMem+" of "+rs);
+      // Env.p("About rule structure (RIGHT): "+rs.rightMem+" of "+rs);
       rs.rightMem.showAllRules();
     }
 

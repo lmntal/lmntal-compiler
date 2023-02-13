@@ -31,7 +31,8 @@ public class CountsSet {
   private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<>();
 
   /** 膜名 {@literal -->} 量解析結果(継続膜) */
-  // private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new HashMap<String, Set<FixedDynamicCounts>>();
+  // private final Map<String,Set<FixedDynamicCounts>> memnameToFixedDynamicCountss = new
+  // HashMap<String, Set<FixedDynamicCounts>>();
 
   public CountsSet() {}
 
@@ -44,10 +45,8 @@ public class CountsSet {
    * @param counts
    */
   public void add(StaticCounts counts) {
-    if (!memToGenCounts.containsKey(counts.mem)) memToGenCounts.put(
-      counts.mem,
-      counts
-    ); else {
+    if (!memToGenCounts.containsKey(counts.mem)) memToGenCounts.put(counts.mem, counts);
+    else {
       StaticCounts oldcounts = memToGenCounts.get(counts.mem);
       oldcounts.addAllCounts(counts);
     }
@@ -141,11 +140,7 @@ public class CountsSet {
       String memname = TypeEnv.getMemName(mem);
       /** プロセスの独立性が崩れている場合、何もしない */
       Boolean cpiflg = memnameToCPIFlg.get(memname);
-      if (
-        cpiflg != null &&
-        cpiflg &&
-        Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE
-      ) {
+      if (cpiflg != null && cpiflg && Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE) {
         //				if(!memnameToMergedCounts.containsKey(memname))
         //					memnameToMergedCounts.put(memname,memToGenCounts.get(mem));
         //				else{
@@ -161,15 +156,12 @@ public class CountsSet {
             // DynamicCountsをコピーして適用する。(この時変数も複製され、別オブジェクトになる)
             DynamicCounts domclone = dom.clone();
             //						clonedDynamicCounts.add(domclone);
-            domclone.assignToVar(
-              new IntervalCount(new NumCount(0), Count.INFINITY)
-            );
+            domclone.assignToVar(new IntervalCount(new NumCount(0), Count.INFINITY));
             memToGenCounts.get(mem).apply(domclone);
           }
           // 解く
-          if (
-            Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL
-          ) memToGenCounts.get(mem).solveByCounts();
+          if (Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL)
+            memToGenCounts.get(mem).solveByCounts();
           memToFixedCounts.put(mem, memToGenCounts.get(mem).solve());
         } else { // ルールセット独立性が崩れてない
           Set<DynamicCounts> doms = memToInhCountss.get(mem);
@@ -177,9 +169,7 @@ public class CountsSet {
           if (doms != null) {
             for (DynamicCounts dom : doms) {
               DynamicCounts domclone = dom.clone();
-              domclone.assignToVar(
-                new IntervalCount(new NumCount(0), Count.INFINITY)
-              );
+              domclone.assignToVar(new IntervalCount(new NumCount(0), Count.INFINITY));
               memToGenCounts.get(mem).apply(domclone);
             }
           }
@@ -189,16 +179,13 @@ public class CountsSet {
             for (DynamicCounts dom : doms) {
               DynamicCounts domclone = dom.clone();
               //							clonedDynamicCounts.add(domclone);
-              domclone.assignToVar(
-                new IntervalCount(new NumCount(0), Count.INFINITY)
-              );
+              domclone.assignToVar(new IntervalCount(new NumCount(0), Count.INFINITY));
               memToGenCounts.get(mem).apply(domclone);
             }
           }
-          //解く
-          if (
-            Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL
-          ) memToGenCounts.get(mem).solveByCounts();
+          // 解く
+          if (Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGEDETAIL)
+            memToGenCounts.get(mem).solveByCounts();
           memToFixedCounts.put(mem, memToGenCounts.get(mem).solve());
           //					memToFixedCounts.put(mem, memToGenCounts.get(mem).solveByCounts());
         }
@@ -215,24 +202,15 @@ public class CountsSet {
       String memname = TypeEnv.getMemName(mem);
       /** プロセスの独立性が崩れている場合 */
       Boolean cpiflg = memnameToCPIFlg.get(memname);
-      if (
-        cpiflg != null &&
-        cpiflg &&
-        Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE
-      ) {
+      if (cpiflg != null && cpiflg && Env.quantityInferenceLevel >= Env.COUNT_APPLYANDMERGE) {
         if (!(memnameToMergedFixedCounts.containsKey(memname))) {
           for (DynamicCounts dom : memnameToAllInhCountss.get(memname)) {
             DynamicCounts domclone = dom.clone();
             //						clonedDynamicCounts.add(domclone);
-            domclone.assignToVar(
-              new IntervalCount(new NumCount(0), Count.INFINITY)
-            );
+            domclone.assignToVar(new IntervalCount(new NumCount(0), Count.INFINITY));
             memToGenCounts.get(mem).apply(domclone);
           }
-          memnameToMergedFixedCounts.put(
-            memname,
-            memToGenCounts.get(mem).solve()
-          );
+          memnameToMergedFixedCounts.put(memname, memToGenCounts.get(mem).solve());
           //					memnameToGenCount.put(memname, memToGenCounts.get(mem));
         } else {
           FixedCounts oldsc = memnameToMergedFixedCounts.get(memname);
@@ -284,12 +262,9 @@ public class CountsSet {
   public void mergeFixeds() {
     for (Membrane mem : memToFixedCounts.keySet()) {
       String memname = TypeEnv.getMemName(mem);
-      if (
-        !memnameToMergedFixedCounts.containsKey(memname)
-      ) memnameToMergedFixedCounts.put(
-        memname,
-        memToFixedCounts.get(mem)
-      ); else {
+      if (!memnameToMergedFixedCounts.containsKey(memname))
+        memnameToMergedFixedCounts.put(memname, memToFixedCounts.get(mem));
+      else {
         FixedCounts oldfc = memnameToMergedFixedCounts.get(memname);
         oldfc.merge(memToFixedCounts.get(mem));
       }
@@ -304,12 +279,15 @@ public class CountsSet {
   //	public void assignInfinityToVar(){
   //		for(Set<DynamicCounts> doms : memToInhCountss.values())
   //			for(DynamicCounts dom : doms)
-  //				if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new NumCount(0),Count.INFINITY));
+  //				if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new
+  // NumCount(0),Count.INFINITY));
   //		for(DynamicCounts dom : clonedDynamicCounts)
-  //			if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new NumCount(0),Count.INFINITY));
+  //			if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new
+  // NumCount(0),Count.INFINITY));
   //		for(Set<DynamicCounts> doms : memnameToCommonInhCountss.values())
   //			for(DynamicCounts dom : doms)
-  //				if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new NumCount(0),Count.INFINITY));
+  //				if(!dom.applyCount.isBound())dom.applyCount.bind(new IntervalCount(new
+  // NumCount(0),Count.INFINITY));
   //	}
 
   /** 下限が0以下なのを0に補正 */
@@ -337,7 +315,7 @@ public class CountsSet {
     for (Membrane mem : memToGenCounts.keySet()) {
       // プロセスの独立性が保たれていなければ無視
       Boolean cpiflg = memnameToCPIFlg.get(TypeEnv.getMemName(mem));
-      if (cpiflg != null && cpiflg) continue; //			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
+      if (cpiflg != null && cpiflg) continue; // 			if(memnameToCPIFlg.get(TypeEnv.getMemName(mem)))
       memToGenCounts.get(mem).solveByCounts();
     }
   }

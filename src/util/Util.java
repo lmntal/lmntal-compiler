@@ -16,10 +16,7 @@ import runtime.functor.SymbolFunctor;
  * @author mizuno
  * 汎用ユーティリティメソッド・定数を集めたクラス
  */
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public abstract class Util {
 
   public static Functor DOT = new SymbolFunctor(".", 3);
