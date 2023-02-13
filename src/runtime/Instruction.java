@@ -1720,7 +1720,10 @@ public class Instruction implements Cloneable {
 
   @LMNtalIL public static final int IMOD = 405;
 
-  //	@LMNtalIL public static final int INOT = 410;
+  @LMNtalIL public static final int IABS = 406;
+
+  @LMNtalIL public static final int INOT = 410;
+
   @LMNtalIL public static final int IAND = 411;
 
   @LMNtalIL public static final int IOR = 412;
@@ -1753,7 +1756,14 @@ public class Instruction implements Cloneable {
     setArgType(IMOD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
   }
 
-  //	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+  static {
+    setArgType(IABS, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
+  }
+
+  static {
+    setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
+  }
+
   static {
     setArgType(IAND, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
   }
