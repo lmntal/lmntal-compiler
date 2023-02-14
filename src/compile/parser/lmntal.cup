@@ -44,21 +44,21 @@ terminal String HL;//seiji
 terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 terminal String CHAR_CODE_LITERAL;
 
-non terminal SrcLink			Link;
-non terminal SrcHyperLink       	HyperLink;
-non terminal SrcName			FuncName;
-non terminal String				AtomName;
-non terminal String				RuleName;
-non terminal Object				QuotedOperatorAtom;
-non terminal Object				UnitAtom;
-non terminal Object				UnaryOpAtom;
-non terminal Object				Atom200;
-non terminal Object				Atom300;
-non terminal Object				Atom400;
-non terminal Object				Atom500;
-non terminal Object				Atom700;
-non terminal Object				Atom800;
-non terminal Object				Atom;
+non terminal SrcLink        Link;
+non terminal SrcHyperLink   HyperLink;
+non terminal SrcName        FuncName;
+non terminal String         AtomName;
+non terminal String         RuleName;
+non terminal SrcAtom        QuotedOperatorAtom;
+non terminal SrcElement     UnitAtom;
+non terminal SrcElement     UnaryOpAtom;
+non terminal SrcElement     Atom200;
+non terminal SrcElement     Atom300;
+non terminal SrcElement     Atom400;
+non terminal SrcElement     Atom500;
+non terminal SrcElement     Atom700;
+non terminal SrcElement     Atom800;
+non terminal SrcElement     Atom;
 
 // 現状: (a,b)と(a,b:-c)で衝突するため、項内でのAtomListの採用が保留となっている。
 // non terminal Object				AtomList;
@@ -70,17 +70,17 @@ non terminal SrcRule			Rule;
 non terminal SrcProcessContext	ProcessContext;
 non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
-non terminal Object				Process;
+non terminal SrcElement			Process;
 non terminal SrcRule			ProcessListContinuation;
-non terminal LinkedList			ProcessList;
-non terminal LinkedList			NonemptyProcessList;
-non terminal LinkedList			WorldProcessList;
-non terminal LinkedList			NonemptyWorldProcessList;
+non terminal LinkedList<SrcElement> ProcessList;
+non terminal LinkedList<SrcElement> NonemptyProcessList;
+non terminal LinkedList<SrcElement> WorldProcessList;
+non terminal LinkedList<SrcElement> NonemptyWorldProcessList;
 non terminal SrcAtom			List;
-non terminal Object				ListCdr;
-non terminal LinkedList			BundleList;
-non terminal LinkedList			LinkList;
-non terminal LinkedList			NonemptyLinkList;
+non terminal SrcElement         ListCdr;
+non terminal LinkedList<SrcElement> BundleList;
+non terminal LinkedList<SrcElement> LinkList;
+non terminal LinkedList<SrcElement> NonemptyLinkList;
 non terminal SrcLinkBundle		Bundle;
 non terminal SrcAtom			Aggregate;
 non terminal SrcTypeDef         TypeDef;
@@ -165,7 +165,7 @@ UnitAtom ::=
              RESULT = list.getFirst();
            }
            else {
-             RESULT = list;
+             RESULT = new SrcList(list);
            }
          }
          else {
@@ -179,7 +179,7 @@ UnitAtom ::=
              RESULT = list.getFirst();
            }
            else {
-             RESULT = list;
+             RESULT = new SrcList(list);
            }
          }
          else {

@@ -95,7 +95,7 @@ public class LMNParser {
     expander.correctWorld(initRule.body);
     // addProcessToMem(srcProcess, mem);
     addObjectToMem(initRule, mem);
-    HashMap freeLinks = addProxies(mem);
+    HashMap<String, LinkOccurrence> freeLinks = addProxies(mem);
     if (!freeLinks.isEmpty()) closeFreeLinks(mem);
     return mem;
   }
@@ -113,7 +113,7 @@ public class LMNParser {
       result = (SrcRule) p.parse().value;
     } catch (Error e) {
       error("ERROR: " + e.getMessage());
-      result = new SrcRule("ERROR", new LinkedList(), new LinkedList());
+      result = new SrcRule("ERROR", new LinkedList<>(), new LinkedList<>());
     } catch (Throwable e) {
       throw new ParseException(e.getMessage(), e);
     }
@@ -129,14 +129,14 @@ public class LMNParser {
   }
 
   /** ルールのテキスト表現を決定する */
-  private void setRuleText(LinkedList process) {
-    for (Object obj : process) {
+  private void setRuleText(LinkedList<SrcElement> process) {
+    for (SrcElement obj : process) {
       if (obj instanceof SrcAtom) {
         setRuleText(((SrcAtom) obj).getProcess());
       } else if (obj instanceof SrcMembrane) {
         setRuleText(((SrcMembrane) obj).getProcess());
-      } else if (obj instanceof LinkedList) {
-        setRuleText((LinkedList) obj);
+      } else if (obj instanceof SrcList) {
+        setRuleText(((SrcList) obj).list);
       } else if (obj instanceof SrcRule) {
         SrcRule rule = (SrcRule) obj;
         rule.setText();
@@ -182,8 +182,8 @@ public class LMNParser {
    * @param list 登録する構文オブジェクトのリスト
    * @param mem 追加先の膜
    */
-  void addProcessToMem(LinkedList list, Membrane mem) throws ParseException {
-    for (Object obj : list) {
+  void addProcessToMem(LinkedList<SrcElement> list, Membrane mem) throws ParseException {
+    for (SrcElement obj : list) {
       addObjectToMem(obj, mem);
     }
   }
@@ -193,10 +193,10 @@ public class LMNParser {
    * @param obj 追加する構文オブジェクト
    * @param mem 追加先の膜
    */
-  private void addObjectToMem(Object obj, Membrane mem) throws ParseException {
+  private void addObjectToMem(SrcElement obj, Membrane mem) throws ParseException {
     // リスト
-    if (obj instanceof LinkedList) {
-      for (Object elem : (LinkedList) obj) {
+    if (obj instanceof SrcList) {
+      for (SrcElement elem : ((SrcList) obj).list) {
         addObjectToMem(elem, mem);
       }
     }
@@ -269,7 +269,7 @@ public class LMNParser {
   private void addSrcAtomToMem(SrcAtom sAtom, Membrane mem) {
     boolean alllinks = true;
     boolean allbundles = true;
-    LinkedList p = sAtom.getProcess();
+    LinkedList<SrcElement> p = sAtom.getProcess();
     int arity = p.size();
 
     // [1] ファンクタを生成する
@@ -353,10 +353,10 @@ public class LMNParser {
         /*seiji--*/
         pc.linkName = sProc.getLinkName();
         if (sProc.hasSameNameList()) {
-          if (pc.getSameNameList() == null) pc.sameNameList = new LinkedList();
+          if (pc.getSameNameList() == null) pc.sameNameList = new LinkedList<>();
           for (int i = 0; i < sProc.getSameNameList().size(); i++)
             pc.getSameNameList().add((String) sProc.getSameNameList().get(i));
-          ListIterator itt = pc.sameNameList.listIterator();
+          // ListIterator<String> itt = pc.sameNameList.listIterator();
         }
       } /*--seiji*/
     }
@@ -431,9 +431,9 @@ public class LMNParser {
         rule.setText();
         addSrcRuleToMem(rule, typeDef.mem);
       } else if (obj instanceof SrcAtom) {
-        LinkedList atoms = new LinkedList<>();
+        LinkedList<SrcElement> atoms = new LinkedList<>();
         atoms.add(sTypeDef.typeName.clone());
-        atoms.add(obj);
+        atoms.add((SrcAtom) obj);
         SrcRule rule = new SrcRule("", atoms, new LinkedList<>());
         rule.setText();
         addSrcRuleToMem(rule, typeDef.mem);
@@ -462,14 +462,17 @@ public class LMNParser {
    *  @param sNegatives ガード否定条件の中間形式[$p,[Q]]のリスト[in]
    *  @param rule ルール構造[in,out]
    *  @param names 左辺およびガード型制約に出現した$p（と*X）からその定義（と出現）へのマップ[in] */
-  private void addGuardNegatives(LinkedList<List> sNegatives, RuleStructure rule, HashMap names)
+  private void addGuardNegatives(
+      LinkedList<LinkedList<LinkedList<SrcProcessContext>>> sNegatives,
+      RuleStructure rule,
+      HashMap names)
       throws ParseException {
-    for (List<List> list1 : sNegatives) {
+    for (LinkedList<LinkedList<SrcProcessContext>> list1 : sNegatives) {
       List<ProcessContextEquation> neg = new LinkedList<>();
-      ListIterator it2 = list1.listIterator();
+      ListIterator<LinkedList<SrcProcessContext>> it2 = list1.listIterator();
       while (it2.hasNext()) {
-        LinkedList sPair = (LinkedList) it2.next();
-        String cxtname = ((SrcProcessContext) sPair.getFirst()).getQualifiedName();
+        LinkedList<SrcProcessContext> sPair = it2.next();
+        String cxtname = sPair.getFirst().getQualifiedName();
         if (!names.containsKey(cxtname)) {
           error(
               "SYNTAX ERROR: fresh process context constrained in a negative condition: "
@@ -486,7 +489,7 @@ public class LMNParser {
                     + rule.lineno);
           } else if (def.lhsOcc != null) {
             Membrane mem = new Membrane(null);
-            addProcessToMem((LinkedList) sPair.getLast(), mem);
+            addProcessToMem(sPair.getLast(), mem);
             neg.add(new ProcessContextEquation(def, mem));
           }
         }
@@ -502,12 +505,12 @@ public class LMNParser {
 
   /** 子膜に対して再帰的にプロキシを追加する。
    * @return この膜の更新された自由リンクマップ mem.freeLinks */
-  private HashMap addProxies(Membrane mem) {
+  private HashMap<String, LinkOccurrence> addProxies(Membrane mem) {
     HashSet<String> proxyLinkNames = new HashSet<>(); // memとその子膜の間に作成した膜間リンク名の集合
     for (Membrane submem : mem.mems) {
-      HashMap freeLinks = addProxies(submem);
+      HashMap<String, LinkOccurrence> freeLinks = addProxies(submem);
       // 子膜の自由リンクに対してプロキシを追加する
-      HashMap newFreeLinks = new HashMap();
+      HashMap<String, LinkOccurrence> newFreeLinks = new HashMap<>();
       for (Object link : freeLinks.keySet()) {
         LinkOccurrence freeLink = (LinkOccurrence) freeLinks.get(link);
         // 子膜の自由リンク名 freeLink.name に対して、膜間リンク名 proxyLinkName を決定する。
@@ -569,21 +572,31 @@ public class LMNParser {
    * <p>副作用として、メソッドの戻り値を mem.freeLinks にセットする。
    * @return リンク名から自由リンク出現へのHashMap
    */
-  private HashMap coupleLinks(Membrane mem) {
+  private HashMap<String, LinkOccurrence> coupleLinks(Membrane mem) {
     // 同じ膜レベルのリンク結合を行う
-    HashMap links = new HashMap();
-    List[] lists = {mem.atoms, mem.processContexts, mem.typedProcessContexts};
-    for (int i = 0; i < lists.length; i++) {
-      Iterator it = lists[i].iterator();
-      while (it.hasNext()) {
-        Atomic a = (Atomic) it.next();
-        for (int j = 0; j < a.args.length; j++) {
-          if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
-            addLinkOccurrence(links, a.args[j]);
-          }
+    HashMap<String, LinkOccurrence> links = new HashMap<>();
+    for (Atom a : mem.atoms) {
+      for (int j = 0; j < a.args.length; j++) {
+        if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
+          addLinkOccurrence(links, a.args[j]);
         }
       }
     }
+    for (ProcessContext a : mem.processContexts) {
+      for (int j = 0; j < a.args.length; j++) {
+        if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
+          addLinkOccurrence(links, a.args[j]);
+        }
+      }
+    }
+    for (ProcessContext a : mem.typedProcessContexts) {
+      for (int j = 0; j < a.args.length; j++) {
+        if (a.args[j].buddy == null) { // outside_proxyの第1引数はすでに非nullになっている
+          addLinkOccurrence(links, a.args[j]);
+        }
+      }
+    }
+
     removeClosedLinks(links);
     mem.freeLinks = links;
     return links;
@@ -761,7 +774,7 @@ public class LMNParser {
 
   /** ガード型制約の型付きプロセス文脈のリストを作成する。
    * @param names コンテキストの限定名 (String) から ContextDef への写像 [in,out] */
-  private void enumTypedNames(Membrane mem, HashMap names) {
+  private void enumTypedNames(Membrane mem, HashMap<String, ContextDef> names) {
     Iterator it = mem.processContexts.iterator();
     while (it.hasNext()) {
       ProcessContext pc = (ProcessContext) it.next();
@@ -1027,7 +1040,7 @@ public class LMNParser {
    *  名前解決により発見された構文エラーを訂正する。
    *  @return 左辺およびガードに出現する限定名(String) -> ContextDef / LinkOccurrence(Bundles) */
   private HashMap resolveHeadContextNames(RuleStructure rule) throws ParseException {
-    HashMap names = new HashMap();
+    HashMap names = new HashMap<>();
     // 次のメソッド後には型付きプロセス文脈の pc.def.typed が true になる
     enumTypedNames(rule.guardMem, names); // この時点では型付きプロセス文脈のみ
     enumHeadNames(rule.leftMem, names, true); // この時点で型なしプロセス文脈およびルール文脈およびリンク束が登録される
@@ -1302,20 +1315,21 @@ class SyntaxExpander {
       lit.remove();
       lit.add(eqlist);
       // リストの要素のうち、$p=Q のみを[$p,[Q]]として残す。
-      ListIterator lit2 = eqlist.listIterator();
+      ListIterator<SrcElement> lit2 = eqlist.listIterator();
       while (lit2.hasNext()) {
-        Object obj2 = lit2.next();
+        SrcElement obj2 = lit2.next();
         lit2.remove();
         if (obj2 instanceof SrcAtom) {
           SrcAtom sAtom = (SrcAtom) obj2;
           if (sAtom.getName().equals("=") && sAtom.getProcess().size() == 2) {
             Object lhs = sAtom.getProcess().getFirst();
             if (lhs instanceof SrcProcessContext) {
-              if (((SrcProcessContext) lhs).args != null) {
+              SrcProcessContext lhs1 = (SrcProcessContext) lhs;
+              if (lhs1.args != null) {
                 warning(
                     "WARNING: argument of constrained process context is ignored: "
-                        + SrcDumper.dump(lhs).replaceAll("\n", ""));
-                ((SrcProcessContext) lhs).args = null;
+                        + SrcDumper.dump(lhs1).replaceAll("\n", ""));
+                lhs1.args = null;
               }
               Object rhs = sAtom.getProcess().get(1);
               LinkedList list = new LinkedList();
@@ -1323,7 +1337,7 @@ class SyntaxExpander {
               list.add(lhs);
               list.add(rhslist);
               rhslist.add(rhs);
-              lit2.add(list);
+              lit2.add(new SrcList(list));
               continue;
             }
           }
@@ -1479,9 +1493,9 @@ class SyntaxExpander {
    * @param result アトム展開結果のオブジェクト列を追加するリストオブジェクト（プロセス構造）
    */
   private void expandAtom(SrcAtom sAtom, LinkedList result) {
-    LinkedList process = sAtom.getProcess();
+    LinkedList<SrcElement> process = sAtom.getProcess();
     for (int i = 0; i < process.size(); i++) {
-      Object obj = process.get(i);
+      SrcElement obj = process.get(i);
       // アトム
       if (obj instanceof SrcAtom) {
         SrcAtom subatom = (SrcAtom) obj;
@@ -1507,8 +1521,8 @@ class SyntaxExpander {
         expandAtoms(submem.getProcess());
       }
       // 項組（仮）
-      else if (obj instanceof LinkedList) {
-        LinkedList list = (LinkedList) obj;
+      else if (obj instanceof SrcList) {
+        LinkedList<SrcElement> list = ((SrcList) obj).list;
         if (list.isEmpty()) {
           SrcAtom subatom = new SrcAtom("()");
           //
@@ -1527,7 +1541,7 @@ class SyntaxExpander {
           if (list.size() == 1) {
             subatom.getProcess().add(list.getFirst());
           } else {
-            subatom.getProcess().add(list);
+            subatom.getProcess().add(new SrcList(list));
           }
           subatom.getProcess().add(new SrcLink(newlinkname));
           //
@@ -1700,7 +1714,7 @@ class SyntaxExpander {
               usedProcNameMap.put(newName, srcProcessContext);
               ruleProcNameMap.put(newName, srcProcessContext);
 
-              LinkedList<SrcProcessContext> procList = new LinkedList();
+              LinkedList<SrcElement> procList = new LinkedList();
               procList.add(new SrcProcessContext(name));
               procList.add(new SrcProcessContext(newName));
               SrcAtom sa = new SrcAtom("==", procList);
@@ -1708,11 +1722,11 @@ class SyntaxExpander {
 
               /* --hl-optではガードにhlink型チェックを追加して、構造比較にかかる時間を短縮している */
               if (Env.hyperLinkOpt) {
-                LinkedList<SrcProcessContext> procList2 = new LinkedList();
+                LinkedList<SrcElement> procList2 = new LinkedList();
                 procList2.add(new SrcProcessContext(name));
                 SrcAtom sa2 = new SrcAtom("unary", procList2);
                 cons.add(sa2);
-                LinkedList<SrcProcessContext> procList3 = new LinkedList();
+                LinkedList<SrcElement> procList3 = new LinkedList();
                 procList3.add(new SrcProcessContext(newName));
                 SrcAtom sa3 = new SrcAtom("unary", procList3);
                 cons.add(sa3);
@@ -1781,7 +1795,7 @@ class SyntaxExpander {
       if (obj instanceof SrcProcessContext) {
         SrcProcessContext spc = (SrcProcessContext) obj;
         if (spc.hasSameNameList()) {
-          LinkedList temp = new LinkedList();
+          LinkedList<String> temp = new LinkedList();
           SrcProcessContext subspc;
           for (int j = 0; j < spc.getSameNameList().size(); j++) {
             subspc = (SrcProcessContext) ruleProcNameMap.get(spc.getSameNameList().get(j));

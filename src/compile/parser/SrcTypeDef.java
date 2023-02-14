@@ -5,17 +5,18 @@ import java.util.LinkedList;
 /**
  * ソース中の型定義を表します
  */
-class SrcTypeDef {
+class SrcTypeDef extends SrcElement {
 
   // public SrcName srcname; // 型名
   // public LinkedList links; // 引数のリンクリスト
   public SrcAtom typeName; // 型名と引数のリンクリスト
-  public LinkedList<Object> rules; // 型の内容
+  public LinkedList<SrcElement> rules; // 型の内容
   public int lineno; // 行番号
 
   private String text; // typedef 構文のテキスト表現
 
-  public SrcTypeDef(SrcName name, LinkedList links, LinkedList processlist, int lineno) {
+  public SrcTypeDef(
+      SrcName name, LinkedList<SrcElement> links, LinkedList<SrcElement> processlist, int lineno) {
     this.typeName = new SrcAtom(name, links);
     this.rules = processlist;
     this.lineno = lineno;
@@ -25,7 +26,7 @@ class SrcTypeDef {
     this.typeName = typeName;
   }
 
-  public void setRules(LinkedList rule) {
+  public void setRules(LinkedList<SrcElement> rule) {
     this.rules = rule;
   }
 
@@ -33,7 +34,7 @@ class SrcTypeDef {
     return typeName;
   }
 
-  public LinkedList getRules() {
+  public LinkedList<SrcElement> getRules() {
     return rules;
   }
 

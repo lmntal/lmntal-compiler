@@ -96,7 +96,7 @@ public final class AtomSet implements Iterable<Atom> {
     if (!Env.fMemory || f.isSymbol() || f instanceof SpecialFunctor) {
       List<Atom> l = (f.isOutsideProxy() ? getOuts().get(f) : getAtoms().get(f));
       if (l == null) {
-        return Util.NULL_ITERATOR;
+        return Util.null_iterator();
       } else {
         return l.iterator();
       }

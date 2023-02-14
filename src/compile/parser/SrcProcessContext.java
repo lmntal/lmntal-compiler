@@ -17,7 +17,7 @@ class SrcProcessContext extends SrcContext {
    * <p>利用側でLinkedListを生成して代入すること
    */
   @JsonTypeInfo(use = Id.CLASS)
-  public LinkedList args = null;
+  public LinkedList<SrcElement> args = null;
 
   /** リンク束 */
   public SrcLinkBundle bundle = null;
