@@ -240,7 +240,7 @@ public final class Env {
   public static String getIndent(int depth) {
     String indent = "";
     for (int i = 0; i < depth; i++) {
-      indent += "\t";
+      indent += "    ";
     }
     return indent;
   }
