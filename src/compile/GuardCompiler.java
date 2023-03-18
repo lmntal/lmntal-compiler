@@ -984,32 +984,32 @@ class GuardCompiler extends LHSCompiler {
    *  型情報を更新する。
    *  @param def プロセス文脈定義
    *  @return リンクリストの変数番号 */
-  // private int loadGroundLinkcslmntal(ContextDef def) {
-  //   //		ArrayList linkids = groundToSrcPath(def);
-  //   int linkids = groundToSrcPath(def);
-  //   if (linkids == UNBOUND) {
-  //     linkids = varCount++;
-  //     // match.add(new Instruction(Instruction.NEWLIST, linkids));
-  //     // for (int i = 0; i < def.lhsOcc.args.length; i++) {
-  //     //   //				Util.println("loadGroundLink "+def.lhsOcc.args[i].buddy.atom);
-  //     //   int[] paths = (int[]) linkPaths.get(
-  //     //     atomToPath(def.lhsOcc.args[i].buddy.atom)
-  //     //   );
-  //     //   //linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
-  //     //   //				linkids.set(i, paths[def.lhsOcc.args[i].buddy.pos]);
-  //     //   //				groundsrcs.put(def, linkids);
-  //     //   // match.add(
-  //     //   //   new Instruction(
-  //     //   //     Instruction.ADDTOLIST,
-  //     //   //     linkids,
-  //     //   //     paths[def.lhsOcc.args[i].buddy.pos]
-  //     //   //   )
-  //     //   // );
-  //     // }
-  //     groundSrcs.put(def, linkids);
-  //   }
-  //   return linkids;
-  // }
+  private int loadGroundLinkcslmntal(ContextDef def) {
+    //		ArrayList linkids = groundToSrcPath(def);
+    int linkids = groundToSrcPath(def);
+    if (linkids == UNBOUND) {
+      linkids = varCount++;
+      // match.add(new Instruction(Instruction.NEWLIST, linkids));
+      // for (int i = 0; i < def.lhsOcc.args.length; i++) {
+      //   //				Util.println("loadGroundLink "+def.lhsOcc.args[i].buddy.atom);
+      //   int[] paths = (int[]) linkPaths.get(
+      //     atomToPath(def.lhsOcc.args[i].buddy.atom)
+      //   );
+      //   //linkids[i] = paths[def.lhsOcc.args[i].buddy.pos];
+      //   //				linkids.set(i, paths[def.lhsOcc.args[i].buddy.pos]);
+      //   //				groundsrcs.put(def, linkids);
+      //   // match.add(
+      //   //   new Instruction(
+      //   //     Instruction.ADDTOLIST,
+      //   //     linkids,
+      //   //     paths[def.lhsOcc.args[i].buddy.pos]
+      //   //   )
+      //   // );
+      // }
+      groundSrcs.put(def, linkids);
+    }
+    return linkids;
+  }
 
   // 左辺の膜(Membrane) -> その膜のアトムが入ったsetを指す変数番号(Integer)
   //	HashMap memToAtomSetPath = new HashMap();
@@ -1104,10 +1104,10 @@ class GuardCompiler extends LHSCompiler {
       typedCxtTypes.put(def, linktype);
       //			int linkid = loadGroundLink(def);
       //			ArrayList linkids = loadGroundLink(def);
-      // int linkids = loadGroundLinkcslmntal(def);
-      // int srclinklistpath;
+      int linkids = loadGroundLinkcslmntal(def);
+      int srclinklistpath;
       //			if(!memToLinkListPath.containsKey(def.lhsOcc.mem)){
-      // srclinklistpath = varCount++;
+      srclinklistpath = varCount++;
       // 避けるリンクのリスト
       // match.add(new Instruction(Instruction.NEWLIST, srclinklistpath));
 
@@ -1116,7 +1116,7 @@ class GuardCompiler extends LHSCompiler {
       // このプロセス文脈の根でないものをリストに追加する
       for (Atom atom : def.lhsOcc.mem.atoms) {
         //				Util.println("checkGroundLink"+atom);
-        // int[] paths = (int[]) linkPaths.get(atomToPath(atom));
+        int[] paths = (int[]) linkPaths.get(atomToPath(atom));
         for (int i = 0; i < atom.args.length; i++) {
           //					match.add(new
           // Instruction(Instruction.ADDATOMTOSET,srcsetpath,atomToPath((Atom)it.next())));
@@ -1147,8 +1147,8 @@ class GuardCompiler extends LHSCompiler {
       //			memToLinkListPath.put(def.lhsOcc.mem, srclinklistpath);
       //			}
       //			else srclinklistpath = ((Integer)memToLinkListPath.get(def.lhsOcc.mem)).intValue();
-      // Atom[] atoms = hlgroundAttrs.get(def); // hlgroundの属性
-      // List<Functor> attrs = new ArrayList<>();
+      Atom[] atoms = hlgroundAttrs.get(def); // hlgroundの属性
+      List<Functor> attrs = new ArrayList<>();
       int natom = varCount++;
       // int inst =
       //   (
