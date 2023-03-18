@@ -24,7 +24,7 @@ lmntal のコンパイラ
 │   ├── LMNParser.java # パーサのエントリーポイント
 │   ├── LMNtal_BNF.txt
 │   ├── Lexer.java # from lmntal.flex
-│   ├── MySymbol.java # 
+│   ├── MySymbol.java
 │   ├── ParseException.java # パースエラー用クラス
 │   ├── SrcAtom.java # アトム用データ構造
 │   ├── SrcContext.java # 文脈用データ構造
@@ -110,7 +110,7 @@ Ruleオブジェクトはコンパイルが終わった後のilファイルの�
 すなわち, 全てのルール内ルールについてRuleStructure->Rule変換を適用する
 
 - 変換の流れ(RuleStructure, Rule, Ruleset, InterpretedRuleset)
-変換の過程である(入力Membraneオブジェクトのrules->ローカル変数rules->ローカル変数ruleset->出力Membraneオブジェクトのruleset)の型はそれぞれ, 
+変換の過程である(入力Membraneオブジェクトのrules->ローカル変数rules->ローカル変数ruleset->出力Membraneオブジェクトのruleset)の型はそれぞれ,
 (RuleStructureのリスト->(変換済み)Ruleのリスト->InterpretedRuleset(Rulesetオブジェクトを継承)->Rulesetオブジェクトのリスト)
 
 - 歴史的経緯
