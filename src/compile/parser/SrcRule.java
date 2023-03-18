@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * ソース中のルールを表します
@@ -23,7 +24,8 @@ class SrcRule extends SrcElement {
   public LinkedList<SrcElement> guard; // ガードプロセス
 
   @JsonTypeInfo(use = Id.CLASS)
-  public LinkedList<SrcElement> guardNegatives; // ガード否定条件構文のリスト
+  public LinkedList<LinkedList<Map.Entry<SrcProcessContext, SrcList>>>
+      guardNegatives; // ガード否定条件構文のリスト
 
   private String text; // ルールのテキスト表現
 
@@ -259,7 +261,7 @@ class SrcRule extends SrcElement {
     for (Object o : l) {
       if (o instanceof SrcAtom) {
         SrcAtom sa = (SrcAtom) o;
-        ret.add(new SrcAtom(sa.getSrcName(), copySrcs(sa.getProcess())));
+        ret.add(new SrcAtom(sa.getName(), copySrcs(sa.getProcess())));
       } else if (o instanceof SrcMembrane) {
         SrcMembrane sm = (SrcMembrane) o;
         SrcMembrane cpm = new SrcMembrane(copySrcs(sm.getProcess()));
@@ -311,7 +313,7 @@ class SrcRule extends SrcElement {
   /**
    * ガード否定条件を取得する
    */
-  public LinkedList<SrcElement> getGuardNegatives() {
+  public LinkedList<LinkedList<Map.Entry<SrcProcessContext, SrcList>>> getGuardNegatives() {
     return guardNegatives;
   }
 
