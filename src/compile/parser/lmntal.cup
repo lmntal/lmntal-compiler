@@ -24,7 +24,7 @@ parser code {:
 
 
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
-// 綴りの単項演算子 (lognot) は，現状の文法では lognot(a,a) などの曖昧性の排除が難しいので断念 (ueda)
+// 綴りの単項演算子 (lognot) は，現状の文法では lognot(a,a) などの曖昧性の排除が難しいので括弧付きで使う (ueda)
 terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE, RBRACE_SLASH, RBRACE_AT, RBRACE_SLASH_AT,
 				RBRACE_UNDERBAR, RBRACE_UNDERBAR_SLASH,

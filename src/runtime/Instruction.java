@@ -1720,7 +1720,10 @@ public class Instruction implements Cloneable {
 
   @LMNtalIL public static final int IMOD = 405;
 
-  //	@LMNtalIL public static final int INOT = 410;
+  @LMNtalIL public static final int IABS = 406;
+
+  @LMNtalIL public static final int INOT = 410;
+
   @LMNtalIL public static final int IAND = 411;
 
   @LMNtalIL public static final int IOR = 412;
@@ -1753,7 +1756,14 @@ public class Instruction implements Cloneable {
     setArgType(IMOD, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
   }
 
-  //	static {setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));}
+  static {
+    setArgType(IABS, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
+  }
+
+  static {
+    setArgType(INOT, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
+  }
+
   static {
     setArgType(IAND, new ArgType(true, ARG_ATOM, ARG_ATOM, ARG_ATOM));
   }
@@ -1787,6 +1797,8 @@ public class Instruction implements Cloneable {
 
   @LMNtalIL public static final int IMODFUNC = IMOD + OPT;
 
+  @LMNtalIL public static final int IABSFUNC = IABS + OPT;
+
   static {
     setArgType(IADDFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
   }
@@ -1805,6 +1817,10 @@ public class Instruction implements Cloneable {
 
   static {
     setArgType(IMODFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
+  }
+
+  static {
+    setArgType(IABSFUNC, new ArgType(true, ARG_VAR, ARG_VAR, ARG_VAR));
   }
 
   // 整数用の組み込みガード命令 (420--429+OPT)
