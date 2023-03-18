@@ -787,7 +787,7 @@ public class LMNParser {
       } else pc.def = names.get(name);
       it.remove();
       mem.typedProcessContexts.add(pc);
-      if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
+      // if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
     }
   }
 
@@ -852,7 +852,7 @@ public class LMNParser {
         }
       }
       if (isLHS) pc.def.lhsOcc = pc; // 左辺での出現を登録
-      if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
+      // if (pc.bundle != null) addLinkOccurrence(names, pc.bundle);
       //
       if (!pc.def.isTyped()) {
         HashSet<String> explicitfreelinks = new HashSet<>();
@@ -891,7 +891,7 @@ public class LMNParser {
     }
     for (Atom atom : mem.aggregates) {
       for (int i = 0; i < atom.args.length; i++) {
-        addLinkOccurrence(names, atom.args[i]);
+        // addLinkOccurrence(names, atom.args[i]);
       }
     }
     //
@@ -1019,7 +1019,7 @@ public class LMNParser {
     while (it4.hasNext()) {
       Atom atom = it4.next();
       for (int i = 0; i < atom.args.length; i++) {
-        addLinkOccurrence(names, atom.args[i]);
+        // addLinkOccurrence(names, atom.args[i]);
       }
     }
     //
@@ -1101,7 +1101,7 @@ public class LMNParser {
     // rule.processContexts/ruleContexts/typedProcessContexts を生成する
     for (String name : names.keySet()) {
       ContextDef obj = names.get(name);
-      if (obj instanceof LinkOccurrence) continue; // リンク束のときは無視
+      // if (obj instanceof LinkOccurrence) continue; // リンク束のときは無視
       ContextDef def = (ContextDef) obj;
       if (def.isTyped()) {
         rule.typedProcessContexts.put(name, def);
