@@ -639,7 +639,7 @@ class HeadCompiler extends LHSCompiler {
         if (other == UNBOUND) continue;
         if (!otheratom.functor.equals(atom.functor)) continue;
         // Fixing issue #101
-        //if (otheratom == atom) continue;
+        // if (otheratom == atom) continue;
         if (otheratom == atom) continue;
         insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
         /* NEQATOMがある場合、同ファンクタのアトムにマッチされるが、branchで両方のアトムを起点とする命令列が出力されるため、connectは不要

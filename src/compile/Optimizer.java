@@ -79,7 +79,7 @@ public class Optimizer {
     // if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop) {
     // allocatomReduce のために常に head と guard をくっつける
     if (true) {
-      //head と guard をくっつける
+      // head と guard をくっつける
       inlineExpandTailJump(rule.memMatch);
       rule.guardLabel = null;
       rule.guard = null;
