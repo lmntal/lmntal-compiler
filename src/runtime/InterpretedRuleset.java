@@ -11,6 +11,7 @@ public final class InterpretedRuleset extends Ruleset {
 
   /** このルールセットのローカルID */
   private int id;
+
   private static int lastId = 600;
 
   /** とりあえずルールの配列として実装 */
@@ -18,6 +19,7 @@ public final class InterpretedRuleset extends Ruleset {
 
   /** 編み上げ後の命令列 */
   public MergedBranchMap branchmap;
+
   public MergedBranchMap systemrulemap;
 
   /** 現在実行中のルール */

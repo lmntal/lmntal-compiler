@@ -13,8 +13,7 @@ public abstract class Atomic {
   /**
    * 所属膜
    */
-  @JsonIgnore
-  public Membrane mem = null;
+  @JsonIgnore public Membrane mem = null;
 
   /**
    * アトムのリンク列（またはアトム集団のリンク束列）

@@ -48,14 +48,12 @@ public class ActiveAtomPath implements Path {
   }
 
   public String toStringWithOutAnonMem() {
-    return (
-      "<" +
-      (Objects.equals(memname, "??") ? "" : (memname + ":")) +
-      functor +
-      "," +
-      pos +
-      ">"
-    );
+    return ("<"
+        + (Objects.equals(memname, "??") ? "" : (memname + ":"))
+        + functor
+        + ","
+        + pos
+        + ">");
   }
 
   public int hashCode() {
@@ -65,11 +63,7 @@ public class ActiveAtomPath implements Path {
   public boolean equals(Object o) {
     if (o instanceof ActiveAtomPath) {
       ActiveAtomPath aap = (ActiveAtomPath) o;
-      return (
-        memname.equals(aap.memname) &&
-        functor.equals(aap.functor) &&
-        pos == aap.pos
-      );
+      return (memname.equals(aap.memname) && functor.equals(aap.functor) && pos == aap.pos);
     } else return false;
   }
 }

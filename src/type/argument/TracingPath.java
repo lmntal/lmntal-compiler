@@ -35,11 +35,7 @@ public class TracingPath implements Path {
   public boolean equals(Object o) {
     if (o instanceof TracingPath) {
       TracingPath tp = (TracingPath) o;
-      return (
-        tracedPath.equals(tp.tracedPath) &&
-        functor.equals(tp.functor) &&
-        pos == tp.pos
-      );
+      return (tracedPath.equals(tp.tracedPath) && functor.equals(tp.functor) && pos == tp.pos);
     } else return false;
   }
 
@@ -48,8 +44,6 @@ public class TracingPath implements Path {
   }
 
   public String toStringWithOutAnonMem() {
-    return (
-      tracedPath.toStringWithOutAnonMem() + "<" + functor + "," + +pos + ">"
-    );
+    return (tracedPath.toStringWithOutAnonMem() + "<" + functor + "," + +pos + ">");
   }
 }

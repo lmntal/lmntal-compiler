@@ -20,7 +20,7 @@ public final class SystemRulesets {
   public static void clear() {
     all.clear();
     userDefined.clear();
-    //all.add(GlobalSystemRuleset.getInstance());
+    // all.add(GlobalSystemRuleset.getInstance());
   }
 
   /**

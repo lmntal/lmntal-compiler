@@ -6,10 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@JsonAutoDetect(
-  fieldVisibility = Visibility.ANY,
-  getterVisibility = Visibility.NONE
-)
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
 public final class Rule {
 
   /** 膜主導ルール適用の命令列（memMatchLabel.insts）
@@ -46,6 +43,11 @@ public final class Rule {
   /** uniq制約を持つかどうか */
   public boolean hasUniq = false;
 
+  /** typedef の内容かどうか */
+  public boolean isTypeDef = false;
+
+  public String typeDefName = "";
+
   // todo いずれ4つともInstructionListで保持するようにし、Listは廃止する。
 
   /**
@@ -80,10 +82,7 @@ public final class Rule {
    * パーザーで利用するコンストラクタ
    */
   public Rule(
-    InstructionList memMatchLabel,
-    InstructionList guardLabel,
-    InstructionList bodyLabel
-  ) {
+      InstructionList memMatchLabel, InstructionList guardLabel, InstructionList bodyLabel) {
     this.memMatchLabel = memMatchLabel;
     this.guardLabel = guardLabel;
     this.bodyLabel = bodyLabel;
@@ -96,6 +95,13 @@ public final class Rule {
    * 命令列の詳細を出力する
    */
   public void showDetail() {
+    if (isTypeDef) {
+      Env.p("Compiled Subrule @" + typeDefName + this);
+      printInstructions(memMatch);
+      Env.p("");
+      return;
+    }
+
     if (hasUniq) {
       Env.p("Compiled Uniq Rule " + this);
     } else {

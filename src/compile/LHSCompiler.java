@@ -96,8 +96,8 @@ abstract class LHSCompiler {
    */
   List<Integer> getMemActuals() {
     List<Integer> args = new ArrayList<>();
-    for (Membrane mem : mems) {
-      if (memPaths.get(mem) != null) args.add(memPaths.get(mem));
+    for (int i = 0; i < mems.size(); i++) {
+      if (memPaths.get(mems.get(i)) != null) args.add(memPaths.get(mems.get(i)));
     }
     return args;
   }

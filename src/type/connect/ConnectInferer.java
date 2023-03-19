@@ -51,7 +51,8 @@ public class ConnectInferer {
     boolean flag = true;
     while (flag) {
       flag = false;
-      for (Map.Entry<FunctorAndArgument, Set<FunctorAndArgument>> mapEntry : functorTrans.entrySet()) {
+      for (Map.Entry<FunctorAndArgument, Set<FunctorAndArgument>> mapEntry :
+          functorTrans.entrySet()) {
         FunctorAndArgument leftFaa = mapEntry.getKey();
         for (FunctorAndArgument rightFaa : mapEntry.getValue()) {
           int preCount = functorConnect.getSetSize(rightFaa);
@@ -66,10 +67,7 @@ public class ConnectInferer {
   private Atomic getBuddyAtom(LinkOccurrence lo) {
     Atomic otherSideAtom = lo.buddy.atom;
     int otherSideAtompos = lo.buddy.pos;
-    if (
-      otherSideAtom instanceof Atom &&
-      ((Atom) otherSideAtom).functor.getName().equals("=")
-    ) {
+    if (otherSideAtom instanceof Atom && ((Atom) otherSideAtom).functor.getName().equals("=")) {
       int j = otherSideAtompos ^ 1;
       return getBuddyAtom(otherSideAtom.args[j]);
     }
@@ -79,10 +77,7 @@ public class ConnectInferer {
   private int getBuddyAtomPos(LinkOccurrence lo) {
     Atomic otherSideAtom = lo.buddy.atom;
     int otherSideAtompos = lo.buddy.pos;
-    if (
-      otherSideAtom instanceof Atom &&
-      ((Atom) otherSideAtom).functor.getName().equals("=")
-    ) {
+    if (otherSideAtom instanceof Atom && ((Atom) otherSideAtom).functor.getName().equals("=")) {
       int j = otherSideAtompos ^ 1;
       return getBuddyAtomPos(otherSideAtom.args[j]);
     }
@@ -102,9 +97,8 @@ public class ConnectInferer {
         int j = getBuddyAtomPos(otherSide);
         if (a instanceof Atom) {
           functorConnect.add(
-            new FunctorAndArgument(((Atom) atomic).functor, otherSide.pos),
-            new FunctorAndArgument(((Atom) a).functor, j)
-          );
+              new FunctorAndArgument(((Atom) atomic).functor, otherSide.pos),
+              new FunctorAndArgument(((Atom) a).functor, j));
         }
       }
     }
@@ -126,10 +120,7 @@ public class ConnectInferer {
     makeFunctorConnectRuleLeftMem(rule.leftMem, rule);
   }
 
-  private void makeFunctorConnectRuleLeftMem(
-    Membrane leftMem,
-    RuleStructure rule
-  ) {
+  private void makeFunctorConnectRuleLeftMem(Membrane leftMem, RuleStructure rule) {
     for (Atomic atomic : leftMem.atoms) {
       if (atomic instanceof ProcessContext) {
         continue;
@@ -140,18 +131,14 @@ public class ConnectInferer {
       Atom atom = (Atom) atomic;
       for (LinkOccurrence otherSide : atomic.args) {
         // 前者もコネクタを考慮するべき？
-        if (
-          !isFreeLink(otherSide, rule) &&
-          !(getBuddyAtom(otherSide) instanceof Atom)
-        ) {
+        if (!isFreeLink(otherSide, rule) && !(getBuddyAtom(otherSide) instanceof Atom)) {
           continue;
         }
         Atom a = (Atom) getBuddyAtom(otherSide);
         int j = getBuddyAtomPos(otherSide);
         functorTrans.add(
-          new FunctorAndArgument(atom.functor, otherSide.pos),
-          new FunctorAndArgument(a.functor, j)
-        );
+            new FunctorAndArgument(atom.functor, otherSide.pos),
+            new FunctorAndArgument(a.functor, j));
       }
     }
 
@@ -160,10 +147,7 @@ public class ConnectInferer {
     }
   }
 
-  private void makeFunctorConnectRuleRightMem(
-    Membrane rightMem,
-    RuleStructure rule
-  ) {
+  private void makeFunctorConnectRuleRightMem(Membrane rightMem, RuleStructure rule) {
     for (Atomic atomic : rightMem.atoms) {
       if (atomic instanceof ProcessContext) {
         continue;
@@ -182,9 +166,8 @@ public class ConnectInferer {
           continue;
         }
         functorConnect.add(
-          new FunctorAndArgument(atom.functor, otherSide.pos),
-          new FunctorAndArgument(((Atom) a).functor, j)
-        );
+            new FunctorAndArgument(atom.functor, otherSide.pos),
+            new FunctorAndArgument(((Atom) a).functor, j));
       }
     }
 
@@ -198,15 +181,13 @@ public class ConnectInferer {
   }
 
   private boolean isFreeLink(LinkOccurrence lo, RuleStructure rs) {
-    return (
-      rs.leftMem.freeLinks.containsValue(lo) ||
-      rs.rightMem.freeLinks.containsValue(lo)
-    );
+    return (rs.leftMem.freeLinks.containsValue(lo) || rs.rightMem.freeLinks.containsValue(lo));
   }
 
   public void printLMNSyntax() {
     Env.p(" connect{");
-    for (Map.Entry<FunctorAndArgument, Set<FunctorAndArgument>> mapEntry : functorConnect.entrySet()) {
+    for (Map.Entry<FunctorAndArgument, Set<FunctorAndArgument>> mapEntry :
+        functorConnect.entrySet()) {
       if (mapEntry.getValue().size() != 1) {
         continue;
       }
@@ -215,12 +196,11 @@ public class ConnectInferer {
           continue;
         }
         Env.p(
-          "\tconnect_only(" +
-          mapEntry.getKey().functor.getName() +
-          ", " +
-          mapEntry.getKey().i +
-          ", integer)."
-        );
+            "\tconnect_only("
+                + mapEntry.getKey().functor.getName()
+                + ", "
+                + mapEntry.getKey().i
+                + ", integer).");
       }
     }
 
