@@ -258,7 +258,7 @@ public class RuleCompiler {
     }
 
     // unary型付プロセス文脈のリンク出現
-    // System.out.println("computeRHSLinks 2: " + rhstypedcxtpaths.keySet());
+    // System.err.println("computeRHSLinks 2: " + rhstypedcxtpaths.keySet());
     for (ProcessContext atom : rhstypedcxtpaths.keySet()) {
       body.add(new Instruction(Instruction.ALLOCLINK, varcount, rhstypedcxtToPath(atom), 0));
       rhslinkpath.put(atom.args[0], varcount);
@@ -655,6 +655,7 @@ public class RuleCompiler {
     }
     varcount = gc.varCount;
     guard.add(0, Instruction.spec(formals, varcount));
+    //    System.err.println("generating jump: " + gc.getAtomActuals());
     guard.add(
         Instruction.jump(
             theRule.bodyLabel, gc.getMemActuals(), gc.getAtomActuals(), gc.getVarActuals()));
@@ -839,6 +840,7 @@ public class RuleCompiler {
   private void freeLHSTypedProcesses() {
     for (ContextDef def : rs.typedProcessContexts.values()) {
       if (gc.typedCxtTypes.get(def) == GuardCompiler.UNARY_ATOM_TYPE) {
+        // System.err.println("freeLHSTypedProcesses " + def + " " + typedcxtToSrcPath(def));
         body.add(new Instruction(Instruction.FREEATOM, typedcxtToSrcPath(def)));
       } else if (gc.typedCxtTypes.get(def) == GuardCompiler.GROUND_LINK_TYPE) {
         body.add(new Instruction(Instruction.FREEGROUND, groundToSrcPath(def)));

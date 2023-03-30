@@ -377,8 +377,8 @@ class GuardCompiler extends LHSCompiler {
             error("COMPILE ERROR: incompatible attributes in ground constraints");
           }
           hlgroundAttrs.put(def1, attrAtoms);
-          // System.out.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
-          // System.out.println("typedCxtTypes: " + typedCxtTypes);
+	   // System.err.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
+	   // System.err.println("typedCxtTypes: " + typedCxtTypes);
           checkHLGroundLink(func, def1);
         }
         // ガードインライン
@@ -444,8 +444,8 @@ class GuardCompiler extends LHSCompiler {
             //							Env.p("VAR## "+srcPath);
             if (srcPath == UNBOUND) continue FixType;
             uniqVars.add(srcPath);
-            // System.out.println("typedCxtTypes, defK: " + typedCxtTypes + " " + defK);
-            // System.out.println("hlgroundAttrs: " + hlgroundAttrs);
+ 	     // System.err.println("typedCxtTypes, defK: " + typedCxtTypes + " " + defK);
+	     // System.err.println("hlgroundAttrs: " + hlgroundAttrs);
           }
 
           match.add(new Instruction(Instruction.UNIQ, uniqVars));
@@ -880,6 +880,7 @@ class GuardCompiler extends LHSCompiler {
       int atomid = varCount++;
       typedCxtSrcs.put(def, atomid);
       typedCxtDefs.add(def);
+      // System.err.println("typedCxtDefs " + typedCxtDefs + " " + atomid + " " + varCount);
       match.add(new Instruction(Instruction.ALLOCATOM, atomid, func));
     } else {
       checkUnaryProcessContext(def);
@@ -1295,9 +1296,11 @@ class GuardCompiler extends LHSCompiler {
     for (int i = 0; i < atoms.size(); i++) {
       args.add(atomPaths.get(atoms.get(i)));
     }
+    // System.err.println("typedCxtDefs = " + typedCxtDefs);
     for (ContextDef def : typedCxtDefs) {
       if (typedCxtTypes.get(def) == UNARY_ATOM_TYPE) args.add(typedcxtToSrcPath(def));
     }
+    // System.err.println("args: " + args);
     return args;
   }
 

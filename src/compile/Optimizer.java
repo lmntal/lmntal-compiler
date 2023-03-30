@@ -73,10 +73,14 @@ public class Optimizer {
    */
   public static void optimizeRule(Rule rule) {
     // TODO 最適化器を統合する
+    // System.err.println("rule.guard0 " + rule.guard);
     Compactor.compactRule(rule);
+    // System.err.println("rule.guard1 " + rule.guard);
     // TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
-    if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop || rule.isTypeDef) {
-      // head と guard をくっつける
+    // ガードの allocatom は現行の slim で扱えないので必ず allocatomReduce 
+    // で消去する必要がある．このため常に head と guard をくっつける
+    // if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop || rule.isTypeDef) {
+    if (true) {
       inlineExpandTailJump(rule.memMatch);
       rule.guardLabel = null;
       rule.guard = null;
@@ -257,15 +261,36 @@ public class Optimizer {
     }
   }
 
-  /** allocatom に続く getfunc を loadfunc に変換する
+  /** ガードでの allocatom に続く getfunc を loadfunc に変換する
    * allocatom は単項アトムにしか使わないので，isunary の検査も消去する
-   * allocatom が参照されなくなった場合は対応する freeatom とともに除去する
+   * allocatom が参照されなくなった（または最初からされない）場合は
+   * 対応する freeatom とともに除去する
    * @param match ガードまでの命令列
    * @param body  右辺命令列
    */
+   // TODO: ガードで本来必要なのはファンクタだけなので，要らなくなるアトムを
+   // 作って解放するのでなく，最初からファンクタだけを扱うのが望ましい
   private static void allocatomReduce(List<Instruction> match, List<Instruction> body) { // ueda
     int maxm = match.size();
     int maxb = body.size();
+
+    // typedef のコンパイル時に呼ばれた場合（命令列 match の最後が
+    // jump でなく succreturn の場合）は何もしない
+    Instruction jump = match.get(maxm - 1);
+    // System.err.println("jump: " + jump);
+    if (jump.getKind() != Instruction.JUMP) return;
+
+    // 通常ルールの場合は，freeatom 命令の消去作業に備えて，
+    // allocatom (guard), freeatom (body) のレジスタ番号の対応関係表を作る
+    // 対応関係はガードからボディへのjump命令からわかる
+    List memargs = (List) jump.getArg2();
+    List atomargs = (List) jump.getArg3();
+    HashMap map = new HashMap();
+    for (int i = 0; i < atomargs.size(); i++) {
+	map.put(atomargs.get(i), memargs.size() + i);
+    }
+    // System.err.println("map: " + map);
+
     for (int i = 0; i < maxm; i++) {
       if (match.get(i).getKind() == Instruction.ALLOCATOM) {
         boolean referred = false;
@@ -292,6 +317,7 @@ public class Optimizer {
             for (int k = 0; k < size; k++) {
               if (inst.getArgType(k) == Instruction.ARG_ATOM) {
                 if ((Integer) inst.data.get(k) == allocreg) {
+                  // System.err.println("ALLOCATOM referred! " + inst);
                   referred = true;
                   break;
                 }
@@ -306,7 +332,8 @@ public class Optimizer {
           for (int j = 0; j < maxb; j++) {
             if (body.get(j).getKind() == Instruction.FREEATOM) {
               int freereg = (Integer) body.get(j).getArg1();
-              if (allocreg == freereg) {
+              // System.err.println("allocreg, freereg: " + allocreg + " " + freereg);
+              if ((int)map.get(allocreg) == freereg) {
                 body.remove(j);
                 maxb--;
               }
