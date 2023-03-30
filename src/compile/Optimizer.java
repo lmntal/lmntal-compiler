@@ -269,8 +269,8 @@ public class Optimizer {
    * @param match ガードまでの命令列
    * @param body  右辺命令列
    */
-   // TODO: ガードで本来必要なのはファンクタだけなので，要らなくなるアトムを
-   // 作って解放するのでなく，最初からファンクタだけを扱うのが望ましい
+  // TODO: ガードで本来必要なのはファンクタだけなので，要らなくなるアトムを
+  // 作って解放するのでなく，最初からファンクタだけを扱うのが望ましい
   private static void allocatomReduce(List<Instruction> match, List<Instruction> body) { // ueda
     int maxm = match.size();
     int maxb = body.size();
@@ -288,7 +288,7 @@ public class Optimizer {
     List atomargs = (List) jump.getArg3();
     HashMap map = new HashMap();
     for (int i = 0; i < atomargs.size(); i++) {
-	map.put(atomargs.get(i), memargs.size() + i);
+      map.put(atomargs.get(i), memargs.size() + i);
     }
     // System.err.println("map: " + map);
 
@@ -334,7 +334,7 @@ public class Optimizer {
             if (body.get(j).getKind() == Instruction.FREEATOM) {
               int freereg = (Integer) body.get(j).getArg1();
               // System.err.println("allocreg, freereg: " + allocreg + " " + freereg);
-              if ((int)map.get(allocreg) == freereg) {
+              if ((int) map.get(allocreg) == freereg) {
                 body.remove(j);
                 maxb--;
               }

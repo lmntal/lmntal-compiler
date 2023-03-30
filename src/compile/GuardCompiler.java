@@ -377,8 +377,8 @@ class GuardCompiler extends LHSCompiler {
             error("COMPILE ERROR: incompatible attributes in ground constraints");
           }
           hlgroundAttrs.put(def1, attrAtoms);
-	   // System.err.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
-	   // System.err.println("typedCxtTypes: " + typedCxtTypes);
+          // System.err.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
+          // System.err.println("typedCxtTypes: " + typedCxtTypes);
           checkHLGroundLink(func, def1);
         }
         // ガードインライン
@@ -444,8 +444,8 @@ class GuardCompiler extends LHSCompiler {
             //							Env.p("VAR## "+srcPath);
             if (srcPath == UNBOUND) continue FixType;
             uniqVars.add(srcPath);
- 	     // System.err.println("typedCxtTypes, defK: " + typedCxtTypes + " " + defK);
-	     // System.err.println("hlgroundAttrs: " + hlgroundAttrs);
+            // System.err.println("typedCxtTypes, defK: " + typedCxtTypes + " " + defK);
+            // System.err.println("hlgroundAttrs: " + hlgroundAttrs);
           }
 
           match.add(new Instruction(Instruction.UNIQ, uniqVars));
