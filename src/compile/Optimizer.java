@@ -77,8 +77,9 @@ public class Optimizer {
     Compactor.compactRule(rule);
     // System.err.println("rule.guard1 " + rule.guard);
     // TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
-    // ガードの allocatom は現行の slim で扱えないので必ず allocatomReduce 
-    // で消去する必要がある．このため常に head と guard をくっつける
+    // ガードでのシンボルアトムの allocatom は現行の slim で扱えないので
+    // 必ず allocatomReduce で消去する必要がある（データアトムは大丈夫）．
+    // このため，コンパイルオプションにかかわらず常に head と guard をくっつける
     // if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop || rule.isTypeDef) {
     if (true) {
       inlineExpandTailJump(rule.memMatch);
