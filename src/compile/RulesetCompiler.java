@@ -8,6 +8,7 @@ import compile.structure.Membrane;
 import compile.structure.RuleStructure;
 import compile.structure.TypeDefStructure;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import runtime.Env;
 import runtime.Instruction;
@@ -60,21 +61,44 @@ public class RulesetCompiler {
     List<Rule> rules = new ArrayList<>();
 
     // この膜にあるルール構造をルールオブジェクトにコンパイルする
-    for (RuleStructure rs : mem.rules) {
-      // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
-      processMembrane(rs.leftMem); // 一応左辺も
-      processMembrane(rs.rightMem);
+    // guard or 用に変更
+    for (int i = 0; i < mem.or_pairs.size(); i++) {
+      LinkedList<Integer> pairs = mem.or_pairs.get(i);
+      if (pairs.size() > 1) {
+        for (int itr = 0; itr < pairs.size(); itr++) {
+          RuleStructure rs = mem.rules.get(pairs.get(itr));
+          // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+          processMembrane(rs.leftMem); // 一応左辺も
+          processMembrane(rs.rightMem);
 
-      RuleCompiler rc = null;
-      try {
-        rc = new RuleCompiler(rs);
-        rc.compile(false);
-        // 2006.1.22 Ruleに行番号を渡す by inui
-        rc.theRule.lineno = rs.lineno;
-      } catch (CompileException e) {
-        Env.p("    in " + rs.toString() + "\n");
+          RuleCompiler rc = null;
+          try {
+            rc = new RuleCompiler(rs);
+            rc.compile(false, true);
+            // 2006.1.22 Ruleに行番号を渡す by inui
+            rc.theRule.lineno = rs.lineno;
+          } catch (CompileException e) {
+            Env.p("    in " + rs.toString() + "\n");
+          }
+          rules.add(rc.theRule);
+        }
+      } else {
+        RuleStructure rs = mem.rules.get(pairs.get(0));
+        // ルールの右辺膜以下にある子ルールをルールセットにコンパイルする
+        processMembrane(rs.leftMem); // 一応左辺も
+        processMembrane(rs.rightMem);
+
+        RuleCompiler rc = null;
+        try {
+          rc = new RuleCompiler(rs);
+          rc.compile(false, false);
+          // 2006.1.22 Ruleに行番号を渡す by inui
+          rc.theRule.lineno = rs.lineno;
+        } catch (CompileException e) {
+          Env.p("    in " + rs.toString() + "\n");
+        }
+        rules.add(rc.theRule);
       }
-      rules.add(rc.theRule);
     }
 
     // typedef におけるサブルールをコンパイルする
@@ -111,7 +135,7 @@ public class RulesetCompiler {
           RuleCompiler rc = null;
           try {
             rc = new RuleCompiler(rs);
-            rc.compile(true);
+            rc.compile(true, false);
 
             // 2006.1.22 Ruleに行番号を渡す by inui
             rc.theRule.lineno = rs.lineno;
@@ -126,8 +150,48 @@ public class RulesetCompiler {
 
     // 生成したルールオブジェクトのリストをルールセット（のセット）にコンパイルする
     if (!rules.isEmpty()) {
+      List<Integer> notAdd = new LinkedList<>();
       InterpretedRuleset ruleset = new InterpretedRuleset();
-      for (Rule r : rules) {
+      // guard or 用に and のみを含むように分割したルールを合成する
+      // -O3 前提
+      for (int itr = 0; itr < mem.or_pairs.size(); itr++) {
+        LinkedList<Integer> pair = (LinkedList) mem.or_pairs.get(itr);
+        if (pair.size() > 1) { // guard or を含む場合
+          InstructionList orlists = new InstructionList();
+          for (int i = 1; i < pair.size(); i++) {
+            notAdd.add(pair.get(i));
+            InstructionList orlist = new InstructionList();
+            orlist.insts = InstructionList.cloneInstructions(rules.get(pair.get(i)).memMatch);
+            for (Instruction instr : rules.get(pair.get(i)).memMatch) {
+              if (instr.getKind() == Instruction.ORDUMMY) { // ordummy 以降の命令をすべて branch で囲む
+                orlist.insts.remove(0);
+                Instruction branch = new Instruction(Instruction.BRANCH, orlist);
+                orlists.add(branch);
+                break;
+              }
+              orlist.insts.remove(0); // ordummy が来るまで前から順に命令を削除
+            }
+          }
+          // ordummy を guard or を表す branch 命令の列に置き換える
+          List<Instruction> replace = rules.get(pair.get(0)).memMatch;
+          for (int i = 0; i < replace.size(); i++) {
+            if (replace.get(i).getKind() == Instruction.ORDUMMY) {
+              replace.addAll(i + 1, orlists.insts);
+              replace.remove(i);
+              break;
+            }
+          }
+        }
+        // ruleset.rules.add(rules.get(pair.get(0)));
+      }
+      for (int i = 0; i < rules.size(); i++) {
+        if (!notAdd.isEmpty()) {
+          if (i == notAdd.get(0)) {
+            notAdd.remove(0);
+            continue;
+          }
+        }
+        Rule r = rules.get(i);
         ruleset.rules.add(r);
       }
       ruleset.branchmap = null;

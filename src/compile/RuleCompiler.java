@@ -103,7 +103,7 @@ public class RuleCompiler {
   /**
    * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルする
    */
-  public Rule compile(boolean isTypeDef) throws CompileException {
+  public Rule compile(boolean isTypeDef, boolean isOrRule) throws CompileException {
     // System.out.println("compile() called: " + rs);
     liftupActiveAtoms(rs.leftMem);
     simplify();
@@ -154,7 +154,7 @@ public class RuleCompiler {
     String ruleName =
         theRule.name != null ? theRule.name : makeRuleName(rs.toString(), Env.showlongrulename, 4);
     theRule.body.add(1, Instruction.commit(ruleName, theRule.lineno));
-    optimize();
+    optimize(isOrRule);
     return theRule;
   }
 
@@ -1050,11 +1050,11 @@ public class RuleCompiler {
   /**
    * 命令列を最適化する
    */
-  private void optimize() {
+  private void optimize(boolean isOrRule) {
     Env.c("optimize");
     if (!rs.isInitialRule()) {
       // このフラグがtrue <=> theRuleは初期データ生成用ルール
-      Optimizer.optimizeRule(theRule);
+      Optimizer.optimizeRule(theRule, isOrRule);
     }
   }
 

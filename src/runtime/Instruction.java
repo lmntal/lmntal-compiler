@@ -2115,6 +2115,12 @@ public class Instruction implements Cloneable {
     setArgType(SUBRULE, new ArgType(true, ARG_VAR, ARG_INT, ARG_OBJ, ARG_VARS));
   }
 
+  public static final int ORDUMMY = 1000;
+
+  static {
+    setArgType(ORDUMMY, new ArgType(false));
+  }
+
   /** 命令の種類を取得する。*/
   public int getKind() {
     return kind;

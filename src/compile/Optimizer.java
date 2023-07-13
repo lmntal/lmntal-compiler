@@ -71,13 +71,13 @@ public class Optimizer {
    *
    *  @param rule ルールオブジェクト
    */
-  public static void optimizeRule(Rule rule) {
+  public static void optimizeRule(Rule rule, boolean isOrRule) {
     // TODO 最適化器を統合する
     Compactor.compactRule(rule);
     // TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
     if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop || rule.isTypeDef) {
       // head と guard をくっつける
-      inlineExpandTailJump(rule.memMatch);
+      inlineExpandTailJump(rule.memMatch, isOrRule);
       rule.guardLabel = null;
       rule.guard = null;
     }
@@ -85,7 +85,7 @@ public class Optimizer {
       rule.memMatch.remove(rule.memMatch.size() - 1);
     }
     optimize(rule.memMatch, rule.body);
-    if (fGuardMove) {
+    if (fGuardMove && !isOrRule) {
       guardMove(rule.memMatch);
       allocMove(rule.memMatch);
     }
@@ -98,7 +98,8 @@ public class Optimizer {
     if (fSystemRulesetsInlining) inlineExpandSystemRuleSets(rule.body);
     if (fInlining) {
       // head(+guard) と body をくっつける
-      inlineExpandTailJump(rule.memMatch);
+      // guard or に対応するため、head と guard の切れ目に印をつけるように変更
+      inlineExpandTailJump(rule.memMatch, false);
 
       rule.bodyLabel = null;
       rule.body = null;
@@ -136,7 +137,7 @@ public class Optimizer {
    *     [ spec[X,Y];  C;jump[L,A1..Am] ] where L:[spec[m,m+n];D]
    * ==> [ spec[X,Y+n];C; D{ 1..m->A1..Am, m+1..m+n->Y+1..Y+n } ]
    * }</pre> */
-  public static void inlineExpandTailJump(List<Instruction> insts) {
+  public static void inlineExpandTailJump(List<Instruction> insts, boolean isOrRule) {
     if (insts.isEmpty()) return;
     Instruction spec = insts.get(0);
     if (spec.getKind() != Instruction.SPEC) return;
@@ -144,12 +145,12 @@ public class Optimizer {
       Instruction branch = insts.get(i);
       if (branch.getKind() != Instruction.BRANCH) break;
       InstructionList label = (InstructionList) branch.getArg1();
-      inlineExpandTailJump(label.insts);
+      inlineExpandTailJump(label.insts, isOrRule);
     }
 
     int formals = spec.getIntArg1();
     int locals = spec.getIntArg2();
-    locals = inlineExpandTailJump(insts, locals);
+    locals = inlineExpandTailJump(insts, locals, isOrRule);
     spec.updateSpec(formals, locals);
   }
 
@@ -158,7 +159,7 @@ public class Optimizer {
    *  @param varcount 展開前の実引数
    *  @return 展開後の実引数
    *  */
-  public static int inlineExpandTailJump(List<Instruction> insts, int varcount) {
+  public static int inlineExpandTailJump(List<Instruction> insts, int varcount, boolean isOrRule) {
     if (insts.isEmpty()) return varcount;
     int size = insts.size();
     Instruction jump = insts.get(size - 1);
@@ -185,6 +186,10 @@ public class Optimizer {
     Instruction.applyVarRewriteMap(subinsts, map);
     subinsts.remove(0); // specを除去
     insts.remove(size - 1); // jump命令を除去
+    if (isOrRule) { // guard or 用の dummy を追加
+      Instruction dummy = new Instruction(Instruction.ORDUMMY);
+      insts.add(dummy);
+    }
     insts.addAll(subinsts);
     return varcount;
   }

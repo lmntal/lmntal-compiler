@@ -310,7 +310,7 @@ class SrcRule {
   }
 
   public String toString() {
-    return "(rule:" + name + ")";
+    return "(rule:" + name + "), head: " + head + ", guard: " + guard + ", body: " + body;
   }
 
   /**

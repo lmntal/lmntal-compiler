@@ -379,39 +379,109 @@ public class LMNParser {
    * @param mem 追加先の膜
    */
   private void addSrcRuleToMem(SrcRule sRule, Membrane mem) throws ParseException {
-    // 2006.1.22 linenoを追加 by inui
-    RuleStructure rule = new RuleStructure(mem, sRule.getText(), sRule.lineno);
-    rule.name = sRule.name;
-    // 略記法の展開
-    expander.expandRuleAbbreviations(sRule);
-    //  左辺のルールを構文エラーとして除去する
-    assertLHSRules(sRule.getHead());
+    // guard に or を含むルールを and のみのルールに分割する
+    LinkedList<SrcRule> splitRules = splitGuardOr(sRule);
+    LinkedList<Integer> pairs = new LinkedList<Integer>();
 
-    // 左辺およびガード型制約に対して、構造を生成し、リンク以外の名前を解決する
-    addProcessToMem(sRule.getHead(), rule.leftMem);
-    addProcessToMem(sRule.getGuard(), rule.guardMem);
-    HashMap names = resolveHeadContextNames(rule);
-    // ガード否定条件および右辺に対して、構造を生成し、リンク以外の名前を解決する
-    addGuardNegatives(sRule.getGuardNegatives(), rule, names);
-    addProcessToMem(sRule.getBody(), rule.rightMem);
-    resolveContextNames(rule, names);
+    for (int itr = 0; itr < splitRules.size(); itr++) {
+      SrcRule sRuleTmp = splitRules.get(itr);
+      // 2006.1.22 linenoを追加 by inui
+      RuleStructure rule = new RuleStructure(mem, sRuleTmp.getText(), sRule.lineno);
+      rule.name = sRuleTmp.name;
+      // 略記法の展開
+      expander.expandRuleAbbreviations(sRuleTmp);
+      //  左辺のルールを構文エラーとして除去する
+      assertLHSRules(sRuleTmp.getHead());
 
-    // 略記法が展開されて構造が生成され，
-    // リンク以外の名前が解決されている ( $p,@pのContext.defがセットされている，*Vは双方向リンクがはられている )
+      // 左辺およびガード型制約に対して、構造を生成し、リンク以外の名前を解決する
+      addProcessToMem(sRuleTmp.getHead(), rule.leftMem);
+      addProcessToMem(sRuleTmp.getGuard(), rule.guardMem);
+      HashMap names = resolveHeadContextNames(rule);
+      // ガード否定条件および右辺に対して、構造を生成し、リンク以外の名前を解決する
+      addGuardNegatives(sRuleTmp.getGuardNegatives(), rule, names);
+      addProcessToMem(sRuleTmp.getBody(), rule.rightMem);
+      resolveContextNames(rule, names);
 
-    // プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
-    // この時点ではアトムのリンク引数には自分自身のLinkOccurreceが格納されている
-    // これらが終わると，アトムのリンク引数のLinkOccurrenceのbuddyがセットされる
-    // リンクを繋ぐ作業はaddLinkOccurrenceで行われる
+      // 略記法が展開されて構造が生成され，
+      // リンク以外の名前が解決されている ( $p,@pのContext.defがセットされている，*Vは双方向リンクがはられている )
 
-    addProxies(rule.leftMem); // addProxiesAndCoupleLinksであるべき?
-    coupleLinks(rule.guardMem);
-    addProxies(rule.rightMem);
-    addProxiesToGuardNegatives(rule);
-    coupleGuardNegativeLinks(rule); // ガード否定条件のリンクを接続する
-    coupleInheritedLinks(rule); // 右辺と左辺の自由リンクを接続する
+      // プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
+      // この時点ではアトムのリンク引数には自分自身のLinkOccurreceが格納されている
+      // これらが終わると，アトムのリンク引数のLinkOccurrenceのbuddyがセットされる
+      // リンクを繋ぐ作業はaddLinkOccurrenceで行われる
 
-    mem.rules.add(rule);
+      addProxies(rule.leftMem); // addProxiesAndCoupleLinksであるべき?
+      coupleLinks(rule.guardMem);
+      addProxies(rule.rightMem);
+      addProxiesToGuardNegatives(rule);
+      coupleGuardNegativeLinks(rule); // ガード否定条件のリンクを接続する
+      coupleInheritedLinks(rule); // 右辺と左辺の自由リンクを接続する
+
+      mem.rules.add(rule);
+      pairs.add(mem.rules.size() - 1);
+    }
+    if (pairs.size() > 0) mem.or_pairs.add(pairs);
+
+    // // 2006.1.22 linenoを追加 by inui
+    //   RuleStructure rule = new RuleStructure(mem, sRule.getText(), sRule.lineno);
+    //   rule.name = sRule.name;
+    //   // 略記法の展開
+    //   expander.expandRuleAbbreviations(sRule);
+    //   //  左辺のルールを構文エラーとして除去する
+    //   assertLHSRules(sRule.getHead());
+
+    //   // 左辺およびガード型制約に対して、構造を生成し、リンク以外の名前を解決する
+    //   addProcessToMem(sRule.getHead(), rule.leftMem);
+    //   addProcessToMem(sRule.getGuard(), rule.guardMem);
+    //   HashMap names = resolveHeadContextNames(rule);
+    //   // ガード否定条件および右辺に対して、構造を生成し、リンク以外の名前を解決する
+    //   addGuardNegatives(sRule.getGuardNegatives(), rule, names);
+    //   addProcessToMem(sRule.getBody(), rule.rightMem);
+    //   resolveContextNames(rule, names);
+
+    //   // 略記法が展開されて構造が生成され，
+    //   // リンク以外の名前が解決されている ( $p,@pのContext.defがセットされている，*Vは双方向リンクがはられている )
+
+    //   // プロキシアトムを生成し、リンクをつなぎ、膜の自由リンクリストを決定する
+    //   // この時点ではアトムのリンク引数には自分自身のLinkOccurreceが格納されている
+    //   // これらが終わると，アトムのリンク引数のLinkOccurrenceのbuddyがセットされる
+    //   // リンクを繋ぐ作業はaddLinkOccurrenceで行われる
+
+    //   addProxies(rule.leftMem); // addProxiesAndCoupleLinksであるべき?
+    //   coupleLinks(rule.guardMem);
+    //   addProxies(rule.rightMem);
+    //   addProxiesToGuardNegatives(rule);
+    //   coupleGuardNegativeLinks(rule); // ガード否定条件のリンクを接続する
+    //   coupleInheritedLinks(rule); // 右辺と左辺の自由リンクを接続する
+
+    //   mem.rules.add(rule);
+  }
+
+  /**
+   * guard or を含むルールを and のみのルールに分割する
+   * @param rule
+   * @return
+   */
+  private LinkedList<SrcRule> splitGuardOr(SrcRule rule) {
+    LinkedList<SrcRule> result = new LinkedList<SrcRule>();
+    if (rule.getGuard() != null) {
+      LinkedList guard = rule.getGuard();
+      if (guard.size() > 0) {
+        if (guard.get(0) instanceof LinkedList) {
+          for (int i = 0; i < guard.size(); i++) {
+            SrcRule tmp =
+                new SrcRule(
+                    rule.name, rule.head, (LinkedList) guard.get(i), rule.body, rule.lineno);
+            tmp.guard = (LinkedList) guard.get(i);
+            tmp.setText();
+            result.add(tmp);
+          }
+        }
+      } else {
+        result.add(rule);
+      }
+    }
+    return result;
   }
 
   /**
