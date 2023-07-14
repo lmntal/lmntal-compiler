@@ -468,7 +468,7 @@ public class LMNParser {
       LinkedList guard = rule.getGuard();
       LinkedList body = rule.getBody();
       boolean bodyOr = false;
-      if(body.size() > 1){
+      if (body.size() > 1) {
         bodyOr = true;
       }
       if (guard.size() > 0) {
@@ -477,17 +477,25 @@ public class LMNParser {
         // }
         if (guard.get(0) instanceof LinkedList) {
           for (int i = 0; i < guard.size(); i++) {
-            if(bodyOr){
+            if (bodyOr) {
               SrcRule tmp =
-                new SrcRule(
-                    rule.name, rule.head, (LinkedList) guard.get(i), (LinkedList)body.get(i), rule.lineno);
+                  new SrcRule(
+                      rule.name,
+                      rule.head,
+                      (LinkedList) guard.get(i),
+                      (LinkedList) body.get(i),
+                      rule.lineno);
               tmp.guard = (LinkedList) guard.get(i);
               tmp.setText();
               result.add(tmp);
-            }else{
+            } else {
               SrcRule tmp =
-                new SrcRule(
-                    rule.name, rule.head, (LinkedList) guard.get(i), (LinkedList)body.get(0), rule.lineno);
+                  new SrcRule(
+                      rule.name,
+                      rule.head,
+                      (LinkedList) guard.get(i),
+                      (LinkedList) body.get(0),
+                      rule.lineno);
               tmp.guard = (LinkedList) guard.get(i);
               tmp.setText();
               result.add(tmp);
