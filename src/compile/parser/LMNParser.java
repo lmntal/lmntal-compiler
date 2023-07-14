@@ -472,9 +472,9 @@ public class LMNParser {
         bodyOr = true;
       }
       if (guard.size() > 0) {
-        if(bodyOr && body.size()!=guard.size()){
-          error("Syntax error: different number of semicolon in guard and body");
-        }
+        // if(bodyOr && body.size()!=guard.size()){
+        //   error("Syntax error: different number of semicolon in guard and body");
+        // }
         if (guard.get(0) instanceof LinkedList) {
           for (int i = 0; i < guard.size(); i++) {
             if(bodyOr){
