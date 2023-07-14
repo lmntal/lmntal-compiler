@@ -163,7 +163,7 @@ public class RulesetCompiler {
             notAdd.add(pair.get(i));
             InstructionList orlist = new InstructionList();
             orlist.insts = InstructionList.cloneInstructions(rules.get(pair.get(i)).memMatch);
-            if(orlist.insts.get(0).getIntArg2() > maxlocals){
+            if (orlist.insts.get(0).getIntArg2() > maxlocals) {
               maxlocals = orlist.insts.get(0).getIntArg2();
             }
             for (Instruction instr : rules.get(pair.get(i)).memMatch) {
@@ -179,7 +179,7 @@ public class RulesetCompiler {
           // ordummy を guard or を表す branch 命令の列に置き換える
           List<Instruction> replace = rules.get(pair.get(0)).memMatch;
           Instruction spec = replace.get(0);
-          if(spec.getIntArg2() > maxlocals){
+          if (spec.getIntArg2() > maxlocals) {
             maxlocals = spec.getIntArg2();
           }
           spec.updateSpec(spec.getIntArg1(), maxlocals);
