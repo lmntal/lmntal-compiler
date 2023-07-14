@@ -501,10 +501,14 @@ public class LMNParser {
               result.add(tmp);
             }
           }
+        }else{
+          result.add(rule);
         }
       } else {
         result.add(rule);
       }
+    }else{
+      result.add(rule);
     }
     return result;
   }
