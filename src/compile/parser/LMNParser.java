@@ -466,15 +466,32 @@ public class LMNParser {
     LinkedList<SrcRule> result = new LinkedList<SrcRule>();
     if (rule.getGuard() != null) {
       LinkedList guard = rule.getGuard();
+      LinkedList body = rule.getBody();
+      boolean bodyOr = false;
+      if(body.size() > 1){
+        bodyOr = true;
+      }
       if (guard.size() > 0) {
+        if(bodyOr && body.size()!=guard.size()){
+          error("Syntax error: different number of semicolon in guard and body");
+        }
         if (guard.get(0) instanceof LinkedList) {
           for (int i = 0; i < guard.size(); i++) {
-            SrcRule tmp =
+            if(bodyOr){
+              SrcRule tmp =
                 new SrcRule(
-                    rule.name, rule.head, (LinkedList) guard.get(i), rule.body, rule.lineno);
-            tmp.guard = (LinkedList) guard.get(i);
-            tmp.setText();
-            result.add(tmp);
+                    rule.name, rule.head, (LinkedList) guard.get(i), (LinkedList)body.get(i), rule.lineno);
+              tmp.guard = (LinkedList) guard.get(i);
+              tmp.setText();
+              result.add(tmp);
+            }else{
+              SrcRule tmp =
+                new SrcRule(
+                    rule.name, rule.head, (LinkedList) guard.get(i), (LinkedList)body.get(0), rule.lineno);
+              tmp.guard = (LinkedList) guard.get(i);
+              tmp.setText();
+              result.add(tmp);
+            }
           }
         }
       } else {
