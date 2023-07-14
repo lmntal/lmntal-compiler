@@ -154,6 +154,7 @@ public class RulesetCompiler {
       InterpretedRuleset ruleset = new InterpretedRuleset();
       // guard or 用に and のみを含むように分割したルールを合成する
       // -O3 前提
+      int maxlocals = 0;
       for (int itr = 0; itr < mem.or_pairs.size(); itr++) {
         LinkedList<Integer> pair = (LinkedList) mem.or_pairs.get(itr);
         if (pair.size() > 1) { // guard or を含む場合
@@ -162,6 +163,9 @@ public class RulesetCompiler {
             notAdd.add(pair.get(i));
             InstructionList orlist = new InstructionList();
             orlist.insts = InstructionList.cloneInstructions(rules.get(pair.get(i)).memMatch);
+            if(orlist.insts.get(0).getIntArg2() > maxlocals){
+              maxlocals = orlist.insts.get(0).getIntArg2();
+            }
             for (Instruction instr : rules.get(pair.get(i)).memMatch) {
               if (instr.getKind() == Instruction.ORDUMMY) { // ordummy 以降の命令をすべて branch で囲む
                 orlist.insts.remove(0);
@@ -174,6 +178,11 @@ public class RulesetCompiler {
           }
           // ordummy を guard or を表す branch 命令の列に置き換える
           List<Instruction> replace = rules.get(pair.get(0)).memMatch;
+          Instruction spec = replace.get(0);
+          if(spec.getIntArg2() > maxlocals){
+            maxlocals = spec.getIntArg2();
+          }
+          spec.updateSpec(spec.getIntArg1(), maxlocals);
           for (int i = 0; i < replace.size(); i++) {
             if (replace.get(i).getKind() == Instruction.ORDUMMY) {
               replace.addAll(i + 1, orlists.insts);

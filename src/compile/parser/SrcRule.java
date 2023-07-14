@@ -226,7 +226,18 @@ class SrcRule {
    */
   private void unSimpagationize(List head2) {
     // head を全てbodyへコピー (前に追加のほうが再利用の上でも都合がいい？)
-    body.addAll(copySrcs(head));
+    if(body.get(0) instanceof LinkedList){
+      for (int i=0; i<body.size(); i++) {
+        if(body.get(i) instanceof LinkedList){
+          LinkedList b = (LinkedList)body.get(i);
+          b.addAll(copySrcs(head));
+        }
+      }
+    }
+    else{
+      body.addAll(copySrcs(head));
+    }
+    
     // head2をheadの後ろに連結
     head.addAll(head2);
   }
