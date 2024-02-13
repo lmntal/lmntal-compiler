@@ -11,7 +11,7 @@ public abstract class ValueCount {
 
   public abstract ValueCount mul(int m);
 
-  public abstract int compare(ValueCount vc);
+  public abstract long compare(ValueCount vc);
 
   public boolean equals(ValueCount v) {
     return compare(v) == 0;
