@@ -6,7 +6,7 @@ package compile.parser;
 import java.util.LinkedList;
 import compile.parser.MySymbol;
 
-parser code {: 
+parser code {:
 	public void report_error(String message, Object info) {
 		System.err.print(message);
 		if (info instanceof MySymbol) {
@@ -19,7 +19,7 @@ parser code {:
     public void unrecovered_syntax_error(java_cup.runtime.Symbol cur_token) throws Exception {
     	report_fatal_error("Couldn't repair and continue parse", null);
 	}
-    
+
 :};
 
 
@@ -30,8 +30,8 @@ terminal		COMMA, LPAREN, RPAREN, LBRACE,
 				RBRACE_UNDERBAR, RBRACE_UNDERBAR_SLASH,
 				RBRACE_UNDERBAR_AT, RBRACE_UNDERBAR_SLASH_AT,
 				RBRACE_ASTERISK,
-				COLON, PERIOD, BACKSLASH, GUARD, PROCVAR, RULEVAR, 
-				LBRACKET, RBRACKET, NEGATIVE, MOD, 
+				COLON, PERIOD, BACKSLASH, GUARD, PROCVAR, RULEVAR,
+				LBRACKET, RBRACKET, NEGATIVE, MOD,
 				LOGAND, LOGIOR, LOGXOR, /* LOGNOT, */ ASH,
 				HAT, TILDE, ASTERISK_ASTERISK,
 				ASTERISK_DOT, SLASH_DOT, PLUS_DOT, MINUS_DOT,
@@ -71,7 +71,6 @@ non terminal SrcProcessContext	ProcessContext;
 non terminal SrcRuleContext		RuleContext;
 non terminal SrcContext			Context;
 non terminal Object				Process;
-non terminal SrcRule			ProcessListContinuation;
 non terminal LinkedList			ProcessList;
 non terminal LinkedList			NonemptyProcessList;
 non terminal LinkedList			WorldProcessList;
@@ -156,37 +155,8 @@ UnitAtom ::=
       {: RESULT = new SrcAtom(name, list, nameleft, nameright); :}
   | List:list
       {: RESULT = list; :}
-//				| LPAREN Rule:rule RPAREN
-//					{: RESULT = rule; :}
-  | LPAREN RuleName:name RULENAMESEP ProcessList:list ProcessListContinuation:rule
-      {: rule.name = name;
-         if (rule == null) {
-           if (list.size() == 1) {
-             RESULT = list.getFirst();
-           }
-           else {
-             RESULT = list;
-           }
-         }
-         else {
-           rule.setHead(list);
-           RESULT = rule;
-         }
-      :}
-  | LPAREN ProcessList:list ProcessListContinuation:rule
-      {: if (rule == null) {
-           if (list.size() == 1) {
-             RESULT = list.getFirst();
-           }
-           else {
-             RESULT = list;
-           }
-         }
-         else {
-           rule.setHead(list);
-           RESULT = rule;
-         }
-      :}
+  | LPAREN Rule:rule RPAREN
+      {: RESULT = rule; :}
   | LPAREN QuotedOperatorAtom:atom RPAREN
       {: RESULT = atom; :}
   | Context:p
@@ -446,23 +416,6 @@ Rule ::=
       {: RESULT = new SrcRule(null, head, head2, guard, body, lineno.intValue()); :}
   | RuleName:name RULENAMESEP ProcessList:head BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body
       {: RESULT = new SrcRule(name, head, head2, guard, body, lineno.intValue()); :}
-;
-
-// 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
-// こっちはルール名には非対応。(a,b,c :- ( 対応しているようだが…。)
-// 出現した行番号を追加 by Inui
-// simpagationを追加 by Kudo
-ProcessListContinuation ::=
-    RPAREN
-      {: RESULT = null; :}
-  | RULE:lineno ProcessList:body RPAREN
-      {: RESULT = new SrcRule(null, null, body, lineno.intValue()); :}
-  | RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-      {: RESULT = new SrcRule(null, null, guard, body, lineno.intValue()); :}
-  | BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body RPAREN
-      {: RESULT = new SrcRule(null, null, head2, null, body, lineno.intValue()); :}
-  | BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-      {: RESULT = new SrcRule(null, null, head2, guard, body, lineno.intValue()); :}
 ;
 
 ProcessContext ::=
