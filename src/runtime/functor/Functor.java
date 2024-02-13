@@ -159,7 +159,7 @@ public abstract class Functor {
             name = name.substring(2);
             radix = 16;
           }
-          return new IntegerFunctor(Integer.parseInt(name, radix));
+          return new IntegerFunctor(Long.parseLong(name, radix));
         } catch (NumberFormatException ignored) {
         }
         try {

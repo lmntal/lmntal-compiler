@@ -4,17 +4,17 @@ package runtime.functor;
  * @author n-kato */
 public class IntegerFunctor extends DataFunctor {
 
-  private int value;
+  private long value;
 
-  public IntegerFunctor(int value) {
+  public IntegerFunctor(long value) {
     this.value = value;
   }
 
   public int hashCode() {
-    return value;
+      return (int) value;
   }
 
-  public int intValue() {
+  public long intValue() {
     return value;
   }
 
@@ -46,7 +46,7 @@ public class IntegerFunctor extends DataFunctor {
   }
 
   public String getName() {
-    return Integer.toString(value);
+    return Long.toString(value);
   }
 
   public String getQuotedAtomName() {
