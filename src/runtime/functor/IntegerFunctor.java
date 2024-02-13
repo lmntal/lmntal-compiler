@@ -11,7 +11,7 @@ public class IntegerFunctor extends DataFunctor {
   }
 
   public int hashCode() {
-      return (int) value;
+    return (int) value;
   }
 
   public long intValue() {
