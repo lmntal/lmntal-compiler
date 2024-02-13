@@ -471,11 +471,7 @@ public class LMNParser {
           for (int i = 0; i < guard.size(); i++) {
             SrcRule tmp =
                 new SrcRule(
-                    rule.name,
-                    rule.head,
-                    (LinkedList) guard.get(i),
-                    rule.body,
-                    rule.lineno);
+                    rule.name, rule.head, (LinkedList) guard.get(i), rule.body, rule.lineno);
             tmp.guard = (LinkedList) guard.get(i);
             tmp.setText();
             result.add(tmp);
