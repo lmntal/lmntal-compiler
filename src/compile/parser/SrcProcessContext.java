@@ -17,13 +17,13 @@ class SrcProcessContext extends SrcContext {
    * <p>利用側でLinkedListを生成して代入すること
    */
   @JsonTypeInfo(use = Id.CLASS)
-  public LinkedList args = null;
+  public LinkedList<SrcElement> args = null;
 
   /** リンク束 */
   public SrcLinkBundle bundle = null;
 
   /** 分離した同名型付きプロセス文脈の名前を格納 */
-  public LinkedList sameNameList = null;
+  public LinkedList<String> sameNameList = null;
 
   /** リンク名 */
   public String linkName = null;
@@ -56,7 +56,7 @@ class SrcProcessContext extends SrcContext {
     return "$" + name;
   }
 
-  public LinkedList getSameNameList() {
+  public LinkedList<String> getSameNameList() {
     return sameNameList;
   }
 

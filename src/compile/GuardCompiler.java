@@ -781,10 +781,11 @@ class GuardCompiler extends LHSCompiler {
           hlgroundAttrs.put(def1, attrAtoms);
           // System.out.println("#hlgroundAttrs: " + hlgroundAttrs.get(def1).length);
           checktypedefLink(func, def1);
-        } else {
-          error("COMPILE ERROR: unrecognized type constraint: " + cstr);
-          discardTypeConstraint(cstr); // ここには来ない
         }
+        // else {
+        //   error("COMPILE ERROR: unrecognized type constraint: " + cstr);
+        //   discardTypeConstraint(cstr); // ここには来ない
+        // }
         lit.remove();
         changed = true;
       }

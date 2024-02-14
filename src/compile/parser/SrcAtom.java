@@ -8,10 +8,10 @@ import java.util.LinkedList;
 
 /** ソースファイル中のアトム表現 */
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
-class SrcAtom {
+class SrcAtom extends SrcElement {
 
   @JsonTypeInfo(use = Id.CLASS)
-  protected LinkedList process = null;
+  protected LinkedList<SrcElement> process = null;
 
   /** 名前トークン */
   protected SrcName srcname;
@@ -43,7 +43,7 @@ class SrcAtom {
    * @param srcname 名前トークン
    */
   public SrcAtom(SrcName srcname) {
-    this(srcname, new LinkedList(), -1, -1);
+    this(srcname, new LinkedList<>(), -1, -1);
   }
 
   /**
@@ -51,7 +51,7 @@ class SrcAtom {
    * @param name アトム名
    * @param process 子供プロセス
    */
-  public SrcAtom(String name, LinkedList process) {
+  public SrcAtom(String name, LinkedList<SrcElement> process) {
     this(new SrcName(name), process, -1, -1);
   }
 
@@ -60,7 +60,7 @@ class SrcAtom {
    * @param srcname 名前トークン
    * @param process 子供プロセス
    */
-  public SrcAtom(SrcName srcname, LinkedList process) {
+  public SrcAtom(SrcName srcname, LinkedList<SrcElement> process) {
     this(srcname, process, -1, -1);
   }
 
@@ -72,7 +72,7 @@ class SrcAtom {
    * @param column ソースコード上での出現位置(桁)
    */
   public SrcAtom(SrcName srcname, int line, int column) {
-    this(srcname, new LinkedList(), line, column);
+    this(srcname, new LinkedList<>(), line, column);
   }
 
   /**
@@ -83,7 +83,7 @@ class SrcAtom {
    * @param line ソースコード上での出現位置(行)
    * @param column ソースコード上での出現位置(桁)
    */
-  public SrcAtom(SrcName nametoken, LinkedList process, int line, int column) {
+  public SrcAtom(SrcName nametoken, LinkedList<SrcElement> process, int line, int column) {
     this.srcname = nametoken;
     this.process = process;
     this.line = line;
@@ -121,12 +121,12 @@ class SrcAtom {
    * このアトムの子プロセスを得ます
    * @return 子プロセスのリスト
    */
-  public LinkedList getProcess() {
+  public LinkedList<SrcElement> getProcess() {
     return process;
   }
 
   public SrcAtom clone() {
-    return new SrcAtom(srcname.clone(), (LinkedList) process.clone(), line, column);
+    return new SrcAtom(srcname.clone(), new LinkedList<SrcElement>(process), line, column);
   }
 
   public String toString() {

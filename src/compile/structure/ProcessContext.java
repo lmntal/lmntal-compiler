@@ -16,7 +16,7 @@ public final class ProcessContext extends Context {
   /**
    * 分離した同名型付きプロセス文脈の名前を格納
    */
-  public LinkedList sameNameList = null; // seiji
+  public LinkedList<String> sameNameList = null; // seiji
 
   /**
    * リンク名
@@ -56,7 +56,7 @@ public final class ProcessContext extends Context {
   /**
    * 同名プロセス文脈の分離により新たに生成された名前を格納しているリストを返す
    */
-  public LinkedList getSameNameList() { // seiji
+  public LinkedList<String> getSameNameList() { // seiji
     return sameNameList;
   }
 

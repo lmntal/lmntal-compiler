@@ -3,7 +3,6 @@ package compile.structure;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,7 +52,7 @@ public final class RuleStructure {
   /**
    * ガード否定条件（ProcessContextEquationのLinkedList）のリスト
    */
-  public List<List<ProcessContextEquation>> guardNegatives = new LinkedList<>();
+  public LinkedList<LinkedList<ProcessContextEquation>> guardNegatives = new LinkedList<>();
 
   /**
    * プロセス文脈の限定名 ("$p"などのString) {@literal -->} 文脈の定義 (ContextDef)

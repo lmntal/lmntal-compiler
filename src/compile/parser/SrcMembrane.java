@@ -7,11 +7,11 @@ import java.util.LinkedList;
 /**
  * ソースファイル中の膜表現
  */
-class SrcMembrane {
+class SrcMembrane extends SrcElement {
 
   /** 膜の内容プロセスの表現 */
   @JsonTypeInfo(use = Id.CLASS)
-  LinkedList process = null;
+  LinkedList<SrcElement> process = null;
 
   /** 終了フラグの有無 */
   public boolean stable = false;
@@ -20,7 +20,7 @@ class SrcMembrane {
   public int kind = 0;
 
   /** ＠指定またはnull */
-  Object pragma = null;
+  SrcElement pragma = null;
 
   /** 膜名 */
   public String name;
@@ -29,14 +29,14 @@ class SrcMembrane {
    * 空の膜を作成します
    */
   public SrcMembrane() {
-    this(new LinkedList());
+    this(new LinkedList<>());
   }
 
   /**
    * 指定された子プロセスを持つ膜を作成します
    * @param process 膜に含まれる子プロセス
    */
-  public SrcMembrane(LinkedList process) {
+  public SrcMembrane(LinkedList<SrcElement> process) {
     this.process = process;
   }
 
@@ -44,7 +44,7 @@ class SrcMembrane {
    * 子プロセスを取得します
    * @return 子プロセスのリスト
    */
-  public LinkedList getProcess() {
+  public LinkedList<SrcElement> getProcess() {
     return process;
   }
 

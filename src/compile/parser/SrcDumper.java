@@ -22,7 +22,7 @@ public class SrcDumper {
     return s;
   }
 
-  public static String dumpLinkedList(LinkedList list, String sep) {
+  public static String dumpLinkedList(LinkedList<SrcElement> list, String sep) {
     if (list == null || list.size() == 0) return "";
     String s = "";
     s += dump(list.get(0));
@@ -77,7 +77,7 @@ public class SrcDumper {
     return s;
   }
 
-  public static String dump(Object obj) {
+  public static String dump(SrcElement obj) {
     if (obj instanceof SrcLink) {
       return dumpLink((SrcLink) obj);
     } else if (obj instanceof SrcAtom) {
@@ -90,8 +90,8 @@ public class SrcDumper {
       return dumpProcessContext((SrcProcessContext) obj);
     } else if (obj instanceof SrcRuleContext) {
       return dumpRuleContext((SrcRuleContext) obj);
-    } else if (obj instanceof LinkedList) {
-      return dumpLinkedList((LinkedList) obj, ", ");
+    } else if (obj instanceof SrcList) {
+      return dumpLinkedList(((SrcList) obj).list, ", ");
     } else if (obj instanceof SrcTypeDef) {
       return dumpTypeDef((SrcTypeDef) obj);
     }

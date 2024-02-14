@@ -5,26 +5,27 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 
 /**
  * ソース中のルールを表します
  */
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.NONE)
-class SrcRule {
+class SrcRule extends SrcElement {
 
   public String name; // ルール名
   public int lineno; // 行番号 2006.1.22 by inui
-  public LinkedList head; // ヘッドプロセス
+  public LinkedList<SrcElement> head; // ヘッドプロセス
 
   @JsonTypeInfo(use = Id.CLASS)
-  public LinkedList body; // ボディプロセス
+  public LinkedList<SrcElement> body; // ボディプロセス
 
   @JsonTypeInfo(use = Id.CLASS)
-  public LinkedList guard; // ガードプロセス
+  public LinkedList<SrcElement> guard; // ガードプロセス
 
   @JsonTypeInfo(use = Id.CLASS)
-  public LinkedList guardNegatives; // ガード否定条件構文のリスト
+  public LinkedList<LinkedList<Map.Entry<SrcProcessContext, SrcList>>>
+      guardNegatives; // ガード否定条件構文のリスト
 
   private String text; // ルールのテキスト表現
 
@@ -33,8 +34,8 @@ class SrcRule {
    * @param head ヘッドのリスト
    * @param body ボディのリスト
    */
-  public SrcRule(String name, LinkedList head, LinkedList body) {
-    this(name, head, new LinkedList(), body);
+  public SrcRule(String name, LinkedList<SrcElement> head, LinkedList<SrcElement> body) {
+    this(name, head, new LinkedList<>(), body);
   }
 
   // 2006.1.22 by inui
@@ -44,8 +45,9 @@ class SrcRule {
    * @param body ボディのリスト
    * @param lineno 行番号
    */
-  public SrcRule(String name, LinkedList head, LinkedList body, int lineno) {
-    this(name, head, new LinkedList(), body);
+  public SrcRule(
+      String name, LinkedList<SrcElement> head, LinkedList<SrcElement> body, int lineno) {
+    this(name, head, new LinkedList<>(), body);
     this.lineno = lineno;
   }
 
@@ -55,11 +57,15 @@ class SrcRule {
    * @param gurad ガードのリスト
    * @param body ボディのリスト
    */
-  public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body) {
+  public SrcRule(
+      String name,
+      LinkedList<SrcElement> head,
+      LinkedList<SrcElement> guard,
+      LinkedList<SrcElement> body) {
     this.name = name;
     this.head = head;
     this.guard = guard;
-    this.guardNegatives = new LinkedList();
+    this.guardNegatives = new LinkedList<>();
     this.body = body;
     addHyperLinkConstraint(head, this.guard, body);
   }
@@ -72,7 +78,12 @@ class SrcRule {
    * @param body ボディのリスト
    * @param lineno 行番号
    */
-  public SrcRule(String name, LinkedList head, LinkedList guard, LinkedList body, int lineno) {
+  public SrcRule(
+      String name,
+      LinkedList<SrcElement> head,
+      LinkedList<SrcElement> guard,
+      LinkedList<SrcElement> body,
+      int lineno) {
     this(name, head, guard, body);
     this.lineno = lineno;
   }
@@ -88,17 +99,22 @@ class SrcRule {
    * @param lineno 行番号
    */
   public SrcRule(
-      String name, LinkedList head, List head2, LinkedList guard, LinkedList body, int lineno) {
+      String name,
+      LinkedList<SrcElement> head,
+      LinkedList<SrcElement> head2,
+      LinkedList<SrcElement> guard,
+      LinkedList<SrcElement> body,
+      int lineno) {
     this.name = name;
     this.head = head;
-    this.guard = (guard == null ? new LinkedList() : guard);
-    this.guardNegatives = new LinkedList();
+    this.guard = (guard == null ? new LinkedList<>() : guard);
+    this.guardNegatives = new LinkedList<>();
     this.body = body;
     if (head2 != null) {
       unSimpagationize(head2);
     }
-    LinkedList head3 = this.head;
-    LinkedList body2 = this.body;
+    LinkedList<SrcElement> head3 = this.head;
+    LinkedList<SrcElement> body2 = this.body;
     addTypeConstraint(head3);
     addHyperLinkConstraint(head3, this.guard, body2);
   }
@@ -113,18 +129,22 @@ class SrcRule {
    *       a(!H:1,!H:2,!H:3) も同じになってしまうのは要改良．
    *       ueda
    */
-  public void addHyperLinkConstraint(LinkedList head, LinkedList guard, LinkedList body) {
-    LinkedList headhl = new LinkedList();
+  public void addHyperLinkConstraint(
+      LinkedList<SrcElement> head, LinkedList<SrcElement> guard, LinkedList<SrcElement> body) {
+    LinkedList<String> headhl = new LinkedList<>();
     addHyperLinkConstraintSub(head, guard, body, headhl);
   }
 
-  private LinkedList addHyperLinkConstraintSub(
-      LinkedList head, LinkedList guard, LinkedList body, LinkedList headhl) {
+  private LinkedList<String> addHyperLinkConstraintSub(
+      LinkedList<SrcElement> head,
+      LinkedList<SrcElement> guard,
+      LinkedList<SrcElement> body,
+      LinkedList<String> headhl) {
     if (head != null) {
       for (Object o : head) {
         if (o instanceof SrcHyperLink) {
           SrcHyperLink shl = (SrcHyperLink) o;
-          LinkedList newl = new LinkedList();
+          LinkedList<SrcElement> newl = new LinkedList<>();
           SrcLink name = new SrcLink(shl.name);
           SrcAtom attr = new SrcAtom(shl.attr);
           newl.add(name);
@@ -151,7 +171,7 @@ class SrcRule {
           SrcLink name = new SrcLink(shl.name);
           SrcAtom attr = new SrcAtom(shl.attr);
           if (!headhl.contains(name.toString())) {
-            LinkedList newl = new LinkedList();
+            LinkedList<SrcElement> newl = new LinkedList<>();
             newl.add(name);
             if (!attr.getName().equals("")) {
               newl.add(attr);
@@ -176,31 +196,31 @@ class SrcRule {
    * リンク名が_IXなど、頭に_Iがつくと自動でガードにint(_IX)を加える.
    * hara. nakano.
    * */
-  public void addTypeConstraint(LinkedList l) {
+  public void addTypeConstraint(LinkedList<SrcElement> l) {
     if (l == null) {
       return;
     }
 
-    for (Object o : l) {
+    for (SrcElement o : l) {
       if (o instanceof SrcLink) {
         SrcLink sl = (SrcLink) o;
         if (sl.name.matches("^_I.*")) { // int
-          LinkedList newl = new LinkedList();
+          LinkedList<SrcElement> newl = new LinkedList<>();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("int", newl);
           guard.add(newg);
         } else if (sl.name.matches("^_G.*")) { // ground
-          LinkedList newl = new LinkedList();
+          LinkedList<SrcElement> newl = new LinkedList<>();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("ground", newl);
           guard.add(newg);
         } else if (sl.name.matches("^_S.*")) { // string
-          LinkedList newl = new LinkedList();
+          LinkedList<SrcElement> newl = new LinkedList<>();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("string", newl);
           guard.add(newg);
         } else if (sl.name.matches("^_U.*")) { // unary
-          LinkedList newl = new LinkedList();
+          LinkedList<SrcElement> newl = new LinkedList<>();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("unary", newl);
           guard.add(newg);
@@ -220,7 +240,7 @@ class SrcRule {
    * simpagation rule を、通常のルールの形に直す。コンストラクタから呼ばれる。
    * @param head2 ヘッドの'\'の後ろ部分のリスト
    */
-  private void unSimpagationize(List head2) {
+  private void unSimpagationize(LinkedList<SrcElement> head2) {
     // head を全てbodyへコピー (前に追加のほうが再利用の上でも都合がいい？)
     body.addAll(copySrcs(head));
     // head2をheadの後ろに連結
@@ -232,16 +252,16 @@ class SrcRule {
    * @param l
    * @return
    */
-  private LinkedList copySrcs(List l) {
+  private LinkedList<SrcElement> copySrcs(LinkedList<SrcElement> l) {
     if (l == null) {
       return null;
     }
 
-    LinkedList ret = new LinkedList(); // List 型だと各所で使っているgetFirstが無い
+    LinkedList<SrcElement> ret = new LinkedList<>(); // List 型だと各所で使っているgetFirstが無い
     for (Object o : l) {
       if (o instanceof SrcAtom) {
         SrcAtom sa = (SrcAtom) o;
-        ret.add(new SrcAtom(sa.getSrcName(), copySrcs(sa.getProcess())));
+        ret.add(new SrcAtom(sa.getName(), copySrcs(sa.getProcess())));
       } else if (o instanceof SrcMembrane) {
         SrcMembrane sm = (SrcMembrane) o;
         SrcMembrane cpm = new SrcMembrane(copySrcs(sm.getProcess()));
@@ -270,7 +290,7 @@ class SrcRule {
   /**
    * ヘッドを設定する
    */
-  public void setHead(LinkedList head) {
+  public void setHead(LinkedList<SrcElement> head) {
     this.head = head;
   }
 
@@ -278,7 +298,7 @@ class SrcRule {
    * ルールのヘッドを取得します
    * @return ヘッドのリスト
    */
-  public LinkedList getHead() {
+  public LinkedList<SrcElement> getHead() {
     return head;
   }
 
@@ -286,14 +306,14 @@ class SrcRule {
    * ルールのガードを得ます
    * @return ガードのリスト
    */
-  public LinkedList getGuard() {
+  public LinkedList<SrcElement> getGuard() {
     return guard;
   }
 
   /**
    * ガード否定条件を取得する
    */
-  public LinkedList getGuardNegatives() {
+  public LinkedList<LinkedList<Map.Entry<SrcProcessContext, SrcList>>> getGuardNegatives() {
     return guardNegatives;
   }
 
@@ -301,7 +321,7 @@ class SrcRule {
    * ルールのボディを取得します
    * @return ボディのリスト
    */
-  public LinkedList getBody() {
+  public LinkedList<SrcElement> getBody() {
     return body;
   }
 

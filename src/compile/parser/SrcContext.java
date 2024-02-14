@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
  * <p>プロセス文脈名およびルール文脈名には '...' や [[...]] が使えないようにした。
  */
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.ANY)
-abstract class SrcContext {
+abstract class SrcContext extends SrcElement {
 
   protected String name = null;
   protected int lineno = -1;
