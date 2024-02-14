@@ -169,11 +169,7 @@ UnitAtom ::=
           } :}
   // RuleNameがある場合
   | LPAREN RuleName:name RULENAMESEP ProcessList:list RULE:lineno ProcessList:body RPAREN
-      {: if (list.size() == 1) {
-            RESULT = list.getFirst();
-          } else {
-            RESULT = list;
-          } :}
+      {: RESULT = new SrcRule(name, list, body, lineno.intValue()); :}
   | LPAREN RuleName:name RULENAMESEP ProcessList:list RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
       {: RESULT = new SrcRule(name, list, guard, body, lineno.intValue()); :}
   | LPAREN RuleName:name RULENAMESEP ProcessList:list BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body RPAREN
