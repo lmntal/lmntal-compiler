@@ -215,6 +215,7 @@ public class RuleCompiler {
       }
       hc.switchToUntypedCompilation();
       hc.setContLabel(contLabel);
+      // ２パス目
       hc.compileMembrane(rs.leftMem, hc.matchLabel);
     }
     hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
@@ -1013,7 +1014,17 @@ public class RuleCompiler {
         // ( X=Y :- p(X,Y) ) は ( :- p(X,X) ) になる
         link1.buddy = link2;
         link2.buddy = link1;
-        link2.name = link1.name;
+        // =/2 の除去にあたってリンク名の付け替えが行われるが，プロセス文脈の
+        // リンク名（~3 のような形式で，プロセス文脈の内部名と同一視される）は
+        // 事前に procCxtNameToLinkName で変換されたものが sameNameMap などで
+        // 使われるため，プロセス文脈のリンク名が保存されるようにする (ueda)
+        //	Util.println("staticUnify " + link1.atom + " " + link1.name
+        //		     + " " + link2.atom + " " + link2.name);
+        if (link1.atom instanceof ProcessContext) {
+          link2.name = link1.name;
+        } else {
+          link1.name = link2.name;
+        }
         it.remove();
       }
     }

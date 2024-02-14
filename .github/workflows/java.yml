@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo apt -qq update
-      - run: sudo apt install -y ant re2c
+      - run: sudo apt install -y ant re2c autoconf2.69
       - run: ant
       - run: git clone https://github.com/lmntal/slim.git
       - run: ./autogen.sh

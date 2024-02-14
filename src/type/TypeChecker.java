@@ -160,7 +160,7 @@ public class TypeChecker {
                 throw new TypeParseException("context appearing in type definition");
               Atom lastatom = (Atom) actatomic;
               Functor lastf = lastatom.functor;
-              int count = ((IntegerFunctor) f).intValue();
+              long count = ((IntegerFunctor) f).intValue();
               if (lastf.equals(new SymbolFunctor(".", 3))) continue;
               else if (lastf.equals(new SymbolFunctor("+", 1))
                   && lastatom.mem.parent == mem) { // 子膜なら
@@ -260,7 +260,7 @@ public class TypeChecker {
     Atom atom1 = (Atom) atomic1;
     if (!(atom1.functor instanceof IntegerFunctor))
       throw new TypeParseException("1st element of interval is not integer.");
-    int min = ((IntegerFunctor) atom1.functor).intValue();
+    long min = ((IntegerFunctor) atom1.functor).intValue();
     Atomic consatomic = firstcons.args[1].buddy.atom;
     if (!(consatomic instanceof Atom))
       throw new TypeParseException("context appearing in type definition.");
@@ -272,7 +272,7 @@ public class TypeChecker {
       throw new TypeParseException("context appearing in type definition.");
     Atom atom2 = (Atom) atomic2;
     if (atom2.functor instanceof IntegerFunctor) {
-      int max = ((IntegerFunctor) atom2.functor).intValue();
+      long max = ((IntegerFunctor) atom2.functor).intValue();
       return new IntervalCount(min, max);
     } else if (atom2.functor.equals(new SymbolFunctor("inf", 1))) {
       return new IntervalCount(new NumCount(min), Count.INFINITY);

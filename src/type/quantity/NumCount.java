@@ -2,14 +2,14 @@ package type.quantity;
 
 public class NumCount extends ValueCount {
 
-  public final int value;
+  public final long value;
 
-  public NumCount(int value) {
+  public NumCount(long value) {
     this.value = value;
   }
 
   public String toString() {
-    return Integer.toString(value);
+    return Long.toString(value);
   }
 
   //	public ValueCount inverse(){
@@ -28,7 +28,7 @@ public class NumCount extends ValueCount {
     } else return vc.add(this);
   }
 
-  public int compare(ValueCount vc) {
+  public long compare(ValueCount vc) {
     if (vc instanceof InfinityCount) return -vc.compare(this);
     else return (value - ((NumCount) vc).value);
   }

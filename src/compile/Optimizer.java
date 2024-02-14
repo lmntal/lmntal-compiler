@@ -75,7 +75,10 @@ public class Optimizer {
     // TODO 最適化器を統合する
     Compactor.compactRule(rule);
     // TODO 本質的にインライン展開が必要ないものは、展開しなくてもできるようにする
-    if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop || rule.isTypeDef) {
+    // Fixins issue #101
+    // if (fInlining || fGuardMove || fGrouping || fReuseMem || fLoop) {
+    // allocatomReduce のために常に head と guard をくっつける
+    if (true) {
       // head と guard をくっつける
       inlineExpandTailJump(rule.memMatch, isOrRule);
       rule.guardLabel = null;
