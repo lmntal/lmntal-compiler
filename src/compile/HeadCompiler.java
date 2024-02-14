@@ -497,6 +497,7 @@ class HeadCompiler extends LHSCompiler {
     memVisited.add(mem);
 
     List<Instruction> insts = list.insts;
+    boolean firstPass = insts.size() == 0;
 
     if (debug2) {
       Util.println("\ncompileMembrane called\n" + " mem :" + mem + " list :\n" + list.insts);
@@ -504,7 +505,16 @@ class HeadCompiler extends LHSCompiler {
     int thismempath = memToPath(mem);
     for (Atom atom : mem.atoms) {
       if (!atom.functor.isActive() && !fFindDataAtoms) continue;
-      if (atomToPath(atom) != UNBOUND) continue;
+      if (atomToPath(atom) != UNBOUND) {
+        // a(X,Y), a(Y,X) :- ... （２つ目の a は deref で辿れている）が
+        // a(X,X) にマッチしないようにする
+        // compileMembrane は２回呼ばれることがあるが，
+        // 最初のパスでNEQATOM命令を生成する
+        if (firstPass) {
+          emitNeqAtoms(mem, atom, atomToPath(atom), insts);
+        }
+        continue;
+      }
       // 見つかったアトムを変数に取得する
       int atompath = varCount++;
       insts.add(Instruction.findatom(atompath, thismempath, atom.functor));
@@ -628,7 +638,9 @@ class HeadCompiler extends LHSCompiler {
         int other = atomToPath(otheratom);
         if (other == UNBOUND) continue;
         if (!otheratom.functor.equals(atom.functor)) continue;
+        // Fixing issue #101
         // if (otheratom == atom) continue;
+        if (otheratom == atom) continue;
         insts.add(new Instruction(Instruction.NEQATOM, atompath, other));
         /* NEQATOMがある場合、同ファンクタのアトムにマッチされるが、branchで両方のアトムを起点とする命令列が出力されるため、connectは不要
          testmems[i].connect(otheratom, atom);

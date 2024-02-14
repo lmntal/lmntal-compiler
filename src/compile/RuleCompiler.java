@@ -215,6 +215,7 @@ public class RuleCompiler {
       }
       hc.switchToUntypedCompilation();
       hc.setContLabel(contLabel);
+      // ２パス目
       hc.compileMembrane(rs.leftMem, hc.matchLabel);
     }
     hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
