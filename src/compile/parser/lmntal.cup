@@ -162,23 +162,33 @@ UnitAtom ::=
 
   // 「丸カッコありのルール構文、または丸カッコとカンマによる項組構文」のための非終端記号
   | LPAREN ProcessList:list RPAREN
-      {: RESULT = list; :}
+      {: if (list.size() == 1) {
+            RESULT = list.getFirst();
+          } else {
+            RESULT = list;
+          } :}
+  // RuleNameがある場合
   | LPAREN RuleName:name RULENAMESEP ProcessList:list RULE:lineno ProcessList:body RPAREN
-      {:RESULT = new SrcRule(name, list, body, lineno.intValue());:}
+      {: if (list.size() == 1) {
+            RESULT = list.getFirst();
+          } else {
+            RESULT = list;
+          } :}
   | LPAREN RuleName:name RULENAMESEP ProcessList:list RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-      {:RESULT = new SrcRule(name, list, guard, body, lineno.intValue());:}
+      {: RESULT = new SrcRule(name, list, guard, body, lineno.intValue()); :}
   | LPAREN RuleName:name RULENAMESEP ProcessList:list BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body RPAREN
-      {:RESULT = new SrcRule(name, list, head2, null, body, lineno.intValue());:}
+      {: RESULT = new SrcRule(name, list, head2, null, body, lineno.intValue()); :}
   | LPAREN RuleName:name RULENAMESEP ProcessList:list BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-      {:RESULT = new SrcRule(name, list, head2, guard, body, lineno.intValue());:}
+      {: RESULT = new SrcRule(name, list, head2, guard, body, lineno.intValue()); :}
+  // RuleNameがない場合
   | LPAREN ProcessList:list RULE:lineno ProcessList:body RPAREN
-      {:RESULT = new SrcRule(null, list, body, lineno.intValue());:}
+      {: RESULT = new SrcRule(null, list, body, lineno.intValue()); :}
   | LPAREN ProcessList:list RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-      {:RESULT = new SrcRule(null, list, guard, body, lineno.intValue());:}
+      {: RESULT = new SrcRule(null, list, guard, body, lineno.intValue()); :}
   | LPAREN ProcessList:list BACKSLASH ProcessList:head2 RULE:lineno ProcessList:body RPAREN
-      {:RESULT = new SrcRule(null, list, head2, null, body, lineno.intValue());:}
+      {: RESULT = new SrcRule(null, list, head2, null, body, lineno.intValue()); :}
   | LPAREN ProcessList:list BACKSLASH ProcessList:head2 RULE:lineno ProcessList:guard GUARD ProcessList:body RPAREN
-      {:RESULT = new SrcRule(null, list, head2, guard, body, lineno.intValue());:}
+      {: RESULT = new SrcRule(null, list, head2, guard, body, lineno.intValue()); :}
   | LPAREN QuotedOperatorAtom:atom RPAREN
       {: RESULT = atom; :}
   | Context:p
