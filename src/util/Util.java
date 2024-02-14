@@ -96,7 +96,7 @@ public abstract class Util {
    * @return
    */
   public static boolean listMax(Link link, Atom result) {
-    int max = Integer.MIN_VALUE;
+    long max = Long.MIN_VALUE;
     boolean b = true;
     Atom a;
     while (true) {
@@ -112,7 +112,7 @@ public abstract class Util {
         b = false;
         break;
       }
-      int v = ((IntegerFunctor) a.nthAtom(0).getFunctor()).intValue();
+      long v = ((IntegerFunctor) a.nthAtom(0).getFunctor()).intValue();
       if (max < v) max = v;
       link = a.getArg(1);
     }
@@ -127,7 +127,7 @@ public abstract class Util {
    * @return
    */
   public static boolean listMin(Link link, Atom result) {
-    int min = Integer.MAX_VALUE;
+    long min = Long.MAX_VALUE;
     boolean b = true;
     Atom a;
     while (true) {
@@ -143,7 +143,7 @@ public abstract class Util {
         b = false;
         break;
       }
-      int v = ((IntegerFunctor) a.nthAtom(0).getFunctor()).intValue();
+      long v = ((IntegerFunctor) a.nthAtom(0).getFunctor()).intValue();
       if (min > v) min = v;
       link = a.getArg(1);
     }

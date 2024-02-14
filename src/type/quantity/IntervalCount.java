@@ -10,7 +10,7 @@ public class IntervalCount {
   public final ValueCount min;
   public final ValueCount max;
 
-  public IntervalCount(int min, int max) {
+  public IntervalCount(long min, long max) {
     this(new NumCount(min), new NumCount(max));
   }
 
