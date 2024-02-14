@@ -11,12 +11,12 @@ public final class Env {
   /**
    * LMNtal Compiler のバージョン (M.mm)
    */
-  public static final String LMNTAL_COMPILER_VERSION = "1.51";
+  public static final String LMNTAL_COMPILER_VERSION = "1.60";
 
   /**
    * このバージョンをリリースした日付 (yyyy-MM-dd)
    */
-  public static final String RELEASE_DATE = "2021-04-19";
+  public static final String RELEASE_DATE = "2023-04-03";
 
   /** -dオプション指定時のデフォルトのデバッグレベル */
   static final int DEBUG_DEFAULT = 1;
@@ -240,7 +240,7 @@ public final class Env {
   public static String getIndent(int depth) {
     String indent = "";
     for (int i = 0; i < depth; i++) {
-      indent += "\t";
+      indent += "    ";
     }
     return indent;
   }

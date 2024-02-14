@@ -130,7 +130,7 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	"logand"			{ return symbol(sym.LOGAND); }//ueda
 	"logior"			{ return symbol(sym.LOGIOR); }//ueda
 	"logxor"			{ return symbol(sym.LOGXOR); }//ueda
-// 綴りの単項の演算子は，現状の文法では lognot(a,a) などの曖昧性の排除が難しいので断念 (ueda)
+// 綴りの単項の演算子は，現状の文法では lognot(a,a) などの曖昧性の排除が難しいので括弧付きで使う (ueda)
 //	"lognot"			{ return symbol(sym.LOGNOT); }//ueda
 	"typedef"			{ return symbol(sym.TYPEDEF, new Integer(yyline+1)); }//taguchi
 	"ash"				{ return symbol(sym.ASH); }//ueda 

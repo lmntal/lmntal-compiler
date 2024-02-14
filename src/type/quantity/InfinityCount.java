@@ -30,7 +30,7 @@ public class InfinityCount extends ValueCount {
     return this;
   }
 
-  public int compare(ValueCount vc) {
+  public long compare(ValueCount vc) {
     if (vc instanceof ValueCount) return (minus ? -1 : 1);
     else {
       InfinityCount ic = (InfinityCount) vc;

@@ -49,6 +49,9 @@ public final class Membrane {
   /** ルール(compile.structure.RuleStructure)のリスト */
   public List<RuleStructure> rules = new LinkedList<>();
 
+  /**guard or を展開したペアのリスト */
+  public List<LinkedList> or_pairs = new LinkedList<>();
+
   /** 型定義(compile.structure.TypeDefStructure)のリスト */
   public List<TypeDefStructure> typeDefs = new LinkedList<>();
 

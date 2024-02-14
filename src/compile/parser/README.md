@@ -1,7 +1,5 @@
 # compiler/parser
 
-[山田くんの日誌から勝手に拝借してきた，この世で一番わかりやすい lmntal-compiler の parser の説明](https://www.ueda.info.waseda.ac.jp/lmntal/local/index.php?k-yamada/%E9%9B%86%E4%B8%AD%E4%BD%9C%E6%A5%AD2022%E6%98%A5)
-
 ## src/compile/parser/LMNParser.java
 
 LMNtal の意味解析を行うプログラム
@@ -48,9 +46,59 @@ LMNParser インスタンスを作る -初期化には、使用する字句解�
 - addSrcRuleToMem
   ルール構文の追加
 
+### addGuardNegatives
+
+ガード否定条件に対する構造を生成する
+
 ### SyntaxExpander(クラス)
 
-略記法の展開など、構文の調整を行うメソッドをまとめたクラス -拡張記法まわりについてはこのクラスを見るとよさそう？
+略記法の展開など、構文の調整を行うメソッドをまとめたクラス\
+拡張記法まわりについてはこのクラスを見るとよさそう？
+
+## ParseException.java
+
+LMNParser.java内でスローされるエラーの定義。\
+基本は覗く必要なし。
+
+## Src**.java
+
+LMNtalプログラムを構成する構文要素に対するソースファイル内のデータ構造定義
+
+- SrcAtom.java\
+アトムを表すデータ構造
+- SrcContext.java\
+リンク、リンク束、プロセス文脈、ルール文脈を表すデータ構造の親クラス。
+本クラスを継承して、SrcLink, SrcLinkBundle, SrcProcessContext, SrcRuleContextクラスが定義される。
+- SrcHyperLink.java\
+ハイパーリンクを表すデータ構造
+- SrcLink.java\
+リンクを表すデータ構造。SrcContextクラスを継承
+- SrcLinkBundle.java\
+リンク束を表すデータ構造。SrcContextクラスを継承
+- SrcMembrane.java\
+膜を表すデータ構造
+- SrcName.java\
+アトム名トークンの構成定義。\
+アトム名トークン＝アトム名文字列＋種類(クオートの有無)
+- SrcProcessContext.java\
+プロセス文脈を表すデータ構造。SrcContextクラスを継承
+- SrcRule.java\
+ルールを表すデータ構造。恐らくSrc**.javaの中で一番重要。\
+ルールは「head」「Guard」「Body」に分けて、それぞれLinkedListで保持される。
+  - addHyperLinkConstraint\
+  head,bodyに!X:Aが出現した場合，Guardにhlink(X,A)もしくはnew(X,A)を自動で追加する。
+  a(!H:1,!H:2,!H:3)と書いても!H:1に固定されてしまう問題の元凶。
+  - addTypeConstraint\
+  リンク名に'_I'から始まる表記を使うと、ガードに自動でint制約を加える。
+  - unSimpagationize\
+  simpagation ruleを自動で通常のルールの形に変換する。
+  - copySrcs\
+  ソースオブジェクトのリストをコピーする。
+- SrcRuleContext.java
+ルール文脈を表すデータ構造。SrcContextクラスを継承
+- SrcDumper.java\
+Src\*\*クラスの内容出力用クラス。\
+SrcDumper.dump(Src\*\*クラスインスタンス)で内容を出力できる。
 
 ## Lexer.java
 
@@ -58,8 +106,8 @@ JFlex によって自動生成された字句解析器
 
 - lmntal.flex を参照して、字句解析器を生成している模様
 
-## Parser.java
+## parser.java
 
 CUP によって自動生成された構文解析器
 
-- lmntal.cup を参照してい生成されている模様
+- lmntal.cup を参照して、生成されている模様

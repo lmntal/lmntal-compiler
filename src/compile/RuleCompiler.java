@@ -103,7 +103,7 @@ public class RuleCompiler {
   /**
    * 初期化時に指定されたルール構造をルールオブジェクトにコンパイルする
    */
-  public Rule compile(boolean isTypeDef) throws CompileException {
+  public Rule compile(boolean isTypeDef, boolean isOrRule) throws CompileException {
     // System.out.println("compile() called: " + rs);
     liftupActiveAtoms(rs.leftMem);
     simplify();
@@ -154,7 +154,7 @@ public class RuleCompiler {
     String ruleName =
         theRule.name != null ? theRule.name : makeRuleName(rs.toString(), Env.showlongrulename, 4);
     theRule.body.add(1, Instruction.commit(ruleName, theRule.lineno));
-    optimize();
+    optimize(isOrRule);
     return theRule;
   }
 
@@ -215,6 +215,7 @@ public class RuleCompiler {
       }
       hc.switchToUntypedCompilation();
       hc.setContLabel(contLabel);
+      // ２パス目
       hc.compileMembrane(rs.leftMem, hc.matchLabel);
     }
     hc.checkFreeLinkCount(rs.leftMem, hc.match); // 言語仕様変更により呼ばなくてよくなった→やはり呼ぶ必要あり
@@ -1013,7 +1014,17 @@ public class RuleCompiler {
         // ( X=Y :- p(X,Y) ) は ( :- p(X,X) ) になる
         link1.buddy = link2;
         link2.buddy = link1;
-        link2.name = link1.name;
+        // =/2 の除去にあたってリンク名の付け替えが行われるが，プロセス文脈の
+        // リンク名（~3 のような形式で，プロセス文脈の内部名と同一視される）は
+        // 事前に procCxtNameToLinkName で変換されたものが sameNameMap などで
+        // 使われるため，プロセス文脈のリンク名が保存されるようにする (ueda)
+        //	Util.println("staticUnify " + link1.atom + " " + link1.name
+        //		     + " " + link2.atom + " " + link2.name);
+        if (link1.atom instanceof ProcessContext) {
+          link2.name = link1.name;
+        } else {
+          link1.name = link2.name;
+        }
         it.remove();
       }
     }
@@ -1050,11 +1061,11 @@ public class RuleCompiler {
   /**
    * 命令列を最適化する
    */
-  private void optimize() {
+  private void optimize(boolean isOrRule) {
     Env.c("optimize");
     if (!rs.isInitialRule()) {
       // このフラグがtrue <=> theRuleは初期データ生成用ルール
-      Optimizer.optimizeRule(theRule);
+      Optimizer.optimizeRule(theRule, isOrRule);
     }
   }
 

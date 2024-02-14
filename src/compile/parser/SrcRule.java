@@ -136,11 +136,7 @@ class SrcRule {
           }
           headhl.add(name.toString());
           SrcAtom newg = new SrcAtom("hlink", newl);
-          // or の受理のため，linkedlist の linkedlist になっているはずなので変更 imagawa
-          for (Object i : guard) {
-            LinkedList tmp = (LinkedList) i;
-            tmp.add(newg);
-          }
+          guard.add(newg);
 
         } else if (o instanceof SrcAtom) {
           SrcAtom sa = (SrcAtom) o;
@@ -166,11 +162,7 @@ class SrcRule {
             }
             headhl.add(name.toString());
             SrcAtom newg = new SrcAtom("new", newl);
-            // or の受理のため，linkedlist の linkedlist になっているはずなので変更 imagawa
-            for (Object i : guard) {
-              LinkedList tmp = (LinkedList) i;
-              tmp.add(newg);
-            }
+            guard.add(newg);
           }
         } else if (o instanceof SrcAtom) {
           SrcAtom sa = (SrcAtom) o;
@@ -200,38 +192,22 @@ class SrcRule {
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("int", newl);
-          // or の受理のため，linkedlist の linkedlist になっているはずなので変更 imagawa
-          for (Object i : guard) {
-            LinkedList tmp = (LinkedList) i;
-            tmp.add(newg);
-          }
+          guard.add(newg);
         } else if (sl.name.matches("^_G.*")) { // ground
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("ground", newl);
-          // or の受理のため，linkedlist の linkedlist になっているはずなので変更 imagawa
-          for (Object i : guard) {
-            LinkedList tmp = (LinkedList) i;
-            tmp.add(newg);
-          }
+          guard.add(newg);
         } else if (sl.name.matches("^_S.*")) { // string
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("string", newl);
-          // or の受理のため，linkedlist の linkedlist になっているはずなので変更 imagawa
-          for (Object i : guard) {
-            LinkedList tmp = (LinkedList) i;
-            tmp.add(newg);
-          }
+          guard.add(newg);
         } else if (sl.name.matches("^_U.*")) { // unary
           LinkedList newl = new LinkedList();
           newl.add(new SrcLink(sl.name));
           SrcAtom newg = new SrcAtom("unary", newl);
-          // or の受理のため，linkedlist の linkedlist になっているはずなので変更 imagawa
-          for (Object i : guard) {
-            LinkedList tmp = (LinkedList) i;
-            tmp.add(newg);
-          }
+          guard.add(newg);
         }
       } else if (o instanceof SrcAtom) {
         SrcAtom sa = (SrcAtom) o;
@@ -250,7 +226,17 @@ class SrcRule {
    */
   private void unSimpagationize(List head2) {
     // head を全てbodyへコピー (前に追加のほうが再利用の上でも都合がいい？)
-    body.addAll(copySrcs(head));
+    if (body.get(0) instanceof LinkedList) {
+      for (int i = 0; i < body.size(); i++) {
+        if (body.get(i) instanceof LinkedList) {
+          LinkedList b = (LinkedList) body.get(i);
+          b.addAll(copySrcs(head));
+        }
+      }
+    } else {
+      body.addAll(copySrcs(head));
+    }
+
     // head2をheadの後ろに連結
     head.addAll(head2);
   }
@@ -334,7 +320,7 @@ class SrcRule {
   }
 
   public String toString() {
-    return "(rule:" + name + ")";
+    return "(rule:" + name + "), head: " + head + ", guard: " + guard + ", body: " + body;
   }
 
   /**

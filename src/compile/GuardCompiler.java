@@ -110,11 +110,12 @@ class GuardCompiler extends LHSCompiler {
     putLibrary("float", 1, 1, array(ISFLOAT));
     putLibrary("+", 2, 1, array(ISINT, -1, ISINT));
     putLibrary("-", 2, 1, array(ISINT, Instruction.INEG, ISINT));
-    //		putLibrary("lognot"    , 2, 1, array(ISINT  , Instruction.INOT,   ISINT));
+    putLibrary("lognot", 2, 1, array(ISINT, Instruction.INOT, ISINT));
     putLibrary("+.", 2, 1, array(ISFLOAT, -1, ISFLOAT));
     putLibrary("-.", 2, 1, array(ISFLOAT, Instruction.FNEG, ISFLOAT));
     putLibrary("int", 2, 1, array(ISFLOAT, Instruction.FLOAT2INT, ISINT));
     putLibrary("float", 2, 1, array(ISINT, Instruction.INT2FLOAT, ISFLOAT));
+    putLibrary("abs", 2, 1, array(ISINT, Instruction.IABS, ISINT));
     if (Env.hyperLink) {
       putLibrary("new", 1, 0, array(Instruction.NEWHLINK, ISINT));
       // putLibrary("make"      , 2, 1, array(ISINT, Instruction.MAKEHLINK, ISINT));

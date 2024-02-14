@@ -32,10 +32,29 @@ public class SrcDumper {
     return s;
   }
 
+  // guard or 用 dumper
+  public static String dumpLinkedListWithOr(LinkedList list, String sep_and, String sep_or) {
+    if (list == null || list.size() == 0) return "";
+    String s = "";
+    if (list.get(0) instanceof LinkedList) {
+      s += dump(list.get(0));
+      for (int i = 1; i < list.size(); i++) {
+        s += sep_or + dump(list.get(i));
+      }
+    } else {
+      s += dump(list.get(0));
+      for (int i = 1; i < list.size(); i++) {
+        s += sep_and + dump(list.get(i));
+      }
+    }
+
+    return s;
+  }
+
   public static String dumpMembrane(SrcMembrane mem) {
     String name = mem.name == null ? "" : mem.name;
     String s = name + "{";
-    if (mem.getProcess().size() > 0) s += dumpLinkedList(mem.getProcess(), ", ");
+    if (mem.getProcess().size() > 0) s += dumpLinkedListWithOr(mem.getProcess(), ", ", "; ");
     s += "}";
     if (mem.kind == 1) s += "_";
     if (mem.stable) s += "/";
@@ -50,7 +69,7 @@ public class SrcDumper {
     if (rule.getHead() != null && rule.getHead().size() > 0)
       s += dumpLinkedList(rule.getHead(), ", ");
     s += " :- ";
-    if (rule.getGuard().size() > 0) s += dumpLinkedList(rule.getGuard(), ", ") + " | ";
+    if (rule.getGuard().size() > 0) s += dumpLinkedListWithOr(rule.getGuard(), ", ", "; ") + " | ";
     s += dumpLinkedList(rule.getBody(), ", ") + ". )";
     return s;
   }
@@ -91,7 +110,7 @@ public class SrcDumper {
     } else if (obj instanceof SrcRuleContext) {
       return dumpRuleContext((SrcRuleContext) obj);
     } else if (obj instanceof LinkedList) {
-      return dumpLinkedList((LinkedList) obj, ", ");
+      return dumpLinkedListWithOr((LinkedList) obj, ", ", "; ");
     } else if (obj instanceof SrcTypeDef) {
       return dumpTypeDef((SrcTypeDef) obj);
     }
