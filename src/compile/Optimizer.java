@@ -266,21 +266,23 @@ public class Optimizer {
    * @param match ガードまでの命令列
    * @param body  右辺命令列
    */
-  private static void allocatomReduce(List<Instruction> match, List<Instruction> body, String bodyLabel) { // ueda
+  private static void allocatomReduce(
+      List<Instruction> match, List<Instruction> body, String bodyLabel) { // ueda
     int maxm = match.size();
     int maxb = body.size();
-    
+
     ArrayList<Integer> atomargs = new ArrayList<>();
     for (int i = maxm - 1; i >= 0; i--) {
-      if (match.get(i).getKind() == Instruction.JUMP && match.get(i).getArg1().toString().equals(bodyLabel)){
-          Object obj = match.get(i).getArg3();
-          if (obj instanceof ArrayList) {
-              ArrayList<?> arg3List = (ArrayList<?>) obj;
-              if(arg3List.size() > 0){
-                atomargs = (ArrayList<Integer>) obj;
-              }
+      if (match.get(i).getKind() == Instruction.JUMP
+          && match.get(i).getArg1().toString().equals(bodyLabel)) {
+        Object obj = match.get(i).getArg3();
+        if (obj instanceof ArrayList) {
+          ArrayList<?> arg3List = (ArrayList<?>) obj;
+          if (arg3List.size() > 0) {
+            atomargs = (ArrayList<Integer>) obj;
           }
-          break;
+        }
+        break;
       }
     }
     for (int i = 0; i < maxm; i++) {
@@ -323,7 +325,9 @@ public class Optimizer {
           for (int j = 0; j < maxb; j++) {
             if (body.get(j).getKind() == Instruction.FREEATOM) {
               int freereg = (Integer) body.get(j).getArg1();
-              if(!atomargs.isEmpty() && freereg <= atomargs.size() && allocreg == atomargs.get(freereg - 1)){
+              if (!atomargs.isEmpty()
+                  && freereg <= atomargs.size()
+                  && allocreg == atomargs.get(freereg - 1)) {
                 body.remove(j);
                 maxb--;
               }
