@@ -655,6 +655,22 @@ class HeadCompiler extends LHSCompiler {
     HeadCompiler.contLabel = contLabel;
   }
 
+  /* 膜及び子孫の膜がリンク束をもつか */
+  boolean memHasBundle(Membrane mem) {
+    if (!mem.processContexts.isEmpty()) {
+      ProcessContext pc = mem.processContexts.get(0);
+      if (pc.bundle != null) {
+        return true;
+      }
+    }
+    for (Membrane submem : mem.mems) {
+      if (memHasBundle(submem)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** 膜および子孫の膜に対して自由リンクの個数を調べる。
    * <p>かつて$p等式右辺膜以外の場合は、自由リンクに関する検査を行う必要があった。
    * しかし現在 redex "Tθ" に = を含んでもよい言語仕様になっているため、この検査は実は不要。
@@ -676,7 +692,7 @@ class HeadCompiler extends LHSCompiler {
       //			Functor.INSIDE_PROXY));
       //			}
       // リンク束が無い場合
-      if (pc.bundle == null) {
+      if (!memHasBundle(mem)) {
         insts.add(new Instruction(Instruction.NFREELINKS, thismempath, mem.getFreeLinkAtomCount()));
       }
     }
