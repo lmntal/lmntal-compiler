@@ -1,47 +1,55 @@
 package compile.parser;
 
-public class Quantifier {
+public class SrcQuantifier {
     public static final int INF = Integer.MAX_VALUE;
-    public static final int NOT = -1;
-    public static final int ONE_OR_MORE = -2;
-    public static final int ALL = -3;
 
-    public int min, max, kind;
+    protected int min, max;
+    protected SrcQuantifierKind kind;
 
-    public Quantifier(int min, int max) {
+    public SrcQuantifier(int min, int max) {
         this.min = min;
         this.max = max;
-        this.kind = 0;
+        this.kind = SrcQuantifierKind.CARD;
     }
 
-    public Quantifier(int kind) {
+    public SrcQuantifier(SrcQuantifierKind kind) {
         this.kind = kind;
     }
 
-    public static Quantifier parse(String token) {
+    public static SrcQuantifier parse(String token) {
         // <^>, <*>, <+>, <?>, <n1>, <n1,>, <n1,n2>
         if (token.equals("<^>"))
-            return new Quantifier(NOT);
+            return new SrcQuantifier(SrcQuantifierKind.NOT);
         if (token.equals("<*>"))
-            return new Quantifier(ALL);
+            return new SrcQuantifier(SrcQuantifierKind.ZERO_OR_MORE);
         if (token.equals("<+>"))
-            return new Quantifier(ONE_OR_MORE);
+            return new SrcQuantifier(SrcQuantifierKind.ONE_OR_MORE);
         if (token.equals("<?>"))
-            return new Quantifier(0, INF);
+            return new SrcQuantifier(0, INF);
         if (token.matches("<[0-9]+>")) {
             int n = Integer.parseInt(token.substring(1, token.length() - 1));
-            return new Quantifier(n, n);
+            return new SrcQuantifier(n, n);
         }
         if (token.matches("<[0-9]+,>")) {
             int n = Integer.parseInt(token.substring(1, token.length() - 2));
-            return new Quantifier(n, INF);
+            return new SrcQuantifier(n, INF);
         }
         if (token.matches("<[0-9]+,[0-9]+>")) {
             String[] parts = token.substring(1, token.length() - 1).split(",");
             int n1 = Integer.parseInt(parts[0]);
             int n2 = Integer.parseInt(parts[1]);
-            return new Quantifier(n1, n2);
+            return new SrcQuantifier(n1, n2);
         }
         throw new IllegalArgumentException("Unknown quantifier: " + token);
     }
+    public SrcQuantifierKind getKind() {
+        return kind;
+    }
+}
+
+enum SrcQuantifierKind {
+    NOT,
+    ONE_OR_MORE,
+    ZERO_OR_MORE,
+    CARD
 }

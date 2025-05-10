@@ -231,6 +231,10 @@ public class LMNParser {
               + ", at line "
               + link.lineno);
     }
+    // 量化されたプロセス
+    else if (obj instanceof SrcQuantifiedProcess) {
+      addQuantifiedProcessToMem((SrcQuantifiedProcess) obj, mem);
+    }
     // その他
     else {
       throw new ParseException("SYSTEM ERROR: Illegal Object to add to a membrane: " + obj);
@@ -441,6 +445,31 @@ public class LMNParser {
     }
 
     mem.typeDefs.add(typeDef);
+  }
+
+  /**
+   * 量化されたプロセスを膜に追加する
+   * @param qp 追加したい量化プロセス
+   * @param mem 追加先の膜
+   */
+  private void addQuantifiedProcessToMem(SrcQuantifiedProcess qp, Membrane mem) throws ParseException {
+    SrcQuantifier quantifier = qp.getQuantifier();
+    SrcQuantifierKind quantifierKind = quantifier.getKind();
+    Object process = qp.getProcess();
+    switch (quantifierKind) {
+      case NOT: // 否定
+        break;
+      // case CARD:
+      // case ZERO_OR_MORE:
+      // case ONE_OR_MORE:
+      default:
+        if (process instanceof LinkedList) {
+            addProcessToMem((LinkedList) process, mem);
+        } else {
+            addObjectToMem(process, mem);
+        }
+        break;
+    }
   }
 
   /**
