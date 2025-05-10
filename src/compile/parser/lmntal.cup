@@ -2,6 +2,8 @@
 /* Import the class java_cup.runtime.*  */
 
 package compile.parser;
+import compile.parser.Quantifier;
+import compile.parser.QuantifiedProcess;
 
 import java.util.LinkedList;
 import compile.parser.MySymbol;
@@ -43,6 +45,7 @@ terminal String RELOP, STRING;
 terminal String HL;//seiji
 terminal String LINK_NAME, NUMBER_NAME, SYMBOL_NAME, ATOM_NAME, PATHED_ATOM_NAME;
 terminal String CHAR_CODE_LITERAL;
+terminal String QUANTIFIER;
 
 non terminal SrcLink			Link;
 non terminal SrcHyperLink       	HyperLink;
@@ -59,6 +62,8 @@ non terminal Object				Atom500;
 non terminal Object				Atom700;
 non terminal Object				Atom800;
 non terminal Object				Atom;
+non terminal Quantifier				Quantifier;
+non terminal QuantifiedProcess		QuantifiedProcess;
 
 // 現状: (a,b)と(a,b:-c)で衝突するため、項内でのAtomListの採用が保留となっている。
 // non terminal Object				AtomList;
@@ -395,6 +400,11 @@ Membrane ::=
       {: mem.name = name; RESULT = mem; :}
 ;
 
+Quantifier ::=
+    QUANTIFIER:token
+      {: RESULT = Quantifier.parse(token.toString()); :}
+;
+
 UnnamedMembrane ::=
 				//AtomName:name COLON LBRACE WorldProcessList:list RBRACE_SLASH
 				//	{: SrcMembrane sMem = new SrcMembrane(name, list);
@@ -515,6 +525,8 @@ Process ::=
 //					{:  RESULT = p; :}
 //				| Context:p
 //					{:  RESULT = p; :}
+  | Quantifier:q Process:p
+      {: RESULT = new QuantifiedProcess(q, p); :}
 ;
 
 // Processをカンマで区切った列。

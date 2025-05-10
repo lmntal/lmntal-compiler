@@ -41,6 +41,7 @@ InputCharacter = ([^\r\n\f]|Character)
 WhiteSpace     = {LineTerminator} | [ \t]
 
 LinkName       = [A-Z_][A-Za-z_0-9]*
+Integer = [0-9]+
 
 ////////////////////////////////////////////////////////////////
 //
@@ -82,9 +83,9 @@ Comment = {EndOfLineComment}
 //TraditionalComment = "/*" [^*] ~"*/"
 EndOfLineComment = ("//"|"%"|"#") {InputCharacter}* {LineTerminator}?
 
-HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<" 
+HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 
-%% 
+%%
 
 /* ------------------------Lexical Rules Section---------------------- */
 
@@ -95,6 +96,14 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	")"					{ return symbol(sym.RPAREN); }
 	"{"					{ return symbol(sym.LBRACE); }
 	"}"					{ return symbol(sym.RBRACE); }
+    // 量化子のパターン
+    "<\^>"        { return symbol(sym.QUANTIFIER, yytext()); }
+    "<\*>"        { return symbol(sym.QUANTIFIER, yytext()); }
+    "<\+>"        { return symbol(sym.QUANTIFIER, yytext()); }
+    "<\?>"        { return symbol(sym.QUANTIFIER, yytext()); }
+    "<"{Integer}">"        { return symbol(sym.QUANTIFIER, yytext()); }
+    "<"{Integer}","">"     { return symbol(sym.QUANTIFIER, yytext()); }
+    "<"{Integer}","{Integer}">" { return symbol(sym.QUANTIFIER, yytext()); }
 	"}/"				{ return symbol(sym.RBRACE_SLASH); }
 	"}@"				{ return symbol(sym.RBRACE_AT); }
 	"}/@"				{ return symbol(sym.RBRACE_SLASH_AT); }
@@ -132,7 +141,7 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 // 綴りの単項の演算子は，現状の文法では lognot(a,a) などの曖昧性の排除が難しいので括弧付きで使う (ueda)
 //	"lognot"			{ return symbol(sym.LOGNOT); }//ueda
 	"typedef"			{ return symbol(sym.TYPEDEF, new Integer(yyline+1)); }//taguchi
-	"ash"				{ return symbol(sym.ASH); }//ueda 
+	"ash"				{ return symbol(sym.ASH); }//ueda
 	"\\+"				{ return symbol(sym.NEGATIVE); }
 	"@@" 				{ return symbol(sym.RULENAMESEP); }
 	{HyperLinkOp}		{ return symbol(sym.HL, yytext()); }//seiji
@@ -166,8 +175,8 @@ HyperLinkOp = "><" | ">*<" | ">+<" |">>" | "<<"
 	{LineTerminator}	{ /* just skip */ }			// 改行は無視する。仮仕様なので必要ならば変更してよい
 	<<EOF>>             { throw new Error("EOF in string"); }
 	.					{ token.append(yytext()); string.append( yytext() ); }
-}												
-												
+}
+
 <COMMENT> {
 	[^*\n]*             {}
 	"\n"                {}
