@@ -23,14 +23,19 @@ public class Optimizer {
 
   /** 命令列のインライニングを行う*/
   public static boolean fInlining;
+
   /** 膜の再利用を行う */
   public static boolean fReuseMem;
+
   /** 命令列のループ化を行う */
   public static boolean fLoop;
+
   /** 命令列の並び替えを行う */
   public static boolean fGuardMove;
+
   /** 命令列のグループ化を行う */
   public static boolean fGrouping;
+
   /** システムルールセットのインライン展開 */
   public static boolean fSystemRulesetsInlining;
 
@@ -205,14 +210,14 @@ public class Optimizer {
       Instruction inst = insts.get(i);
 
       switch (inst.getKind()) {
-          // ボディ命令列は並び替えない -> ボディの先頭はcommit
+        // ボディ命令列は並び替えない -> ボディの先頭はcommit
         case Instruction.COMMIT:
           return;
-          // 否定条件は放置(位置を変えない)
-          // todo どうするか考える
+        // 否定条件は放置(位置を変えない)
+        // todo どうするか考える
         case Instruction.NOT:
           continue;
-          // 位置を変えたくない命令。他にあればここに追加する。
+        // 位置を変えたくない命令。他にあればここに追加する。
         case Instruction.FINDATOM:
         case Instruction.ANYMEM:
         case Instruction.NEWLIST:
@@ -222,14 +227,14 @@ public class Optimizer {
         case Instruction.UNIQ:
         case Instruction.ADDTOLIST:
           continue;
-          // 引数に命令列を持つ命令
+        // 引数に命令列を持つ命令
         case Instruction.GROUP:
         case Instruction.BRANCH:
           InstructionList subinsts = (InstructionList) inst.getArg1();
           guardMove(subinsts.insts);
           break;
-          // 上に該当しない命令は、その引数の変数番号が定義された命令より前にならない限り、
-          // 前に動かせる。
+        // 上に該当しない命令は、その引数の変数番号が定義された命令より前にならない限り、
+        // 前に動かせる。
         default:
           int judge = guardMove(insts, inst, i - 1);
           if (judge == 2) {
@@ -885,11 +890,11 @@ public class Optimizer {
             lit.remove();
           }
           break;
-          //				case Instruction.LOADRULESET:
-          //				//ルールを退避しない場合に備えて最後に移動
-          //				tmpInsts.add(inst);
-          //				lit.remove();
-          //				break;
+        //				case Instruction.LOADRULESET:
+        //				//ルールを退避しない場合に備えて最後に移動
+        //				tmpInsts.add(inst);
+        //				lit.remove();
+        //				break;
         case Instruction.COPYRULES:
           Integer srcmem = (Integer) inst.getArg2();
           Integer dstmem = (Integer) inst.getArg1();

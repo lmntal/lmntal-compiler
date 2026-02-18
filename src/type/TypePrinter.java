@@ -28,6 +28,7 @@ class TypePrinter {
 
   private final Map<String, Map<Functor, TypeVarConstraint[]>> memnameToFunctorTypes;
   private final TreeSet<String> sortedMemNames;
+
   /** 念のため、ファンクタを名前順->引数数順でソートして管理する(意味ないかも) */
   private final TreeSet<Functor> sortedFunctors;
 

@@ -18,14 +18,19 @@ public class CountsSet {
 
   /** 生成膜 -> 固定多重度 */
   private final Map<Membrane, StaticCounts> memToGenCounts = new HashMap<>();
+
   /** 継続膜・混在膜・最外膜 -> その膜の変動多重度 */
   private final Map<Membrane, Set<DynamicCounts>> memToInhCountss = new HashMap<>();
+
   /** 膜名 -> 全ての変動多重度 */
   private final Map<String, Set<DynamicCounts>> memnameToAllInhCountss = new HashMap<>();
+
   /** 膜名 -> 共通の変動多重度 */
   private final Map<String, Set<DynamicCounts>> memnameToCommonInhCountss = new HashMap<>();
+
   /** ソース上の膜 -> 量解析結果(生成膜/評価済み) */
   private final Map<Membrane, FixedCounts> memToFixedCounts = new HashMap<>();
+
   //	/** ソース上の膜 -> 量解析結果(継続膜/評価済み) */
   //	Map<Membrane,FixedCounts> memToInhFixedCounts;
   private final Map<String, FixedCounts> memnameToMergedFixedCounts = new HashMap<>();

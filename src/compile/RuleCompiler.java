@@ -728,14 +728,18 @@ public class RuleCompiler {
   // 型付きプロセス文脈関係
 
   private GuardCompiler gc;
+
   /** 型付きプロセス文脈の右辺での出現 (Context) -> 変数番号 */
   private HashMap<ProcessContext, Integer> rhstypedcxtpaths = new HashMap<>();
+
   /** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkのリストを指す)変数番号 */
   private HashMap<ProcessContext, Integer> rhsgroundpaths = new HashMap<>();
+
   /** ground型付きプロセス文脈の右辺での出現(Context) -> (Linkを指す)変数番号のリスト */
   // private HashMap rhsgroundlinkpaths = new HashMap();
   /** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時） */
   private HashMap<ContextDef, Integer> typedcxtsrcs = new HashMap<>();
+
   /** ground型付きプロセス文脈定義(ContextDef) -> ソース出現（コピー元とする出現）の変数番号（Body実行時）のリストの変数番号 */
   private HashMap<ContextDef, Integer> groundsrcs = new HashMap<>();
 

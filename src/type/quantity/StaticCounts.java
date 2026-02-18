@@ -21,6 +21,7 @@ public class StaticCounts {
 
   /** ファンクタ {@literal -->} 量 */
   public final Map<Functor, Count> functorToCount;
+
   /** 膜名 {@literal -->} 量 */
   public final Map<String, Count> memnameToCount;
 

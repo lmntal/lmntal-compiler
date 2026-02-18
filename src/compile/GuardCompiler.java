@@ -25,26 +25,35 @@ class GuardCompiler extends LHSCompiler {
   static final Object UNARY_ATOM_TYPE = "U"; // 1引数アトム
   static final Object GROUND_LINK_TYPE = "G"; // 基底項プロセス
   static final Object HLGROUND_LINK_TYPE = "HLG"; // ハイパーリンク基底項プロセス
+
   //	static final Object LINEAR_ATOM_TYPE = "L"; // 任意のプロセス $p[X|*V]
 
   /** 型付きプロセス文脈定義 (ContextDef) -> データ型の種類を表すラップされた型検査命令番号(Integer) */
   HashMap<ContextDef, Integer> typedCxtDataTypes = new HashMap<>();
+
   /** 型付きプロセス文脈定義 (ContextDef) -> データ型のパターンを表す定数オブジェクト */
   HashMap<ContextDef, Object> typedCxtTypes = new HashMap<>();
+
   /** 型付きプロセス文脈定義 (ContextDef) -> ソース出現（コピー元とする出現）の変数番号 */
   HashMap<ContextDef, Integer> typedCxtSrcs = new HashMap<>();
+
   /** ground型付きプロセス文脈定義(ContextDef) -> リンクのソース出現（コピー元とする出現）のリストの変数番号 */
   HashMap<ContextDef, Integer> groundSrcs = new HashMap<>();
+
   /** 膜(Membrane) -> (その膜に存在するground型付きプロセス文脈定義(ContextDef) -> 構成アトム数)というマップ */
   HashMap<Membrane, HashMap<ContextDef, Integer>> memToGroundSizes = new HashMap<>();
+
   /** ソース出現が特定された型付きプロセス文脈定義のセット
    * <p>identifiedCxtdefs.contains(x) は、左辺に出現するかまたはloadedであることを表す。*/
   HashSet<ContextDef> identifiedCxtdefs = new HashSet<>();
+
   /** 型付きプロセス文脈定義のリスト（仮引数IDの管理に使用する）
    * <p>実際にはtypedcxtsrcsのキーを追加された順番に並べたもの。*/
   List<ContextDef> typedCxtDefs = new ArrayList<>();
+
   /** newアトム -> newアトムの引数の接続先アトム一覧 */
   HashMap<Atom, Atom[]> newAtomArgAtoms = new HashMap<>(); // hlgroundattr@onuma
+
   /** hlground型付きプロセス文脈定義(ContextDef) -> hlgroundの属性 */
   HashMap<ContextDef, Atom[]> hlgroundAttrs = new HashMap<>();
 

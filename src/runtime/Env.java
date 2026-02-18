@@ -20,10 +20,13 @@ public final class Env {
 
   /** -dオプション指定時のデフォルトのデバッグレベル */
   static final int DEBUG_DEFAULT = 1;
+
   /** 内部命令の実行をトレースするデバッグレベル */
   static final int DEBUG_TRACE = 2;
+
   /** システムルールセットの命令列実行を表示するデバッグレベル（仮） */
   static final int DEBUG_SYSTEMRULESET = 7;
+
   /** Debug level. */
   public static int debug = 0;
 
@@ -58,10 +61,12 @@ public final class Env {
    * <p>リンク操作に{@code cyclelinks}命令を使用する。</p>
    */
   public static boolean useCycleLinks = false;
+
   /**
    * <p>SLIM内のデータ構造atomlistを動的に変化させて最適化を行う。</p>
    */
   public static boolean useAtomListOP = false;
+
   /**
    * <p>{@code swaplink/cyclelinks} 命令を使用する場合、コンパイル情報を標準エラー出力に出力する。</p>
    */
@@ -76,21 +81,27 @@ public final class Env {
 
   /** リンクの表示をL[数字]で表示する冗長表示レベル　<pre> a(_2) {@literal -->} a(L2) </pre> */
   public static final int VERBOSE_SIMPLELINK = 1;
+
   /** ルールセットの内容を1回だけ表示する冗長表示レベル　*/
   public static final int VERBOSE_SHOWRULES = 3;
+
   //	/** 自由リンク管理アトムを表示する冗長表示レベル（EXPANDATOMS未満に限る）*/
   //	public static final int VERBOSE_EXPANDPROXIES = 3;
   /** 演算子を展開する冗長表示レベル（EXPANDATOMS未満に限る） <pre> X+Y {@literal -->} '+'(X,Y) </pre> */
   public static final int VERBOSE_EXPANDOPS = 4;
+
   /** アトム引数を展開する冗長表示レベル <pre> a(b) {@literal -->} a(_2),b(_2) </pre> */
   public static final int VERBOSE_EXPANDATOMS = 5;
+
   /** ルールセットの内容を展開する冗長表示レベル */
   public static final int VERBOSE_EXPANDRULES = 6;
 
   /** -vオプション無指定時の冗長表示レベル */
   public static final int VERBOSE_INIT = 1;
+
   /** -vオプション指定時のデフォルトの冗長表示レベル */
   public static final int VERBOSE_DEFAULT = 5;
+
   /** verbose level. */
   public static int verbose = VERBOSE_INIT;
 
@@ -268,10 +279,13 @@ public final class Env {
 
   /** 各生成膜を混ぜて効果を適用 */
   public static final int COUNT_MERGEANDAPPLY = 0;
+
   /** 各生成膜ごとに効果を適用してから混ぜる */
   public static final int COUNT_APPLYANDMERGE = 1;
+
   /** 各生成膜ごとに適用回数を解析 */
   public static final int COUNT_APPLYANDMERGEDETAIL = 2;
+
   /** default */
   public static final int COUNT_DEFAULT = COUNT_APPLYANDMERGEDETAIL;
 

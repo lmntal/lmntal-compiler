@@ -29,6 +29,7 @@ public class DynamicCounts {
 
   /** 削除するプロセス */
   public final StaticCounts removeCounts;
+
   /** 生成するプロセス */
   public final StaticCounts generateCounts;
 

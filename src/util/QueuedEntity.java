@@ -8,6 +8,7 @@ package util;
 public class QueuedEntity {
 
   QueuedEntity next, prev;
+
   /** この entity がつまれているスタック */
   protected Stack stack;
 

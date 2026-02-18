@@ -6,6 +6,7 @@ public class FixedDynamicCounts {
 
   /** 削除するプロセス */
   public final FixedCounts removeCounts;
+
   /** 生成するプロセス */
   public final FixedCounts generateCounts;
 
