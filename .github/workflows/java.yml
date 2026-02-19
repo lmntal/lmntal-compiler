@@ -9,14 +9,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt -qq update
-      - run: sudo apt install -y ant re2c
+      - run: sudo apt install -y ant re2c cmake bison ruby
       - run: ant
       - run: git clone https://github.com/lmntal/slim.git
-      - run: ./autogen.sh
+      - run: ./build-cmake.sh
         working-directory: ./slim
-      - run: ./configure
-        working-directory: ./slim
-      - run: make
-        working-directory: ./slim
-      - run: make check
+      - run: ./run-tests.sh
         working-directory: ./slim
