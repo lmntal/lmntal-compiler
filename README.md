@@ -48,9 +48,18 @@ Any contributions you make are **greatly appreciated**.
 We are currently using google-java-format.
 
 ```sh
-wget https://github.com/google/google-java-format/releases/download/v1.15.0/google-java-format-1.15.0-all-deps.jar
-java -jar /path/to/google-java-format-1.15.0-all-deps.jar --replace --skip-javadoc-formatting [files...]
+wget https://github.com/google/google-java-format/releases/download/v1.34.1/google-java-format-1.34.1-all-deps.jar
+java \
+  --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED \
+  --add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED \
+  --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED \
+  --add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED \
+  --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED \
+  --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED \
+  -jar /path/to/google-java-format-1.34.1-all-deps.jar --replace --skip-javadoc-formatting [files...]
 ```
+
+Note: v1.34.1 requires JDK 21 or higher.
 
 See <https://github.com/google/google-java-format> for more detailed information.
 
