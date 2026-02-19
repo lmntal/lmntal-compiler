@@ -27,10 +27,13 @@ public final class AtomSet implements Iterable<Atom> {
 
   /** atoms内のアトムの数。整合性要注意 */
   private int size = 0;
+
   /** 実際にアトムの集合を管理している変数 */
   private Map<Functor, List<Atom>> atoms = null;
+
   /** メモリ利用量削減のため、データアトムはまとめて管理 */
   private List<Atom> dataAtoms = null;
+
   /** OUTSIDE_PROXYの集合を管理している変数 */
   private Map<Functor, List<Atom>> outs = null;
 

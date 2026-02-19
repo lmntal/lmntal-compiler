@@ -6,6 +6,7 @@ public final class Stack {
 
   /** 底 */
   private QueuedEntity head;
+
   /** トップ */
   private QueuedEntity tail;
 

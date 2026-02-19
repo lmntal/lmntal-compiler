@@ -16,18 +16,23 @@ public final class Rule {
   /** ガード命令列（guardLabel.insts）またはnull。
    * 先頭の命令はspec[*,*]でなければならない。*/
   public List<Instruction> guard;
+
   /** ボディ命令列（bodyLabel.insts）またはnull。
    * 先頭の命令はspec[*,*]でなければならない。*/
   public List<Instruction> body;
 
   /** ラベル付き膜主導ルール適用命令列 */
   public InstructionList memMatchLabel;
+
   /** ラベル付きガード命令列またはnull */
   public InstructionList guardLabel;
+
   /** ラベル付きボディ命令列またはnull */
   public InstructionList bodyLabel;
+
   /** このルールの表示用文字列 */
   public String text = "";
+
   /** このルールの表示用文字列（省略なし） */
   public String fullText = "";
 

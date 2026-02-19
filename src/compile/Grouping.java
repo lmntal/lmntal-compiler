@@ -18,8 +18,10 @@ public class Grouping {
 
   /** 変数番号⇒変数番号を定義した命令のマップ */
   private HashMap var2DefInst;
+
   /** 命令⇒グループ識別番号のマップ */
   private HashMap<Instruction, Integer> Inst2GroupId;
+
   /** グループ命令内の計算コスト*/
   private HashMap<Instruction, Cost> group2Cost;
 

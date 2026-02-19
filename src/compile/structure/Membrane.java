@@ -34,6 +34,7 @@ public final class Membrane {
    * <br>[要注意]例外的に、引数の長さおよびbundleは0にセットされる。
    * @see ContextDef#lhsMem */
   public ProcessContext pragmaAtHost = null;
+
   //	/** システムルールセットとして使うなら真 */
   //	public boolean is_system_ruleset = false;
 

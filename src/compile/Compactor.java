@@ -54,8 +54,8 @@ public class Compactor {
       Instruction inst = insts.get(i);
       //			060831okabe			int modify = (inst.getKind() >= Instruction.LOCAL ? Instruction.LOCAL : 0);
       switch (inst.getKind()) {
-          // inheritlink [atom1,pos1,link2,mem1]
-          // ==> alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem1]
+        // inheritlink [atom1,pos1,link2,mem1]
+        // ==> alloclink[link1,atom1,pos1];unifylinks[link1,link2,mem1]
         case Instruction.INHERITLINK:
           insts.remove(i);
           insts.add(
@@ -68,8 +68,8 @@ public class Compactor {
           size += 1;
           i += 1;
           continue;
-          // unify[atom1,pos1,atom2,pos2,mem1]
-          // ==> getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
+        // unify[atom1,pos1,atom2,pos2,mem1]
+        // ==> getlink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
         case Instruction.UNIFY:
           insts.remove(i);
           insts.add(
@@ -85,9 +85,9 @@ public class Compactor {
           size += 2;
           i += 2;
           continue;
-          // newlink[atom1,pos1,atom2,pos2,mem1]
-          // ==>
-          // alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
+        // newlink[atom1,pos1,atom2,pos2,mem1]
+        // ==>
+        // alloclink[link1,atom1,pos1];alloclink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
         case Instruction.NEWLINK:
           insts.remove(i);
           insts.add(
@@ -104,8 +104,8 @@ public class Compactor {
           size += 2;
           i += 2;
           continue;
-          // relink[atom1,pos1,atom2,pos2,mem1]
-          // ==> alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
+        // relink[atom1,pos1,atom2,pos2,mem1]
+        // ==> alloclink[link1,atom1,pos1];getlink[link2,atom2,pos2];unifylinks[link1,link2,mem1]
         case Instruction.RELINK:
           insts.remove(i);
           insts.add(
@@ -122,8 +122,8 @@ public class Compactor {
           size += 2;
           i += 2;
           continue;
-          // samefunc[atom1,atom2]
-          // ==> getfunc[func1,atom1];getfunc[func2,atom2];eqfunc[func1,func2]
+        // samefunc[atom1,atom2]
+        // ==> getfunc[func1,atom1];getfunc[func2,atom2];eqfunc[func1,func2]
         case Instruction.SAMEFUNC:
           insts.remove(i);
           insts.add(i, new Instruction(Instruction.GETFUNC, varcount, inst.getIntArg1()));
@@ -427,7 +427,7 @@ public class Compactor {
         }
       } else {
         switch (inst1.getKind()) {
-            // 検査命令
+          // 検査命令
           case Instruction.EQATOM:
           case Instruction.EQMEM:
           case Instruction.EQFUNC:
@@ -496,7 +496,7 @@ public class Compactor {
         }
       }
       switch (inst.getKind()) {
-          // eqfunc[func,func] ==> ; など
+        // eqfunc[func,func] ==> ; など
         case Instruction.EQATOM:
         case Instruction.EQMEM:
         case Instruction.EQFUNC:

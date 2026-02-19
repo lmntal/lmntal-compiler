@@ -26,22 +26,29 @@ public final class Membrane extends QueuedEntity {
    * 修正するときは、親膜のロックを取得している必要がある。
    * null を代入する（=この膜を除去する）時は、この膜と親膜の両方のロックを取得している必要がある。 */
   protected Membrane parent;
+
   /** アトムの集合 */
   protected AtomSet atoms = new AtomSet();
+
   /** 子膜の集合 */
   protected Set<Membrane> mems = null;
+
   //	/** このセルの自由リンクの数 */
   //	protected int freeLinkCount = 0;
   /** ルールセットの集合。 */
   protected List<Ruleset> rulesets = new ArrayList<>();
+
   /** 膜のタイプ */
   protected int kind = 0;
 
   public static final int KIND_ND = 2;
+
   /** trueならばこの膜以下に適用できるルールが無い */
   protected boolean stable = false;
+
   /** 永続フラグ（trueならばルール適用できなくてもstableにならない）*/
   public boolean perpetual = false;
+
   /** この膜をロックしているスレッド。ロックされていないときはnullが入っている。*/
   protected Thread lockThread = null;
 

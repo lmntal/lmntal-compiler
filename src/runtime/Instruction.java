@@ -59,22 +59,31 @@ public class Instruction implements Cloneable {
 
   /** 命令毎の引数情報を入れるテーブル */
   private static Map<Integer, ArgType> argTypeTable = new HashMap<>();
+
   /**アトム*/
   public static final int ARG_ATOM = 0;
+
   /**膜*/
   public static final int ARG_MEM = 1;
+
   /**アトム・膜以外の変数*/
   public static final int ARG_VAR = 2;
+
   /**整数*/
   public static final int ARG_INT = 3;
+
   /**命令列*/
   public static final int ARG_INSTS = 4;
+
   /**ラベル付き命令列*/
   public static final int ARG_LABEL = 5;
+
   /**変数番号のList*/
   public static final int ARG_VARS = 6;
+
   /**その他オブジェクト(ルールなど)への参照*/
   public static final int ARG_OBJ = 7;
+
   /**その他オブジェクト(ルールなど)への参照のList*/
   public static final int ARG_OBJS = 8;
 

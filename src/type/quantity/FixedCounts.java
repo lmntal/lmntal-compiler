@@ -18,6 +18,7 @@ public class FixedCounts {
 
   /** ファンクタ {@literal -->} 量 */
   public final Map<Functor, IntervalCount> functorToCount;
+
   /** 膜名 {@literal -->} 量 */
   public final Map<String, IntervalCount> memnameToCount;
 

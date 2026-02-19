@@ -18,6 +18,7 @@ abstract class LHSCompiler {
 
   /** マッチング命令列（のラベル）*/
   InstructionList matchLabel;
+
   /** matchLabel.insts */
   List<Instruction> match;
 
