@@ -1,7 +1,7 @@
 # LMNtal Compiler
 
 This is an compiler of the
-[LMNtal (pronounced "elemental") ](https://www.ueda.info.waseda.ac.jp/lmntal) language.
+[LMNtal (pronounced "elemental") ](https://github.com/lmntal/lmntal-compiler/wiki) language.
 
 LMNtal is a programming and modeling language
 based on hierarchical graph rewriting.
