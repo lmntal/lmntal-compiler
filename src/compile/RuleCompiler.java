@@ -397,9 +397,7 @@ public class RuleCompiler {
 
     buildRHSMem(rs.rightMem);
     /* 右辺の$pが配置された直後。このタイミングでなければならない筈 */
-    if (!rs.rightMem.processContexts.isEmpty()) {
-      body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
-    }
+    body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
     copyRules(rs.rightMem);
     loadRulesets(rs.rightMem);
     buildRHSTypedProcesses();
@@ -478,9 +476,7 @@ public class RuleCompiler {
 
     buildRHSMem(rs.rightMem); // 右辺にある膜の変数番号確定
     /* 右辺の$pが配置された直後。このタイミングでなければならない筈 */
-    if (!rs.rightMem.processContexts.isEmpty()) {
-      body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
-    }
+    body.add(new Instruction(Instruction.REMOVETEMPORARYPROXIES, toplevelmemid));
     copyRules(rs.rightMem);
     loadRulesets(rs.rightMem);
     buildRHSTypedProcesses();
